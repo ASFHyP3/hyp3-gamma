@@ -30,7 +30,7 @@
 ###############################################################################
 import argparse
 import os, sys
-from execute import *
+from execute import execute 
     
 def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,gammaFlag=None,kmzFlag=None,loFlag=None):
 
