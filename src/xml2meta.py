@@ -11,7 +11,7 @@ import datetime
 import scipy.constants as sc
 from asf_utils import *
 import logging
-import asf.log
+#import asf.log
 
 
 # establish a stub root logger to avoid syntax errors
@@ -224,7 +224,7 @@ if __name__ == '__main__':
     parser.print_help()
     sys.exit(1)
   args = parser.parse_args()
-  log = asf.log.getLogger(screen = args.screen)
+  #log = asf.log.getLogger(screen = args.screen)
 
   if not os.path.exists(args.xmlFile):
     log.error('XML metadata file (%s) does not exist!' % args.xmlFile)
