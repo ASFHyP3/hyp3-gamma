@@ -873,6 +873,9 @@ sub execute{
   print LOG ("\n${command}\n");
   my $out = `$command`;
   my $exit = $? >> 8;
+  if ($out =~ /ERROR: Unable to find a DEM/) {
+    die "ERROR: Unable to find a DEM";
+  }
   #$exit = system("$command 1>> $log");
   print ("\nsentinel_rtc.pl is Running: ${command}\nOutput:\n${out}\n----------\n");
   print LOG ("\n${out}\n");
