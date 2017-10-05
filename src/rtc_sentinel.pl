@@ -646,7 +646,10 @@ sub process_2nd_pol() {
   chdir("$geo_dir");
 #  execute("data2geotiff ../geo_$pol1/area.dem_par image_cal_map.mli 2 $output.$pol2.tif",$log);
 
-  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol2",$log);
+  $cmd = "createAmp.py image_cal_map.mli.tif";
+  execute($cmd,$log); 
+
+  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol2",$log);
   execute("resample -size 1000 tc_$pol2 ${output}_${pol2}_browse",$log);
   execute("resample -square $kmz_res tc_$pol2 ${output}_${pol2}_${kmz_res}m",$log);
@@ -654,11 +657,7 @@ sub process_2nd_pol() {
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$pol2-$output.tif"; }
   else { $outname = "s1$plat-$mode-rtch-$pol2-$output.tif"; }
-
   my $out = "../PRODUCT";
-
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
 
   print "Moving file image_cal_map.mli-amp.tif to $out/$outname\n";
   move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli-amp.tif -> ../$outname";
@@ -776,7 +775,11 @@ sub process_pol() {
   execute("stats -overstat -overmeta ls_map",$log);
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
-  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol",$log);
+
+  $cmd = "createAmp.py image_cal_map.mli.tif";
+  execute($cmd,$log); 
+
+  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol",$log);
   execute("resample -size 1000 tc_$pol ${output}_${pol}_browse",$log);
   execute("resample -square $kmz_res tc_$pol ${output}_${pol}_${kmz_res}m",$log);
@@ -788,8 +791,6 @@ sub process_pol() {
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$pol-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$pol-$output"; }
 
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
   move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
