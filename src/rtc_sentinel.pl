@@ -659,8 +659,8 @@ sub process_2nd_pol() {
   else { $outname = "s1$plat-$mode-rtch-$pol2-$output.tif"; }
   my $out = "../PRODUCT";
 
-  print "Moving file image_cal_map.mli-amp.tif to $out/$outname\n";
-  move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli-amp.tif -> ../$outname";
+  print "Moving file image_cal_map.mli.tif to $out/$outname\n";
+  move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
 
   chdir("..");
 
@@ -791,7 +791,7 @@ sub process_pol() {
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$pol-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$pol-$output"; }
 
-  move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
+  move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$output"; }
