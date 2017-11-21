@@ -234,11 +234,11 @@ if ($multi_pol==1) {
   chdir("geo_${pol}");
   my $outdir = "../PRODUCT";
 
-#  execute("sqrt_img ${output}_${pol}_browse ${output}_amp_browse",$log);
-#  execute("asf_export -format jpeg -byte sigma ${output}_amp_browse ${output}.amp.jpg",$log);
+  execute("sqrt_img ${output}_${pol}_browse ${output}_amp_browse",$log);
+  execute("asf_export -format jpeg -byte sigma ${output}_amp_browse ${output}.amp.jpg",$log);
 
-  execute("asf_export -format jpeg -byte sigma ${output}_${pol}_browse ${output}.amp.jpg",$log);
-  execute("asf2geobrowse ${output}_${pol}_browse ${output}.geo.jpg",$log);
+#  execute("asf_export -format jpeg -byte sigma ${output}_${pol}_browse ${output}.amp.jpg",$log);
+  execute("asf2geobrowse ${output}_amp_browse ${output}.geo.jpg",$log);
   if ($kmz_flg) {
     execute("asf_kml_overlay -reduction_factor 1.0 ${output}_${pol}_${kmz_res}m $output",$log);
   } else {
@@ -646,10 +646,10 @@ sub process_2nd_pol() {
   chdir("$geo_dir");
 #  execute("data2geotiff ../geo_$pol1/area.dem_par image_cal_map.mli 2 $output.$pol2.tif",$log);
 
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
+#  $cmd = "createAmp.py image_cal_map.mli.tif";
+#  execute($cmd,$log); 
 
-  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
+  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol2",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol2",$log);
   execute("resample -size 1000 tc_$pol2 ${output}_${pol2}_browse",$log);
   execute("resample -square $kmz_res tc_$pol2 ${output}_${pol2}_${kmz_res}m",$log);
@@ -776,10 +776,10 @@ sub process_pol() {
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
 
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
+#  $cmd = "createAmp.py image_cal_map.mli.tif";
+#  execute($cmd,$log); 
 
-  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
+  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol",$log);
   execute("resample -size 1000 tc_$pol ${output}_${pol}_browse",$log);
   execute("resample -square $kmz_res tc_$pol ${output}_${pol}_${kmz_res}m",$log);
