@@ -85,7 +85,6 @@ if ($dem eq '') {
   $dem = "big.dem";
   $parfile = "$dem.par";
 
-#  execute("get_dem.pl -p 30 -v -u -s -o -f -- $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
   execute("get_dem.py -p 10 -u $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
   execute("utm2dem.pl tmpdem.tif $dem $parfile","$log");
 
@@ -178,7 +177,6 @@ if (($num_vv == 1 && $num_vh == 1) || ($num_hh == 1 && $num_hv == 1))
 # Create browse, geo jpg, kmz
 #
 if ($multi_pol==1) {
-  
   if ($num_vv == 1) { $pol1 = "vv"; $pol2 = "vh"; $CPOL1 = "VV"; $CPOL2 = "VH"; }
   elsif ($num_hh == 1) { $pol1 = "hh"; $pol2 = "hv"; $CPOL1 = "HH"; $CPOL2 = "HV"; }
   else {die "ERROR: No vv or hh pol found\n";}
@@ -186,83 +184,43 @@ if ($multi_pol==1) {
   execute("cleanup_pixel 0.0039811 0.0 0.0 geo_${pol1}/${output}_${pol1}_${kmz_res}m.img ${output}_${pol1}_${kmz_res}m_cleaned.img",$log);
   execute("cleanup_pixel 0.0039811 0.0 0.0 geo_${pol2}/${output}_${pol2}_${kmz_res}m.img ${output}_${pol2}_${kmz_res}m_cleaned.img",$log);
   execute("color_browse -noise-cal -24 ${output}_${pol1}_${kmz_res}m_cleaned.img ${output}_${pol2}_${kmz_res}m_cleaned.img ${output}_hires_browse",$log);
-  execute("asf_export -format jpeg -rgb Ps Pv Pd -byte TRUNCATE ${output}_hires_browse ${output}_hires.jpg",$log);
   execute("asf_export -format geotiff -rgb Ps Pv Pd -byte TRUNCATE ${output}_hires_browse ${output}_hires.tif",$log);
+
   execute("color_browse -noise-cal -24 geo_${pol1}/${output}_${pol1}_browse geo_${pol2}/${output}_${pol2}_browse ${output}_browse",$log);
-
-#  fix_three_banded("${output}_browse.meta",$CPOL1,$CPOL2);
-
   execute("stats -nostat -overmeta -mask 0 ${output}_browse",$log);
-  execute("asf_export -format jpeg -rgb Ps Pv Pd -byte TRUNCATE ${output}_browse ${output}.jpg",$log);
   execute("asf_export -format geotiff -rgb Ps Pv Pd -byte TRUNCATE ${output}_browse ${output}.tif",$log);
-  execute("asf2geobrowse ${output}_browse ${output}.geo.jpg",$log);
-  if ($kmz_flg) {
-
-#    execute("color_browse geo_${pol1}/${output}_${pol1}_${kmz_res}m geo_${pol2}/${output}_${pol2}_${kmz_res}m ${output}_hires_browse",$log);
-#    fix_three_banded("${output}_hires_browse.meta",$CPOL1,$CPOL2);
-
-    execute("asf_kml_overlay -rgb Ps,Pv,Pd -reduction_factor 1.0 ${output}_hires_browse ${output}",$log);
-  } else {
-    execute("asf_kml_overlay -rgb Ps,Pv,Pd -reduction_factor 1.0 ${output}_browse ${output}",$log);
-  }
-  execute("zip ${output}.kmz ${output}.kml ${output}.png",$log);
-
+ 
   my $outdir = "PRODUCT";
-
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$output"; }
 
-  copy("$output.jpg","$outdir/$outname.geo.jpg") or die ("ERROR $0: Copy failed: $!");
-  copy("$output.geo.wld","$outdir/$outname.geo.wld") or die ("ERROR $0: Move failed: $!");
-  copy("$output.geo.jpg.aux.xml","$outdir/$outname.geo.jpg.aux.xml") or die ("ERROR $0: Move failed: $!");
-  copy("$output.kmz","$outdir/$outname.kmz") or die ("ERROR $0: Move failed: $!");
-  copy("$output.jpg","$outdir/$outname.jpg") or die ("ERROR $0: Move failed: $!");  
-
-  if ($mid_flg == 1) {
-    $outname = "s1$plat-$mode-rtch-$output";
-    copy("$output.jpg","$outdir/$outname.geo.jpg") or die ("ERROR $0: Copy failed: $!");
-    copy("$output.geo.wld","$outdir/$outname.geo.wld") or die ("ERROR $0: Move failed: $!");
-    copy("$output.geo.jpg.aux.xml","$outdir/$outname.geo.jpg.aux.xml") or die ("ERROR $0: Move failed: $!");
-    copy("$output.kmz","$outdir/$outname.kmz") or die ("ERROR $0: Move failed: $!");
-#    copy("$output.jpg","$outdir/$outname.jpg") or die ("ERROR $0: Move failed: $!");  
+  if ($kmz_flg) {
+    execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${outname}",$log);
+  } else {
+    execute("makeAsfBrowse.py ${output}.tif ${outdir}/${outname}",$log);
   }
-
 } else {
-
   $pol = $main_pol;
-
   chdir("geo_${pol}");
   my $outdir = "../PRODUCT";
 
-#  execute("sqrt_img ${output}_${pol}_browse ${output}_amp_browse",$log);
-#  execute("asf_export -format jpeg -byte sigma ${output}_amp_browse ${output}.amp.jpg",$log);
-
-  execute("asf_export -format jpeg -byte sigma ${output}_${pol}_browse ${output}.amp.jpg",$log);
-  execute("asf2geobrowse ${output}_${pol}_browse ${output}.geo.jpg",$log);
-  if ($kmz_flg) {
-    execute("asf_kml_overlay -reduction_factor 1.0 ${output}_${pol}_${kmz_res}m $output",$log);
-  } else {
-    execute("asf_kml_overlay -reduction_factor 1.0 ${output}_${pol}_browse $output",$log);
-  }
-  execute("zip ${output}.kmz ${output}.kml ${output}.png",$log);
+  execute("sqrt_img ${output}_${pol}_browse ${output}_amp_browse",$log);
+  execute("asf_export -format geotiff -byte sigma ${output}_amp_browse ${output}.amp.tif",$log);
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$output"; }
 
-  copy("$output.geo.jpg","$outdir/$outname.geo.jpg") or die ("ERROR $0: Move failed: $!");
-  copy("$output.geo.wld","$outdir/$outname.geo.wld") or die ("ERROR $0: Move failed: $!");
-  copy("$output.geo.jpg.aux.xml","$outdir/$outname.geo.jpg.aux.xml") or die ("ERROR $0: Move failed: $!");
-  copy("$output.kmz","$outdir/$outname.kmz") or die ("ERROR $0: Move failed: $!");
-  copy("$output.amp.jpg","$outdir/$outname.jpg") or die ("ERROR $0: Move failed: $!");
-
-  if ($mid_flg == 1) {
-    $outname = "s1$plat-$mode-rtch-$output";
-    copy("$output.geo.jpg","$outdir/$outname.geo.jpg") or die ("ERROR $0: Move failed: $!");
-    copy("$output.geo.wld","$outdir/$outname.geo.wld") or die ("ERROR $0: Move failed: $!");
-    copy("$output.geo.jpg.aux.xml","$outdir/$outname.geo.jpg.aux.xml") or die ("ERROR $0: Move failed: $!");
-    copy("$output.kmz","$outdir/$outname.kmz") or die ("ERROR $0: Move failed: $!");
-    # copy("$output.amp.jpg","$outdir/$outname.jpg") or die ("ERROR $0: Move failed: $!");
+  if ($kmz_flg) {
+    execute("makeAsfBrowse.py ${output}_${pol}_${kmz_res}m.tif ${outname}",$log);
+  } else {
+    execute("makeAsfBrowse.py ${output}.amp.tif ${outname}",$log);
   }
+  print("Moving browse images to ");
+  move("${outname}.kmz","$outdir/${outname}.kmz") or die "ERROR $0: Move failed: $!";
+  move("${outname}.png","$outdir/${outname}.png") or die "ERROR $0: Move failed: $!";
+  move("${outname}.png.aux.xml","$outdir/${outname}.png.aux.xml") or die "ERROR $0: Move failed: $!";
+  move("${outname}_large.png","$outdir/${outname}_large.png") or die "ERROR $0: Move failed: $!";
+  move("${outname}_large.png.aux.xml","$outdir/${outname}_large.png.aux.xml") or die "ERROR $0: Move failed: $!";
 
   chdir("..");
 
@@ -407,7 +365,7 @@ sub generate_xml() {
   print HDF5_LIST "gamma version = $gamma_version\n";
   print HDF5_LIST "gap_rtc version = $gap_rtc_version\n";
   print HDF5_LIST "dem source = $dem_type\n";
-  print HDF5_LIST "browse image = $out/$outname.geo.jpg\n";
+  print HDF5_LIST "browse image = $out/$outname.png\n";
   print HDF5_LIST "kml overlay = $out/$outname.kmz\n";
   close(HDF5_LIST);
 
@@ -467,23 +425,10 @@ sub upsample_pol() {
   $inc_map = "$geo_dir/image_0.inc_map";
 
   $mli = "$output.$pol.mgrd";
-#  $mli2 = "$output.$pol.mli2";
   $mli2 = "$output.$pol.GRD";
 
   $mli_par = "$output.$pol.mgrd.par";
-#  $mli2_par = "$output.$pol.mli2.par";
   $mli2_par = "$output.$pol.GRD.par";
-
-#  print "Reprojecting image to slant range\n";
-#  if (-e "$output.$pol.mli2.par") { 
-#    print "Deleting file $output.$pol.mli2.par\n";
-#    unlink("$output.$pol.mli2.par") or die ("ERROR $0: Unlink failed: $!"); 
-#  } else {
-#    printf "File $output.$pol.mli2.par does not exist\n";
-#  }
-#  $cmd = "GRD_to_SR $output.$pol.GRD.par $output.$pol.mli2.par - $output.$pol.GRD $output.$pol.mli2 1 1 2 $post $post";
-#  execute($cmd,$log);
-
 
   execute("data2geotiff $dem_seg_par $ls_map 5 ls_map.tif","$log");
   execute("asf_import -format geotiff ls_map.tif ls_map","$log");
@@ -587,16 +532,6 @@ sub process_2nd_pol() {
     copy("$output.$pol2.GRD.par","$output.$pol2.mgrd.par") or die ("ERROR $0: Copy failed: $!");
   }   
 
-#  print "Reprojecting image to slant range\n";
-#  if (-e "$output.$pol2.mli.par") { 
-#    print "Deleting file $output.$pol2.mli.par\n";
-#    unlink("$output.$pol2.mli.par") or die ("ERROR $0: Unlink failed: $!"); 
-#  } else {
-#    printf "File $output.$pol2.mli.par does not exist\n";
-#  }
-#  $cmd = "GRD_to_SR $output.$pol2.mgrd.par $output.$pol2.mli.par - $output.$pol2.mgrd $output.$pol2.mli 1 1 2 $res $res";
-#  execute($cmd,$log);
-
   $geo_dir = "geo_$pol2";
   $gc0 = "$geo_dir/image_0.map_to_rdc";
   $ls_map = "$geo_dir/image_0.ls_map";
@@ -640,11 +575,9 @@ sub process_2nd_pol() {
   execute("ln -f $pix_map_main $pix_map",$log);
 
   $cmd = "mk_geo_radcal $output.$pol2.mgrd $output.$pol2.mgrd.par $dem $dem.par geo_$pol1/area.dem geo_$pol1/area.dem_par $geo_dir image $res 3 $options";
-#  $cmd = "mk_geo_radcal $output.$pol2.mli $output.$pol2.mli.par $dem $dem.par geo_$pol1/area.dem geo_$pol1/area.dem_par $geo_dir image $res 3 $options";
   execute($cmd,$log);
 
   chdir("$geo_dir");
-#  execute("data2geotiff ../geo_$pol1/area.dem_par image_cal_map.mli 2 $output.$pol2.tif",$log);
 
   execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol2",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol2",$log);
@@ -654,14 +587,10 @@ sub process_2nd_pol() {
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$pol2-$output.tif"; }
   else { $outname = "s1$plat-$mode-rtch-$pol2-$output.tif"; }
-
   my $out = "../PRODUCT";
 
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
-
-  print "Moving file image_cal_map.mli-amp.tif to $out/$outname\n";
-  move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli-amp.tif -> ../$outname";
+  print "Moving file image_cal_map.mli.tif to $out/$outname\n";
+  move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
 
   chdir("..");
 
@@ -694,27 +623,15 @@ sub process_pol() {
     copy("$output.$pol.GRD.par","$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
   }   
 
-#  print "Reprojecting image to slant range\n";
-#  if (-e "$output.$pol.mli.par") {
-#    print "Deleting $output.$pol.mli.par file\n";
-#    unlink("$output.$pol.mli.par") or die ("ERROR $0: Unlink failed: $!");
-#  } else {
-#    printf "File $output.$pol.mli.par does not exist\n";
-#  }
-#  $cmd = "GRD_to_SR $output.$pol.mgrd.par $output.$pol.mli.par - $output.$pol.mgrd $output.$pol.mli 1 1 2 $res $res";
-#  execute($cmd,$log);
-
   my $options = "-p -j -n 6 -q -c ";
   $options .= "-g " if $gamma_flg;
 
   print "Running RTC process... initializing\n";
-#  $cmd = "mk_geo_radcal $output.$pol.mli $output.$pol.mli.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 0 $options";
   $cmd = "mk_geo_radcal $output.$pol.mgrd $output.$pol.mgrd.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 0 $options";
   execute($cmd,$log);
  
   if ($no_match_flg != 1) {
     print "Running RTC process... coarse matching\n";
-#    $cmd = "mk_geo_radcal $output.$pol.mli $output.$pol.mli.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 1 $options";
     $cmd = "mk_geo_radcal $output.$pol.mgrd $output.$pol.mgrd.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 1 $options";
 
     eval {
@@ -724,7 +641,6 @@ sub process_pol() {
     };
 
     print "Running RTC process... fine matching\n";
-    # $cmd = "mk_geo_radcal $output.$pol.mli $output.$pol.mli.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 2 $options";
     $cmd = "mk_geo_radcal $output.$pol.mgrd $output.$pol.mgrd.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 2 $options";
 
     eval {
@@ -741,13 +657,8 @@ sub process_pol() {
     };
     if ($fail != 1) {
       eval {
-
-#        my $offset = 50;
-#        my $error = 2;
-
 	my $offset = 250;
   	my $error = 4;
-
         execute("check_coreg.pl $res -o $offset -e $error $output",$log);
       } or do {
          print "WARNING: Failed coregistration check\n";
@@ -762,12 +673,10 @@ sub process_pol() {
   }
 
   print "Running RTC process... finalizing\n";
-  # $cmd = "mk_geo_radcal $output.$pol.mli $output.$pol.mli.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 3 $options";
   $cmd = "mk_geo_radcal $output.$pol.mgrd $output.$pol.mgrd.par $dem $dem.par geo_$pol/area.dem geo_$pol/area.dem_par geo_$pol image $res 3 $options";
   execute($cmd,$log);
 
   chdir("geo_$pol");
-#  execute("data2geotiff area.dem_par image_cal_map.mli 2 $output.$pol.tif",$log);
   execute("data2geotiff area.dem_par image_0.ls_map 5 ${output}.ls_map.tif",$log);
   execute("data2geotiff area.dem_par image_0.inc_map 2 ${output}.inc_map.tif",$log);
   execute("data2geotiff area.dem_par area.dem 2 outdem.tif",$log);
@@ -776,10 +685,12 @@ sub process_pol() {
   execute("stats -overstat -overmeta ls_map",$log);
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
+
   execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol",$log);
   execute("resample -size 1000 tc_$pol ${output}_${pol}_browse",$log);
   execute("resample -square $kmz_res tc_$pol ${output}_${pol}_${kmz_res}m",$log);
+  execute("asf_export -format geotiff ${output}_${pol}_${kmz_res}m ${output}_${pol}_${kmz_res}m.tif",$log);
   fix_band_name("${output}_${pol}_browse.meta",$pol);
 
   my $out = "../PRODUCT";
@@ -788,9 +699,7 @@ sub process_pol() {
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$pol-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$pol-$output"; }
 
-  $cmd = "createAmp.py image_cal_map.mli.tif";
-  execute($cmd,$log); 
-  move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
+  move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
 
   if ($res == 30.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$output"; }
@@ -846,25 +755,6 @@ sub get_cc {
     return @parms;
 }
 
-#sub execute{
-#  my ($command, $log) = @_;
-#  print "$command\n";
-#
-#  my $out = `$command`;
-#  my $exit = $? >> 8;
-#
-#  if (-e $log){open(LOG,">>$log") or die "ERROR $0: cannot open log file: $log  command: $command\n";}
-#  else {open(LOG,">$log") or die "ERROR $0 : cannot open log file: $log  command: $command\n";}
-#  LOG->autoflush;
-#  print LOG ("\nRunning: ${command}\nOutput:\n${out}\n----------\n");
-#  close LOG;
-#  if ($exit != 0) {
-#    # Moving the "ERROR" into the regular print, so that they appear in the right order
-#    print "\nnon-zero exit status: ${command}\nOutput:\n${out}\nERROR: non-zero exit status: $command\n";
-#    die "$0 ERROR";
-#  }
-#}
-
 sub execute{
   my ($command, $log) = @_;
   if (-e $log){open(LOG,">>$log") or die "\nERROR $0: cannot open log file: $log\n";}
@@ -876,7 +766,6 @@ sub execute{
     die "ERROR: Unable to find a DEM";
   }
   my $exit = $? >> 8;
-  #$exit = system("$command 1>> $log");
   print ("\nsentinel_rtc.pl is Running: ${command}\nOutput:\n${out}\n----------\n");
   print LOG ("\n${out}\n");
   close LOG;
