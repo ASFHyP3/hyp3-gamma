@@ -589,10 +589,10 @@ if ($mode == 2) {
   printf "number of azimuth patches: %3d   patch height: %3d\n\n", $nazp, $azpatch;
 
   if($pix_flg == 1){
-    execute("offset_pwrm $pix_sigma0_0 $mli $diff_par $offs $cpp $rpatch $azpatch - $n_ovr $nrp $nazp $thres2 4 1", $log);
+    execute("offset_pwrm $pix_sigma0_0 $mli $diff_par $offs $cpp $rpatch $azpatch - $n_ovr $nrp $nazp $thres2", $log);
   }
   else {
-    execute("offset_pwrm $sim_rdc0 $mli $diff_par $offs $cpp $rpatch $azpatch - $n_ovr $nrp $nazp $thres2 4 1", $log);
+    execute("offset_pwrm $sim_rdc0 $mli $diff_par $offs $cpp $rpatch $azpatch - $n_ovr $nrp $nazp $thres2", $log);
   }
   eval {
     execute("offset_fitm $offs $cpp $diff_par $coffs - $thres2 $npoly",$log);
