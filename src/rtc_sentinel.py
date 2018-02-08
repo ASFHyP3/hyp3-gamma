@@ -32,7 +32,7 @@ import argparse
 import os, sys
 from execute import execute 
     
-def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,gammaFlag=None,kmzFlag=None,loFlag=None):
+def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,gammaFlag=None,loFlag=None):
 
     string = "rtc_sentinel.pl "
     if dem is not None:
@@ -45,8 +45,6 @@ def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,ga
         string = string + "-d "
     if gammaFlag:
         string = string + "-g "
-    if kmzFlag:
-        string = string + "-h "
     if loFlag:
         string = string + "-l "
     cmd = string + outName
@@ -63,10 +61,9 @@ if __name__ == '__main__':
   parser.add_argument("-n",action="store_false",help="Do not perform matching")
   parser.add_argument("-d",action="store_true",help="if matching fails, use dead reckoning")
   parser.add_argument("-g",action="store_true",help="create gamma0 instead of sigma0");
-  parser.add_argument("-k",action="store_true",help="create hi-res KMZ file (30 meters)")
-  parser.add_argument("-l",action="store_true",help="create a lo-res output")
+  parser.add_argument("-l",action="store_true",help="create a lo-res output (30m)")
   args = parser.parse_args()
 
   rtc_sentinel_gamma(args.output,res=args.outputResolution,dem=args.externalDEM,matchFlag=args.n,
- 			deadFlag=args.d,gammaFlag=args.g,kmzFlag=args.k,loFlag=args.l)
+ 			deadFlag=args.d,gammaFlag=args.g,loFlag=args.l)
 			
