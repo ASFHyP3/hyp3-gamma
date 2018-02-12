@@ -48,16 +48,22 @@ print "\n";
 #
 my $mode = '';
 $plat = "a";
+$type = '';
 my @list = glob "S1*.SAFE";
 foreach my $file ( @list ) { 
   print "file is $file\n";
   $mode = substr($file,4,2); 
   $mode = lc($mode);
   $plat = substr($file,2,1);
-  eval {
-      execute("get_orb.py $file","$log")
-  } or do {
-      print "\nUnable to get precision orbit... continuing\n";
+  $type = substr($file,7,4);
+  $date = substr($file,17,8);
+  if ($type =~ /SLC/) { $type = "SLC"; }
+  else {
+    eval {
+        execute("get_orb.py $file","$log")
+    } or do {
+        print "\nUnable to get precision orbit... continuing\n";
+    }
   }
 } 
 
@@ -107,38 +113,38 @@ if ($dem eq '') {
 my $num_vv = 0;
 my @vv = glob "*/*/*vv*.tiff";
 foreach my $v ( @vv ) { ++$num_vv; }
-if ($num_vv == 1) { 
+if ($num_vv == 1 || $num_vv == 3) { 
   print "\nFound VV polarization - processing\n\n"; 
   $main_pol = "vv";
   $cross_pol = "vh";
-  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$log");
+  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$type","$date","$log");
 
   my $num_vh = 0;
   my @vh = glob "*/*/*vh*.tiff";
   foreach my $v ( @vh ) { ++$num_vh; }
-  if ($num_vh == 1) { 
+  if ($num_vh == 1 || $num_vh == 3) { 
     print "\nFound VH polarization - processing\n\n"; 
     $multi_pol = 1;
-    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$log");
+    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
   }
 }
 
 my $num_hh = 0;
 my @hh = glob "*/*/*hh*.tiff";
 foreach my $h ( @hh ) { ++$num_hh; }
-if ($num_hh == 1) { 
+if ($num_hh == 1 || $num_hh == 3) { 
   print "\nFound HH polarization - processing\n\n"; 
   $main_pol = "hh";
   $cross_pol = "hv";
-  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$log");
+  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$type","$date","$log");
 
   my $num_hv = 0;
   my @hv = glob "*/*/*hv*.tiff";
   foreach my $h ( @hv ) { ++$num_hv; }
-  if ($num_hv == 1) { 
+  if ($num_hv == 1 || $num_hv == 3) { 
     print "\nFound HV polarization - processing\n\n"; 
     $multi_pol = 1;
-    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$log");
+    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
   }
 }
 
@@ -321,33 +327,48 @@ sub generate_xml() {
 # creates the main cross-pol tif file
 #
 sub process_2nd_pol() {
-  my ($pol2,$res,$gamma_flg,$browse_res,$output,$mode,$dem,$log) = @_;
+  my ($pol2,$res,$gamma_flg,$browse_res,$output,$mode,$dem,$type,$date,$log) = @_;
   if ($pol2 eq "hv") { $pol1 = "hh"; }
   else { $pol1 = "vv"; }
 
   my $options = "-p -j -n 6 -q -c ";
   $options .= "-g " if $gamma_flg;
-
   print "Cross-pol is $pol2; Main pol is $pol1\n";
 
-  print "Ingesting GRD file into Gamma format\n";
-  $cmd = "par_S1_GRD */*/*$pol2*.tiff */*/*$pol2*.xml */*/*/calibration-*$pol2*.xml */*/*/noise-*$pol2*.xml $output.$pol2.GRD.par $output.$pol2.GRD";
-  execute($cmd,$log);
-
-  eval {
-    execute("S1_OPOD_vec $output.$pol2.GRD.par *.EOF",$log);
-  } or do {
-    print "\nUnable to get precision orbit... continuing\n";
-  };
-
-  $look_fact = int ($res/10+0.5);
-  if ($look_fact > 1) {
-    print "Multi-looking GRD file\n";
-    $cmd = "multi_look_MLI $output.$pol2.GRD $output.$pol2.GRD.par $output.$pol2.mgrd $output.$pol2.mgrd.par $look_fact $look_fact";
+  if ($type =~ /GRD/) {
+    print "Ingesting GRD file into Gamma format\n";
+    $cmd = "par_S1_GRD */*/*$pol2*.tiff */*/*$pol2*.xml */*/*/calibration-*$pol2*.xml */*/*/noise-*$pol2*.xml $output.$pol2.GRD.par $output.$pol2.GRD";
     execute($cmd,$log);
+
+    eval {
+      execute("S1_OPOD_vec $output.$pol2.GRD.par *.EOF",$log);
+    } or do {
+      print "\nUnable to get precision orbit... continuing\n";
+    };
+
+    $look_fact = int ($res/10+0.5);
+    if ($look_fact > 1) {
+      print "Multi-looking GRD file\n";
+      $cmd = "multi_look_MLI $output.$pol2.GRD $output.$pol2.GRD.par $output.$pol2.mgrd $output.$pol2.mgrd.par $look_fact $look_fact";
+      execute($cmd,$log);
+    } else {
+      copy("$output.$pol2.GRD","$output.$pol2.mgrd") or die ("ERROR $0: Copy failed: $!");
+      copy("$output.$pol2.GRD.par","$output.$pol2.mgrd.par") or die ("ERROR $0: Copy failed: $!");
+    }
   } else {
-    copy("$output.$pol2.GRD","$output.$pol2.mgrd") or die ("ERROR $0: Copy failed: $!");
-    copy("$output.$pol2.GRD.par","$output.$pol2.mgrd.par") or die ("ERROR $0: Copy failed: $!");
+    print "Ingesting SLC file into Gamma format\n";
+    $cmd = "PAR_S1_SLC_SSV.sh $pol2";
+    execute($cmd,$log);
+
+    $workDir = cwd();
+    chdir($date);
+    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    execute($cmd,$log);
+
+    chdir("../DATA");
+    copy("${date}.mli","../$output.$pol2.mgrd") or die ("ERROR $0: Copy failed: $!");
+    copy("${date}.mli.par","../$output.$pol2.mgrd.par") or die ("ERROR $0: Copy failed: $!");
+    chdir("..");
   }   
 
   $geo_dir = "geo_$pol2";
@@ -422,28 +443,84 @@ sub process_2nd_pol() {
 # Creates the main .tif file, the dem, ls_map, and inc_map
 #
 sub process_pol() {
-  my ($pol,$res,$no_match_flg,$dead_flg,$gamma_flg,$browse_res,$output,$mode,$log) = @_;
+  my ($pol,$res,$no_match_flg,$dead_flg,$gamma_flg,$browse_res,$output,$mode,$type,$date,$log) = @_;
 
-  print "Ingesting GRD file into Gamma format\n";
-  $cmd = "par_S1_GRD */*/*$pol*.tiff */*/*$pol*.xml */*/*/calibration-*$pol*.xml */*/*/noise-*$pol*.xml $output.$pol.GRD.par $output.$pol.GRD";
-  execute($cmd,$log);
-  
-  eval {
-    execute("S1_OPOD_vec $output.$pol.GRD.par *.EOF",$log);
-  } or do {
-    print "\nUnable to get precision orbit... continuing\n";
-  };
-
-  $look_fact = int ($res/10+0.5);
-  if ($look_fact > 1) {
-    print "Multi-looking GRD file\n";
-    $cmd = "multi_look_MLI $output.$pol.GRD $output.$pol.GRD.par $output.$pol.mgrd $output.$pol.mgrd.par $look_fact $look_fact";
+  if ($type =~ "GRD") {  
+    print "Ingesting GRD file into Gamma format\n";
+    $cmd = "par_S1_GRD */*/*$pol*.tiff */*/*$pol*.xml */*/*/calibration-*$pol*.xml */*/*/noise-*$pol*.xml $output.$pol.GRD.par $output.$pol.GRD";
     execute($cmd,$log);
-  } else {
-    copy("$output.$pol.GRD","$output.$pol.mgrd") or die ("ERROR $0: Copy failed: $!");
-    copy("$output.$pol.GRD.par","$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
-  }   
+    
+    eval {
+      execute("S1_OPOD_vec $output.$pol.GRD.par *.EOF",$log);
+    } or do {
+      print "\nUnable to get precision orbit... continuing\n";
+    };
 
+    $look_fact = int ($res/10+0.5);
+    if ($look_fact > 1) {
+      print "Multi-looking GRD file\n";
+      $cmd = "multi_look_MLI $output.$pol.GRD $output.$pol.GRD.par $output.$pol.mgrd $output.$pol.mgrd.par $look_fact $look_fact";
+      execute($cmd,$log);
+    } else {
+      copy("$output.$pol.GRD","$output.$pol.mgrd") or die ("ERROR $0: Copy failed: $!");
+      copy("$output.$pol.GRD.par","$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
+    }   
+  } else {
+    print "Ingesting SLC file into Gamma format\n";
+    $cmd = "PAR_S1_SLC_SSV.sh $pol";
+    execute($cmd,$log);
+
+    chdir($date); 
+    my @slc_files = glob("*.slc");   
+    my @slc_sort = sort @slc_files;
+    my @par_files = glob("*.slc.par");   
+    my @par_sort = sort @par_files;
+    my @tops_files = glob("*.tops_par");   
+    my @tops_sort = sort @tops_files;
+    my $filename = 'slc.tab';
+    open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
+    print $fh "$slc_sort[0] $par_sort[0] $tops_sort[0]\n";
+    print $fh "$slc_sort[1] $par_sort[1] $tops_sort[1]\n";
+    print $fh "$slc_sort[2] $par_sort[2] $tops_sort[2]\n";
+    close $fh;
+    chdir("..");
+
+    my @list = glob "S1*.SAFE";
+    foreach my $file ( @list ) { 
+        my $filename = 'burst.tab';
+        open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
+        $back = cwd();
+        chdir($file);
+        chdir("annotation");
+        my @list2 = glob "*$pol*.xml";
+        my @sort_list2 = sort @list2; 
+        foreach my $file2 ( @sort_list2 ) {
+            $lines_output = `cat $file2`;
+            my @lines = split /\n/, $lines_output; #split into lines
+            foreach my $line ( @lines ) {
+                if ($line =~ m/\s+<burstList count="(\S+)">/) {
+                    $burst_count = $1;
+                }
+            }
+            print $fh "1 $burst_count\n";
+        }
+        close $fh;
+        chdir($back);
+        move("burst.tab","$date/burst.tab") or die "ERROR $0: Move failed: $!";
+    }
+    mkdir("DATA");
+    $workDir = cwd();
+
+    chdir($date);
+    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    execute($cmd,$log);
+
+    chdir("../DATA");
+    copy("${date}.mli","../$output.$pol.mgrd") or die ("ERROR $0: Copy failed: $!");
+    copy("${date}.mli.par","../$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
+
+    chdir("..");
+  }
   my $options = "-p -j -n 6 -q -c ";
   $options .= "-g " if $gamma_flg;
 
