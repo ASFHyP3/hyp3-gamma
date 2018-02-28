@@ -90,16 +90,14 @@ if ($dem eq '') {
   $parfile = "$dem.par";
 
   execute("get_dem.py -p 10 -u $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
-  execute("utm2dem.pl tmpdem.tif $dem $parfile","$log");
+  execute("utm2dem.py tmpdem.tif $dem $parfile","$log");
 
 } elsif ($dem =~ /tif$/) {
   print "Using GeoTIFF DEM $dem\n";
-
   $tiff_dem = $dem;
   $dem = "big.dem";
   $parfile = "$dem.par";
-
-  execute("utm2dem.pl $tiff_dem $dem $parfile","$log");
+  execute("utm2dem.py $tiff_dem $dem $parfile","$log");
 } elsif (-e "$dem.par") {
   print "Using GAMMA DEM file $dem with parameter file $dem.par\n";
   $parfile = "$dem.par";
@@ -357,12 +355,12 @@ sub process_2nd_pol() {
     }
   } else {
     print "Ingesting SLC file into Gamma format\n";
-    $cmd = "PAR_S1_SLC_SSV.sh $pol2";
+    $cmd = "par_s1_slc.py $pol2";
     execute($cmd,$log);
 
     $workDir = cwd();
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
@@ -467,7 +465,7 @@ sub process_pol() {
     }   
   } else {
     print "Ingesting SLC file into Gamma format\n";
-    $cmd = "PAR_S1_SLC_SSV.sh $pol";
+    $cmd = "par_s1_slc.py $pol";
     execute($cmd,$log);
 
     chdir($date); 
@@ -512,7 +510,7 @@ sub process_pol() {
     $workDir = cwd();
 
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
