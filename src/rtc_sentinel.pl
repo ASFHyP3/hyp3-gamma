@@ -90,16 +90,14 @@ if ($dem eq '') {
   $parfile = "$dem.par";
 
   execute("get_dem.py -p 10 -u $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
-  execute("utm2dem.pl tmpdem.tif $dem $parfile","$log");
+  execute("utm2dem.py tmpdem.tif $dem $parfile","$log");
 
 } elsif ($dem =~ /tif$/) {
   print "Using GeoTIFF DEM $dem\n";
-
   $tiff_dem = $dem;
   $dem = "big.dem";
   $parfile = "$dem.par";
-
-  execute("utm2dem.pl $tiff_dem $dem $parfile","$log");
+  execute("utm2dem.py $tiff_dem $dem $parfile","$log");
 } elsif (-e "$dem.par") {
   print "Using GAMMA DEM file $dem with parameter file $dem.par\n";
   $parfile = "$dem.par";
@@ -185,7 +183,7 @@ if ($res > 10.0) {
   $outfile = "s1$plat-$mode-rtch-$main_pol-$output";
 } 
 
-generate_xml($hdf5_list_name,$outname,$main_pol,$outfile,$multi_pol,$cross_pol,$output,$log,$dem_type);
+generate_xml($hdf5_list_name,$outname,$main_pol,$outfile,$multi_pol,$cross_pol,$output,$log,$dem_type, $type);
 
 #Create consolidated log file
 $out = "PRODUCT";
@@ -224,7 +222,7 @@ exit;
 # Generate XML files
 #
 sub generate_xml() {
-  my ($hdf5_list_name,$outname,$main_pol,$outfile,$multi_pol,$cross_pol,$output,$log,$dem_type) = @_;
+  my ($hdf5_list_name,$outname,$main_pol,$outfile,$multi_pol,$cross_pol,$output,$log,$dem_type,$type) = @_;
 
   # Create necessary meta file
   my @list = glob "S1*.SAFE";
@@ -237,88 +235,93 @@ sub generate_xml() {
   $etc_dir = dirname($0) . "/../etc";
   copy("$etc_dir/sentinel_xml.xsl","sentinel_xml.xsl") or die ("ERROR $0: Copy failed: $!");
 
+  $out = "PRODUCT";
+
   $cmd = "xsltproc --stringparam path $path --stringparam timestamp timestring --stringparam file_size 1000 --stringparam server stuff --output out.xml sentinel_xml.xsl $path/manifest.safe";
   execute($cmd,$log);
 
-  $cmd = "xml2meta.py sentinel out.xml out.meta";
-  execute($cmd,$log);
+  if ($type =~ /GRD/) {
 
+      $cmd = "xml2meta.py sentinel out.xml out.meta";
+      execute($cmd,$log);
 
-  $version_file = "$etc_dir/version.txt";
-  $gap_rtc_version = "";
-  if (open(VER, "$version_file")) {
-    $gap_rtc_version = <VER>;
-    chomp($gap_rtc_version);
+      $version_file = "$etc_dir/version.txt";
+      $gap_rtc_version = "";
+      if (open(VER, "$version_file")) {
+        $gap_rtc_version = <VER>;
+        chomp($gap_rtc_version);
+      } else {
+        print "No version.txt file found in $etc_dir\n";
+      }
+
+      $version_file = "$GAMMA_HOME/ASF_Gamma_version.txt";
+      $gamma_version = "20150702";
+      if (open(VER, "$version_file")) {
+        $gamma_version = <VER>;
+        chomp($gamma_version);
+      } else {
+        print "No ASF_Gamma_version.txt file found in $GAMMA_HOME\n";
+      }
+
+      open(HDF5_LIST,"> $hdf5_list_name") or die("ERROR $0: cannot create $hdf5_list_name\n\n");
+      print HDF5_LIST "[GAMMA RTC]\n";
+      print HDF5_LIST "granule = $outname\n";
+      print HDF5_LIST "metadata = out.meta\n"; 
+
+      $geo_dir = "geo_$main_pol"; 
+      $dem_seg = "geo_${main_pol}/area.dem";
+      $dem_seg_par = "geo_${main_pol}/area.dem_par";
+     
+      print HDF5_LIST "oversampled dem file = $dem_seg\n";
+      print HDF5_LIST "oversampled dem metadata = $dem_seg_par\n";
+      print HDF5_LIST "original dem file = $out/$outname-dem.tif\n";
+      print HDF5_LIST "layover shadow mask = $out/$outname-ls_map.tif\n";
+      print HDF5_LIST "layover shadow stats = $geo_dir/ls_map.stat\n";
+      print HDF5_LIST "incidence angle file = $out/$outname-inc_map.tif\n";
+      print HDF5_LIST "incidence angle metadata = $geo_dir/inc_map.meta\n";
+
+      print HDF5_LIST "input $main_pol file = $outfile\n";
+      print HDF5_LIST "terrain corrected $main_pol metadata = $geo_dir/tc_$main_pol.meta\n";
+      print HDF5_LIST "terrain corrected $main_pol file = $out/$outfile.tif\n";
+
+      if ($multi_pol==1) {
+        $outfile2 = $outfile;
+        $outfile2 =~ s/$main_pol/$cross_pol/;
+        print HDF5_LIST "input $cross_pol file = $outfile2\n";
+        $geo_dir2 = $geo_dir;
+        $geo_dir2 =~ s/$main_pol/$cross_pol/;
+        print HDF5_LIST "terrain corrected $cross_pol metadata = $geo_dir2/tc_$cross_pol.meta\n";
+        print HDF5_LIST "terrain corrected $cross_pol file = $out/$outfile2.tif\n";
+      }
+
+      print HDF5_LIST "initial processing log = $output.log\n";
+      print HDF5_LIST "terrain correction log = $output.log\n";
+      print HDF5_LIST "main log = $log\n";
+      print HDF5_LIST "mk_geo_radcal_0 log = geo_$main_pol/mk_geo_radcal_0.log\n";
+      print HDF5_LIST "mk_geo_radcal_1 log = geo_$main_pol/mk_geo_radcal_1.log\n";
+      print HDF5_LIST "mk_geo_radcal_2 log = geo_$main_pol/mk_geo_radcal_2.log\n";
+      print HDF5_LIST "mk_geo_radcal_3 log = geo_$main_pol/mk_geo_radcal_3.log\n";
+      print HDF5_LIST "coreg_check log = coreg_check.log\n";
+      print HDF5_LIST "mli.par file = ${output}.${main_pol}.mgrd.par\n";
+      print HDF5_LIST "gamma version = $gamma_version\n";
+      print HDF5_LIST "gap_rtc version = $gap_rtc_version\n";
+      print HDF5_LIST "dem source = $dem_type\n";
+      print HDF5_LIST "browse image = $out/$outname.png\n";
+      print HDF5_LIST "kml overlay = $out/$outname.kmz\n";
+      close(HDF5_LIST);
+
+      execute("write_hdf5_xml $hdf5_list_name $outname.xml",$log);
+
+      # We can't use execute for xsltproc because of the redirect
+      print "Generating $granule.iso.xml with $etc_dir/rtc_iso.xsl\n";
+      $exit = system("xsltproc $etc_dir/rtc_iso.xsl $outname.xml >$outname.iso.xml");
+      $exit == 0 or die("ERROR $0: non-zero exit status for xsltproc");
+
+      copy("$outname.iso.xml","$out/$outname.iso.xml") or die ("ERROR $0: Copy failed: $!");
+      
   } else {
-    print "No version.txt file found in $etc_dir\n";
+      copy("out.xml","$out/$outname.xml") or die ("ERROR $0: Copy failed: $!");
   }
-
-  $version_file = "$GAMMA_HOME/ASF_Gamma_version.txt";
-  $gamma_version = "20150702";
-  if (open(VER, "$version_file")) {
-    $gamma_version = <VER>;
-    chomp($gamma_version);
-  } else {
-    print "No ASF_Gamma_version.txt file found in $GAMMA_HOME\n";
-  }
-
-  open(HDF5_LIST,"> $hdf5_list_name") or die("ERROR $0: cannot create $hdf5_list_name\n\n");
-  print HDF5_LIST "[GAMMA RTC]\n";
-  print HDF5_LIST "granule = $outname\n";
-  print HDF5_LIST "metadata = out.meta\n"; 
-
-  $out = "PRODUCT";
-  $geo_dir = "geo_$main_pol"; 
-  $dem_seg = "geo_${main_pol}/area.dem";
-  $dem_seg_par = "geo_${main_pol}/area.dem_par";
- 
-  print HDF5_LIST "oversampled dem file = $dem_seg\n";
-  print HDF5_LIST "oversampled dem metadata = $dem_seg_par\n";
-  print HDF5_LIST "original dem file = $out/$outname-dem.tif\n";
-  print HDF5_LIST "layover shadow mask = $out/$outname-ls_map.tif\n";
-  print HDF5_LIST "layover shadow stats = $geo_dir/ls_map.stat\n";
-  print HDF5_LIST "incidence angle file = $out/$outname-inc_map.tif\n";
-  print HDF5_LIST "incidence angle metadata = $geo_dir/inc_map.meta\n";
-
-  print HDF5_LIST "input $main_pol file = $outfile\n";
-  print HDF5_LIST "terrain corrected $main_pol metadata = $geo_dir/tc_$main_pol.meta\n";
-  print HDF5_LIST "terrain corrected $main_pol file = $out/$outfile.tif\n";
-
-  if ($multi_pol==1) {
-    $outfile2 = $outfile;
-    $outfile2 =~ s/$main_pol/$cross_pol/;
-    print HDF5_LIST "input $cross_pol file = $outfile2\n";
-    $geo_dir2 = $geo_dir;
-    $geo_dir2 =~ s/$main_pol/$cross_pol/;
-    print HDF5_LIST "terrain corrected $cross_pol metadata = $geo_dir2/tc_$cross_pol.meta\n";
-    print HDF5_LIST "terrain corrected $cross_pol file = $out/$outfile2.tif\n";
-  }
-
-  print HDF5_LIST "initial processing log = $output.log\n";
-  print HDF5_LIST "terrain correction log = $output.log\n";
-  print HDF5_LIST "main log = $log\n";
-  print HDF5_LIST "mk_geo_radcal_0 log = geo_$main_pol/mk_geo_radcal_0.log\n";
-  print HDF5_LIST "mk_geo_radcal_1 log = geo_$main_pol/mk_geo_radcal_1.log\n";
-  print HDF5_LIST "mk_geo_radcal_2 log = geo_$main_pol/mk_geo_radcal_2.log\n";
-  print HDF5_LIST "mk_geo_radcal_3 log = geo_$main_pol/mk_geo_radcal_3.log\n";
-  print HDF5_LIST "coreg_check log = coreg_check.log\n";
-  print HDF5_LIST "mli.par file = ${output}.${main_pol}.mgrd.par\n";
-  print HDF5_LIST "gamma version = $gamma_version\n";
-  print HDF5_LIST "gap_rtc version = $gap_rtc_version\n";
-  print HDF5_LIST "dem source = $dem_type\n";
-  print HDF5_LIST "browse image = $out/$outname.png\n";
-  print HDF5_LIST "kml overlay = $out/$outname.kmz\n";
-  close(HDF5_LIST);
-
-  execute("write_hdf5_xml $hdf5_list_name $outname.xml",$log);
-
-  # We can't use execute for xsltproc because of the redirect
-  print "Generating $granule.iso.xml with $etc_dir/rtc_iso.xsl\n";
-  $exit = system("xsltproc $etc_dir/rtc_iso.xsl $outname.xml >$outname.iso.xml");
-  $exit == 0 or die("ERROR $0: non-zero exit status for xsltproc");
-
-  copy("$outname.iso.xml","$out/$outname.iso.xml") or die ("ERROR $0: Copy failed: $!");
-
 }
 
 #
@@ -357,12 +360,12 @@ sub process_2nd_pol() {
     }
   } else {
     print "Ingesting SLC file into Gamma format\n";
-    $cmd = "PAR_S1_SLC_SSV.sh $pol2";
+    $cmd = "par_s1_slc.py $pol2";
     execute($cmd,$log);
 
     $workDir = cwd();
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
@@ -467,7 +470,7 @@ sub process_pol() {
     }   
   } else {
     print "Ingesting SLC file into Gamma format\n";
-    $cmd = "PAR_S1_SLC_SSV.sh $pol";
+    $cmd = "par_s1_slc.py $pol";
     execute($cmd,$log);
 
     chdir($date); 
@@ -512,7 +515,7 @@ sub process_pol() {
     $workDir = cwd();
 
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.sh ${workDir}/DATA $date slc.tab burst.tab 2 ${workDir} big";
+    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
