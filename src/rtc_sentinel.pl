@@ -89,7 +89,7 @@ if ($dem eq '') {
   $dem = "big.dem";
   $parfile = "$dem.par";
 
-  execute("get_dem.py -p 10 -u $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
+  execute("get_dem.py -p 30 -u $min_lon $min_lat $max_lon $max_lat tmpdem.tif","$log");
   execute("utm2dem.py tmpdem.tif $dem $parfile","$log");
 
 } elsif ($dem =~ /tif$/) {
