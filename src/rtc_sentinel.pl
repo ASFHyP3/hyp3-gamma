@@ -428,7 +428,7 @@ sub process_2nd_pol() {
     copy("image_cal_map.mli.tif","${output}_${pol2}_${browse_res}m.tif") or die ("ERROR $0: Copy failed: $!");
   } else {  
     execute("resample -square $browse_res tc_$pol2 ${output}_${pol2}_${browse_res}m",$log);
-    fix_band_name("${output}_${pol2}_${browse_res}m.meta",$pol);
+    fix_band_name("${output}_${pol2}_${browse_res}m.meta",$pol2);
     execute("asf_export -format geotiff ${output}_${pol2}_${browse_res}m ${output}_${pol2}_${browse_res}m.tif",$log);
   }
 
