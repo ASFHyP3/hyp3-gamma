@@ -32,7 +32,8 @@ import argparse
 import os, sys
 from execute import execute 
     
-def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,gammaFlag=None,loFlag=None):
+def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,
+                       gammaFlag=None,loFlag=None,pwrFlag=None,filtFlag=None,looks=None):
 
     string = "rtc_sentinel.pl "
     if dem is not None:
@@ -47,6 +48,12 @@ def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,ga
         string = string + "-g "
     if loFlag:
         string = string + "-l "
+    if pwrFlag:
+        string = string + "-p "
+    if filtFlag:
+        string = string + "-f "
+    if looks is not None:
+        string = string + "-k %s " % looks
     cmd = string + outName
     execute(cmd)
 
@@ -62,8 +69,12 @@ if __name__ == '__main__':
   parser.add_argument("-d",action="store_true",help="if matching fails, use dead reckoning")
   parser.add_argument("-g",action="store_true",help="create gamma0 instead of sigma0");
   parser.add_argument("-l",action="store_true",help="create a lo-res output (30m)")
+  parser.add_argument("-p",action="store_true",help="create power images instead of amplitude")
+  parser.add_argument("-f",action="store_true",help="run enhanced lee filter")
+  parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
   args = parser.parse_args()
 
   rtc_sentinel_gamma(args.output,res=args.outputResolution,dem=args.externalDEM,matchFlag=args.n,
- 			deadFlag=args.d,gammaFlag=args.g,loFlag=args.l)
+                     deadFlag=args.d,gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,
+                     filtFlag=args.f,looks=args.looks)
 			
