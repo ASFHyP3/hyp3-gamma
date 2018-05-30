@@ -167,7 +167,7 @@ if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
 else { $outname = "s1$plat-$mode-rtch-$output"; }
 
 if ($multi_pol==1) {
-  execute("rtc2color.py -cleanup geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
+  execute("rtc2color.py -cleanup -amp geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
   my $outdir = "PRODUCT";
   execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${outname}",$log);
 } else {
