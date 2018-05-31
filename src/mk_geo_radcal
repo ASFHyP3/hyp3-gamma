@@ -691,6 +691,7 @@ if ($mode == 3) {
       execute("radcal_MLI $mli $mli_par - $mli_cal - 0 0 1 0.0 - $ellipse_pix_sigma0",$log);
       execute("ratio $ellipse_pix_sigma0  $pix_sigma0_1 $ratio_sigma0 $mli_width[1] 1 1", $log);
       execute("product $mli $ratio_sigma0 $mli_pix_cal $mli_width[1] 1 1", $log);
+      execute("blank_bad_data.py $mli_pix_cal $diff_par ",$log);
       execute("geocode_back $mli_pix_cal $mli_width[1] $gc1 $mli_cal_map $dem_seg_width[1] $dem_seg_lines[1] 2 0",$log);
       execute("raspwr $mli_cal_map $dem_seg_width[1] 1 0 1 1 $scd $expd 1 $mli_cal_map_ras", $log);
       if ($dem_seg_proj[1] eq "SCH"){

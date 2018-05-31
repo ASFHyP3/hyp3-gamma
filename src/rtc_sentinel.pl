@@ -21,12 +21,16 @@ usage: $0 <options> output
 	-d		(option) if matching fails, use dead reckoning
         -g              (option) create gamma0 instead of sigma0 
 	-l 		(option) only create a lo-res output (30m)
+        -f              (option) run enhanced lee filter
+        -k looks        (option) number of looks to take
 
 EOS
 
 my $dem = '';
 my $lo_flg = 0;
-GetOptions ('e=s' => \$dem,'o=f' => \$res, 'n' => \$no_match_flg, 'd' => \$dead_flg, 'g' => \$gamma_flg, 'l' => \$lo_flg );
+my $look_fact = 0;
+
+GetOptions ('e=s' => \$dem,'o=f' => \$res, 'n' => \$no_match_flg, 'd' => \$dead_flg, 'g' => \$gamma_flg, 'l' => \$lo_flg, 'p' => \$pwr_flg, 'f' => \$filter_flg, 'k=f' => \$look_fact );
 
 my $output = $ARGV[0];
 my $log = "$output.log";
@@ -40,6 +44,14 @@ if ($no_match_flg) { print "Turning off all matching\n";}
 elsif ($dead_flg)  { print "If matching fails, use dead reckoning\n";}
 if ($gamma_flg)    { print "Creating gamma0 output\n";}
 if ($lo_flg)       { print "Creating low resolution (30m) ouput\n";  $res = 30.0;}
+if ($pwr_flg)      { print "Creating power output instead of amplitude\n";}
+if ($filt_flg)     { print "Using enhanced Lee filter\n";}
+
+if ($look_fact == 0) {
+  print "Calculating look factor using resolution of $res\n";
+  $look_fact = int ($res/10+0.5);
+}
+print "Look factor is $look_fact\n";
 print "Processing resolution is $res meters\n";
 print "\n";
 
@@ -115,7 +127,7 @@ if ($num_vv == 1 || $num_vv == 3) {
   print "\nFound VV polarization - processing\n\n"; 
   $main_pol = "vv";
   $cross_pol = "vh";
-  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$type","$date","$log");
+  process_pol("$main_pol","$res","$look_fact","$no_match_flg","$dead_flg","$gamma_flg","$filter_flg","$pwr_flg","$browse_res","$output","$mode","$type","$date","$log");
 
   my $num_vh = 0;
   my @vh = glob "*/*/*vh*.tiff";
@@ -123,7 +135,7 @@ if ($num_vv == 1 || $num_vv == 3) {
   if ($num_vh == 1 || $num_vh == 3) { 
     print "\nFound VH polarization - processing\n\n"; 
     $multi_pol = 1;
-    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
+    process_2nd_pol("$cross_pol","$res","$look_fact","$gamma_flg","$filter_flg","$pwr_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
   }
 }
 
@@ -134,7 +146,7 @@ if ($num_hh == 1 || $num_hh == 3) {
   print "\nFound HH polarization - processing\n\n"; 
   $main_pol = "hh";
   $cross_pol = "hv";
-  process_pol("$main_pol","$res","$no_match_flg","$dead_flg","$gamma_flg","$browse_res","$output","$mode","$type","$date","$log");
+  process_pol("$main_pol","$res","$look_fact","$no_match_flg","$dead_flg","$gamma_flg","$filter_flg","$pwr_flg","$browse_res","$output","$mode","$type","$date","$log");
 
   my $num_hv = 0;
   my @hv = glob "*/*/*hv*.tiff";
@@ -142,7 +154,7 @@ if ($num_hh == 1 || $num_hh == 3) {
   if ($num_hv == 1 || $num_hv == 3) { 
     print "\nFound HV polarization - processing\n\n"; 
     $multi_pol = 1;
-    process_2nd_pol("$cross_pol","$res","$gamma_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
+    process_2nd_pol("$cross_pol","$res","$look_fact","$gamma_flg","$filter_flg","$pwr_flg","$browse_res","$output","$mode","$dem","$type","$date","$log");
   }
 }
 
@@ -155,21 +167,14 @@ if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
 else { $outname = "s1$plat-$mode-rtch-$output"; }
 
 if ($multi_pol==1) {
-  execute("rtc2color.py -cleanup geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
+  execute("rtc2color.py -cleanup -amp geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
   my $outdir = "PRODUCT";
   execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${outname}",$log);
 } else {
   chdir("geo_${main_pol}");
-  if ($res >= $browse_res) {
-    copy("tc_${main_pol}.img","${output}_${main_pol}_${browse_res}m.img") or die ("ERROR $0: Copy failed: $!");
-    copy("tc_${main_pol}.meta","${output}_${main_pol}_${browse_res}m.meta") or die ("ERROR $0: Copy failed: $!");
-  } else {
-    execute("asf_import -format geotiff ${output}_${main_pol}_${browse_res}m.tif ${output}_${main_pol}_${browse_res}m",$log);
-  }
-  execute("sqrt_img ${output}_${main_pol}_${browse_res}m ${output}_amp_${browse_res}m",$log);
-  execute("asf_export -format geotiff -byte sigma ${output}_amp_${browse_res}m ${output}.amp.tif",$log);
   my $outdir = "../PRODUCT";
-  execute("makeAsfBrowse.py ${output}.amp.tif ${outdir}/${outname}",$log);
+  execute("asf_export -format geotiff -byte sigma ${output}_${main_pol}_${browse_res}m ${output}_amp.tif",$log);
+  execute("makeAsfBrowse.py ${output}_amp.tif ${outdir}/${outname}",$log);
   chdir("..");
 }
 
@@ -330,7 +335,7 @@ sub generate_xml() {
 # creates the main cross-pol tif file
 #
 sub process_2nd_pol() {
-  my ($pol2,$res,$gamma_flg,$browse_res,$output,$mode,$dem,$type,$date,$log) = @_;
+  my ($pol2,$res,$look_fact,$gamma_flg,$filter_flg,$pwr_flg,$browse_res,$output,$mode,$dem,$type,$date,$log) = @_;
   if ($pol2 eq "hv") { $pol1 = "hh"; }
   else { $pol1 = "vv"; }
 
@@ -349,9 +354,10 @@ sub process_2nd_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-    $look_fact = int ($res/10+0.5);
+#    $look_fact = int ($res/10+0.5);
+#    $look_fact = 3;
     if ($look_fact > 1) {
-      print "Multi-looking GRD file\n";
+      print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol2.GRD $output.$pol2.GRD.par $output.$pol2.mgrd $output.$pol2.mgrd.par $look_fact $look_fact";
       execute($cmd,$log);
     } else {
@@ -373,6 +379,14 @@ sub process_2nd_pol() {
     copy("${date}.mli.par","../$output.$pol2.mgrd.par") or die ("ERROR $0: Copy failed: $!");
     chdir("..");
   }   
+
+  if ($filter_flg) {
+    @width = extract_param("$output.$pol2.mgrd.par","range_samples:");
+    $el_looks = $look_fact*$look_fact*5;
+    $cmd = "enh_lee $output.$pol2.mgrd temp.mgrd $width[1] $el_looks 1 7 7";
+    execute($cmd,$log); 
+    move("temp.mgrd","$output.$pol2.mgrd") or die("ERROR $0: Move failed: $!");
+  }
 
   $geo_dir = "geo_$pol2";
   $gc0 = "$geo_dir/image_0.map_to_rdc";
@@ -421,11 +435,13 @@ sub process_2nd_pol() {
 
   chdir("$geo_dir");
 
-  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol2",$log);
+  # Always make tc_<pol> image amplitude because it is used for browse
+  execute("createAmp.py image_cal_map.mli.tif -n 0",$log);
+  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol2",$log);
 
   if ($res >= $browse_res) {
-    copy("image_cal_map.mli.tif","${output}_${pol2}_${browse_res}m.tif") or die ("ERROR $0: Copy failed: $!");
+    copy("image_cal_map.mli-amp.tif","${output}_${pol2}_${browse_res}m.tif") or die ("ERROR $0: Copy failed: $!");
   } else {  
     execute("resample -square $browse_res tc_$pol2 ${output}_${pol2}_${browse_res}m",$log);
     fix_band_name("${output}_${pol2}_${browse_res}m.meta",$pol2);
@@ -435,7 +451,12 @@ sub process_2nd_pol() {
   if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$pol2-$output.tif"; }
   else { $outname = "s1$plat-$mode-rtch-$pol2-$output.tif"; }
   my $out = "../PRODUCT";
-  move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
+ 
+  if ($pwr_flg) {
+    move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
+  } else {
+    move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
+  }
 
   chdir("..");
 
@@ -446,7 +467,7 @@ sub process_2nd_pol() {
 # Creates the main .tif file, the dem, ls_map, and inc_map
 #
 sub process_pol() {
-  my ($pol,$res,$no_match_flg,$dead_flg,$gamma_flg,$browse_res,$output,$mode,$type,$date,$log) = @_;
+  my ($pol,$res,$look_fact,$no_match_flg,$dead_flg,$gamma_flg,$filter_flg,$pwr_flg,$browse_res,$output,$mode,$type,$date,$log) = @_;
 
   if ($type =~ "GRD") {  
     print "Ingesting GRD file into Gamma format\n";
@@ -459,9 +480,10 @@ sub process_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-    $look_fact = int ($res/10+0.5);
+#    $look_fact = int ($res/10+0.5);
+#    $look_fact = 3;
     if ($look_fact > 1) {
-      print "Multi-looking GRD file\n";
+      print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol.GRD $output.$pol.GRD.par $output.$pol.mgrd $output.$pol.mgrd.par $look_fact $look_fact";
       execute($cmd,$log);
     } else {
@@ -524,6 +546,15 @@ sub process_pol() {
 
     chdir("..");
   }
+
+  if ($filter_flg) {
+    @width = extract_param("$output.$pol.mgrd.par","range_samples:");
+    $el_looks = $look_fact*$look_fact*5;
+    $cmd = "enh_lee $output.$pol.mgrd temp.mgrd $width[1] $el_looks 1 7 7";
+    execute($cmd,$log); 
+    move("temp.mgrd","$output.$pol.mgrd") or die("ERROR $0: Move failed: $!");
+  }
+
   my $options = "-p -j -n 6 -q -c ";
   $options .= "-g " if $gamma_flg;
 
@@ -586,11 +617,15 @@ sub process_pol() {
   execute("stats -overstat -overmeta ls_map",$log);
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
-  execute("asf_import -format geotiff image_cal_map.mli.tif tc_$pol",$log);
+  
+  # Always make tc_<pol> image amplitude because it is used for browse
+  execute("createAmp.py image_cal_map.mli.tif -n 0",$log);  
+  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol",$log);
 
   if ($res >= $browse_res) {
-    copy("image_cal_map.mli.tif","${output}_${pol}_${browse_res}m.tif")  or die ("ERROR $0: Copy failed: $!");
+    copy("image_cal_map.mli-amp.tif","${output}_${pol}_${browse_res}m.tif")  or die ("ERROR $0: Copy failed: $!");
+    execute("asf_import -format geotiff ${output}_${pol}_${browse_res}m.tif ${output}_${pol}_${browse_res}m",$log);
   } else {  
     execute("resample -square $browse_res tc_$pol ${output}_${pol}_${browse_res}m",$log);
     fix_band_name("${output}_${pol}_${browse_res}m.meta",$pol);
@@ -603,7 +638,11 @@ sub process_pol() {
   if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$pol-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$pol-$output"; }
 
-  move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
+  if ($pwr_flg) {
+    move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
+  } else {
+    move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
+  }
 
   if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
   else { $outname = "s1$plat-$mode-rtch-$output"; }
@@ -716,5 +755,18 @@ sub add_log {
 
   print FL "\n";
   close(FL);
+}
+
+sub extract_param{
+  my ($infile,$keyword) = @_;
+  open(PAR_IN,$infile) || die "\nERROR extract_param: cannot open parameter file: $infile\n";
+
+  while(<PAR_IN>){
+    chomp;
+    @tokens = split;
+    if($tokens[0] eq $keyword){close PAR_IN; return @tokens;}
+  }
+  close PAR_IN;
+  die "\nERROR $0: keyword $keyword not found in file: $infile\n";
 }
 
