@@ -354,8 +354,6 @@ sub process_2nd_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-#    $look_fact = int ($res/10+0.5);
-#    $look_fact = 3;
     if ($look_fact > 1) {
       print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol2.GRD $output.$pol2.GRD.par $output.$pol2.mgrd $output.$pol2.mgrd.par $look_fact $look_fact";
@@ -368,10 +366,11 @@ sub process_2nd_pol() {
     print "Ingesting SLC file into Gamma format\n";
     $cmd = "par_s1_slc.py $pol2";
     execute($cmd,$log);
-
     $workDir = cwd();
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
+    $azi_looks = $look_fact;
+    $rng_looks = $look_fact * 5;
+    $cmd = "SLC_copy_S1_fullSW.py -rl $rng_looks -al $azi_looks ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
@@ -435,6 +434,10 @@ sub process_2nd_pol() {
 
   chdir("$geo_dir");
 
+  # Set the band name in the metadata
+  execute("gdal_translate -mo \"Band_1=${pol2}_gamma0\" image_cal_map.mli.tif tmp.tif",$log);
+  move("tmp.tif","image_cal_map.mli.tif") or die "ERROR $0: Move failed: $!";
+
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);
   execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
@@ -455,6 +458,7 @@ sub process_2nd_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   } else {
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
     move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   }
 
@@ -480,8 +484,6 @@ sub process_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-#    $look_fact = int ($res/10+0.5);
-#    $look_fact = 3;
     if ($look_fact > 1) {
       print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol.GRD $output.$pol.GRD.par $output.$pol.mgrd $output.$pol.mgrd.par $look_fact $look_fact";
@@ -535,15 +537,15 @@ sub process_pol() {
     }
     mkdir("DATA");
     $workDir = cwd();
-
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
+    $azi_looks = $look_fact;
+    $rng_looks = $look_fact * 5;
+    $cmd = "SLC_copy_S1_fullSW.py -rl $rng_looks -al $azi_looks ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
     copy("${date}.mli","../$output.$pol.mgrd") or die ("ERROR $0: Copy failed: $!");
     copy("${date}.mli.par","../$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
-
     chdir("..");
   }
 
@@ -618,6 +620,10 @@ sub process_pol() {
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
   
+  # Set the band name in the metadata
+  execute("gdal_translate -mo \"Band_1=${pol}_gamma0\" image_cal_map.mli.tif tmp.tif",$log);
+  move("tmp.tif","image_cal_map.mli.tif") or die "ERROR $0: Move failed: $!";
+  
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);  
   execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
@@ -641,6 +647,7 @@ sub process_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
   } else {
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
     move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
   }
 

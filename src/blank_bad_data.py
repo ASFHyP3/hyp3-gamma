@@ -7,7 +7,7 @@ import os
 import argparse
 from getParameter import getParameter
 
-def blank_bad_data(rawFile,x,y,left=10,right=10):
+def blank_bad_data(rawFile,x,y,left=15,right=15):
 
     data = np.fromfile(rawFile,dtype=np.float32)
     data = np.reshape(data,(y,x))
@@ -34,8 +34,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='blank_bad_data',description='Remove bad data values at the edge of an image')
     parser.add_argument('rawFile', help='name of input raw data file')
     parser.add_argument('parFile', help='name of input par file describing data')
-    parser.add_argument('-l','--left',help='width of data to be blanked at left edge (def=10)',type=int,default=10)
-    parser.add_argument('-r','--right',help='width of data to be blanked at right edge (def=10)',type=int,default=10)
+    parser.add_argument('-l','--left',help='width of data to be blanked at left edge (def=15)',type=int,default=15)
+    parser.add_argument('-r','--right',help='width of data to be blanked at right edge (def=15)',type=int,default=15)
     args = parser.parse_args()
 
     if not os.path.exists(args.rawFile):
