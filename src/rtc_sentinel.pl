@@ -591,8 +591,8 @@ sub process_pol() {
     };
     if ($fail != 1) {
       eval {
-	my $offset = 250;
-  	my $error = 4;
+	my $offset = 50;
+  	my $error = 2;
         execute("check_coreg.pl $res -o $offset -e $error $output",$log);
       } or do {
          print "WARNING: Failed coregistration check\n";

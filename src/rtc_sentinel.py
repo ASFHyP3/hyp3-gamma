@@ -49,22 +49,22 @@ def perform_sanity_checks():
                 lr1 = trans[3] + y*trans[5]
                 ul2 = trans[0]
                 lr2 = trans[0] + x*trans[1]
-                if ((ul1/30.0) - int(ul1/30)) != 0.5:
+                if abs((ul1/30.0) - int(ul1/30)) != 0.5:
                     print "ERROR: Corner coordinates are amiss"
                     print "ERROR: ul1 coordinate not on a 30 meter posting"
                     print "ERROR: ul1 = {}".format(ul1)
                     exit(1)
-                if ((lr1/30.0) - int(lr1/30)) != 0.5:
+                if abs((lr1/30.0) - int(lr1/30)) != 0.5:
                     print "ERROR: Corner coordinates are amiss"
                     print "ERROR: lr1 coordinate not on a 30 meter posting"
                     print "ERROR: lr1 = {}".format(lr1)
                     exit(1)
-                if ((ul2/30.0) - int(ul2/30)) != 0.5:
+                if abs((ul2/30.0) - int(ul2/30)) != 0.5:
                     print "ERROR: Corner coordinates are amiss"
                     print "ERROR: ul2 coordinate not on a 30 meter posting"
                     print "ERROR: ul2 = {}".format(ul2)
                     exit(1)
-                if ((lr2/30.0) - int(lr2/30)) != 0.5:
+                if abs((lr2/30.0) - int(lr2/30)) != 0.5:
                     print "ERROR: Corner coordinates are amiss"
                     print "ERROR: lr2 coordinate not on a 30 meter posting"
                     print "ERROR: lr2 = {}".format(lr2)
