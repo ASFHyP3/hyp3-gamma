@@ -26,7 +26,7 @@ def sentinel2meta(xmlFile):
   m = meta_init_location(m)
   parser = et.XMLParser(remove_blank_text=True)
   meta = et.parse(xmlFile, parser)
-  
+
   # Determine location and centroid
   ring = ogr.Geometry(ogr.wkbLinearRing)
   poly = ogr.Geometry(ogr.wkbPolygon)
@@ -70,7 +70,10 @@ def sentinel2meta(xmlFile):
     centroid = poly.Centroid()
     point = centroid.GetPoint(0)
 
-  # General block  
+  # Figure out which product type we deal with
+  product_type = meta.xpath('/sentinel/metadata/image/product_type')[0].text
+
+  # General block
   name = meta.xpath('/sentinel/metadata/image/file')[0].text
   m['general.name'] = (name, m['general.name'][1])
   sensor = meta.xpath('/sentinel/metadata/image/platform')[0].text
@@ -117,16 +120,32 @@ def sentinel2meta(xmlFile):
   elif polarization == 'DV':
     m['general.band_count'] = ('2', m['general.band_count'][1])
     m['general.bands'] = ('VV,VH', m['general.bands'][1])
-  line_count = meta.xpath('/sentinel/metadata/image/height')[0].text
+  if product_type == 'GRD':
+    line_count = meta.xpath('/sentinel/metadata/image/height')[0].text
+  elif product_type == 'SLC':
+    param = ('/sentinel/metadata/image/IW1_{0}/height'.format(polarization))
+    line_count = meta.xpath(param)[0].text
   m['general.line_count'] = (line_count, m['general.line_count'][1])
-  sample_count = meta.xpath('/sentinel/metadata/image/width')[0].text
+  if product_type == 'GRD':
+    sample_count = meta.xpath('/sentinel/metadata/image/width')[0].text
+  elif product_type == 'SLC':
+    param = ('/sentinel/metadata/image/IW1_{0}/width'.format(polarization))
+    sample_count = meta.xpath(param)[0].text
   m['general.sample_count'] = (sample_count, m['general.sample_count'][1])
   m['general.start_line'] = ('0', m['general.start_line'][1])
   m['general.start_sample'] = ('0', m['general.start_sample'][1])
-  x_pixel_size = meta.xpath('/sentinel/metadata/image/x_spacing')[0].text
+  if product_type == 'GRD':
+    x_pixel_size = meta.xpath('/sentinel/metadata/image/x_spacing')[0].text
+  elif product_type == 'SLC':
+    param = ('/sentinel/metadata/image/IW1_{0}/x_spacing'.format(polarization))
+    x_pixel_size = meta.xpath(param)[0].text
   m['general.x_pixel_size'] = (x_pixel_size, m['general.x_pixel_size'][1])
-  y_pixel_size = meta.xpath('/sentinel/metadata/image/y_spacing')[0].text
-  m['general.y_pixel_size'] = (y_pixel_size, m['general.y_pixel_size'][1])  
+  if product_type == 'GRD':
+    y_pixel_size = meta.xpath('/sentinel/metadata/image/y_spacing')[0].text
+  elif product_type == 'SLC':
+    param = ('/sentinel/metadata/image/IW1_{0}/y_spacing'.format(polarization))
+    y_pixel_size = meta.xpath(param)[0].text
+  m['general.y_pixel_size'] = (y_pixel_size, m['general.y_pixel_size'][1])
   m['general.center_latitude'] = \
     (str(point[0]), m['general.center_latitude'][1])
   m['general.center_longitude'] = \
@@ -139,7 +158,7 @@ def sentinel2meta(xmlFile):
   # m['general.re_minor'] = (str(ref.GetSemiMinor()), m['general.re_minor'][1])
   m['general.re_major'] = ('6378137.0', m['general.re_major'][1])
   m['general.re_minor'] = ('6356752.31425', m['general.re_minor'][1])
-  
+
   # SAR block
   if polarization == 'SH' or polarization == 'HH':
     m['sar.polarization'] = ('HH', m['sar.polarization'][1])
@@ -153,10 +172,9 @@ def sentinel2meta(xmlFile):
     m['sar.polarization'] = ('HH,HV', m['sar.polarization'][1])
   elif polarization == 'DV':
     m['sar.polarization'] = ('VV,VH', m['sar.polarization'][1])
-  product_type = meta.xpath('/sentinel/metadata/image/product_type')[0].text
   if product_type == 'RAW' or product_type == 'SLC':
     m['sar.image_type'] = ('S', m['sar.image_type'][1])
-    m['multilook'] = ('0', m['multilook'][1])
+    m['sar.multilook'] = ('0', m['sar.multilook'][1])
   elif product_type == 'GRD':
     m['sar.image_type'] = ('G', m['sar.image_type'][1])
     m['sar.multilook'] = ('1', m['sar.multilook'][1])
@@ -207,7 +225,7 @@ def sentinel2meta(xmlFile):
   incid_a(4): -1.5988761359e-09
   incid_a(5): 6.0266559732e-13
   '''
-  
+
   return m
 
 
