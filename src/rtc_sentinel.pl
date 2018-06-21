@@ -167,16 +167,17 @@ if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
 else { $outname = "s1$plat-$mode-rtch-$output"; }
 
 if ($multi_pol==1) {
+  $colorname = $outname . "-rgb";
   execute("rtc2color.py -cleanup -amp geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
   my $outdir = "PRODUCT";
-  execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${outname}",$log);
-} else {
-  chdir("geo_${main_pol}");
-  my $outdir = "../PRODUCT";
-  execute("asf_export -format geotiff -byte sigma ${output}_${main_pol}_${browse_res}m ${output}_amp.tif",$log);
-  execute("makeAsfBrowse.py ${output}_amp.tif ${outdir}/${outname}",$log);
-  chdir("..");
+  execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${colorname}",$log);
 }
+
+chdir("geo_${main_pol}");
+my $outdir = "../PRODUCT";
+execute("asf_export -format geotiff -byte sigma ${output}_${main_pol}_${browse_res}m ${output}_amp.tif",$log);
+execute("makeAsfBrowse.py ${output}_amp.tif ${outdir}/${outname}",$log);
+chdir("..");
 
 if ($res > 10.0) {
   $hdf5_list_name = "hdf5_list_rtcm.txt";
