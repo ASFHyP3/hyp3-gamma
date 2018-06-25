@@ -56,7 +56,6 @@ def blank_bad_data(rawFile,x,y,left=15,right=15,cut=27):
     data = data.byteswap()
     data.tofile(rawFile)
 
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(prog='blank_bad_data',description='Remove bad data values at the edge of an image')
@@ -65,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('-l','--left',help='width of data to be blanked at left edge (def=15)',type=int,default=15)
     parser.add_argument('-r','--right',help='width of data to be blanked at right edge (def=15)',type=int,default=15)
     parser.add_argument('-c','--cut',help='width of data to be blanked at top/bottom edges (def=27)',type=int,default=27)
+
     args = parser.parse_args()
 
     if not os.path.exists(args.rawFile):
@@ -77,7 +77,9 @@ if __name__ == '__main__':
 
     x = int(getParameter(args.parFile,"range_samp_1"))
     y = int(getParameter(args.parFile,"az_samp_1"))
+
     blank_bad_data(args.rawFile,x,y,left=args.left,right=args.right,cut=args.cut)
     
+
 
 
