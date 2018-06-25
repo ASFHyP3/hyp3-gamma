@@ -7,8 +7,9 @@ import os
 import argparse
 from getParameter import getParameter
 
-def blank_bad_data_lr(rawFile,x,y,left=15,right=15,cut=15):
+def blank_bad_data(rawFile,x,y,left=15,right=15,cut=27):
 
+    # Read in the data
     data = np.fromfile(rawFile,dtype=np.float32)
     data = np.reshape(data,(y,x))
     data = data.byteswap()
@@ -25,7 +26,6 @@ def blank_bad_data_lr(rawFile,x,y,left=15,right=15,cut=15):
             if data[i,j] != 0:
                 data[i,j-right:] = 0
                 break            
-
 
     # Any non-zero pixel is set to 1
     mask = np.zeros((y,x))
@@ -51,7 +51,8 @@ def blank_bad_data_lr(rawFile,x,y,left=15,right=15,cut=15):
     for i in xrange(y-cut,y):
         if sums[i] == 1:
 	    data[i,:] = 0
-	    
+
+    # Write out the data	    
     data = data.byteswap()
     data.tofile(rawFile)
 
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('parFile', help='name of input par file describing data')
     parser.add_argument('-l','--left',help='width of data to be blanked at left edge (def=15)',type=int,default=15)
     parser.add_argument('-r','--right',help='width of data to be blanked at right edge (def=15)',type=int,default=15)
-    parser.add_argument('-c','--cut',help='width of data to be blanked at top/bottom edges (def=15)',type=int,default=15)
+    parser.add_argument('-c','--cut',help='width of data to be blanked at top/bottom edges (def=27)',type=int,default=27)
     args = parser.parse_args()
 
     if not os.path.exists(args.rawFile):
