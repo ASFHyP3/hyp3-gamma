@@ -81,7 +81,7 @@
             </gco:DateTime>
           </gmd:dateStamp>
           <gmd:metadataStandardName>
-            <gco:CharacterString>ISO 19115-2 Geographic information — Metadata — Part 2: Extensions for imagery and gridded data</gco:CharacterString>
+            <gco:CharacterString>ISO 19115-2 Geographic information - Metadata - Part 2: Extensions for imagery and gridded data</gco:CharacterString>
           </gmd:metadataStandardName>
           <gmd:metadataStandardVersion>
             <gco:CharacterString>ISO 19115-2:2009-02-15</gco:CharacterString>
@@ -207,6 +207,9 @@
                       </xsl:if>
                       <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1A'">
                         <gco:CharacterString>The granule for the generation of this terrain corrected product has been acquired as part of the Copernicus Sentinel-1A mission. The Sentinel-1A satellite was launched on April 3, 2014. Sentinel-1A has a 12-day repeat cycle.</gco:CharacterString>
+                      </xsl:if>
+                      <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1B'">
+                        <gco:CharacterString>The granule for the generation of this terrain corrected product has been acquired as part of the Copernicus Sentinel-1B mission. The Sentinel-1B satellite was launched on April 25, 2016. Sentinel-1B has a 12-day repeat cycle.</gco:CharacterString>
                       </xsl:if>
                       </gmd:name>
                     </gmd:CI_Series>
@@ -2628,3 +2631,4 @@ Gesch, D.B., Oimoen, M.J. and Evans, G.A., 2014. Accuracy Assessment of the Unit
 </gmd:DS_Series>
 </xsl:template>
 </xsl:stylesheet>
+
