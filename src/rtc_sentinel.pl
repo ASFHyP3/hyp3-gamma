@@ -167,16 +167,18 @@ if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
 else { $outname = "s1$plat-$mode-rtch-$output"; }
 
 if ($multi_pol==1) {
+
+  $colorname = $outname . "-rgb";
   execute("rtc2color.py -cleanup -amp geo_${main_pol}/${output}_${main_pol}_${browse_res}m.tif geo_${cross_pol}/${output}_${cross_pol}_${browse_res}m.tif -24 ${output}_hires.tif",$log);
   my $outdir = "PRODUCT";
-  execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${outname}",$log);
-} else {
-  chdir("geo_${main_pol}");
-  my $outdir = "../PRODUCT";
-  execute("asf_export -format geotiff -byte sigma ${output}_${main_pol}_${browse_res}m ${output}_amp.tif",$log);
-  execute("makeAsfBrowse.py ${output}_amp.tif ${outdir}/${outname}",$log);
-  chdir("..");
+  execute("makeAsfBrowse.py ${output}_hires.tif ${outdir}/${colorname}",$log);
 }
+
+chdir("geo_${main_pol}");
+my $outdir = "../PRODUCT";
+execute("byteSigmaScale.py ${output}_${main_pol}_${browse_res}m.tif ${output}_amp.tif",$log);
+execute("makeAsfBrowse.py ${output}_amp.tif ${outdir}/${outname}",$log);
+chdir("..");
 
 if ($res > 10.0) {
   $hdf5_list_name = "hdf5_list_rtcm.txt";
@@ -245,88 +247,83 @@ sub generate_xml() {
   $cmd = "xsltproc --stringparam path $path --stringparam timestamp timestring --stringparam file_size 1000 --stringparam server stuff --output out.xml sentinel_xml.xsl $path/manifest.safe";
   execute($cmd,$log);
 
-  if ($type =~ /GRD/) {
+  $cmd = "xml2meta.py sentinel out.xml out.meta";
+  execute($cmd,$log);
 
-      $cmd = "xml2meta.py sentinel out.xml out.meta";
-      execute($cmd,$log);
-
-      $version_file = "$etc_dir/version.txt";
-      $gap_rtc_version = "";
-      if (open(VER, "$version_file")) {
-        $gap_rtc_version = <VER>;
-        chomp($gap_rtc_version);
-      } else {
-        print "No version.txt file found in $etc_dir\n";
-      }
-
-      $version_file = "$GAMMA_HOME/ASF_Gamma_version.txt";
-      $gamma_version = "20150702";
-      if (open(VER, "$version_file")) {
-        $gamma_version = <VER>;
-        chomp($gamma_version);
-      } else {
-        print "No ASF_Gamma_version.txt file found in $GAMMA_HOME\n";
-      }
-
-      open(HDF5_LIST,"> $hdf5_list_name") or die("ERROR $0: cannot create $hdf5_list_name\n\n");
-      print HDF5_LIST "[GAMMA RTC]\n";
-      print HDF5_LIST "granule = $outname\n";
-      print HDF5_LIST "metadata = out.meta\n"; 
-
-      $geo_dir = "geo_$main_pol"; 
-      $dem_seg = "geo_${main_pol}/area.dem";
-      $dem_seg_par = "geo_${main_pol}/area.dem_par";
-     
-      print HDF5_LIST "oversampled dem file = $dem_seg\n";
-      print HDF5_LIST "oversampled dem metadata = $dem_seg_par\n";
-      print HDF5_LIST "original dem file = $out/$outname-dem.tif\n";
-      print HDF5_LIST "layover shadow mask = $out/$outname-ls_map.tif\n";
-      print HDF5_LIST "layover shadow stats = $geo_dir/ls_map.stat\n";
-      print HDF5_LIST "incidence angle file = $out/$outname-inc_map.tif\n";
-      print HDF5_LIST "incidence angle metadata = $geo_dir/inc_map.meta\n";
-
-      print HDF5_LIST "input $main_pol file = $outfile\n";
-      print HDF5_LIST "terrain corrected $main_pol metadata = $geo_dir/tc_$main_pol.meta\n";
-      print HDF5_LIST "terrain corrected $main_pol file = $out/$outfile.tif\n";
-
-      if ($multi_pol==1) {
-        $outfile2 = $outfile;
-        $outfile2 =~ s/$main_pol/$cross_pol/;
-        print HDF5_LIST "input $cross_pol file = $outfile2\n";
-        $geo_dir2 = $geo_dir;
-        $geo_dir2 =~ s/$main_pol/$cross_pol/;
-        print HDF5_LIST "terrain corrected $cross_pol metadata = $geo_dir2/tc_$cross_pol.meta\n";
-        print HDF5_LIST "terrain corrected $cross_pol file = $out/$outfile2.tif\n";
-      }
-
-      print HDF5_LIST "initial processing log = $output.log\n";
-      print HDF5_LIST "terrain correction log = $output.log\n";
-      print HDF5_LIST "main log = $log\n";
-      print HDF5_LIST "mk_geo_radcal_0 log = geo_$main_pol/mk_geo_radcal_0.log\n";
-      print HDF5_LIST "mk_geo_radcal_1 log = geo_$main_pol/mk_geo_radcal_1.log\n";
-      print HDF5_LIST "mk_geo_radcal_2 log = geo_$main_pol/mk_geo_radcal_2.log\n";
-      print HDF5_LIST "mk_geo_radcal_3 log = geo_$main_pol/mk_geo_radcal_3.log\n";
-      print HDF5_LIST "coreg_check log = coreg_check.log\n";
-      print HDF5_LIST "mli.par file = ${output}.${main_pol}.mgrd.par\n";
-      print HDF5_LIST "gamma version = $gamma_version\n";
-      print HDF5_LIST "gap_rtc version = $gap_rtc_version\n";
-      print HDF5_LIST "dem source = $dem_type\n";
-      print HDF5_LIST "browse image = $out/$outname.png\n";
-      print HDF5_LIST "kml overlay = $out/$outname.kmz\n";
-      close(HDF5_LIST);
-
-      execute("write_hdf5_xml $hdf5_list_name $outname.xml",$log);
-
-      # We can't use execute for xsltproc because of the redirect
-      print "Generating $granule.iso.xml with $etc_dir/rtc_iso.xsl\n";
-      $exit = system("xsltproc $etc_dir/rtc_iso.xsl $outname.xml >$outname.iso.xml");
-      $exit == 0 or die("ERROR $0: non-zero exit status for xsltproc");
-
-      copy("$outname.iso.xml","$out/$outname.iso.xml") or die ("ERROR $0: Copy failed: $!");
-      
+  $version_file = "$etc_dir/version.txt";
+  $gap_rtc_version = "";
+  if (open(VER, "$version_file")) {
+    $gap_rtc_version = <VER>;
+    chomp($gap_rtc_version);
   } else {
-      copy("out.xml","$out/$outname.xml") or die ("ERROR $0: Copy failed: $!");
+    print "No version.txt file found in $etc_dir\n";
   }
+
+  $version_file = "$GAMMA_HOME/ASF_Gamma_version.txt";
+  $gamma_version = "20150702";
+  if (open(VER, "$version_file")) {
+    $gamma_version = <VER>;
+    chomp($gamma_version);
+  } else {
+    print "No ASF_Gamma_version.txt file found in $GAMMA_HOME\n";
+  }
+
+  open(HDF5_LIST,"> $hdf5_list_name") or die("ERROR $0: cannot create $hdf5_list_name\n\n");
+  print HDF5_LIST "[GAMMA RTC]\n";
+  print HDF5_LIST "granule = $outname\n";
+  print HDF5_LIST "metadata = out.meta\n"; 
+
+  $geo_dir = "geo_$main_pol"; 
+  $dem_seg = "geo_${main_pol}/area.dem";
+  $dem_seg_par = "geo_${main_pol}/area.dem_par";
+ 
+  print HDF5_LIST "oversampled dem file = $dem_seg\n";
+  print HDF5_LIST "oversampled dem metadata = $dem_seg_par\n";
+  print HDF5_LIST "original dem file = $out/$outname-dem.tif\n";
+  print HDF5_LIST "layover shadow mask = $out/$outname-ls_map.tif\n";
+  print HDF5_LIST "layover shadow stats = $geo_dir/ls_map.stat\n";
+  print HDF5_LIST "incidence angle file = $out/$outname-inc_map.tif\n";
+  print HDF5_LIST "incidence angle metadata = $geo_dir/inc_map.meta\n";
+
+  print HDF5_LIST "input $main_pol file = $outfile\n";
+  print HDF5_LIST "terrain corrected $main_pol metadata = $geo_dir/tc_$main_pol.meta\n";
+  print HDF5_LIST "terrain corrected $main_pol file = $out/$outfile.tif\n";
+
+  if ($multi_pol==1) {
+    $outfile2 = $outfile;
+    $outfile2 =~ s/$main_pol/$cross_pol/;
+    print HDF5_LIST "input $cross_pol file = $outfile2\n";
+    $geo_dir2 = $geo_dir;
+    $geo_dir2 =~ s/$main_pol/$cross_pol/;
+    print HDF5_LIST "terrain corrected $cross_pol metadata = $geo_dir2/tc_$cross_pol.meta\n";
+    print HDF5_LIST "terrain corrected $cross_pol file = $out/$outfile2.tif\n";
+  }
+
+  print HDF5_LIST "initial processing log = $output.log\n";
+  print HDF5_LIST "terrain correction log = $output.log\n";
+  print HDF5_LIST "main log = $log\n";
+  print HDF5_LIST "mk_geo_radcal_0 log = geo_$main_pol/mk_geo_radcal_0.log\n";
+  print HDF5_LIST "mk_geo_radcal_1 log = geo_$main_pol/mk_geo_radcal_1.log\n";
+  print HDF5_LIST "mk_geo_radcal_2 log = geo_$main_pol/mk_geo_radcal_2.log\n";
+  print HDF5_LIST "mk_geo_radcal_3 log = geo_$main_pol/mk_geo_radcal_3.log\n";
+  print HDF5_LIST "coreg_check log = coreg_check.log\n";
+  print HDF5_LIST "mli.par file = ${output}.${main_pol}.mgrd.par\n";
+  print HDF5_LIST "gamma version = $gamma_version\n";
+  print HDF5_LIST "gap_rtc version = $gap_rtc_version\n";
+  print HDF5_LIST "dem source = $dem_type\n";
+  print HDF5_LIST "browse image = $out/$outname.png\n";
+  print HDF5_LIST "kml overlay = $out/$outname.kmz\n";
+  close(HDF5_LIST);
+
+  execute("write_hdf5_xml $hdf5_list_name $outname.xml",$log);
+
+  # We can't use execute for xsltproc because of the redirect
+  print "Generating $granule.iso.xml with $etc_dir/rtc_iso.xsl\n";
+  $exit = system("xsltproc $etc_dir/rtc_iso.xsl $outname.xml >$outname.iso.xml");
+  $exit == 0 or die("ERROR $0: non-zero exit status for xsltproc");
+
+  copy("$outname.iso.xml","$out/$outname.iso.xml") or die ("ERROR $0: Copy failed: $!");
+  
 }
 
 #
@@ -354,8 +351,6 @@ sub process_2nd_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-#    $look_fact = int ($res/10+0.5);
-#    $look_fact = 3;
     if ($look_fact > 1) {
       print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol2.GRD $output.$pol2.GRD.par $output.$pol2.mgrd $output.$pol2.mgrd.par $look_fact $look_fact";
@@ -368,10 +363,11 @@ sub process_2nd_pol() {
     print "Ingesting SLC file into Gamma format\n";
     $cmd = "par_s1_slc.py $pol2";
     execute($cmd,$log);
-
     $workDir = cwd();
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
+    $azi_looks = $look_fact;
+    $rng_looks = $look_fact * 5;
+    $cmd = "SLC_copy_S1_fullSW.py -rl $rng_looks -al $azi_looks ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
@@ -435,6 +431,10 @@ sub process_2nd_pol() {
 
   chdir("$geo_dir");
 
+  # Set the band name in the metadata
+  execute("gdal_translate -mo \"Band_1=${pol2}_gamma0\" image_cal_map.mli.tif tmp.tif",$log);
+  move("tmp.tif","image_cal_map.mli.tif") or die "ERROR $0: Move failed: $!";
+
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);
   execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
@@ -455,6 +455,7 @@ sub process_2nd_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   } else {
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
     move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   }
 
@@ -480,8 +481,6 @@ sub process_pol() {
       print "\nUnable to get precision orbit... continuing\n";
     };
 
-#    $look_fact = int ($res/10+0.5);
-#    $look_fact = 3;
     if ($look_fact > 1) {
       print "Multi-looking GRD file at $look_fact looks\n";
       $cmd = "multi_look_MLI $output.$pol.GRD $output.$pol.GRD.par $output.$pol.mgrd $output.$pol.mgrd.par $look_fact $look_fact";
@@ -535,15 +534,15 @@ sub process_pol() {
     }
     mkdir("DATA");
     $workDir = cwd();
-
     chdir($date);
-    $cmd = "SLC_copy_S1_fullSW.py ${workDir}/DATA $date slc.tab burst.tab 2";
+    $azi_looks = $look_fact;
+    $rng_looks = $look_fact * 5;
+    $cmd = "SLC_copy_S1_fullSW.py -rl $rng_looks -al $azi_looks ${workDir}/DATA $date slc.tab burst.tab 2";
     execute($cmd,$log);
 
     chdir("../DATA");
     copy("${date}.mli","../$output.$pol.mgrd") or die ("ERROR $0: Copy failed: $!");
     copy("${date}.mli.par","../$output.$pol.mgrd.par") or die ("ERROR $0: Copy failed: $!");
-
     chdir("..");
   }
 
@@ -589,8 +588,8 @@ sub process_pol() {
     };
     if ($fail != 1) {
       eval {
-	my $offset = 250;
-  	my $error = 4;
+	my $offset = 50;
+  	my $error = 2;
         execute("check_coreg.pl $res -o $offset -e $error $output",$log);
       } or do {
          print "WARNING: Failed coregistration check\n";
@@ -618,6 +617,10 @@ sub process_pol() {
   execute("asf_import -format geotiff ${output}.inc_map.tif inc_map",$log);
   execute("stats -overstat -overmeta -mask 0 inc_map",$log);
   
+  # Set the band name in the metadata
+  execute("gdal_translate -mo \"Band_1=${pol}_gamma0\" image_cal_map.mli.tif tmp.tif",$log);
+  move("tmp.tif","image_cal_map.mli.tif") or die "ERROR $0: Move failed: $!";
+  
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);  
   execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
@@ -641,6 +644,7 @@ sub process_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
   } else {
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
     move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
   }
 

@@ -30,8 +30,50 @@
 ###############################################################################
 import argparse
 import os, sys
+import glob
+import saa_func_lib as saa
+
 from execute import execute 
-    
+
+def perform_sanity_checks():
+    print "Performing sanity checks on output PRODUCTs"
+    tif_list = glob.glob("PRODUCT/*.tif")
+    for myfile in tif_list:
+        if "vv" in myfile or "hh" in myfile or "vh" in myfile or "hv" in myfile:
+            # Check that the main polarization file is on a 30 meter posting
+            x,y,trans,proj = saa.read_gdal_file_geo(saa.open_gdal_file(myfile))    
+            print "    trans[1] = {}; trans[5] = {}".format(trans[1],trans[5]) 
+            if abs(trans[5]) > 10 and abs(trans[1]) > 10:
+                print "Checking corner coordinates...",
+                ul1 = trans[3]
+                lr1 = trans[3] + y*trans[5]
+                ul2 = trans[0]
+                lr2 = trans[0] + x*trans[1]
+                if abs((ul1/30.0) - int(ul1/30)) != 0.5:
+                    print "ERROR: Corner coordinates are amiss"
+                    print "ERROR: ul1 coordinate not on a 30 meter posting"
+                    print "ERROR: ul1 = {}".format(ul1)
+                    exit(1)
+                if abs((lr1/30.0) - int(lr1/30)) != 0.5:
+                    print "ERROR: Corner coordinates are amiss"
+                    print "ERROR: lr1 coordinate not on a 30 meter posting"
+                    print "ERROR: lr1 = {}".format(lr1)
+                    exit(1)
+                if abs((ul2/30.0) - int(ul2/30)) != 0.5:
+                    print "ERROR: Corner coordinates are amiss"
+                    print "ERROR: ul2 coordinate not on a 30 meter posting"
+                    print "ERROR: ul2 = {}".format(ul2)
+                    exit(1)
+                if abs((lr2/30.0) - int(lr2/30)) != 0.5:
+                    print "ERROR: Corner coordinates are amiss"
+                    print "ERROR: lr2 coordinate not on a 30 meter posting"
+                    print "ERROR: lr2 = {}".format(lr2)
+                    exit(1)
+                print "...ok"
+
+
+
+
 def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,
                        gammaFlag=None,loFlag=None,pwrFlag=None,filtFlag=None,looks=None):
 
@@ -56,6 +98,8 @@ def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,
         string = string + "-k %s " % looks
     cmd = string + outName
     execute(cmd)
+
+    perform_sanity_checks()
 
 
 if __name__ == '__main__':
