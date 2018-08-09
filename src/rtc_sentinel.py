@@ -32,8 +32,12 @@ import argparse
 import os, sys
 import glob
 import saa_func_lib as saa
+import logging
 
 from execute import execute 
+from get_dem import get_dem
+from utm2dem import utm2dem
+from get_bb_from_shape import get_bb_from_shape
 
 def perform_sanity_checks():
     print "Performing sanity checks on output PRODUCTs"
@@ -74,12 +78,29 @@ def perform_sanity_checks():
 
 
 
-def rtc_sentinel_gamma(outName,res=None,dem=None,matchFlag=None,deadFlag=None,
-                       gammaFlag=None,loFlag=None,pwrFlag=None,filtFlag=None,looks=None):
+def rtc_sentinel_gamma(outName,res=None,dem=None,aoi=None,shape=None,matchFlag=None,
+                       deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
+                       filtFlag=None,looks=None):
 
     string = "rtc_sentinel.pl "
     if dem is not None:
         string = string + "-e %s " % dem
+    if shape is not None:
+        minX,minY,maxX,maxY = get_bb_from_shape(shape)
+        print minX,minY,maxX,maxY
+        aoi = []
+        aoi.append(minX)
+        aoi.append(minY)
+        aoi.append(maxX)
+        aoi.append(maxY)
+        print aoi
+    if aoi is not None:
+        tifdem = "tmp_{}_dem.tif".format(os.getpid())
+        get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,True,post=30)
+        gammadem = "big.dem"  
+        utm2dem(tifdem,gammadem,"big.dem.par")
+        os.remove(tifdem)
+        string = string + "-e {} ".format(gammadem)
     if res is not None:
         string = string + "-o %s " % res
     if not matchFlag:
@@ -108,7 +129,10 @@ if __name__ == '__main__':
     description='Creates an RTC image from a Sentinel 1 Scene using GAMMA software')
   parser.add_argument('output', help='base name of the output files')
   parser.add_argument("-o","--outputResolution",type=float,help="Desired output resolution")
-  parser.add_argument("-e","--externalDEM",help="Specify a DEM file to use")
+  group = parser.add_mutually_exclusive_group()
+  group.add_argument("-e","--externalDEM",help="Specify a DEM file to use")
+  group.add_argument("-a","--aoi",help="Specify AOI to use",type=float,nargs=4,metavar=('LON_MIN','LAT_MIN','LON_MAX','LAT_MAX'))
+  group.add_argument("-s","--shape",help="Specify shape file to use")
   parser.add_argument("-n",action="store_false",help="Do not perform matching")
   parser.add_argument("-d",action="store_true",help="if matching fails, use dead reckoning")
   parser.add_argument("-g",action="store_true",help="create gamma0 instead of sigma0");
@@ -118,7 +142,8 @@ if __name__ == '__main__':
   parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
   args = parser.parse_args()
 
-  rtc_sentinel_gamma(args.output,res=args.outputResolution,dem=args.externalDEM,matchFlag=args.n,
-                     deadFlag=args.d,gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,
-                     filtFlag=args.f,looks=args.looks)
+  rtc_sentinel_gamma(args.output,res=args.outputResolution,dem=args.externalDEM,
+                     aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
+                     gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filtFlag=args.f,
+                     looks=args.looks)
 			
