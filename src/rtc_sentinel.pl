@@ -437,11 +437,11 @@ sub process_2nd_pol() {
 
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);
-  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol2",$log);
+  execute("asf_import -format geotiff image_cal_map.mli_amp.tif tc_$pol2",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol2",$log);
 
   if ($res >= $browse_res) {
-    copy("image_cal_map.mli-amp.tif","${output}_${pol2}_${browse_res}m.tif") or die ("ERROR $0: Copy failed: $!");
+    copy("image_cal_map.mli_amp.tif","${output}_${pol2}_${browse_res}m.tif") or die ("ERROR $0: Copy failed: $!");
   } else {  
     execute("resample -square $browse_res tc_$pol2 ${output}_${pol2}_${browse_res}m",$log);
     fix_band_name("${output}_${pol2}_${browse_res}m.meta",$pol2);
@@ -455,8 +455,8 @@ sub process_2nd_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   } else {
-    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
-    move("image_cal_map.mli-amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli_amp.tif",$log);
+    move("image_cal_map.mli_amp.tif","$out/$outname") or die "Move failed: image_cal_map.mli.tif -> ../$outname";
   }
 
   chdir("..");
@@ -623,11 +623,11 @@ sub process_pol() {
   
   # Always make tc_<pol> image amplitude because it is used for browse
   execute("createAmp.py image_cal_map.mli.tif -n 0",$log);  
-  execute("asf_import -format geotiff image_cal_map.mli-amp.tif tc_$pol",$log);
+  execute("asf_import -format geotiff image_cal_map.mli_amp.tif tc_$pol",$log);
   execute("stats -nostat -overmeta -mask 0 tc_$pol",$log);
 
   if ($res >= $browse_res) {
-    copy("image_cal_map.mli-amp.tif","${output}_${pol}_${browse_res}m.tif")  or die ("ERROR $0: Copy failed: $!");
+    copy("image_cal_map.mli_amp.tif","${output}_${pol}_${browse_res}m.tif")  or die ("ERROR $0: Copy failed: $!");
     execute("asf_import -format geotiff ${output}_${pol}_${browse_res}m.tif ${output}_${pol}_${browse_res}m",$log);
   } else {  
     execute("resample -square $browse_res tc_$pol ${output}_${pol}_${browse_res}m",$log);
@@ -644,8 +644,8 @@ sub process_pol() {
   if ($pwr_flg) {
     move("image_cal_map.mli.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli.tif -> $out/$outname.tif";
   } else {
-    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli-amp.tif",$log);
-    move("image_cal_map.mli-amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli-amp.tif -> $out/$outname.tif";
+    execute("copy_metadata.py image_cal_map.mli.tif image_cal_map.mli_amp.tif",$log);
+    move("image_cal_map.mli_amp.tif","$out/$outname.tif") or die "Move failed: image_cal_map.mli_amp.tif -> $out/$outname.tif";
   }
 
   if ($res > 10.0) { $outname = "s1$plat-$mode-rtcm-$output"; }
