@@ -4,14 +4,14 @@
 # rtc_sentinel.py
 #
 # Project:  APD HYP3
-# Purpose:  Create RTC files using rtc_sentinel.pl
+# Purpose:  Create RTC files using GAMMA software
 #  
 # Author:   Tom Logan
 #
 # Issues/Caveats:
 #
 ###############################################################################
-# Copyright (c) 2017, Alaska Satellite Facility
+# Copyright (c) 2018, Alaska Satellite Facility
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -421,12 +421,28 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     outdir = "../PRODUCT"
     outfile = "{}/{}".format(outdir,rtcName)
     ampfile = "{name}_{pol}_{res}m.tif".format(pol=pol,name=outName,res=browse_res)
-    newfile = ampfile.replace(".tif","_sigma.tif")
-    byteSigmaScale(ampfile,newfile)
-    makeAsfBrowse(newfile,outfile)
+    sigmafile = ampfile.replace(".tif","_sigma.tif")
+    byteSigmaScale(ampfile,sigmafile)
+    makeAsfBrowse(sigmafile,outfile)
+  
+    os.chdir("../PRODUCT")
+
+    infile = "{}-ls_map.tif".format(rtcName)
+    outfile = "{}-ls_map".format(rtcName)
+    makeAsfBrowse(infile,outfile) 
+
+    infile = "{}-inc_map.tif".format(rtcName)
+    outfile = "{}-inc_map".format(rtcName)
+    makeAsfBrowse(infile,outfile) 
+
+    infile = "{}-dem.tif".format(rtcName)
+    outfile = "{}-dem".format(rtcName)
+    makeAsfBrowse(infile,outfile) 
+
     os.chdir("..")
 
-def create_arc_xml(infile,outfile,type,gamma0_flag,pwr_flag,looks,pol,cpol):
+
+def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol):
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
@@ -436,34 +452,41 @@ def create_arc_xml(infile,outfile,type,gamma0_flag,pwr_flag,looks,pol,cpol):
     time = now.strftime("%H%M%S")
     dt = now.strftime("%Y-%m-%dT%H:%M:%S")
     year = now.year
-    encoded_jpg = pngtothumb("{}.png".format(outfile))
     basename = os.path.basename(infile)
     granulename = os.path.splitext(basename)[0]
-    if gamma0_flag:
+    flooks = looks*looks*5
+    if gammaFlag:
         power_type = "gamma"
     else:
         power_type = "sigma"
-
-    if pwr_flag:
+    if pwrFlag:
         format_type = "power"
     else:
         format_type = "amplitude"
+    if filterFlag:
+        filterStr = "has"
+    else:
+        filterStr = "has not"
 
     for myfile in glob.glob("*.tif"):
         f = None
+        this_pol = None
         if pol in myfile or cpol in myfile:
             f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
+            encoded_jpg = pngtothumb("{}.png".format(outfile))
             if pol in myfile:
                 this_pol = pol
             else:
                 this_pol = cpol
         elif "ls_map" in myfile:
-                pass
+            f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir),"r")
+            g = open("{}.xml".format(myfile),"w")
+            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         elif "inc_map" in myfile:
-                pass
+            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         elif "dem" in myfile:
-                pass
+            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         if f is not None: 
             for line in f:
                 line = line.replace("[DATE]",date)
@@ -473,11 +496,14 @@ def create_arc_xml(infile,outfile,type,gamma0_flag,pwr_flag,looks,pol,cpol):
                 line = line.replace("[YEARACQUIRED]",infile[17:21])
                 line = line.replace("[TYPE]",type)
                 line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
-                line = line.replace("[POL]",this_pol)
+                if this_pol is not None:
+                    line = line.replace("[POL]",this_pol)
                 line = line.replace("[POWERTYPE]",power_type)
                 line = line.replace("[GRAN_NAME]",granulename)
                 line = line.replace("[FORMAT]",format_type)
                 line = line.replace("[LOOKS]","{}".format(looks))
+                line = line.replace("[FILT]","{}".format(filterStr))
+                line = line.replace("[FLOOKS]","{}".format(flooks))
                 g.write("{}\n".format(line))
             f.close()
             g.close()
@@ -665,6 +691,23 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,dem_type,log):
     shutil.copy("{}.iso.xml".format(outname),"{}".format(out))
 
 
+def clean_prod_dir():
+    os.chdir("PRODUCT")
+    for myfile in glob.glob("*ls_map*png*"):
+        os.remove(myfile)
+    for myfile in glob.glob("*ls_map*kmz"):
+        os.remove(myfile)
+    for myfile in glob.glob("*inc_map*png*"):
+        os.remove(myfile)
+    for myfile in glob.glob("*inc_map*kmz"):
+        os.remove(myfile)
+    for myfile in glob.glob("*dem*png*"):
+        os.remove(myfile)
+    for myfile in glob.glob("*dem*kmz"):
+        os.remove(myfile)
+    os.chdir("..")
+
+
 def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
                        filterFlag=None,looks=None):
@@ -776,7 +819,8 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
     logFile = glob.glob("*_log.txt")[0]
     rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
     create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,dem_type,logFile)
-    create_arc_xml(inFile,auxName,type,gammaFlag,pwrFlag,looks,pol,cpol)
+    create_arc_xml(inFile,auxName,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol)
+    clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
     logging.info("               Sentinel RTC Program - Completed")
@@ -784,6 +828,7 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
 
     create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
                             shape,pwrFlag,filterFlag,pol,looks,logFile)
+
 
 if __name__ == '__main__':
 
