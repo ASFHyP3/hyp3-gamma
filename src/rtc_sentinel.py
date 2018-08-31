@@ -115,7 +115,7 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     logging.info("    Number of looks to take           : {}".format(looks))
     
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
-                filterFlag,pwrFlag,browse_res,outName,dem,type,data):
+                filterFlag,pwrFlag,browse_res,outName,dem,inputType,data):
 
     logging.info("Processing the {} polarization".format(pol))
 
@@ -127,7 +127,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    if "GRD" in type:
+    if "GRD" in inputType:
         cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml \
               {inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=pol,grd=grd)
         execute(cmd,uselogging=True)
@@ -285,7 +285,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     
 		  
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-	                    outfile,dem,type,date):
+	                    outfile,dem,inputType,date):
 
     if cpol == "vh":
         mpol = "vv"
@@ -300,7 +300,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    if "GRD" in type:
+    if "GRD" in inputType:
         cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml \
               {inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=cpol,grd=grd)
         execute(cmd,uselogging=True)
@@ -442,7 +442,7 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     os.chdir("..")
 
 
-def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol):
+def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType):
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
@@ -471,6 +471,8 @@ def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cp
     for myfile in glob.glob("*.tif"):
         f = None
         this_pol = None
+        resa = None
+        resm = None
         if pol in myfile or cpol in myfile:
             f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
@@ -486,6 +488,27 @@ def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cp
         elif "inc_map" in myfile:
             encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         elif "dem" in myfile:
+            if "NED" in demType:
+                f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir),"r")
+                if "13" in demType:
+                    resa = 0.333333333333
+                    resm = 10
+                elif "1" in demType:
+                    resa = 1.0
+                    resm = 30
+                else:
+                    resa = 2.0
+                    resm = 60
+            else:
+                f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir),"r")
+                if "1" in demType:
+                    resa = 1.0
+                    resm = 30
+                else:
+                    resa = 3.0
+                    resm = 90
+
+            g = open("{}.xml".format(myfile),"w")
             encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         if f is not None: 
             for line in f:
@@ -494,7 +517,7 @@ def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cp
                 line = line.replace("[DATETIME]",dt)
                 line = line.replace("[YEARPROCESSED]","{}".format(year))
                 line = line.replace("[YEARACQUIRED]",infile[17:21])
-                line = line.replace("[TYPE]",type)
+                line = line.replace("[TYPE]",inputType)
                 line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
                 if this_pol is not None:
                     line = line.replace("[POL]",this_pol)
@@ -504,6 +527,11 @@ def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cp
                 line = line.replace("[LOOKS]","{}".format(looks))
                 line = line.replace("[FILT]","{}".format(filterStr))
                 line = line.replace("[FLOOKS]","{}".format(flooks))
+                line = line.replace("[DEM]","{}".format(demType))
+                if resa is not None:
+                    line = line.replace("[RESA]","{}".format(resa))
+                if resm is not None:
+                    line = line.replace("[RESM]","{}".format(resm))
                 g.write("{}\n".format(line))
             f.close()
             g.close()
@@ -529,7 +557,7 @@ def create_arc_xml(infile,outfile,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cp
             line = line.replace("[DATETIME]",dt)
             line = line.replace("[YEARPROCESSED]","{}".format(year))
             line = line.replace("[YEARACQUIRED]",infile[17:21])
-            line = line.replace("[TYPE]",type)
+            line = line.replace("[TYPE]",inputType)
             line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
             line = line.replace("[GRAN_NAME]",granulename)
             line = line.replace("[RES]",res)
@@ -602,7 +630,7 @@ def add_log(log,full_log):
     g.close()
    
     
-def create_iso_xml(outfile,outname,pol,cpol,inFile,output,dem_type,log):
+def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
 
     hdf5_name = "hdf5_list.txt"
     path = inFile
@@ -674,7 +702,7 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,dem_type,log):
     g.write("mli.par file = {}.{}.mgrd.par\n".format(output,pol))
     g.write("gamma version = {}\n".format(gamma_ver))
     g.write("gap_rtc version = {}\n".format(gap_ver))
-    g.write("dem source = {}\n".format(dem_type))
+    g.write("dem source = {}\n".format(demType))
     g.write("browse image = {}/{}.png\n".format(out,outname))
     g.write("kml overlay = {}/{}.kmz\n".format(out,outname))
 
@@ -740,11 +768,11 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
 
     mode = inFile[4:6].lower()
     plat = inFile[2:3].lower()
-    type = inFile[7:11]
+    inputType = inFile[7:11]
     date = inFile[17:25]
     
-    if 'SLC' in type:
-        type = 'SLC'
+    if 'SLC' in inputType:
+        inputType = 'SLC'
 
     if (res > 10):
         outType = "rtcm"
@@ -762,7 +790,7 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
     
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
-	demfile,dem_type = getDemFile(inFile,"tmpdem.tif",utmFlag=True,post=30)
+	demfile,demType = getDemFile(inFile,"tmpdem.tif",utmFlag=True,post=30)
 	dem = "area.dem"
 	parfile = "area.dem.par"
 	utm2dem("tmpdem.tif",dem,parfile)
@@ -770,10 +798,10 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
         tiff_dem = dem
 	parfile = "area.dem.par"
         utm2dem(tiff_dem,dem,parfile)          
-        dem_type = "Unknown"
+        demType = "Unknown"
     elif os.path.isfile("{}.par".format(dem)):
         parfile = "{}.par".format(dem)
-        dem_type = "Unknown"
+        demType = "Unknown"
     else:
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
 	exit(1)
@@ -790,26 +818,26 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
         pol = "vv"
         rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,type,date)
+            browse_res,outName,dem,inputType,date)
         if vhlist:
             cpol = "vh"
             rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,cpol,outName)
             logging.info("Found VH polarization - processing")
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,type,date)
+                            outName,dem,inputType,date)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
         pol = "hh"
         rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,type,date)
+            browse_res,outName,dem,inputType,date)
         if vhlist:
             cpol = "hv"
             logging.info("Found HV polarization - processing")
             rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,cpol,outName)
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,type,date)
+                            outName,dem,inputType,date)
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
@@ -818,8 +846,8 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     logFile = glob.glob("*_log.txt")[0]
     rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
-    create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,dem_type,logFile)
-    create_arc_xml(inFile,auxName,type,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol)
+    create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
+    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType)
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
