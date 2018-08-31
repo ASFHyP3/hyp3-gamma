@@ -52,10 +52,8 @@ from rtc2color import rtc2color
 from xml2meta import sentinel2meta
 from asf_utils import write_asf_meta
 from copy_metadata import copy_metadata
-from par_s1_slc_single import par_s1_slc_single
-from SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
-from getBursts import getBursts
 from make_arc_thumb import pngtothumb
+from ingest_S1_granule import ingest_S1_granule
 
 def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
@@ -114,12 +112,12 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     logging.info("    Speckle Filtering                 : {}".format(filterFlag))
     logging.info("    Number of looks to take           : {}".format(looks))
     
+    
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
                 filterFlag,pwrFlag,browse_res,outName,dem,inputType,data):
 
     logging.info("Processing the {} polarization".format(pol))
 
-    grd = "{out}.{pol}.grd".format(out=outName,pol=pol)
     mgrd = "{out}.{pol}.mgrd".format(out=outName,pol=pol)
     utm = "{out}.{pol}.utm".format(out=outName,pol=pol)
     dem = "area.dem"
@@ -127,51 +125,9 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    if "GRD" in inputType:
-        cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml \
-              {inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=pol,grd=grd)
-        execute(cmd,uselogging=True)
-	
-        # Update the state vectors
-        try:
-            for eoffile in glob.glob("*.EOF"):
-                logging.debug("Applying precision orbit information")
-                cmd = "S1_OPOD_vec {grd}.par {eof}".format(grd=grd,eof=eoffile)
-                execute(cmd,uselogging=True)
-        except:
-            logging.warning("Unable to get precision state vectors... continuing...")
-
-        # Multi-look the image
-        if look_fact > 1.0:
-            cmd = "multi_look_MLI {grd} {grd}.par {mgrd} {mgrd}.par {lks} {lks}".format(grd=grd,mgrd=mgrd,lks=look_fact)
-            execute(cmd,uselogging=True)
-        else:
-	    shutil.copy(grd,mgrd)
-            shutil.copy("{}.par".format(grd),"{}.par".format(mgrd))
-
-    else:
-        #  Ingest SLC data files into gamma format
-        par_s1_slc_single(inFile,pol)
-        date = inFile[17:25]
-	make_tab_flag = True
-        burst_tab = getBursts(inFile,make_tab_flag)
-        shutil.copy(burst_tab,date)
-
-        # Mosaic the swaths together and copy SLCs over        
-        back = os.getcwd()
-        os.chdir(date) 
-        path = "../"
-        rlooks = look_fact*5
-        alooks = look_fact 
-        SLC_copy_S1_fullSW(path,date,"SLC_TAB",burst_tab,mode=2,raml=rlooks,azml=alooks)
-        os.chdir(back)
- 
-        # Rename files
-        name = "{}.mli".format(date)
-        shutil.move(name,mgrd)
-        name = "{}.mli.par".format(date)
-        shutil.move(name,"{}.par".format(mgrd))
-
+    ingest_S1_granule(inFile,pol,look_fact,mgrd)
+    
+    # Apply filter if requested
     if filterFlag:
         width = getParmeter("{}.par".format(mgrd),"range_samples")
 	el_looks = look_fact * look_fact * 5
@@ -292,7 +248,6 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     else:
         mpol = "hh"
 
-    grd = "{out}.{pol}.grd".format(out=outfile,pol=cpol)
     mgrd = "{out}.{pol}.mgrd".format(out=outfile,pol=cpol)
     utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
     dem = "area.dem"
@@ -300,51 +255,9 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    if "GRD" in inputType:
-        cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml \
-              {inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=cpol,grd=grd)
-        execute(cmd,uselogging=True)
-	
-        # Update the state vectors
-        try:
-            for eoffile in glob.glob("*.EOF"):
-                logging.debug("Applying precision orbit information")
-                cmd = "S1_OPOD_vec {grd}.par {eof}".format(grd=grd,eof=eoffile)
-                execute(cmd,uselogging=True)
-        except:
-            logging.warning("Unable to get precision state vectors... continuing...")
-
-        # Multi-look the image
-        if look_fact > 1.0:
-            cmd = "multi_look_MLI {grd} {grd}.par {mgrd} {mgrd}.par {lks} {lks}".format(grd=grd,mgrd=mgrd,lks=look_fact)
-            execute(cmd,uselogging=True)
-        else:
-	    shutil.copy(grd,mgrd)
-            shutil.copy("{}.par".format(grd),"{}.par".format(mgrd))
-
-    else:
-        #  Ingest SLC data files into gamma format
-        par_s1_slc_single(inFile,cpol)
-        date = inFile[17:25]
-	make_tab_flag = False
-        burst_tab = getBursts(inFile,make_tab_flag)
-        shutil.copy(burst_tab,date)
-
-        # Mosaic the swaths together and copy SLCs over        
-        back = os.getcwd()
-        os.chdir(date) 
-        path = "../"
-        rlooks = look_fact*5
-        alooks = look_fact 
-        SLC_copy_S1_fullSW(path,date,"SLC_TAB",burst_tab,mode=2,raml=rlooks,azml=alooks)
-        os.chdir(back)
- 
-        # Rename files
-        name = "{}.mli".format(date)
-        shutil.move(name,mgrd)
-        name = "{}.mli.par".format(date)
-        shutil.move(name,"{}.par".format(mgrd))
- 
+    ingest_S1_granule(inFile,cpol,look_fact,mgrd)
+    
+    # Apply filtering if requested
     if filterFlag:
         width = getParmeter("{}.par".format(mgrd),"range_samples")
 	el_looks = look_fact * look_fact * 5
@@ -405,6 +318,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
 	shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
         
     os.chdir("..")
+    
     
 def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
 
@@ -473,6 +387,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         this_pol = None
         resa = None
         resm = None
+	if cpol is None:
+	    cpol = "ZZ"
         if pol in myfile or cpol in myfile:
             f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
@@ -484,7 +400,10 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         elif "ls_map" in myfile:
             f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
-            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
+            cmd = "pbmmake 200 200 | pnmtopng > white.png"
+            execute(cmd,uselogging=True)
+            encoded_jpg = pngtothumb("white.png")
+            os.remove("white.png")
         elif "inc_map" in myfile:
             encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         elif "dem" in myfile:
