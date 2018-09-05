@@ -36,6 +36,8 @@ def check_coreg(input,post,max_offset=50,max_error=2):
         mlog = "geo_HH/{}".format(myfile)
     elif os.path.isdir("geo_hh"):
         mlog = "geo_hh/{}".format(myfile)
+    elif os.path.isdir("geo_VV"):
+        mlog = "geo_VV/{}".format(myfile)
     elif os.path.isdir("geo_vv"):
         mlog = "geo_vv/{}".format(myfile)
     elif os.path.isdir("geo"):
