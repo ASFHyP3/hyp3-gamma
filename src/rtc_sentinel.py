@@ -59,7 +59,7 @@ def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
     tif_list = glob.glob("PRODUCT/*.tif")
     for myfile in tif_list:
-        if "vv" in myfile or "hh" in myfile or "vh" in myfile or "hv" in myfile:
+        if "VV" in myfile or "HH" in myfile or "VH" in myfile or "HV" in myfile:
             # Check that the main polarization file is on a 30 meter posting
             x,y,trans,proj = saa.read_gdal_file_geo(saa.open_gdal_file(myfile))    
             logging.debug("    trans[1] = {}; trans[5] = {}".format(trans[1],trans[5]))
@@ -243,10 +243,10 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
 	                    outfile,dem,inputType,date):
 
-    if cpol == "vh":
-        mpol = "vv"
+    if cpol == "VH":
+        mpol = "VV"
     else:
-        mpol = "hh"
+        mpol = "HH"
 
     mgrd = "{out}.{pol}.mgrd".format(out=outfile,pol=cpol)
     utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
@@ -400,31 +400,33 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         elif "ls_map" in myfile:
             f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
-            cmd = "pbmmake 200 200 | pnmtopng > white.png"
+            cmd = "pbmmake 100 75 | pnmtopng > white.png"
             execute(cmd,uselogging=True)
             encoded_jpg = pngtothumb("white.png")
             os.remove("white.png")
         elif "inc_map" in myfile:
+            f = open("{}/RTC_GAMMA_Template_inc.xml".format(etc_dir),"r")
+            g = open("{}.xml".format(myfile),"w")
             encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         elif "dem" in myfile:
             if "NED" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir),"r")
                 if "13" in demType:
-                    resa = 0.333333333333
+                    resa = "1/3"
                     resm = 10
                 elif "1" in demType:
-                    resa = 1.0
+                    resa = 1
                     resm = 30
                 else:
-                    resa = 2.0
+                    resa = 2
                     resm = 60
             else:
                 f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir),"r")
                 if "1" in demType:
-                    resa = 1.0
+                    resa = 1
                     resm = 30
                 else:
-                    resa = 3.0
+                    resa = 3
                     resm = 90
 
             g = open("{}.xml".format(myfile),"w")
@@ -694,11 +696,11 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
         inputType = 'SLC'
 
     if (res > 10):
-        outType = "rtcm"
+        outType = "RT2"
     else:
-        outType = "rtch"
+        outType = "RT1"
 
-    auxName= "s1{}-{}-{}-{}".format(plat,mode,outType,outName)
+    auxName= "S1{}-{}-{}-{}".format(plat.upper(),mode.upper(),outType,outName)
 
     try:
         cmd = "get_orb.py {}".format(inFile)
@@ -734,27 +736,27 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
 
     if vvlist:
         logging.info("Found VV polarization - processing")
-        pol = "vv"
-        rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
+        pol = "VV"
+        rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
             browse_res,outName,dem,inputType,date)
         if vhlist:
-            cpol = "vh"
-            rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,cpol,outName)
+            cpol = "VH"
+            rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,cpol)
             logging.info("Found VH polarization - processing")
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
                             outName,dem,inputType,date)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
-        pol = "hh"
-        rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
+        pol = "HH"
+        rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
             browse_res,outName,dem,inputType,date)
         if vhlist:
-            cpol = "hv"
+            cpol = "HV"
             logging.info("Found HV polarization - processing")
-            rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,cpol,outName)
+            rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,cpol)
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
                             outName,dem,inputType,date)
 
@@ -764,7 +766,7 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
 
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     logFile = glob.glob("*_log.txt")[0]
-    rtcName= "s1{}-{}-{}-{}-{}.tif".format(plat,mode,outType,pol,outName)
+    rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
     create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType)
     clean_prod_dir()
