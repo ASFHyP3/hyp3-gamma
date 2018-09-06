@@ -341,12 +341,15 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
   
     os.chdir("../PRODUCT")
 
-    infile = "{}-ls_map.tif".format(rtcName)
-    outfile = "{}-ls_map".format(rtcName)
-    makeAsfBrowse(infile,outfile) 
-
     infile = "{}-inc_map.tif".format(rtcName)
     outfile = "{}-inc_map".format(rtcName)
+    sigmafile = infile.replace(".tif","_sigma.tif")
+    byteSigmaScale(infile,sigmafile)
+    makeAsfBrowse(sigmafile,outfile) 
+    os.remove(sigmafile)
+
+    infile = "{}-ls_map.tif".format(rtcName)
+    outfile = "{}-ls_map".format(rtcName)
     makeAsfBrowse(infile,outfile) 
 
     infile = "{}-dem.tif".format(rtcName)
