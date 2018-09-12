@@ -714,14 +714,28 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
     
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
-	demfile,demType = getDemFile(inFile,"tmpdem.tif",utmFlag=True,post=30)
+        tifdem = "tmp_{}_dem.tif".format(os.getpid())
+        if shape is not None:
+            minX,minY,maxX,maxY = get_bb_from_shape(shape)
+            print minX,minY,maxX,maxY
+            aoi = []
+            aoi.append(minX)
+            aoi.append(minY)
+            aoi.append(maxX)
+            aoi.append(maxY)
+            print aoi
+        if aoi is not None:
+            demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,True,post=30)
+        else:
+     	    demfile,demType = getDemFile(inFile,tifdem,utmFlag=True,post=30)
 	dem = "area.dem"
 	parfile = "area.dem.par"
-	utm2dem("tmpdem.tif",dem,parfile)
+	utm2dem(tifdem,dem,parfile)
+        os.remove(tifdem)
     elif ".tif" in dem:
         tiff_dem = dem
 	parfile = "area.dem.par"
-        utm2dem(tiff_dem,dem,parfile)          
+        utm2dem(tiff_dem,dem,parfile)
         demType = "Unknown"
     elif os.path.isfile("{}.par".format(dem)):
         parfile = "{}.par".format(dem)
