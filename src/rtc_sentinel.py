@@ -114,7 +114,7 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     
     
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
-                filterFlag,pwrFlag,browse_res,outName,dem,inputType,data):
+                filterFlag,pwrFlag,browse_res,outName,dem,data):
 
     logging.info("Processing the {} polarization".format(pol))
 
@@ -241,7 +241,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     
 		  
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-	                    outfile,dem,inputType,date):
+	                    outfile,dem,date):
 
     if cpol == "VH":
         mpol = "VV"
@@ -660,7 +660,7 @@ def clean_prod_dir():
     os.chdir("..")
 
 
-def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
+def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
                        filterFlag=None,looks=None):
 
@@ -678,9 +678,6 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
         looks = int(res/10+0.5)
         logging.info("Setting looks to {}".format(looks))
 
-    report_kwargs(inFile,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks)
-
     if not os.path.exists(inFile):
         logging.error("ERROR: Input file {} does not exist".format(inFile))
         exit(1)
@@ -690,20 +687,37 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
         zip_ref.close()    
         inFile = inFile.replace(".zip",".SAFE")
 
-    mode = inFile[4:6].lower()
-    plat = inFile[2:3].lower()
+    plat = inFile[2:3]
+    mode = inFile[4:6]
     inputType = inFile[7:11]
     date = inFile[17:25]
+    time = inFile[26:32]
     
     if 'SLC' in inputType:
         inputType = 'SLC'
 
-    if (res > 10):
-        outType = "RT2"
+    if gammaFlag:
+        d = "g"
     else:
-        outType = "RT1"
+        d = "s"
 
-    auxName= "S1{}-{}-{}-{}".format(plat.upper(),mode.upper(),outType,outName)
+    if pwrFlag:
+        e = "p"
+    else:
+        e = "a"
+    
+    if filterFlag:
+        f = "f"
+    else:
+        f = "n" 
+ 
+    baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,res,date,time,d,e,f)
+    auxName = baseName
+    if outName is None:
+        outName = baseName
+
+    report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
+                  pwrFlag,filterFlag,looks)
 
     try:
         cmd = "get_orb.py {}".format(inFile)
@@ -754,28 +768,28 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
     if vvlist:
         logging.info("Found VV polarization - processing")
         pol = "VV"
-        rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
+        rtcName=baseName+"_"+pol+".tif"
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,inputType,date)
+            browse_res,outName,dem,date)
         if vhlist:
             cpol = "VH"
-            rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,cpol)
+            rtcName=baseName+"_"+cpol+".tif"
             logging.info("Found VH polarization - processing")
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,inputType,date)
+                            outName,dem,date)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
         pol = "HH"
-        rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
+        rtcName=baseName+"_"+pol+".tif"
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,inputType,date)
+            browse_res,outName,dem,date)
         if vhlist:
             cpol = "HV"
             logging.info("Found HV polarization - processing")
-            rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,cpol)
+            rtcName=baseName+"_"+cpol+".tif"
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,inputType,date)
+                            outName,dem,date)
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
@@ -783,7 +797,7 @@ def rtc_sentinel_gamma(inFile,outName,res=None,dem=None,aoi=None,shape=None,matc
 
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     logFile = glob.glob("*_log.txt")[0]
-    rtcName= "S1{}-{}-{}-{}-{}.tif".format(plat.upper(),mode.upper(),outType,outName,pol)
+    rtcName=baseName+"_"+pol+".tif"
     create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType)
     clean_prod_dir()
@@ -801,7 +815,6 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(prog='rtc_sentinel',
       description='Creates an RTC image from a Sentinel 1 Scene using GAMMA software')
   parser.add_argument('input',help='Name of input file, either .zip or .SAFE')
-  parser.add_argument('output', help='base name of the output files')
   parser.add_argument("-o","--outputResolution",type=float,help="Desired output resolution")
   group = parser.add_mutually_exclusive_group()
   group.add_argument("-e","--externalDEM",help="Specify a DEM file to use")
@@ -815,15 +828,16 @@ if __name__ == '__main__':
   parser.add_argument("-p",action="store_true",help="create power images instead of amplitude")
   parser.add_argument("-f",action="store_true",help="run enhanced lee filter")
   parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
+  parser.add_argument('--output',help='base name of the output files')
   args = parser.parse_args()
 
-  logFile = "{}_{}_log.txt".format(args.output,os.getpid())
+  logFile = "{}_{}_log.txt".format(os.path.splitext(args.input)[0],os.getpid())
   logging.basicConfig(filename=logFile,format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.DEBUG)
   logging.getLogger().addHandler(logging.StreamHandler())
   logging.info("Starting run")
 
-  rtc_sentinel_gamma(args.input,args.output,res=args.outputResolution,dem=args.externalDEM,
+  rtc_sentinel_gamma(args.input,outName=args.output,res=args.outputResolution,dem=args.externalDEM,
                      aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
                      gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filterFlag=args.f,
                      looks=args.looks)
