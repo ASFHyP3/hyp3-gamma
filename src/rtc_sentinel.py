@@ -69,22 +69,22 @@ def perform_sanity_checks():
                 lr1 = trans[3] + y*trans[5]
                 ul2 = trans[0]
                 lr2 = trans[0] + x*trans[1]
-                if abs((ul1/30.0) - int(ul1/30)) != 0.5:
+                if ul1 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: ul1 coordinate not on a 30 meter posting")
                     logging.error("ERROR: ul1 = {}".format(ul1))
                     exit(1)
-                if abs((lr1/30.0) - int(lr1/30)) != 0.5:
+                if lr1 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: lr1 coordinate not on a 30 meter posting")
                     logging.error("ERROR: lr1 = {}".format(lr1))
                     exit(1)
-                if abs((ul2/30.0) - int(ul2/30)) != 0.5:
+                if ul2 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: ul2 coordinate not on a 30 meter posting")
                     logging.error("ERROR: ul2 = {}".format(ul2))
                     exit(1)
-                if abs((lr2/30.0) - int(lr2/30)) != 0.5:
+                if lr2 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: lr2 coordinate not on a 30 meter posting")
                     logging.error("ERROR: lr2 = {}".format(lr2))
@@ -359,7 +359,7 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     os.chdir("..")
 
 
-def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType):
+def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType,spacing):
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
@@ -451,6 +451,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 line = line.replace("[LOOKS]","{}".format(looks))
                 line = line.replace("[FILT]","{}".format(filterStr))
                 line = line.replace("[FLOOKS]","{}".format(flooks))
+                line = line.replace("[SPACING]","{}".format(spacing))
                 line = line.replace("[DEM]","{}".format(demType))
                 if resa is not None:
                     line = line.replace("[RESA]","{}".format(resa))
@@ -485,10 +486,25 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
             line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
             line = line.replace("[GRAN_NAME]",granulename)
             line = line.replace("[RES]",res)
+            line = line.replace("[SPACING]","{}".format(spacing))
             line = line.replace("[FORMAT]",format_type)
             g.write("{}\n".format(line))
         f.close()
         g.close()
+
+    f = open("{}/README_Template.txt".format(etc_dir),"r")
+    g = open("README.txt","w")
+    for line in f:
+        line = line.replace("[GRAN_NAME]",granulename)
+        line = line.replace("[YEARPROCESSED]","{}".format(year))
+        line = line.replace("[YEARACQUIRED]",infile[17:21])
+        line = line.replace("[POWERTYPE]",power_type)
+        line = line.replace("[FORMAT]",format_type)
+        line = line.replace("[LOOKS]","{}".format(looks))
+        line = line.replace("[SPACING]","{}".format(spacing))
+        g.write("{}".format(line))
+    f.close()
+    g.close()
 
     os.chdir(back)
 
@@ -659,6 +675,27 @@ def clean_prod_dir():
         os.remove(myfile)
     os.chdir("..")
 
+# Gamma program data2geotiff shifts the corner coordianates
+# by 1/2 a pixel.  This routine shifts them back.  It also
+# sets the geotiff metadata to say Point.
+def fix_geotiff_locations():
+    os.chdir("PRODUCT")
+    for myfile in glob.glob("*.tif"):
+        x1,y1,t1,p1,data = saa.read_gdal_file(saa.open_gdal_file(myfile))
+        easting = t1[0]
+        resx = t1[1]
+        rotx = t1[2]
+        northing = t1[3]
+        roty = t1[4]
+        resy = t1[5]
+        easting = easting + resx/2.0
+        northing = northing + resy/2.0
+        t1 = [easting, resx, rotx, northing, roty, resy]
+        tmpfile = "tmp_tiff_{}.tif".format(os.getpid())
+        saa.write_gdal_file_float(tmpfile,t1,p1,data)
+        gdal.Translate(myfile,tmpfile,metadataOptions = ['AREA_OR_POINT=Point'])
+        os.remove(tmpfile)
+    os.chdir("..")
 
 def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
@@ -711,7 +748,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     else:
         f = "n" 
  
-    baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,res,date,time,d,e,f)
+    baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,int(res),date,time,d,e,f)
     auxName = baseName
     if outName is None:
         outName = baseName
@@ -796,10 +833,11 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         exit(1)
 
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
+    fix_geotiff_locations()
     logFile = glob.glob("*_log.txt")[0]
     rtcName=baseName+"_"+pol+".tif"
     create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
-    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType)
+    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType,res)
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
