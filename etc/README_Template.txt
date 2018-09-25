@@ -17,8 +17,8 @@ The files generated in this process include:
 
 1. Backscatter tif data files for each polarity available
 2. Browse images (png and kmz format) in grayscale and color (when dual-pol is available)
-3. A copy of the DEM used to correct the data (you can choose to omit this layer when you order imagery)
-4. A layover-shadow mask (you can choose to omit this layer when you order imagery)
+3. A copy of the DEM used to correct the data (included in standard products; you can choose to omit this layer when custom ordering imagery)
+4. A layover-shadow mask (included in standard products; you can choose to omit this layer when custom ordering imagery)
 5. An xml file in ISO 19115-2 format, describing all of the products
 6. An ArcGIS xml metadata file for each raster layer, accessible through the Item Description in ArcGIS
 7. Log file
@@ -111,7 +111,7 @@ A log file is generated during processing, which includes all of the parameters 
 -------------
 RTC Processing
 
-The basic steps in the radiometic terrain correction are as follows:
+The basic steps in the radiometric terrain correction process are as follows:
 1.  Data granule is ingested into gamma format - calibration is done during this step. 
 2.  If required, data is multi-looked to the desired number of looks (default is 6 for GRD and 3 for SLC). This product used [LOOKS] looks. 
 3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected. 
