@@ -363,7 +363,8 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     os.chdir("..")
 
 
-def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType,spacing):
+def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
+                   demType,spacing,hyp3_ver,gamma_ver):
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
@@ -459,6 +460,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 line = line.replace("[DEM]","{}".format(demType))
                 line = line.replace("[RESA]","{}".format(resa))
                 line = line.replace("[RESM]","{}".format(resm))
+                line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
+                line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
                 g.write("{}\n".format(line))
             f.close()
             g.close()
@@ -490,6 +493,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
             line = line.replace("[RES]",res)
             line = line.replace("[SPACING]","{}".format(spacing))
             line = line.replace("[FORMAT]",format_type)
+            line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
+            line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
             g.write("{}\n".format(line))
         f.close()
         g.close()
@@ -594,11 +599,11 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
     write_asf_meta(m, "out.meta")
 
     ver_file = "{}/version.txt".format(etc_dir)
-    gap_ver = None
+    hyp3_ver = None
     if os.path.exists(ver_file):
         f = open(ver_file,"r")
         for line in f:
-            gap_ver = line.strip()
+            hyp3_ver = line.strip()
     else:
         logging.warning("No version.txt file found in {}".format(etc_dir))
 
@@ -661,8 +666,8 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
     g.write("coreg_check log = coreg_check.log\n")
     g.write("mli.par file = {}.{}.mgrd.par\n".format(output,pol))
     g.write("gamma version = {}\n".format(gamma_ver))
-    g.write("gap_rtc version = {}\n".format(gap_ver))
-    g.write("ipf_rtc version = {}\n".format(ipf_ver))
+    g.write("hyp3_rtc version = {}\n".format(hyp3_ver))
+    g.write("ipf version = {}\n".format(ipf_ver))
     g.write("dem source = {}\n".format(demType))
     g.write("browse image = {}/{}.png\n".format(out,outname))
     g.write("kml overlay = {}/{}.kmz\n".format(out,outname))
@@ -679,7 +684,8 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
 
     shutil.copy("{}.iso.xml".format(outname),"{}".format(out))
 
-
+    return hyp3_ver, gamma_ver
+ 
 def clean_prod_dir():
     os.chdir("PRODUCT")
     for myfile in glob.glob("*ls_map*png*"):
@@ -862,8 +868,9 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     fix_geotiff_locations()
     logFile = glob.glob("*_log.txt")[0]
     rtcName=baseName+"_"+pol+".tif"
-    create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
-    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,demType,res)
+    hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
+    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
+                   demType,res,hyp3_ver,gamma_ver)
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
