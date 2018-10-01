@@ -39,17 +39,14 @@
                   <gmd:phone>
                     <gmd:CI_Telephone>
                       <gmd:voice>
-                        <gco:CharacterString>907-474-6166</gco:CharacterString>
+                        <gco:CharacterString>907-474-5041</gco:CharacterString>
                       </gmd:voice>
-                      <gmd:facsimile>
-                        <gco:CharacterString>907-474-2665</gco:CharacterString>
-                      </gmd:facsimile>
                     </gmd:CI_Telephone>
                   </gmd:phone>
                   <gmd:address>
                     <gmd:CI_Address>
                       <gmd:deliveryPoint>
-                        <gco:CharacterString>903 Koyukuk Dr.</gco:CharacterString>
+                        <gco:CharacterString>2156 Koyukuk Dr.</gco:CharacterString>
                       </gmd:deliveryPoint>
                       <gmd:city>
                         <gco:CharacterString>Fairbanks</gco:CharacterString>
@@ -81,7 +78,7 @@
             </gco:DateTime>
           </gmd:dateStamp>
           <gmd:metadataStandardName>
-            <gco:CharacterString>ISO 19115-2 Geographic information — Metadata — Part 2: Extensions for imagery and gridded data</gco:CharacterString>
+            <gco:CharacterString>ISO 19115-2 Geographic information - Metadata - Part 2: Extensions for imagery and gridded data</gco:CharacterString>
           </gmd:metadataStandardName>
           <gmd:metadataStandardVersion>
             <gco:CharacterString>ISO 19115-2:2009-02-15</gco:CharacterString>
@@ -207,6 +204,9 @@
                       </xsl:if>
                       <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1A'">
                         <gco:CharacterString>The granule for the generation of this terrain corrected product has been acquired as part of the Copernicus Sentinel-1A mission. The Sentinel-1A satellite was launched on April 3, 2014. Sentinel-1A has a 12-day repeat cycle.</gco:CharacterString>
+                      </xsl:if>
+                      <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1B'">
+                        <gco:CharacterString>The granule for the generation of this terrain corrected product has been acquired as part of the Copernicus Sentinel-1B mission. The Sentinel-1B satellite was launched on April 25, 2016. Sentinel-1B has a 12-day repeat cycle.</gco:CharacterString>
                       </xsl:if>
                       </gmd:name>
                     </gmd:CI_Series>
@@ -1275,7 +1275,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             <gco:CharacterString>Raw image - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>                                                                      </xsl:if>
                           <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1A' or
                                         /hdf5/metadata/input_image/platform='Sentinel-1B'">
-                            <gco:CharacterString>Single look complex image - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>                                                      </xsl:if>
+                            <gco:CharacterString>Single look complex image - <xsl:value-of select="/hdf5/metadata/input_image/file" /> (IPF version: <xsl:value-of select="/hdf5/metadata/input_image/ipf_version" />)</gco:CharacterString>                                                      </xsl:if>
                           </gmd:description>
                         </gmd:LI_Source>
                       </gmd:source>
@@ -1316,7 +1316,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1387,7 +1392,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1459,7 +1469,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1531,7 +1546,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1603,7 +1623,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1620,7 +1645,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                   <gmd:source>
                     <gmd:LI_Source>
                       <gmd:description>
-                        <gco:CharacterString>Single look complex - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>
+                        <gco:CharacterString>Single look complex - <xsl:value-of select="/hdf5/metadata/input_image/file" /> (IPF version: <xsl:value-of select="/hdf5/metadata/input_image/ipf_version" />)</gco:CharacterString>
                       </gmd:description>
                     </gmd:LI_Source>
                   </gmd:source>
@@ -2628,3 +2653,4 @@ Gesch, D.B., Oimoen, M.J. and Evans, G.A., 2014. Accuracy Assessment of the Unit
 </gmd:DS_Series>
 </xsl:template>
 </xsl:stylesheet>
+
