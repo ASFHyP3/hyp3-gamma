@@ -1,6 +1,18 @@
 RTC Data Package
 
-This folder contains radiometric terrain corrected products and their associated files. RTC is performed by the Alaska Satellite Facility (ASF) using GAMMA software. The pixel spacing is [SPACING] m.
+This folder contains radiometric terrain corrected (RTC) products and their associated files, processed [DATE] [TIME] UTC. RTC is performed by the Alaska Satellite Facility (ASF) using GAMMA software. The pixel spacing is [SPACING] m.
+
+The folder and each of its contents all share the same base name, using the following convention: 
+S1x_yy_RTzz_aaaaaaaaTbbbbbb_c_def 
+x:        Sentinel-1 Mission (A or B)
+yy:       Beam Mode
+zz:       Terrain Correction Resolution
+aaaaaaaa: Start Date of Acquisition (YYYYMMDD)
+bbbbbb:   Start Time of Acquisition (HHMMSS)
+c:        Processor (Gamma or S1TBX)
+d:        gamma-0 (g) or sigma-0 (s) output
+e:        amplitude (a) or power (p) output
+f:        Not filtered (n) or Filtered (f)
 
 The source granule used to generate the products contained in this folder is:
 [GRAN_NAME]
@@ -18,10 +30,11 @@ The files generated in this process include:
 1. Backscatter tif data files for each polarity available
 2. Browse images (png and kmz format) in grayscale and color (when dual-pol is available)
 3. A copy of the DEM used to correct the data (included in standard products; you can choose to omit this layer when custom ordering imagery)
-4. A layover-shadow mask (included in standard products; you can choose to omit this layer when custom ordering imagery)
-5. An xml file in ISO 19115-2 format, describing all of the products
-6. An ArcGIS xml metadata file for each raster layer, accessible through the Item Description in ArcGIS
-7. Log file
+4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
+5. A layover-shadow mask
+6. An xml file in ISO 19115-2 format, describing all of the products
+7. An ArcGIS xml metadata file for each raster layer, accessible through the Item Description in ArcGIS
+8. Log file
 
 See below for detailed descriptions of each of the products.
 
@@ -37,18 +50,18 @@ These files have been processed to output [POWERTYPE]-0 [FORMAT].
 
 PNG files are generated in two different resolutions for quick visualization of the backscatter data. Each png browse image is accompanied by an aux file containing the projection and geocoding information for the file.
 
-All products will include a grayscale png browse image in both resolutions. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale.
+All products will include a grayscale png browse image in both resolutions. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The low-resolution image is designated by a simple .png extension, while the tag _large.png indicates the medium-resolution image. 
 
-For dual-pol products, a false color png browse image is generated in both resolutions. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color.
+For dual-pol products, a false color png browse image is generated in both resolutions. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
 
 KMZ files are generated in the higher resolution for use in Google Earth and other compatible applications. All products will include a grayscale kmz image, and dual-pol products will also include a color browse kmz image.
 
 -------------
 3. A copy of the DEM used to correct the data
 
-If the user would like a copy of the DEM used for terrain correction, there is an option in the subscription/order interface to include this file. The DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available.  
+The digital elevation model layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -dem.tif
 
-The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The sources include the National Elevation Dataset (NED) or the Shuttle Radar Topography Mission (SRTM), and the resolution of the DEM varies depending on the location of the granule.  
+The best digital elevation model publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The sources include the National Elevation Dataset (NED) or the Shuttle Radar Topography Mission (SRTM), and the resolution of the DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to [SPACING] m for use in RTC.
 
 The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).
 
@@ -57,11 +70,18 @@ The NED provides the best available public domain raster elevation data of the c
 The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://lta.cr.usgs.gov/SRTM
 
 -------------
-4. A layover-shadow mask
+4. An incidence angle map
 
-If the user would like to include an output of the layover-shadow mask, there is an option in the subscription/order interface to include this file. 
+The incidence angle map is is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -inc_map.tif
 
-The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. The pixel values are generated by adding the following values together to indicate which layover and shadow effects are impacting each pixel:
+This map records the incidence angle for each pixel in the RTC image. The incidence angle is the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians.
+
+-------------
+5. A layover-shadow mask
+
+The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with -ls_map.tif 
+
+The pixel values are generated by adding the following values together to indicate which layover and shadow effects are impacting each pixel:
 0  Pixel not tested for layover or shadow
 1  Pixel tested for layover or shadow
 2  Pixel has a look angle less than the slope angle
@@ -90,12 +110,12 @@ The values in each cell can range from 0 to 31:
 31 Affected by shadow and layover; look angle < slope and opposite slope angle
 
 -------------
-5. An xml file in ISO 19115-2 format
+6. An xml file in ISO 19115-2 format
 
 There is an iso.xml file that contains the information about the processing of this product.
 
 -------------
-6. ArcGIS-compatible xml metadata files
+7. ArcGIS-compatible xml metadata files
 
 Each raster in this folder has an associated xml file. It is named with the same filename as the raster, but also includes an .xml extension. When any of the rasters are viewed in ArcGIS, the associated xml file is recognized by the software, and the contents will display in the Item Description for that raster. Once the file is viewed in ArcGIS, the software will change the xml file to include metadata inherent to the raster (geographic extent, raster format, etc.) along with the descriptive metadata included in the original xml file.
 
@@ -104,9 +124,9 @@ ArcGIS users should take care not to edit the xml files directly, or to change f
 Users who do not use ArcGIS to interact with the data will still find the information included in the individual xml files very useful, but will need to contend with the xml tags if viewing it as a textfile or in a browser.
 
 -------------
-7. Log file
+8. Log file
 
-A log file is generated during processing, which includes all of the parameters used for each part of the RTC process.
+A log file is generated during processing, which includes all of the parameters used for each part of the RTC process. It has a .log extension.
 
 -------------
 RTC Processing
@@ -124,7 +144,7 @@ The basic steps in the radiometric terrain correction process are as follows:
 10. Post processing creates geotiffs, pngs, kmzs, and metadata.
 
 The Algorithm Theoretical Basis Document (ATBD), which provides the theoretical background of the algorithms and processing flows used for the generation of this product, is available here:
-https://media.asf.alaska.edu/uploads/sentinel/rtc_atbd_v2.1.sentinel.pdf
+https://media.asf.alaska.edu/uploads/sentinel/RTC_ATBD_Sentinel.pdf
 
 -------------
 The Sentinel-1 mission 
