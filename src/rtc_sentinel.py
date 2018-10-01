@@ -630,7 +630,7 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
 
     g = open(hdf5_name,"w")
     g.write("[GAMMA RTC]\n")
-    g.write("granule = {}\n".format(infile.replace(".SAFE","")))
+    g.write("granule = {}\n".format(inFile.replace(".SAFE","")))
     g.write("metadata = out.meta\n")
     
     geo_dir = "geo_{}".format(pol)
