@@ -483,7 +483,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                 </gmd:CI_Citation>
               </gmd:citation>
               <gmd:abstract>
-                <gco:CharacterString>The incidence angle map represents the local incidene angle on a pixel by pixel basis.</gco:CharacterString>
+                <gco:CharacterString>The incidence angle map represents the local incidence angle on a pixel by pixel basis.</gco:CharacterString>
               </gmd:abstract>
               <gmd:status>
                 <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed">completed</gmd:MD_ProgressCode>
@@ -872,7 +872,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                                     <gco:CharacterString>true layover</gco:CharacterString>
                                   </eos:name>
                                   <eos:description>
-                                    <gco:CharacterString>pixels were slope angle is greater than look angle</gco:CharacterString>
+                                    <gco:CharacterString>pixels where slope angle is greater than look angle</gco:CharacterString>
                                   </eos:description>
                                   <eos:dataType>
                                     <eos:EOS_AdditionalAttributeDataTypeCode codeList="http://earthdata.nasa.gov/metadata/resources/" codeListValue="FLOAT">FLOAT</eos:EOS_AdditionalAttributeDataTypeCode>
@@ -2539,7 +2539,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                   </gmd:useConstraints>
                   <gmd:otherConstraints>
                     <gco:CharacterString>
-None. Any downloading and use of these data signifies a user's agreement to comprehension and compliance of the USGS Standard Disclaimer. Insure all portions of metadata are read and clearly understood before using these data in order to protect both user and USGS interests.
+None. Any downloading and use of these data signifies a user's agreement to comprehension and compliance of the USGS Standard Disclaimer. Ensure all portions of metadata are read and clearly understood before using these data in order to protect both user and USGS interests.
                     
 There is no guarantee or warranty concerning the accuracy of the data. Users should be aware that temporal changes may have occurred since these data were collected and that some parts of these data may no longer represent actual surface conditions. Users should not use these data for critical applications without a full awareness of its limitations. Acknowledgement of the originating agencies would be appreciated in products derived from these data. Any user who modifies the data is obligated to describe the eos:types of modifications they perform. User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by the USGS. Please refer to http://www.usgs.gov/privacy.html for the USGS disclaimer.                  
                     </gco:CharacterString>
