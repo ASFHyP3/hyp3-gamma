@@ -515,6 +515,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         line = line.replace("[DEM]","{}".format(demType))
         line = line.replace("[RESA]","{}".format(resa))
         line = line.replace("[RESM]","{}".format(resm))
+        line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
+        line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
         g.write("{}".format(line))
     f.close()
     g.close()
