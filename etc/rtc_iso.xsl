@@ -39,17 +39,14 @@
                   <gmd:phone>
                     <gmd:CI_Telephone>
                       <gmd:voice>
-                        <gco:CharacterString>907-474-6166</gco:CharacterString>
+                        <gco:CharacterString>907-474-5041</gco:CharacterString>
                       </gmd:voice>
-                      <gmd:facsimile>
-                        <gco:CharacterString>907-474-2665</gco:CharacterString>
-                      </gmd:facsimile>
                     </gmd:CI_Telephone>
                   </gmd:phone>
                   <gmd:address>
                     <gmd:CI_Address>
                       <gmd:deliveryPoint>
-                        <gco:CharacterString>903 Koyukuk Dr.</gco:CharacterString>
+                        <gco:CharacterString>2156 Koyukuk Dr.</gco:CharacterString>
                       </gmd:deliveryPoint>
                       <gmd:city>
                         <gco:CharacterString>Fairbanks</gco:CharacterString>
@@ -486,7 +483,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                 </gmd:CI_Citation>
               </gmd:citation>
               <gmd:abstract>
-                <gco:CharacterString>The incidence angle map represents the local incidene angle on a pixel by pixel basis.</gco:CharacterString>
+                <gco:CharacterString>The incidence angle map represents the local incidence angle on a pixel by pixel basis.</gco:CharacterString>
               </gmd:abstract>
               <gmd:status>
                 <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed">completed</gmd:MD_ProgressCode>
@@ -875,7 +872,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                                     <gco:CharacterString>true layover</gco:CharacterString>
                                   </eos:name>
                                   <eos:description>
-                                    <gco:CharacterString>pixels were slope angle is greater than look angle</gco:CharacterString>
+                                    <gco:CharacterString>pixels where slope angle is greater than look angle</gco:CharacterString>
                                   </eos:description>
                                   <eos:dataType>
                                     <eos:EOS_AdditionalAttributeDataTypeCode codeList="http://earthdata.nasa.gov/metadata/resources/" codeListValue="FLOAT">FLOAT</eos:EOS_AdditionalAttributeDataTypeCode>
@@ -1278,7 +1275,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             <gco:CharacterString>Raw image - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>                                                                      </xsl:if>
                           <xsl:if test="/hdf5/metadata/input_image/platform='Sentinel-1A' or
                                         /hdf5/metadata/input_image/platform='Sentinel-1B'">
-                            <gco:CharacterString>Single look complex image - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>                                                      </xsl:if>
+                            <gco:CharacterString>Single look complex image - <xsl:value-of select="/hdf5/metadata/input_image/file" /> (IPF version: <xsl:value-of select="/hdf5/metadata/input_image/ipf_version" />)</gco:CharacterString>                                                      </xsl:if>
                           </gmd:description>
                         </gmd:LI_Source>
                       </gmd:source>
@@ -1319,7 +1316,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1390,7 +1392,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1462,7 +1469,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1534,7 +1546,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1606,7 +1623,12 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                             </gmd:CI_Citation>
                           </gmi:softwareReference>
                           <gmi:procedureDescription>
-                            <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/gap_rtc_version">
+                              <gco:CharacterString>processing with gap_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/gap_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
+                            <xsl:if test="/hdf5/metadata/terrain_correction/hyp3_rtc_version">
+                              <gco:CharacterString>processing with hyp3_rtc script (version <xsl:value-of select="/hdf5/metadata/terrain_correction/hyp3_rtc_version" />)</gco:CharacterString>
+                            </xsl:if>
                           </gmi:procedureDescription>
                         </gmi:LE_Processing>
                       </gmi:processingInformation>
@@ -1623,7 +1645,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                   <gmd:source>
                     <gmd:LI_Source>
                       <gmd:description>
-                        <gco:CharacterString>Single look complex - <xsl:value-of select="/hdf5/metadata/input_image/file" /></gco:CharacterString>
+                        <gco:CharacterString>Single look complex - <xsl:value-of select="/hdf5/metadata/input_image/file" /> (IPF version: <xsl:value-of select="/hdf5/metadata/input_image/ipf_version" />)</gco:CharacterString>
                       </gmd:description>
                     </gmd:LI_Source>
                   </gmd:source>
@@ -2517,7 +2539,7 @@ Data received from the Alaska Satellite Facility (ASF) can be used only under th
                   </gmd:useConstraints>
                   <gmd:otherConstraints>
                     <gco:CharacterString>
-None. Any downloading and use of these data signifies a user's agreement to comprehension and compliance of the USGS Standard Disclaimer. Insure all portions of metadata are read and clearly understood before using these data in order to protect both user and USGS interests.
+None. Any downloading and use of these data signifies a user's agreement to comprehension and compliance of the USGS Standard Disclaimer. Ensure all portions of metadata are read and clearly understood before using these data in order to protect both user and USGS interests.
                     
 There is no guarantee or warranty concerning the accuracy of the data. Users should be aware that temporal changes may have occurred since these data were collected and that some parts of these data may no longer represent actual surface conditions. Users should not use these data for critical applications without a full awareness of its limitations. Acknowledgement of the originating agencies would be appreciated in products derived from these data. Any user who modifies the data is obligated to describe the eos:types of modifications they perform. User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by the USGS. Please refer to http://www.usgs.gov/privacy.html for the USGS disclaimer.                  
                     </gco:CharacterString>
