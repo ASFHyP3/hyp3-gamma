@@ -34,7 +34,7 @@ https://www.gamma-rs.ch/
 *************
 The files generated in this process include:
 
-1. Backscatter tif data files for each polarity available
+1. Radiometric Terrain Corrected tif data files for each polarization available
 2. Browse images (png and kmz format) in grayscale and color (when dual-pol is available)
 3. A copy of the DEM used to correct the data (included in standard products; you can choose to omit this layer when custom ordering imagery)
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
@@ -46,9 +46,9 @@ The files generated in this process include:
 See below for detailed descriptions of each of the products.
 
 -------------
-1. Backscatter data files
+1. Radiometric Terrain Corrected data files
 
-GeoTIFF files are generated for each polarity available in the source granule. Each filename will include the polarization: VV or HH for primary polarization, and VH or HV for cross-polarization.
+GeoTIFF files are generated for each polarization available in the source granule. Each filename will include the polarization: VV or HH for primary polarization, and VH or HV for cross-polarization. To learn more about polarimetry, refer to https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry
 
 These files have been processed to output [POWERTYPE]-0 [FORMAT].
 
@@ -79,7 +79,7 @@ The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The 
 -------------
 4. An incidence angle map
 
-The incidence angle map is is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -inc_map.tif
+The incidence angle map is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -inc_map.tif
 
 This map records the incidence angle for each pixel in the RTC image. The incidence angle is the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians.
 

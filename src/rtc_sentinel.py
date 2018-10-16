@@ -130,10 +130,10 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     # Apply filter if requested
     if filterFlag:
         width = getParmeter("{}.par".format(mgrd),"range_samples")
-	el_looks = look_fact * look_fact * 5
-	cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
-	execute(cmd,uselogging=True)
-	shutil.move("temp.mgrd",mgrd)
+        el_looks = look_fact * look_fact * 5
+        cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
+        execute(cmd,uselogging=True)
+        shutil.move("temp.mgrd",mgrd)
 
     options = "-p -j -n 6 -q -c "
     if gammaFlag:
@@ -147,38 +147,38 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     if matchFlag:
         fail = False
         logging.info("Running RTC process... coarse matching")
-	cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 1 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
+        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 1 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
         try:
-	    execute(cmd,uselogging=True)
-	except:
-	    logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
-	
+            execute(cmd,uselogging=True)
+        except:
+            logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
+        
         logging.info("Running RTC process... fine matching")
-	cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 2 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
+        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 2 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
         try:
-	    execute(cmd,uselogging=True)
-	except:
-	    if not deadFlag:
-	        logging.error("ERROR: Failed to match images")
-		exit(1)
+            execute(cmd,uselogging=True)
+        except:
+            if not deadFlag:
+                logging.error("ERROR: Failed to match images")
+                exit(1)
             else:
-	        logging.warning("WARNING: Coregistration has failed; defaulting to dead reckoning")
-		os.remove("{}/{}".format(dir,"image.diff_par"))
-		fail = True
-	
-	if not fail:
-	    try:
-	        check_coreg(outName,res,max_offset=50,max_error=2)
+                logging.warning("WARNING: Coregistration has failed; defaulting to dead reckoning")
+                os.remove("{}/{}".format(dir,"image.diff_par"))
+                fail = True
+        
+        if not fail:
+            try:
+                check_coreg(outName,res,max_offset=50,max_error=2)
             except:
-		if not deadFlag:
-	            logging.error("ERROR: Failed to coregistration check")
-		    exit(1)
+                if not deadFlag:
+                    logging.error("ERROR: Failed to coregistration check")
+                    exit(1)
                 else:
-	            logging.warning("WARNING: Coregistration check has failed; defaulting to dead reckoning")
-		    os.remove("{}/{}".format(dir,"image.diff_par"))
+                    logging.warning("WARNING: Coregistration check has failed; defaulting to dead reckoning")
+                    os.remove("{}/{}".format(dir,"image.diff_par"))
 
     logging.info("Running RTC process... finalizing")
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)    		
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)                   
     execute(cmd,uselogging=True)
 
     back = os.getcwd()
@@ -231,17 +231,17 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
         shutil.move(tif,"{}/{}".format(outDir,tifName))
     else:
         copy_metadata(tif,"image_cal_map.mli_amp.tif")
-	shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,tifName))
-	
+        shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,tifName))
+        
     shutil.move("{}.ls_map.tif".format(outName),"{}/{}-ls_map.tif".format(outDir,auxName))
     shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
     shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
     
     os.chdir("..")
     
-		  
+                  
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-	                    outfile,dem,date):
+                            outfile,dem,date):
 
     if cpol == "VH":
         mpol = "VV"
@@ -260,10 +260,10 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     # Apply filtering if requested
     if filterFlag:
         width = getParmeter("{}.par".format(mgrd),"range_samples")
-	el_looks = look_fact * look_fact * 5
-	cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
-	execute(cmd,uselogging=True)
-	shutil.move("temp.mgrd",mgrd)
+        el_looks = look_fact * look_fact * 5
+        cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
+        execute(cmd,uselogging=True)
+        shutil.move("temp.mgrd",mgrd)
 
     options = "-p -j -n 6 -q -c "
     if gammaFlag:
@@ -315,7 +315,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
         shutil.move(tif,"{}/{}".format(outDir,rtcName))
     else:
         copy_metadata(tif,"image_cal_map.mli_amp.tif")
-	shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
+        shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
         
     os.chdir("..")
     
@@ -324,9 +324,9 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
 
     ampfile = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=pol,name=outName,res=browse_res)
     if cpol:
-	ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol,name=outName,res=browse_res)
-	threshold = -24
-	outfile = "{}_rgb.tif".format(outName)
+        ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol,name=outName,res=browse_res)
+        threshold = -24
+        outfile = "{}_rgb.tif".format(outName)
         rtc2color(ampfile,ampfile2, threshold, outfile, amp=True, cleanup=True)
         colorname = "PRODUCT/{}_rgb".format(rtcName)
         makeAsfBrowse(outfile,colorname)
@@ -390,6 +390,11 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
     else:
         filterStr = "has not"
 
+    if inputType == "SLC":
+        full_type = "Single-Look Complex"
+    else:
+        full_type = "Ground Range Detected"
+
     if "NED" in demType:
         if "13" in demType:
             resa = "1/3"
@@ -411,8 +416,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
     for myfile in glob.glob("*.tif"):
         f = None
         this_pol = None
-	if cpol is None:
-	    cpol = "ZZ"
+        if cpol is None:
+            cpol = "ZZ"
         if pol in myfile or cpol in myfile:
             f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir),"r")
             g = open("{}.xml".format(myfile),"w")
@@ -447,6 +452,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 line = line.replace("[YEARPROCESSED]","{}".format(year))
                 line = line.replace("[YEARACQUIRED]",infile[17:21])
                 line = line.replace("[TYPE]",inputType)
+                line = line.replace("[FULL_TYPE]",full_type)
                 line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
                 if this_pol is not None:
                     line = line.replace("[POL]",this_pol)
@@ -488,6 +494,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
             line = line.replace("[YEARPROCESSED]","{}".format(year))
             line = line.replace("[YEARACQUIRED]",infile[17:21])
             line = line.replace("[TYPE]",inputType)
+            line = line.replace("[FULL_TYPE]",full_type)
             line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
             line = line.replace("[GRAN_NAME]",granulename)
             line = line.replace("[RES]",res)
@@ -744,7 +751,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         res = 10
     if loFlag:
         res = 30
-	
+        
     if looks is None:
         looks = int(res/10+0.5)
         logging.info("Setting looks to {}".format(looks))
@@ -766,6 +773,8 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     
     if 'SLC' in inputType:
         inputType = 'SLC'
+    else:
+        inputType = 'GRD'
 
     if gammaFlag:
         d = "g"
@@ -812,14 +821,15 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         if aoi is not None:
             demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,True,post=30)
         else:
-     	    demfile,demType = getDemFile(inFile,tifdem,utmFlag=True,post=30)
-	dem = "area.dem"
-	parfile = "area.dem.par"
-	utm2dem(tifdem,dem,parfile)
+            demfile,demType = getDemFile(inFile,tifdem,utmFlag=True,post=30)
+        dem = "area.dem"
+        parfile = "area.dem.par"
+        utm2dem(tifdem,dem,parfile)
         os.remove(tifdem)
     elif ".tif" in dem:
         tiff_dem = dem
-	parfile = "area.dem.par"
+        dem = "area.dem"
+        parfile = "area.dem.par"
         utm2dem(tiff_dem,dem,parfile)
         demType = "Unknown"
     elif os.path.isfile("{}.par".format(dem)):
@@ -827,7 +837,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         demType = "Unknown"
     else:
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
-	exit(1)
+        exit(1)
 
     vvlist = glob.glob("{}/*/*vv*.tiff".format(inFile))
     vhlist = glob.glob("{}/*/*vh*.tiff".format(inFile))
@@ -914,4 +924,4 @@ if __name__ == '__main__':
                      aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
                      gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filterFlag=args.f,
                      looks=args.looks)
-			
+                        
