@@ -607,6 +607,9 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
 
 def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,spacing,hyp3_ver,gamma_ver):
+
+    spacing = int(spacing)
+
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
