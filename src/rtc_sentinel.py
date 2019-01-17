@@ -54,6 +54,7 @@ from asf_utils import write_asf_meta
 from copy_metadata import copy_metadata
 from make_arc_thumb import pngtothumb
 from ingest_S1_granule import ingest_S1_granule
+from getParameter import getParameter
 
 def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
@@ -131,7 +132,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     
     # Apply filter if requested
     if filterFlag:
-        width = getParmeter("{}.par".format(mgrd),"range_samples")
+        width = getParameter("{}.par".format(mgrd),"range_samples")
         el_looks = look_fact * look_fact * 5
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
@@ -422,7 +423,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     
     # Apply filtering if requested
     if filterFlag:
-        width = getParmeter("{}.par".format(mgrd),"range_samples")
+        width = getParameter("{}.par".format(mgrd),"range_samples")
         el_looks = look_fact * look_fact * 5
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
