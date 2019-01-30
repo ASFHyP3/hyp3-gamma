@@ -54,6 +54,8 @@ from asf_utils import write_asf_meta
 from copy_metadata import copy_metadata
 from make_arc_thumb import pngtothumb
 from ingest_S1_granule import ingest_S1_granule
+from make_cogs import cogify_dir
+from area2point import fix_geotiff_locations
 
 def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
@@ -170,7 +172,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
         
         if not fail:
             try:
-                check_coreg(outName,res,max_offset=50,max_error=2)
+                check_coreg(outName,res,max_offset=75,max_error=2)
             except:
                 if not deadFlag:
                     logging.error("ERROR: Failed the coregistration check")
@@ -956,33 +958,6 @@ def clean_prod_dir():
         os.remove(myfile)
     os.chdir("..")
 
-# Gamma program data2geotiff shifts the corner coordianates
-# by 1/2 a pixel.  This routine shifts them back.  It also
-# sets the geotiff metadata to say Point.
-def fix_geotiff_locations():
-    os.chdir("PRODUCT")
-    for myfile in glob.glob("*.tif"):
-        x1,y1,t1,p1,data = saa.read_gdal_file(saa.open_gdal_file(myfile))
-        easting = t1[0]
-        resx = t1[1]
-        rotx = t1[2]
-        northing = t1[3]
-        roty = t1[4]
-        resy = t1[5]
-        easting = easting + resx/2.0
-        northing = northing + resy/2.0
-        t1 = [easting, resx, rotx, northing, roty, resy]
-        tmpfile = "tmp_tiff_{}.tif".format(os.getpid())
-        if "dem" in myfile:
-            saa.write_gdal_file(tmpfile,t1,p1,data)
-        elif "ls_map" in myfile:
-            saa.write_gdal_file_byte(tmpfile,t1,p1,data)
-        else:
-            saa.write_gdal_file_float(tmpfile,t1,p1,data,nodata=0)
-        gdal.Translate(myfile,tmpfile,metadataOptions=['AREA_OR_POINT=Point'],noData="0")
-        os.remove(tmpfile)
-    os.chdir("..")
-
 def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
                        filterFlag=None,looks=None,rerun=None,terms=6):
@@ -1005,7 +980,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         logging.error("ERROR: Input file {} does not exist".format(inFile))
         exit(1)
     if "zip" in inFile:
-        zip_ref = zipfile.ZipFile(myfile, 'r')
+        zip_ref = zipfile.ZipFile(inFile, 'r')
         zip_ref.extractall(".")
         zip_ref.close()    
         inFile = inFile.replace(".zip",".SAFE")
@@ -1151,6 +1126,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,res,hyp3_ver,gamma_ver)
+    cogify_dir()
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
