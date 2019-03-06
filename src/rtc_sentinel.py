@@ -1127,7 +1127,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,res,hyp3_ver,gamma_ver)
-    cogify_dir()
+    cogify_dir(res=res)
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
