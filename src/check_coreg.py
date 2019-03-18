@@ -105,7 +105,8 @@ def check_coreg(input,post,max_offset=50,max_error=2):
 	        display("error > max_error",f)
 	        display("std dev is too high, using dead reckoning",f)
 		display("Granule failed coregistration",f)
-		return(-1)
+                f.close()
+		exit(-1)
     g.close()
 	
     mlog = glob.glob('geo_??/*.diff_par')[0]
