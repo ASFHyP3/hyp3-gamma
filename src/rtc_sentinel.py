@@ -135,7 +135,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     # Apply filter if requested
     if filterFlag:
         width = getParameter("{}.par".format(mgrd),"range_samples")
-        el_looks = look_fact * look_fact * 5
+        el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
         shutil.move("temp.mgrd",mgrd)
@@ -249,15 +249,16 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
 
     logging.info("Processing the {} polarization".format(pol))
 
-    mgrd = "{out}.{pol}.mgrd".format(out=outName,pol=pol)
+    date = outName.split("_")[3].lower()
+    mgrd = glob.glob("s1a-iw-grd-{}-{}*.mgrd".format(pol.lower(),date))[0]
+    if not mgrd:
+        logging.error("Unable to find input mgrd file with pol {} and date {}".format(pol.lower(),date))
+        exit(-1)
     utm = "{out}.{pol}.utm".format(out=outName,pol=pol)
     dem = "area.dem"
     small_map = "{out}_small_map".format(out=outName)
     tif = "image_cal_map.mli.tif"
 
-    # Ingest the granule into gamma format
-#    ingest_S1_granule(inFile,pol,look_fact,mgrd)
-    
     # Apply filter if requested
 #    if filterFlag:
 #        width = getParmeter("{}.par".format(mgrd),"range_samples")
@@ -270,12 +271,12 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
     if gammaFlag:
         options = options + "-g "
     
-    logging.info("Running RTC process... initializing")
     dir = "geo_{}".format(pol)
 
+    logging.info("Running RTC process... initializing")
 
-#    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 0 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
-#    execute(cmd,uselogging=True)
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 0 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)
+    execute(cmd,uselogging=True)
     
 #    if matchFlag:
 #        fail = False
@@ -312,40 +313,40 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
 #
 
     # Read in the fftMatch file
-    fftFile = "{}_{}.txt".format(rerun,date)
-    logging.info("Reading fftMatch results file {}...".format(fftFile))
-    f = open(fftFile,'r')
-    for line in f:
-         t = line.split('\t')
-         print t
-         xoff = t[0].strip()
-         yoff = t[1].strip()
-         conf = t[2].strip()
-    f.close()
+#    fftFile = "{}_{}.txt".format(rerun,date)
+#    logging.info("Reading fftMatch results file {}...".format(fftFile))
+#    f = open(fftFile,'r')
+#    for line in f:
+#         t = line.split('\t')
+#         print t
+#         xoff = t[0].strip()
+#         yoff = t[1].strip()
+#         conf = t[2].strip()
+#    f.close()
 
     # Update the polynomials in the diff_par file
-    old = "{}/image.diff_par".format(dir)
-    new = "{}/image.diff_par.new".format(dir)
-    f = open(old,"r")
-    g = open(new,"w")
-    for line in f:
-         if "range_offset_polynomial" in line:
-             t = line.split(":")
-             s = t[1].split()             
-             s[0] = float(s[0])+ float(xoff)
-             line = t[0] + ":          {} {} {} {} {} {}".format(s[0],s[1],s[2],s[3],s[4],s[5])
-         elif "azimuth_offset_polynomial" in line:
-             t = line.split(":")
-             s = t[1].split()             
-             s[0] = float(s[0])+ float(yoff)
-             line = t[0] + ":          {} {} {} {} {} {}".format(s[0],s[1],s[2],s[3],s[4],s[5])
-         g.write("{}".format(line))
-    f.close()
-    g.close()
-    shutil.move(new,old)
+#    old = "{}/image.diff_par".format(dir)
+#    new = "{}/image.diff_par.new".format(dir)
+#    f = open(old,"r")
+#    g = open(new,"w")
+#    for line in f:
+#         if "range_offset_polynomial" in line:
+#             t = line.split(":")
+#             s = t[1].split()             
+#             s[0] = float(s[0])+ float(xoff)
+#             line = t[0] + ":          {} {} {} {} {} {}".format(s[0],s[1],s[2],s[3],s[4],s[5])
+#         elif "azimuth_offset_polynomial" in line:
+#             t = line.split(":")
+#             s = t[1].split()             
+#             s[0] = float(s[0])+ float(yoff)
+#             line = t[0] + ":          {} {} {} {} {} {}".format(s[0],s[1],s[2],s[3],s[4],s[5])
+#         g.write("{}".format(line))
+#    f.close()
+#    g.close()
+#    shutil.move(new,old)
 
     logging.info("Running RTC process... finalizing")
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)                   
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} {diff_par} {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options,diff_par=rerun)
     execute(cmd,uselogging=True)
 
     back = os.getcwd()
@@ -426,7 +427,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     # Apply filtering if requested
     if filterFlag:
         width = getParameter("{}.par".format(mgrd),"range_samples")
-        el_looks = look_fact * look_fact * 5
+        el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
         shutil.move("temp.mgrd",mgrd)
@@ -493,15 +494,16 @@ def reprocess_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwr
     else:
         mpol = "HH"
 
-    mgrd = "{out}.{pol}.mgrd".format(out=outfile,pol=cpol)
+    date = outName.split("_")[3].lower()
+    mgrd = glob.glob("s1a-iw-grd-{}-{}*.mgrd".format(mpol.lower(),date))[0]
+    if not mgrd:
+        logging.error("Unable to find input mgrd file with pol {} and date {}".format(pol.lower(),date))
+        exit(-1)
     utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
     dem = "area.dem"
     small_map = "{out}_small_map".format(out=outfile)
     tif = "image_cal_map.mli.tif"
 
-    # Ingest the granule into gamma format
-#    ingest_S1_granule(inFile,cpol,look_fact,mgrd)
-    
     # Apply filtering if requested
 #   if filterFlag:
 #       width = getParmeter("{}.par".format(mgrd),"range_samples")
@@ -519,14 +521,14 @@ def reprocess_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwr
     if not os.path.isdir(dir):
         os.mkdir(dir)
 
-#   shutil.copy("geo_{}/image.diff_par".format(mpol),"{}".format(dir))
-#   os.symlink("../geo_{}/image_0.map_to_rdc".format(mpol),"{}/image_0.map_to_rdc".format(dir))
-#   os.symlink("../geo_{}/image_0.ls_map".format(mpol),"{}/image_0.ls_map".format(dir))
-#   os.symlink("../geo_{}/image_0.inc_map".format(mpol),"{}/image_0.inc_map".format(dir))
-#   os.symlink("../geo_{}/image_0.sim".format(mpol),"{}/image_0.sim".format(dir))
-#   os.symlink("../geo_{}/image_0.pix_map".format(mpol),"{}/image_0.pix_map".format(dir))
+    shutil.copy("geo_{}/image.diff_par".format(mpol),"{}".format(dir))
+    os.symlink("../geo_{}/image_0.map_to_rdc".format(mpol),"{}/image_0.map_to_rdc".format(dir))
+    os.symlink("../geo_{}/image_0.ls_map".format(mpol),"{}/image_0.ls_map".format(dir))
+    os.symlink("../geo_{}/image_0.inc_map".format(mpol),"{}/image_0.inc_map".format(dir))
+    os.symlink("../geo_{}/image_0.sim".format(mpol),"{}/image_0.sim".format(dir))
+    os.symlink("../geo_{}/image_0.pix_map".format(mpol),"{}/image_0.pix_map".format(dir))
     
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,mdir=mdir,dir=dir,res=res,opt=options)
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} {diff_par} {res} 3 {opt}".format(mgrd=mgrd,dem=dem,mdir=mdir,dir=dir,res=res,opt=options,diff_par=rerun)
     execute(cmd,uselogging=True)
     os.chdir(dir)
     
@@ -624,7 +626,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
     year = now.year
     basename = os.path.basename(infile)
     granulename = os.path.splitext(basename)[0]
-    flooks = looks*looks*5
+    flooks = looks*30
     if gammaFlag:
         power_type = "gamma"
     else:
