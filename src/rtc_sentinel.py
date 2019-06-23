@@ -96,7 +96,7 @@ def perform_sanity_checks():
 
 
 def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms):
+                  pwrFlag,filterFlag,looks,rerun,terms,stack):
     
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(inName))
@@ -117,9 +117,11 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     if rerun is not None:
         logging.info("    Master for stack co-registration  : {}".format(rerun))
     logging.info("    Number of terms in used in match  : {}".format(terms))
+    if stack is not None:
+        logging.info("    Offset file (stack process)       : {}".format(stack))
     
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
-                filterFlag,pwrFlag,browse_res,outName,dem,date,terms):
+                filterFlag,pwrFlag,browse_res,outName,dem,date,terms,roff=0,aoff=0):
 
     logging.info("Processing the {} polarization".format(pol))
 
@@ -183,7 +185,8 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
                     os.remove("{}/{}".format(dir,"image.diff_par"))
 
     logging.info("Running RTC process... finalizing")
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options)                   
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 ".format(mgrd=mgrd,dem=dem,dir=dir,res=res)                   
+    cmd = cmd + "- - - - 1 1 0.2 - - {roff} {aoff} {opt}".format(roff=roff,aoff=aoff,opt=options)
     execute(cmd,uselogging=True)
 
     back = os.getcwd()
@@ -408,7 +411,7 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
     os.chdir("..")
     
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outfile,dem,date,terms):
+                            outfile,dem,date,terms,roff=0,aoff=0):
 
     if cpol == "VH":
         mpol = "VV"
@@ -448,7 +451,8 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     os.symlink("../geo_{}/image_0.sim".format(mpol),"{}/image_0.sim".format(dir))
     os.symlink("../geo_{}/image_0.pix_map".format(mpol),"{}/image_0.pix_map".format(dir))
     
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3 {opt}".format(mgrd=mgrd,dem=dem,mdir=mdir,dir=dir,res=res,opt=options)
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3 ".format(mgrd=mgrd,dem=dem,mdir=mdir,dir=dir,res=res)
+    cmd = cmd + "- - - - 1 1 0.2 - - {roff} {aoff} {opt}".format(roff=roff,aoff=aoff,opt=options)
     execute(cmd,uselogging=True)
     os.chdir(dir)
     
@@ -963,7 +967,7 @@ def clean_prod_dir():
 
 def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
-                       filterFlag=None,looks=None,rerun=None,terms=6):
+                       filterFlag=None,looks=None,rerun=None,terms=6,stack=None):
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
@@ -1020,7 +1024,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         outName = baseName
 
     report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms)
+                  pwrFlag,filterFlag,looks,rerun,terms,stack)
 
     if not rerun:
         try:
@@ -1067,6 +1071,18 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         parfile = "area.dem.par"
         demType = "Unknown"
 
+    if stack:
+       roff = getParameter(stack,"range_offset_polynomial")
+       aoff = getParameter(stack,"azimuth_offset_polynomial")
+       roff_new = float(roff.split()[0])
+       aoff_new = float(aoff.split()[0])
+       roff = roff_new
+       aoff = aoff_new
+       logging.info("Found range, azimuth offsets of {}, {}".format(roff,aoff)) 
+    else:
+       roff = 0
+       aoff = 0
+
     vvlist = glob.glob("{}/*/*vv*.tiff".format(inFile))
     vhlist = glob.glob("{}/*/*vh*.tiff".format(inFile))
     hhlist = glob.glob("{}/*/*hh*.tiff".format(inFile))
@@ -1083,7 +1099,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                 browse_res,outName,dem,date,rerun,terms)
         else:
             process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-                browse_res,outName,dem,date,terms)  
+                browse_res,outName,dem,date,terms,roff=roff,aoff=aoff)  
           
         if vhlist:
             cpol = "VH"
@@ -1094,7 +1110,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                             outName,dem,date,rerun,terms)
             else:
                 process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,date,terms)
+                            outName,dem,date,terms,roff=roff,aoff=aoff)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
@@ -1105,7 +1121,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                 browse_res,outName,dem,date,rerun,terms)
         else: 
             process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-                browse_res,outName,dem,date,terms)
+                browse_res,outName,dem,date,terms,roff=roff,aoff=aoff)
 
         if vhlist:
             cpol = "HV"
@@ -1116,7 +1132,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                             outName,dem,date,rerun,terms)
             else:
                 process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,date,terms)
+                            outName,dem,date,terms,roff=roff,aoff=aoff)
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
@@ -1124,7 +1140,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
 
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     fix_geotiff_locations()
-    logFile = glob.glob("*_log.txt")[0]
+    logFile = logging.getLogger().handlers[0].baseFilename
     rtcName=baseName+"_"+pol+".tif"
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
@@ -1162,6 +1178,7 @@ if __name__ == '__main__':
   parser.add_argument("-t","--terms",type=int,help="set the number of terms in matching polynomial",
            default=6)
   parser.add_argument('--output',help='base name of the output files')
+  parser.add_argument("--stack",help="Stack processing - use specified offset file")
   args = parser.parse_args()
 
   logFile = "{}_{}_log.txt".format(os.path.splitext(args.input)[0],os.getpid())
@@ -1173,5 +1190,5 @@ if __name__ == '__main__':
   rtc_sentinel_gamma(args.input,outName=args.output,res=args.outputResolution,dem=args.externalDEM,
                      aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
                      gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filterFlag=args.f,
-                     looks=args.looks,rerun=args.rerun,terms=args.terms)
+                     looks=args.looks,rerun=args.rerun,terms=args.terms,stack=args.stack)
                         
