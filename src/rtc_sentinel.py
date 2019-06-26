@@ -132,8 +132,22 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(inFile,pol,look_fact,mgrd)
-    
+    if not stack:
+        ingest_S1_granule(inFile,pol,look_fact,mgrd)  
+    else:
+        # File has already been ingested
+        fi = glob.glob("{}/*/*vv*.tiff".format(inFile))[0]
+        # Figure out filename
+        outf= fi.split("/")[-1]
+        outfile = outf.split(".")[0]
+        outfile = outfile + ".mgrd" 
+        outfile = os.path.join(os.pardir,outfile)
+        # Link files to mgrd name
+        os.symlink(outfile,mgrd) 
+        os.symlink(outfile+".par",mgrd+".par")
+        if stack == "FIRST":
+            stack = None
+
     # Apply filter if requested
     if filterFlag:
         width = getParameter("{}.par".format(mgrd),"range_samples")
@@ -225,8 +239,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     execute(cmd,uselogging=True)
      
     # Make browse resolution tif file 
-    if (res > browse_res):
-        browse_res = res
+    if (res == browse_res):
         shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outName,pol,browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outName,pol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
@@ -388,8 +401,7 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
     execute(cmd,uselogging=True)
      
     # Make browse resolution tif file 
-    if (res > browse_res):
-        browse_res = res
+    if (res == browse_res):
         shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outName,pol,browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outName,pol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
@@ -469,8 +481,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     
     # Make browse resolution file
     createAmp(tif,nodata=0)
-    if (res > browse_res):
-        browse_res = res
+    if (res == browse_res):
         shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outfile,cpol,browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outfile,cpol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
@@ -549,8 +560,7 @@ def reprocess_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwr
     
     # Make browse resolution file
     createAmp(tif,nodata=0)
-    if (res > browse_res):
-        browse_res = res
+    if (res == browse_res):
         shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outfile,cpol,browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outfile,cpol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
@@ -978,11 +988,14 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
 
-    browse_res = 30
     if res is None:
         res = 10
     if loFlag:
         res = 30
+
+    browse_res = 30
+    if (res > browse_res):
+        browse_res = res
         
     if looks is None:
         looks = int(res/10+0.5)
