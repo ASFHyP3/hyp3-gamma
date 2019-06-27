@@ -93,14 +93,6 @@ def ingest_raw_stack(infiles,res):
     vvlist = glob.glob("{}/*/*vv*.tiff".format(infile))
     hhlist = glob.glob("{}/*/*hh*.tiff".format(infile))
 
-    # Try to get the precision state vectors
-#    try:
-#        cmd = "get_orb.py {}".format(infile)
-#        logging.info("Getting precision orbit information")
-#        execute(cmd,uselogging=True)
-#    except:
-#        logging.warning("Unable to fetch precision state vectors... continuing")
-
     for fi in vvlist:
         outf= fi.split("/")[-1]
         outfile = outf.split(".")[0]
@@ -111,6 +103,11 @@ def ingest_raw_stack(infiles,res):
         else:
             logging.info("Creating output file {}".format(outfile))
             ingest_S1_granule(infile,"VV",look_fact,outfile)
+
+            # remove EOF file for next iteration
+            for eof in glob.glob("*.EOF"):
+                os.remove(eof)
+
             mgrd_list.append(outfile)
          
     for fi in hhlist:
