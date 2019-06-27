@@ -24,7 +24,6 @@ from rtc2color import rtc2color
 from asf_geometry import geometry_geo2proj
 from getBursts import getBursts
 from make_arc_thumb import pngtothumb
-from geocode_sentinel import geocode_sentinel
 from rtc_sentinel import rtc_sentinel_gamma
 
 def create_dem_par_files(infiles):
@@ -213,7 +212,8 @@ def match_raw_stack(infiles,res):
     prod_dir = os.path.join(os.getcwd(),"RTC_PRODUCTS")
     if not os.path.exists(prod_dir):
         os.mkdir(prod_dir)
-    rtc_granule(sorted_files[0],prod_dir,res)
+    rtc_granule(sorted_files[0],prod_dir,res,stack="FIRST")
+    first_dem=os.path.join(os.getcwd(),os.path.basename(sorted_files[0]).replace(".SAFE","")[17:32],"area.dem")
     polyaz = 0 
     polyra = 0
     for x in xrange(1,len(sorted_mgrd)):
@@ -221,10 +221,11 @@ def match_raw_stack(infiles,res):
         diff_par = os.path.join(os.getcwd(),diff_par)
         polyaz,polyra = get_poly(polyaz,polyra,diff_par) 
         new_par = fix_diff_par(polyaz,polyra,diff_par)
-        rtc_granule(sorted_files[x],prod_dir,res,stack=new_par)
+        logging.info("New parameter file {} created".format(new_par))
+        rtc_granule(sorted_files[x],prod_dir,res,stack=new_par,dem=first_dem)
 
 
-def rtc_granule(fi,prod_dir,res,stack=None):
+def rtc_granule(fi,prod_dir,res,stack=None,dem=None):
     back = os.getcwd()
     mydir = os.path.basename(fi)
     mydir = mydir.replace(".SAFE","")
@@ -242,7 +243,7 @@ def rtc_granule(fi,prod_dir,res,stack=None):
         look_fact = int(res/10.0) * 2
 
     rtc_sentinel_gamma(fi,matchFlag=True,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
-                       terms=1,stack=stack,noCrossPol=True)
+                       terms=1,stack=stack,noCrossPol=True,dem=dem)
 
     for tmp in glob.glob("PRODUCT/*_V*.tif"):
         shutil.copy(tmp,prod_dir)
@@ -264,6 +265,7 @@ def fix_diff_par(az,ra,diff_par):
             g.write("{}".format(line))
     f.close()
     g.close()
+    return outfile
 
 def get_poly(az,ra,diff_par):
      polyra = getParameter(diff_par,"range_offset_polynomial",uselogging=True)
