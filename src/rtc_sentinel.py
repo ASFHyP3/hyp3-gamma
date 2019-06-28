@@ -127,7 +127,6 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     mgrd = "{out}.{pol}.mgrd".format(out=outName,pol=pol)
     utm = "{out}.{pol}.utm".format(out=outName,pol=pol)
-    dem = "area.dem"
     small_map = "{out}_small_map".format(out=outName)
     tif = "image_cal_map.mli.tif"
 
@@ -273,7 +272,6 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
         logging.error("Unable to find input mgrd file with pol {} and date {}".format(pol.lower(),date))
         exit(-1)
     utm = "{out}.{pol}.utm".format(out=outName,pol=pol)
-    dem = "area.dem"
     small_map = "{out}_small_map".format(out=outName)
     tif = "image_cal_map.mli.tif"
 
@@ -434,7 +432,6 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
 
     mgrd = "{out}.{pol}.mgrd".format(out=outfile,pol=cpol)
     utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
-    dem = "area.dem"
     small_map = "{out}_small_map".format(out=outfile)
     tif = "image_cal_map.mli.tif"
 
@@ -519,7 +516,6 @@ def reprocess_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwr
         logging.error("Unable to find input mgrd file with pol {} and date {}".format(pol.lower(),date))
         exit(-1)
     utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
-    dem = "area.dem"
     small_map = "{out}_small_map".format(out=outfile)
     tif = "image_cal_map.mli.tif"
 
@@ -1045,13 +1041,6 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                   pwrFlag,filterFlag,looks,rerun,terms,stack)
 
     if not rerun:
-        try:
-            cmd = "get_orb.py {}".format(inFile)
-            logging.info("Getting precision orbit information")
-            execute(cmd,uselogging=True)
-        except:
-            logging.warning("Unable to fetch precision state vectors... continuing")
-    
         if dem is None:
             logging.info("Getting DEM file covering this SAR image")
             tifdem = "tmp_{}_dem.tif".format(os.getpid())
@@ -1079,14 +1068,12 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
             utm2dem(tiff_dem,dem,parfile)
             demType = "Unknown"
         elif os.path.isfile("{}.par".format(dem)):
-            parfile = "{}.par".format(dem)
             demType = "Unknown"
         else:
             logging.error("ERROR: Unrecognized DEM: {}".format(dem))
             exit(1)
     else:
         dem = "area.dem"
-        parfile = "area.dem.par"
         demType = "Unknown"
 
     vvlist = glob.glob("{}/*/*vv*.tiff".format(inFile))
