@@ -83,10 +83,12 @@ def ingest_raw_stack(infiles,res,look_fact):
           logging.error("ERROR: Input file {} does not exist".format(infile))
           exit(1)
       if "zip" in infile:
+          logging.info("Unzipping file {}".format(infile))
           zip_ref = zipfile.ZipFile(infile, 'r')
           zip_ref.extractall(".")
           zip_ref.close()    
           infiles[x] = infile.replace(".zip",".SAFE")
+          infile = infile.replace(".zip",".SAFE")
 
       if "SDV" in infile or "SSV" in infile:
           outfile = ingest_tiff(infile,"VV",look_fact)
@@ -100,7 +102,10 @@ def ingest_raw_stack(infiles,res,look_fact):
 
 def ingest_tiff(infile,pol,look_fact):
     fi = glob.glob("{}/*/*{}*.tiff".format(infile,pol.lower()))[0]
-    outf= fi.split("/")[-1]
+    if not fi:
+        logging.error("Unable to find input file {}/*/*{}*.tif".format(infile,pol.lower()))
+        exit(1)
+    outf = fi.split("/")[-1]
     outfile = outf.split(".")[0]
     outfile = outfile + ".mgrd"
     if os.path.isfile(outfile):
