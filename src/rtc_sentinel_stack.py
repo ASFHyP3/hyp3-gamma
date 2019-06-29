@@ -74,51 +74,45 @@ def create_dem_par(basename,dataType,pixel_size,lat_max,lat_min,lon_max,lon_min,
 
     return demParIn
 
-def ingest_raw_stack(infiles,res):
+def ingest_raw_stack(infiles,res,look_fact):
   logging.info("Infile list: {}".format(infiles))
-  look_fact = res / 10.0
   mgrd_list = []
   for x in xrange(len(infiles)):
-    infile = infiles[x]
-    if not os.path.exists(infile):
-        logging.error("ERROR: Input file {} does not exist".format(infile))
-        exit(1)
-    if "zip" in infile:
-        zip_ref = zipfile.ZipFile(infile, 'r')
-        zip_ref.extractall(".")
-        zip_ref.close()    
-        infiles[x] = infile.replace(".zip",".SAFE")
+      infile = infiles[x]
+      if not os.path.exists(infile):
+          logging.error("ERROR: Input file {} does not exist".format(infile))
+          exit(1)
+      if "zip" in infile:
+          zip_ref = zipfile.ZipFile(infile, 'r')
+          zip_ref.extractall(".")
+          zip_ref.close()    
+          infiles[x] = infile.replace(".zip",".SAFE")
 
-    # Get list of files to process
-    vvlist = glob.glob("{}/*/*vv*.tiff".format(infile))
-    hhlist = glob.glob("{}/*/*hh*.tiff".format(infile))
+      if "SDV" in infile or "SSV" in infile:
+          outfile = ingest_tiff(infile,"VV",look_fact)
+          mgrd_list.append(outfile)
+      else:
+          outfile = ingest_tiff(infile,"HH",look_fact)
+          mgrd_list.append(outfile)
 
-    for fi in vvlist:
-        outf= fi.split("/")[-1]
-        outfile = outf.split(".")[0]
-        outfile = outfile + ".mgrd"
-        if os.path.isfile(outfile):
-            logging.info("Output file {} already exists. Skipping.".format(outfile))
-            mgrd_list.append(outfile)
-        else:
-            logging.info("Creating output file {}".format(outfile))
-            ingest_S1_granule(infile,"VV",look_fact,outfile)
-
-            # remove EOF file for next iteration
-            for eof in glob.glob("*.EOF"):
-                os.remove(eof)
-
-            mgrd_list.append(outfile)
-         
-    for fi in hhlist:
-        outf= fi.split("/")[-1]
-        outfile = outf.split(".")[0]
-        outfile = outfile + ".mgrd"
-        logging.info("Creating output file {}".format(outfile))
-        ingest_S1_granule(infile,"HH",look_fact,outfile)
-	mgrd_list.append(outfile)
- 
   return(mgrd_list,infiles)
+
+
+def ingest_tiff(infile,pol,look_fact):
+    fi = glob.glob("{}/*/*{}*.tiff".format(infile,pol.lower()))[0]
+    outf= fi.split("/")[-1]
+    outfile = outf.split(".")[0]
+    outfile = outfile + ".mgrd"
+    if os.path.isfile(outfile):
+        logging.info("Output file {} already exists. Skipping.".format(outfile))
+    else:
+        logging.info("Creating output file {}".format(outfile))
+        ingest_S1_granule(infile,"VV",look_fact,outfile)
+        # remove EOF file for next iteration
+        for eof in glob.glob("*.EOF"):
+            os.remove(eof)
+    return outfile
+         
 	
 def create_diff_par_in():
     cfgdir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "config"))
@@ -147,8 +141,14 @@ def get_dates(file_list,sep="-"):
     return(files,dates)
 
 
-def match_raw_stack(infiles,res):
-    mgrd_files,infiles = ingest_raw_stack(infiles,res)
+def rtc_sentinel_stack(infiles,res):
+
+    if res == 10.0:
+        look_fact = 1
+    else: 
+        look_fact = int(res/10.0) * 2
+
+    mgrd_files,infiles = ingest_raw_stack(infiles,res,look_fact)
     dpar_files = create_dem_par_files(infiles)
     logging.info("mgrd file {}".format(mgrd_files))
     sorted_mgrd,dates = get_dates(mgrd_files)
@@ -209,7 +209,7 @@ def match_raw_stack(infiles,res):
     prod_dir = os.path.join(os.getcwd(),"RTC_PRODUCTS")
     if not os.path.exists(prod_dir):
         os.mkdir(prod_dir)
-    rtc_granule(sorted_files[0],prod_dir,res,stack="FIRST")
+    rtc_granule(sorted_files[0],prod_dir,res,look_fact,stack="FIRST")
     first_dem=os.path.join(os.getcwd(),os.path.basename(sorted_files[0]).replace(".SAFE","")[17:32],"area.dem")
     polyaz = 0 
     polyra = 0
@@ -219,10 +219,10 @@ def match_raw_stack(infiles,res):
         polyaz,polyra = get_poly(polyaz,polyra,diff_par) 
         new_par = fix_diff_par(polyaz,polyra,diff_par)
         logging.info("New parameter file {} created".format(new_par))
-        rtc_granule(sorted_files[x],prod_dir,res,stack=new_par,dem=first_dem)
+        rtc_granule(sorted_files[x],prod_dir,res,look_fact,stack=new_par,dem=first_dem)
 
 
-def rtc_granule(fi,prod_dir,res,stack=None,dem=None):
+def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None):
     back = os.getcwd()
     mydir = os.path.basename(fi)
     mydir = mydir.replace(".SAFE","")
@@ -233,11 +233,6 @@ def rtc_granule(fi,prod_dir,res,stack=None,dem=None):
     os.mkdir(mydir)
     os.chdir(mydir)
     os.symlink("../{}".format(fi),fi)
-
-    if res == 10.0:
-        look_fact = 1
-    else: 
-        look_fact = int(res/10.0) * 2
 
     rtc_sentinel_gamma(fi,matchFlag=True,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
                        terms=1,stack=stack,noCrossPol=True,dem=dem)
@@ -285,5 +280,5 @@ if __name__ == '__main__':
   logging.getLogger().addHandler(logging.StreamHandler())
   logging.info("Starting run")
 
-  match_raw_stack(args.infile,args.res)
+  rtc_sentinel_stack(args.infile,args.res)
 

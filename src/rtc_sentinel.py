@@ -199,7 +199,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     logging.info("Running RTC process... finalizing")
     if stack:
-        shutil.cp(stack,"{}/image.diff_par".format(dir))
+        shutil.copy(stack,"{}/image.diff_par".format(dir))
     cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 ".format(mgrd=mgrd,dem=dem,dir=dir,res=res)                   
     cmd = cmd + "{opt}".format(opt=options)
     execute(cmd,uselogging=True)
