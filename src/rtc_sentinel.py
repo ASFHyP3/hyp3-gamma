@@ -76,23 +76,20 @@ def perform_sanity_checks():
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: ul1 coordinate not on a 30 meter posting")
                     logging.error("ERROR: ul1 = {}".format(ul1))
-                    exit(1)
-                if lr1 % 30 != 0:
+                elif lr1 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: lr1 coordinate not on a 30 meter posting")
                     logging.error("ERROR: lr1 = {}".format(lr1))
-                    exit(1)
-                if ul2 % 30 != 0:
+                elif ul2 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: ul2 coordinate not on a 30 meter posting")
                     logging.error("ERROR: ul2 = {}".format(ul2))
-                    exit(1)
-                if lr2 % 30 != 0:
+                elif lr2 % 30 != 0:
                     logging.error("ERROR: Corner coordinates are amiss")
                     logging.error("ERROR: lr2 coordinate not on a 30 meter posting")
                     logging.error("ERROR: lr2 = {}".format(lr2))
-                    exit(1)
-                logging.debug("...ok")
+                else:
+                    logging.debug("...ok")
 
 
 def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
@@ -1032,10 +1029,11 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     else:
         f = "n" 
  
-    baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,int(res),date,time,d,e,f)
-    auxName = baseName
     if outName is None:
-        outName = baseName
+       baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,int(res),date,time,d,e,f)
+    else:
+       baseName = outName
+    auxName = baseName
 
     report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
                   pwrFlag,filterFlag,looks,rerun,terms,stack)
@@ -1056,6 +1054,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
             if aoi is not None:
                 demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,True,post=30)
             else:
+                logging.info("Calling getDemFile with {} {} {} {}".format(inFile,tifdem,True,30))
                 demfile,demType = getDemFile(inFile,tifdem,utmFlag=True,post=30)
             dem = "area.dem"
             parfile = "area.dem.par"
