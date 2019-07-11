@@ -93,7 +93,7 @@ def perform_sanity_checks():
 
 
 def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms,stack):
+                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol):
     
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(inName))
@@ -116,6 +116,8 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     logging.info("    Number of terms in used in match  : {}".format(terms))
     if stack is not None:
         logging.info("    Offset file (stack process)       : {}".format(stack))
+    logging.info("    Process crosspol                  : {}".format(not noCrossPol))
+    
    
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
                 filterFlag,pwrFlag,browse_res,outName,dem,date,terms,stack=None):
@@ -1036,7 +1038,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     auxName = baseName
 
     report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms,stack)
+                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol)
 
     if not rerun:
         if dem is None:
@@ -1171,7 +1173,7 @@ if __name__ == '__main__':
            default=6)
   parser.add_argument('--output',help='base name of the output files')
   parser.add_argument("--stack",help="Stack processing - use specified offset file")
-  parser.add_argument("--nocrosspol",help="Do not process the cross pol image",action="store_false")
+  parser.add_argument("--nocrosspol",help="Do not process the cross pol image",action="store_true")
   args = parser.parse_args()
 
   logFile = "{}_{}_log.txt".format(os.path.splitext(args.input)[0],os.getpid())

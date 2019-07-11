@@ -42,11 +42,10 @@ def create_dem_par(basename,dataType,pixel_size,lat_max,lat_min,lon_max,lon_min,
     zone, false_north, y_min, y_max, x_min, x_max = geometry_geo2proj(lat_max,lat_min,lon_max,lon_min)
     logging.debug("Original Output Coordinates: {} {} {} {}".format(y_min, y_max, x_min, x_max))
     if post is not None:
-        shift = 0
-        x_max = math.ceil(x_max/post)*post+shift
-        x_min = math.floor(x_min/post)*post-shift
-        y_max = math.ceil(y_max/post)*post+shift
-        y_min = math.floor(y_min/post)*post-shift
+        x_max = math.ceil(x_max/post)*post
+        x_min = math.floor(x_min/post)*post
+        y_max = math.ceil(y_max/post)*post
+        y_min = math.floor(y_min/post)*post
         logging.debug("Snapped Output Coordinates: {} {} {} {}".format(y_min, y_max, x_min, x_max))
 
     f = open(demParIn,"w")
@@ -99,7 +98,6 @@ def ingest_raw_stack(infiles,res,look_fact):
 
   return(mgrd_list,infiles)
 
-
 def ingest_tiff(infile,pol,look_fact):
     fi = glob.glob("{}/*/*{}*.tiff".format(infile,pol.lower()))[0]
     if not fi:
@@ -145,6 +143,50 @@ def get_dates(file_list,sep="-"):
         dates.append(date_and_file[x][1])  
     return(files,dates)
 
+
+def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None):
+    back = os.getcwd()
+    mydir = os.path.basename(fi)
+    mydir = mydir.replace(".SAFE","")
+    mydir = mydir[17:32]
+    if os.path.exists(mydir):
+        logging.info("Old {} directory found; deleting".format(mydir))
+        shutil.rmtree(mydir)
+    os.mkdir(mydir)
+    os.chdir(mydir)
+    os.symlink("../{}".format(fi),fi)
+
+    rtc_sentinel_gamma(fi,matchFlag=True,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
+                       terms=1,stack=stack,noCrossPol=True,dem=dem)
+
+    for tmp in glob.glob("PRODUCT/*_V*.tif"):
+        shutil.copy(tmp,prod_dir)
+    for tmp in glob.glob("PRODUCT/*_H*.tif"):
+        shutil.copy(tmp,prod_dir)
+
+    os.chdir(back)
+   
+def fix_diff_par(az,ra,diff_par):
+    f = open(diff_par,"r")
+    outfile = diff_par.replace(".par","") + "_accum.par"
+    g = open(outfile,"w")
+    for line in f:
+        if "range_offset_polynomial" in line:
+            g.write("range_offset_polynomial: {} 0.0 0.0 0.0 0.0 0.0\n".format(ra))
+        elif "azimuth_offset_polynomial" in line:
+            g.write("azimuth_offset_polynomial: {} 0.0 0.0 0.0 0.0 0.0\n".format(az))
+        else:
+            g.write("{}".format(line))
+    f.close()
+    g.close()
+    return outfile
+
+def get_poly(diff_par):
+     polyra = getParameter(diff_par,"range_offset_polynomial",uselogging=True)
+     polyaz = getParameter(diff_par,"azimuth_offset_polynomial",uselogging=True)
+     ra_new = float(polyra.split()[0])
+     az_new = float(polyaz.split()[0])
+     return az_new,ra_new
 
 def rtc_sentinel_stack(infiles,res):
 
@@ -216,60 +258,21 @@ def rtc_sentinel_stack(infiles,res):
         os.mkdir(prod_dir)
     rtc_granule(sorted_files[0],prod_dir,res,look_fact,stack="FIRST")
     first_dem=os.path.join(os.getcwd(),os.path.basename(sorted_files[0]).replace(".SAFE","")[17:32],"area.dem")
-    polyaz = 0 
-    polyra = 0
+    first_par=os.path.join(os.getcwd(),os.path.basename(sorted_files[0]).replace(".SAFE","")[17:32],"geo_VV","image.diff_par")
+    polyaz,polyra = get_poly(first_par)
     for x in xrange(1,len(sorted_mgrd)):
         diff_par = "{}_{}.par".format(dates[x-1],dates[x])
         diff_par = os.path.join(os.getcwd(),diff_par)
-        polyaz,polyra = get_poly(polyaz,polyra,diff_par) 
+        new_polyaz,new_polyra = get_poly(diff_par) 
+        if new_polyaz > 80.0 or new_polyra > 80.0:
+            logging.warning("Offsets greater than 800 meters; ignoring offsets...")
+            new_polyra = 0
+            new_polyaz = 0
+        polyaz = polyaz - new_polyaz
+        polyra = polyra - new_polyra 
         new_par = fix_diff_par(polyaz,polyra,diff_par)
         logging.info("New parameter file {} created".format(new_par))
         rtc_granule(sorted_files[x],prod_dir,res,look_fact,stack=new_par,dem=first_dem)
-
-
-def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None):
-    back = os.getcwd()
-    mydir = os.path.basename(fi)
-    mydir = mydir.replace(".SAFE","")
-    mydir = mydir[17:32]
-    if os.path.exists(mydir):
-        logging.info("Old {} directory found; deleting".format(mydir))
-        shutil.rmtree(mydir)
-    os.mkdir(mydir)
-    os.chdir(mydir)
-    os.symlink("../{}".format(fi),fi)
-
-    rtc_sentinel_gamma(fi,matchFlag=True,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
-                       terms=1,stack=stack,noCrossPol=True,dem=dem)
-
-    for tmp in glob.glob("PRODUCT/*_V*.tif"):
-        shutil.copy(tmp,prod_dir)
-    for tmp in glob.glob("PRODUCT/*_H*.tif"):
-        shutil.copy(tmp,prod_dir)
-
-    os.chdir(back)
-   
-def fix_diff_par(az,ra,diff_par):
-    f = open(diff_par,"r")
-    outfile = diff_par.replace(".par","") + "_accum.par"
-    g = open(outfile,"w")
-    for line in f:
-        if "range_offset_polynomial" in line:
-            g.write("range_offset_polynomial: {} 0.0 0.0 0.0 0.0 0.0\n".format(ra))
-        elif "azimuth_offset_polynomial" in line:
-            g.write("azimuth_offset_polynomial: {} 0.0 0.0 0.0 0.0 0.0\n".format(az))
-        else:
-            g.write("{}".format(line))
-    f.close()
-    g.close()
-    return outfile
-
-def get_poly(az,ra,diff_par):
-     polyra = getParameter(diff_par,"range_offset_polynomial",uselogging=True)
-     polyaz = getParameter(diff_par,"azimuth_offset_polynomial",uselogging=True)
-     ra_new = float(polyra.split()[0])
-     az_new = float(polyaz.split()[0])
-     return az_new+az,ra_new+ra
 
 
 if __name__ == '__main__':
