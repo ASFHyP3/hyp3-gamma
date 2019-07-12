@@ -1033,6 +1033,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
  
     if outName is None:
        baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat,mode,int(res),date,time,d,e,f)
+       outName = baseName
     else:
        baseName = outName
     auxName = baseName
