@@ -93,7 +93,7 @@ def perform_sanity_checks():
 
 
 def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol):
+                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol,createRD):
     
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(inName))
@@ -117,10 +117,10 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     if stack is not None:
         logging.info("    Offset file (stack process)       : {}".format(stack))
     logging.info("    Process crosspol                  : {}".format(not noCrossPol))
-    
+    logging.info("    Only create range doppler output  : {}".format(createRD))    
    
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
-                filterFlag,pwrFlag,browse_res,outName,dem,date,terms,stack=None):
+                filterFlag,pwrFlag,browse_res,outName,dem,date,terms,stack=None,createRD=False):
 
     logging.info("Processing the {} polarization".format(pol))
 
@@ -203,62 +203,62 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     cmd = cmd + "{opt}".format(opt=options)
     execute(cmd,uselogging=True)
 
-    back = os.getcwd()
-    os.chdir(dir)
+    if not createRD:
+        os.chdir(dir)
 
-    # Make Geotiff Files
-    cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(outName)
-    execute(cmd,uselogging=True)
-    cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(outName)
-    execute(cmd,uselogging=True)
-    cmd = "data2geotiff area.dem_par area.dem 2 outdem.tif"
-    execute(cmd,uselogging=True)
-    gdal.Translate("{}.dem.tif".format(outName),"outdem.tif",outputType=gdal.GDT_Int16)
+        # Make Geotiff Files
+        cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(outName)
+        execute(cmd,uselogging=True)
+        cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(outName)
+        execute(cmd,uselogging=True)
+        cmd = "data2geotiff area.dem_par area.dem 2 outdem.tif"
+        execute(cmd,uselogging=True)
+        gdal.Translate("{}.dem.tif".format(outName),"outdem.tif",outputType=gdal.GDT_Int16)
 
-    if gammaFlag:
-        gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_gamma0'.format(pol)])
-    else:
-        gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(pol)])
-    shutil.move("tmp.tif",tif)
-    createAmp(tif,nodata=0)
+        if gammaFlag:
+            gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_gamma0'.format(pol)])
+        else:
+            gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(pol)])
+        shutil.move("tmp.tif",tif)
+        createAmp(tif,nodata=0)
   
-    # Make meta files and stats 
-    cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(outName)
-    execute(cmd,uselogging=True)
-    cmd = "stats -overstat -overmeta ls_map"
-    execute(cmd,uselogging=True)
-    cmd = "asf_import -format geotiff {}.inc_map.tif inc_map".format(outName) 
-    execute(cmd,uselogging=True)
-    cmd = "stats -overstat -overmeta -mask 0 inc_map"
-    execute(cmd,uselogging=True)
-    cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(pol)
-    execute(cmd,uselogging=True)
-    cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(pol)
-    execute(cmd,uselogging=True)
-     
-    # Make browse resolution tif file 
-    if (res == browse_res):
-        shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outName,pol,browse_res))
-    else:
-        gdal.Translate("{}_{}_{}m.tif".format(outName,pol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
+        # Make meta files and stats 
+        cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(outName)
+        execute(cmd,uselogging=True)
+        cmd = "stats -overstat -overmeta ls_map"
+        execute(cmd,uselogging=True)
+        cmd = "asf_import -format geotiff {}.inc_map.tif inc_map".format(outName) 
+        execute(cmd,uselogging=True)
+        cmd = "stats -overstat -overmeta -mask 0 inc_map"
+        execute(cmd,uselogging=True)
+        cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(pol)
+        execute(cmd,uselogging=True)
+        cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(pol)
+        execute(cmd,uselogging=True)
+         
+        # Make browse resolution tif file 
+        if (res == browse_res):
+            shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outName,pol,browse_res))
+        else:
+            gdal.Translate("{}_{}_{}m.tif".format(outName,pol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
 
-    # Move files into the product directory 
-    outDir = "../PRODUCT"
-    if not os.path.exists(outDir):
-        os.mkdir(outDir)
+        # Move files into the product directory 
+        outDir = "../PRODUCT"
+        if not os.path.exists(outDir):
+            os.mkdir(outDir)
 
-    tifName = rtcName
-    if pwrFlag:
-        shutil.move(tif,"{}/{}".format(outDir,tifName))
-    else:
-        copy_metadata(tif,"image_cal_map.mli_amp.tif")
-        shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,tifName))
+        tifName = rtcName
+        if pwrFlag:
+            shutil.move(tif,"{}/{}".format(outDir,tifName))
+        else:
+            copy_metadata(tif,"image_cal_map.mli_amp.tif")
+            shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,tifName))
         
-    shutil.move("{}.ls_map.tif".format(outName),"{}/{}-ls_map.tif".format(outDir,auxName))
-    shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
-    shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
-    
-    os.chdir("..")
+        shutil.move("{}.ls_map.tif".format(outName),"{}/{}-ls_map.tif".format(outDir,auxName))
+        shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
+        shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
+        
+        os.chdir("..")
     
 def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
                 filterFlag,pwrFlag,browse_res,outName,dem,date,rerun,terms):
@@ -364,7 +364,6 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
     cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} {diff_par} {res} 3 {opt}".format(mgrd=mgrd,dem=dem,dir=dir,res=res,opt=options,diff_par=rerun)
     execute(cmd,uselogging=True)
 
-    back = os.getcwd()
     os.chdir(dir)
 
     # Make Geotiff Files
@@ -422,7 +421,7 @@ def reprocess_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,ga
     os.chdir("..")
     
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outfile,dem,date,terms,stack=None):
+                            outfile,dem,date,terms,stack=None,createRD=False):
 
     if cpol == "VH":
         mpol = "VV"
@@ -466,40 +465,42 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3 ".format(mgrd=mgrd,dem=dem,mdir=mdir,dir=dir,res=res)
     cmd = cmd + " " + options
     execute(cmd,uselogging=True)
-    os.chdir(dir)
+
+    if not createRD:
+        os.chdir(dir)
     
-    # Make geotif file
-    if gammaFlag:
-        gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_gamma0'.format(cpol)])
-    else:
-        gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(cpol)])
-    shutil.move("tmp.tif",tif)
+        # Make geotif file
+        if gammaFlag:
+            gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_gamma0'.format(cpol)])
+        else:
+            gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(cpol)])
+        shutil.move("tmp.tif",tif)
     
-    # Make browse resolution file
-    createAmp(tif,nodata=0)
-    if (res == browse_res):
-        shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outfile,cpol,browse_res))
-    else:
-        gdal.Translate("{}_{}_{}m.tif".format(outfile,cpol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
+        # Make browse resolution file
+        createAmp(tif,nodata=0)
+        if (res == browse_res):
+            shutil.copy("image_cal_map.mli_amp.tif","{}_{}_{}m.tif".format(outfile,cpol,browse_res))
+        else:
+            gdal.Translate("{}_{}_{}m.tif".format(outfile,cpol,browse_res),"image_cal_map.mli_amp.tif",xRes=browse_res,yRes=browse_res)
 
-    # Create meta files and stats
-    cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(cpol)
-    execute(cmd,uselogging=True)
-    cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(cpol)
-    execute(cmd,uselogging=True)
+        # Create meta files and stats
+        cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(cpol)
+        execute(cmd,uselogging=True)
+        cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(cpol)
+        execute(cmd,uselogging=True)
 
-    # Move files to product directory
-    outDir = "../PRODUCT"
-    if not os.path.exists(outDir):
-        os.mkdir(outDir)
+        # Move files to product directory
+        outDir = "../PRODUCT"
+        if not os.path.exists(outDir):
+            os.mkdir(outDir)
 
-    if pwrFlag:
-        shutil.move(tif,"{}/{}".format(outDir,rtcName))
-    else:
-        copy_metadata(tif,"image_cal_map.mli_amp.tif")
-        shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
+        if pwrFlag:
+            shutil.move(tif,"{}/{}".format(outDir,rtcName))
+        else:
+            copy_metadata(tif,"image_cal_map.mli_amp.tif")
+            shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
         
-    os.chdir("..")
+        os.chdir("..")
                   
 def reprocess_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
                             outfile,dem,date,rerun,terms):
@@ -977,7 +978,7 @@ def clean_prod_dir():
 def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
                        filterFlag=None,looks=None,rerun=None,terms=6,stack=None,
-                       noCrossPol=False):
+                       noCrossPol=False,createRD=False):
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
@@ -1039,7 +1040,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     auxName = baseName
 
     report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol)
+                  pwrFlag,filterFlag,looks,rerun,terms,stack,noCrossPol,createRD)
 
     if not rerun:
         if dem is None:
@@ -1094,7 +1095,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                 browse_res,outName,dem,date,rerun,terms)
         else:
             process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-                browse_res,outName,dem,date,terms,stack=stack)
+                browse_res,outName,dem,date,terms,stack=stack,createRD=createRD)
           
         if vhlist and not noCrossPol:
             cpol = "VH"
@@ -1105,7 +1106,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                             outName,dem,date,rerun,terms)
             else:
                 process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,date,terms,stack=stack)
+                            outName,dem,date,terms,stack=stack,createRD=createRD)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
@@ -1116,7 +1117,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                 browse_res,outName,dem,date,rerun,terms)
         else: 
             process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-                browse_res,outName,dem,date,terms,stack=stack)
+                browse_res,outName,dem,date,terms,stack=stack,createRD=createRD)
 
         if vhlist and not noCrossPol:
             cpol = "HV"
@@ -1127,27 +1128,29 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
                             outName,dem,date,rerun,terms)
             else:
                 process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outName,dem,date,terms,stack=stack)
+                            outName,dem,date,terms,stack=stack,createRD=createRD)
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
         exit(1)
 
-    create_browse_images(outName,auxName,res,pol,cpol,browse_res)
-    fix_geotiff_locations()
-    logFile = logging.getLogger().handlers[0].baseFilename
-    rtcName=baseName+"_"+pol+".tif"
-    hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
-    create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
-                   demType,res,hyp3_ver,gamma_ver)
-    cogify_dir(res=res)
-    clean_prod_dir()
-    perform_sanity_checks()
+    if not createRD:
+        create_browse_images(outName,auxName,res,pol,cpol,browse_res)
+        fix_geotiff_locations()
+        logFile = logging.getLogger().handlers[0].baseFilename
+        rtcName=baseName+"_"+pol+".tif"
+        hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
+        create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
+                       demType,res,hyp3_ver,gamma_ver)
+        cogify_dir(res=res)
+        clean_prod_dir()
+        perform_sanity_checks()
     logging.info("===================================================================")
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
+    if not createRD:
+        create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
                             shape,pwrFlag,filterFlag,pol,looks,logFile)
 
 
@@ -1168,6 +1171,7 @@ if __name__ == '__main__':
   parser.add_argument("-l",action="store_true",help="create a lo-res output (30m)")
   parser.add_argument("-p",action="store_true",help="create power images instead of amplitude")
   parser.add_argument("-f",action="store_true",help="run enhanced lee filter")
+  parser.add_argument("-c",action="store_true",help="only create range doppler output")
   parser.add_argument("-r","--rerun",help="re-run RTC process for stack mis-registration - specifies master image")
   parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
   parser.add_argument("-t","--terms",type=int,help="set the number of terms in matching polynomial",
@@ -1187,5 +1191,5 @@ if __name__ == '__main__':
                      aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
                      gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filterFlag=args.f,
                      looks=args.looks,rerun=args.rerun,terms=args.terms,stack=args.stack,
-                     noCrossPol=args.nocrosspol)
+                     noCrossPol=args.nocrosspol,createRD=args.c)
                         
