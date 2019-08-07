@@ -152,6 +152,7 @@ def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
     if os.path.exists(mydir):
         logging.info("Old {} directory found; deleting".format(mydir))
         shutil.rmtree(mydir)
+    logging.info("Creating directory {} for {}".format(mydir,fi))
     os.mkdir(mydir)
     os.chdir(mydir)
     os.symlink("../{}".format(fi),fi)
@@ -159,10 +160,10 @@ def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
     rtc_sentinel_gamma(fi,matchFlag=match,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
                        terms=1,noCrossPol=True,dem=dem,stack=stack)
 
-#    for tmp in glob.glob("PRODUCT/*_V*.tif"):
-#        shutil.copy(tmp,prod_dir)
-#    for tmp in glob.glob("PRODUCT/*_H*.tif"):
-#        shutil.copy(tmp,prod_dir)
+    for tmp in glob.glob("PRODUCT/*_V*.tif"):
+        shutil.copy(tmp,prod_dir)
+    for tmp in glob.glob("PRODUCT/*_H*.tif"):
+        shutil.copy(tmp,prod_dir)
 
     os.chdir(back)
     return(mydir)
@@ -225,6 +226,9 @@ def rtc_sentinel_stack(infiles,res,tol):
             f_list.append(new_dir)
         else:
             p_list.append(new_dir)
+        if "zip" in fi:
+            safe = fi.replace(".zip",".SAFE")
+            shutil.move("{}/{}".format(new_dir,safe),safe)
 
     logging.info("Pass List: {}".format(p_list))
     logging.info("Fail List: {}".format(f_list))
@@ -233,8 +237,8 @@ def rtc_sentinel_stack(infiles,res,tol):
     if len(f_list) != 0 and len(p_list) !=0:
         logging.info("Found mixed stack; reprocessing passing files with no matching")
         for di in p_list:
-            safe = glob.glob("{}/*.SAFE".format(di))[0]
-            logging.info("Re-processing file {}".format(os.path.basename(safe)))
+            safe = glob.glob("*{}*.SAFE".format(di))[0]
+            logging.info("Re-processing file {}".format(safe))
             new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=False)
             if new_dir != di: 
                 logging.error("ERROR!!!  You should never see this")
@@ -246,7 +250,7 @@ def rtc_sentinel_stack(infiles,res,tol):
         azi = np.zeros(len(p_list))
         cnt = 0 
         for di in p_list:
-            par = glob.glob("{}/geo_VV/image.diff_par".format(di))
+            par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
             azi[cnt],rng[cnt] = get_poly(par)
             logging.info("{} : {} : {}",di,rng[cnt],azi[cnt])
             cnt = cnt + 1
@@ -254,9 +258,9 @@ def rtc_sentinel_stack(infiles,res,tol):
         med_azi = np.median(azi)
         logging.info("Offset medians: {},{} (rng/azi)".format(med_rng,med_azi))
         for di in p_list:
-            par = glob.glob("{}/geo_VV/image.diff_par")
+            par = glob.glob("{}/geo_VV/image.diff_par")[0]
             azi1,rng1 = get_poly(par)
-            safe = glob.glob("{}/*.SAFE".format(di))[0]
+            safe = glob.glob("*{}*.SAFE".format(di))[0]
             safe = os.path.basename(safe)
             if np.abs(rng1-med_rng)>tolerance:
                 logging.info("Outlier found: {}; reprocessing with ({},{}) rng/azi offsets".format(di,med_rng,med_azi))
