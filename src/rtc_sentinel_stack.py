@@ -22,8 +22,9 @@ def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
     os.chdir(mydir)
     os.symlink("../{}".format(fi),fi)
 
-    rtc_sentinel_gamma(fi,matchFlag=match,deadFlag=True,gammaFlag=True,res=res,pwrFlag=True,looks=look_fact,
-                       terms=1,noCrossPol=True,dem=dem,stack=stack)
+    rtc_sentinel_gamma(fi,matchFlag=match,deadFlag=True,gammaFlag=True,res=res,
+                       pwrFlag=True,looks=look_fact,terms=1,noCrossPol=True,
+                       dem=dem,stack=stack)
 
     for tmp in glob.glob("PRODUCT/*_V*.tif"):
         shutil.copy(tmp,prod_dir)
@@ -49,12 +50,14 @@ def fix_diff_par(diff_par,rng_med,azi_med):
     g.close()
     return outfile
 
+
 def get_poly(diff_par):
      polyra = getParameter(diff_par,"range_offset_polynomial",uselogging=True)
      polyaz = getParameter(diff_par,"azimuth_offset_polynomial",uselogging=True)
      ra_new = float(polyra.split()[0])
      az_new = float(polyaz.split()[0])
      return az_new,ra_new
+
 
 def check_coreg(di):
     fi = "{}/coreg_check.log".format(di)
@@ -67,7 +70,8 @@ def check_coreg(di):
     f.close()
     return pf
 
-def rtc_sentinel_stack(infiles,res,tol):
+
+def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
 
     if res == 10.0:
         look_fact = 1
@@ -82,14 +86,18 @@ def rtc_sentinel_stack(infiles,res,tol):
     logging.info("Preparing initial RTC stack")
     f_list = []
     p_list = [] 
+    f_cnt = 0
+    p_cnt = 0
     for fi in infiles:
         logging.info("Running granule {}".format(fi))
         new_dir = rtc_granule(fi,prod_dir,res,look_fact,match=True)
         pf = check_coreg(new_dir)
         if pf == False:
             f_list.append(new_dir)
+            f_cnt = f_cnt + 1
         else:
             p_list.append(new_dir)
+            p_cnt = p_cnt + 1
         if "zip" in fi:
             safe = fi.replace(".zip",".SAFE")
             shutil.move("{}/{}".format(new_dir,safe),safe)
@@ -97,43 +105,64 @@ def rtc_sentinel_stack(infiles,res,tol):
     logging.info("Pass List: {}".format(p_list))
     logging.info("Fail List: {}".format(f_list))
 
-    # If we have a mixed stack, re-run the granules that passed with no matching
-    if len(f_list) != 0 and len(p_list) !=0:
-        logging.info("Found mixed stack; reprocessing passing files with no matching")
-        for di in p_list:
-            safe = glob.glob("*{}*.SAFE".format(di))[0]
-            logging.info("Re-processing file {}".format(safe))
-            new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=False)
-            if new_dir != di: 
-                logging.error("ERROR!!!  You should never see this")
+    rng = np.zeros(len(p_list))
+    azi = np.zeros(len(p_list))
+    cnt = 0 
+    for di in p_list:
+        par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
+        azi[cnt],rng[cnt] = get_poly(par)
+        logging.info("{} : {} : {}",di,rng[cnt],azi[cnt])
+        cnt = cnt + 1
+    med_rng = np.median(rng)
+    med_azi = np.median(azi)
+    logging.info("Offset medians: {},{} (rng/azi)".format(med_rng,med_azi))
+
+    # If we have a mixed stack, re-run the granules
+    if f_cnt!= 0 and p_cnt!=0:
+        logging.info("Found mixed stack")
+        if (p_cnt/(f_cnt+p_cnt))>(pass_pct/100):
+            logging.info("Reprocessing failing files with median")
+            for di in f_list:
+                par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
+                logging.info("Fail found: {}; reprocessing with ({},{}) rng/azi offsets".format(di,med_rng,med_azi))
+
+                # Replace the rng,azi polynomial with the median
+                fix_diff_par(par,med_rng,med_azi)
+
+                # Next is to re-run the granule using the modified diff_par file
+                safe = glob.glob("*{}*.SAFE".format(di))[0]
+                logging.info("Re-processing file {}".format(safe))
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,stack=par)
+
+                if new_dir != di: 
+                    logging.error("ERROR!!!  You should never see this")
+            
+        else:
+            logging.info("Reprocessing passing files with no matching")
+            for di in p_list:
+                safe = glob.glob("*{}*.SAFE".format(di))[0]
+                logging.info("Re-processing file {}".format(safe))
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=False)
+                if new_dir != di: 
+                    logging.error("ERROR!!!  You should never see this")
     
     # If all success, check for outliers and reprocess
-    if len(f_list) == 0:
+    if f_cnt == 0:
         logging.info("Found stack that passed coregistration; looking for outliers") 
-        rng = np.zeros(len(p_list))
-        azi = np.zeros(len(p_list))
-        cnt = 0 
         for di in p_list:
             par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
-            azi[cnt],rng[cnt] = get_poly(par)
-            logging.info("{} : {} : {}",di,rng[cnt],azi[cnt])
-            cnt = cnt + 1
-        med_rng = np.median(rng)
-        med_azi = np.median(azi)
-        logging.info("Offset medians: {},{} (rng/azi)".format(med_rng,med_azi))
-        for di in p_list:
-            par = glob.glob("{}/geo_VV/image.diff_par")[0]
             azi1,rng1 = get_poly(par)
-            safe = glob.glob("*{}*.SAFE".format(di))[0]
-            safe = os.path.basename(safe)
             if np.abs(rng1-med_rng)>tol:
                 logging.info("Outlier found: {}; reprocessing with ({},{}) rng/azi offsets".format(di,med_rng,med_azi))
 
                 # Replace the rng,azi polynomial with the median
                 fix_diff_par(par,med_rng,med_azi)
 
-                # Next is to re-run the granule using the modified diff_par file
+                # Re-run the granule using the modified diff_par file
+                safe = glob.glob("*{}*.SAFE".format(di))[0]
+                safe = os.path.basename(safe)
                 new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,stack=par)
+
 
 if __name__ == '__main__':
 
@@ -141,6 +170,7 @@ if __name__ == '__main__':
   parser.add_argument("infile",nargs="+",help="zip files or SAFE directories")
   parser.add_argument("-r","--res",type=float,default=30,help="Desired output pixel spacing for stack (default 30m)")
   parser.add_argument("-t","--tolerance",type=float,default=2.0,help="Tolerance for required re-run (default 2.0)")
+  parser.add_argument("-p","--pass_percent",type=float,default=75,help="Percentage required to pass an entire stack (default 75)")
   args = parser.parse_args()
 
   logFile = "{}_{}_log.txt".format("ingest_stack",os.getpid())
@@ -149,5 +179,5 @@ if __name__ == '__main__':
   logging.getLogger().addHandler(logging.StreamHandler())
   logging.info("Starting run")
 
-  rtc_sentinel_stack(args.infile,args.res,args.tolerance)
+  rtc_sentinel_stack(args.infile,args.res,tol=args.tolerance,pass_pct=args.pass_percent)
 

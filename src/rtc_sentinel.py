@@ -187,7 +187,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
         
         if not fail:
             try:
-                check_coreg(outName,res,max_offset=75,max_error=1.8)
+                check_coreg(outName,res,max_offset=75,max_error=2.0)
             except:
                 if not deadFlag:
                     logging.error("ERROR: Failed the coregistration check")
