@@ -9,7 +9,7 @@ import numpy as np
 from getParameter import getParameter
 from rtc_sentinel import rtc_sentinel_gamma
 
-def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
+def rtc_granule(fi,prod_dir,res,look_fact,par=None,dem=None,match=True):
     back = os.getcwd()
     mydir = os.path.basename(fi)
     mydir = mydir.replace(".SAFE","")
@@ -24,7 +24,7 @@ def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
 
     rtc_sentinel_gamma(fi,matchFlag=match,deadFlag=True,gammaFlag=True,res=res,
                        pwrFlag=True,looks=look_fact,terms=1,noCrossPol=True,
-                       dem=dem,stack=stack)
+                       dem=dem,par=par)
 
     for tmp in glob.glob("PRODUCT/*_V*.tif"):
         shutil.copy(tmp,prod_dir)
@@ -35,9 +35,8 @@ def rtc_granule(fi,prod_dir,res,look_fact,stack=None,dem=None,match=True):
     return(mydir)
 
 
-def fix_diff_par(diff_par,rng_med,azi_med):
+def fix_diff_par(diff_par,outfile,rng_med,azi_med):
     f = open(diff_par,"r")
-    outfile = diff_par.replace(".par","") + "_accum.par"
     g = open(outfile,"w")
     for line in f:
         if "range_offset_polynomial" in line:
@@ -119,20 +118,22 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
 
     # If we have a mixed stack, re-run the granules
     if f_cnt!= 0 and p_cnt!=0:
-        logging.info("Found mixed stack")
-        if (p_cnt/(f_cnt+p_cnt))>(pass_pct/100):
+        this_pct = p_cnt/(f_cnt+p_cnt)
+        logging.info("Found mixed stack - {}% pass percentage".format(int(this_pct*100)))
+        if this_pct > (pass_pct/100):
             logging.info("Reprocessing failing files with median")
             for di in f_list:
                 par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
                 logging.info("Fail found: {}; reprocessing with ({},{}) rng/azi offsets".format(di,med_rng,med_azi))
 
                 # Replace the rng,azi polynomial with the median
-                fix_diff_par(par,med_rng,med_azi)
+                out_par = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.basename(par)))
+                par = fix_diff_par(par,out_par,med_rng,med_azi)
 
                 # Next is to re-run the granule using the modified diff_par file
                 safe = glob.glob("*{}*.SAFE".format(di))[0]
                 logging.info("Re-processing file {}".format(safe))
-                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,stack=par)
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par)
 
                 if new_dir != di: 
                     logging.error("ERROR!!!  You should never see this")
@@ -156,12 +157,13 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
                 logging.info("Outlier found: {}; reprocessing with ({},{}) rng/azi offsets".format(di,med_rng,med_azi))
 
                 # Replace the rng,azi polynomial with the median
-                fix_diff_par(par,med_rng,med_azi)
+                out_par = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.basename(par)))
+                par = fix_diff_par(par,out_par,med_rng,med_azi)
 
                 # Re-run the granule using the modified diff_par file
                 safe = glob.glob("*{}*.SAFE".format(di))[0]
                 safe = os.path.basename(safe)
-                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,stack=par)
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par)
 
 
 if __name__ == '__main__':
