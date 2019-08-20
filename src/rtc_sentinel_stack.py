@@ -9,14 +9,19 @@ import numpy as np
 from getParameter import getParameter
 from rtc_sentinel import rtc_sentinel_gamma
 
-def rtc_granule(fi,prod_dir,res,look_fact,par=None,dem=None,match=True):
+def rtc_granule(fi,prod_dir,res,look_fact,par=None,dem=None,match=True,rerun=False):
     back = os.getcwd()
     mydir = os.path.basename(fi)
     mydir = mydir.replace(".SAFE","")
     mydir = mydir[17:32]
+
     if os.path.exists(mydir):
-        logging.info("Old {} directory found; deleting".format(mydir))
-        shutil.rmtree(mydir)
+        if rerun:
+            logging.info("Old {} directory found; deleting".format(mydir))
+            shutil.rmtree(mydir)
+        else:
+            return(mydir)
+ 
     logging.info("Creating directory {} for {}".format(mydir,fi))
     os.mkdir(mydir)
     os.chdir(mydir)
@@ -89,7 +94,7 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
     p_cnt = 0
     for fi in infiles:
         logging.info("Running granule {}".format(fi))
-        new_dir = rtc_granule(fi,prod_dir,res,look_fact,match=True)
+        new_dir = rtc_granule(fi,prod_dir,res,look_fact,match=True,rerun=False)
         pf = check_coreg(new_dir)
         if pf == False:
             f_list.append(new_dir)
@@ -110,7 +115,7 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
     for di in p_list:
         par = glob.glob("{}/geo_VV/image.diff_par".format(di))[0]
         azi[cnt],rng[cnt] = get_poly(par)
-        logging.info("{} : {} : {}",di,rng[cnt],azi[cnt])
+        logging.info("{} : {} : {}".format(di,rng[cnt],azi[cnt]))
         cnt = cnt + 1
     med_rng = np.median(rng)
     med_azi = np.median(azi)
@@ -133,7 +138,7 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
                 # Next is to re-run the granule using the modified diff_par file
                 safe = glob.glob("*{}*.SAFE".format(di))[0]
                 logging.info("Re-processing file {}".format(safe))
-                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par)
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par,rerun=True)
 
                 if new_dir != di: 
                     logging.error("ERROR!!!  You should never see this")
@@ -143,7 +148,7 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
             for di in p_list:
                 safe = glob.glob("*{}*.SAFE".format(di))[0]
                 logging.info("Re-processing file {}".format(safe))
-                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=False)
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=False,rerun=True)
                 if new_dir != di: 
                     logging.error("ERROR!!!  You should never see this")
     
@@ -163,7 +168,9 @@ def rtc_sentinel_stack(infiles,res,tol=2,pass_pct=75):
                 # Re-run the granule using the modified diff_par file
                 safe = glob.glob("*{}*.SAFE".format(di))[0]
                 safe = os.path.basename(safe)
-                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par)
+                new_dir = rtc_granule(safe,prod_dir,res,look_fact,match=True,par=par,rerun=True)
+            else:
+                logging.info("Good offset found: {} : {} : {}".format(di,rng1,azi1))
 
 
 if __name__ == '__main__':
