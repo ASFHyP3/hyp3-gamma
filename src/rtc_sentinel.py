@@ -57,6 +57,9 @@ from ingest_S1_granule import ingest_S1_granule
 from make_cogs import cogify_dir
 from area2point import fix_geotiff_locations
 from getParameter import getParameter
+from raster_boundary2shape import raster_boundary2shape
+
+
 
 def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
@@ -240,7 +243,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     shutil.move("{}.ls_map.tif".format(outName),"{}/{}-ls_map.tif".format(outDir,auxName))
     shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
     shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
-
+    shutil.copy("image.diff_par","{}/{}_diff.par".format(outDir,auxName))
     os.chdir("..")
 
     
@@ -364,6 +367,8 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     byteSigmaScale(infile,sigmafile)
     makeAsfBrowse(sigmafile,outfile) 
     os.remove(sigmafile)
+
+    raster_boundary2shape(rtcName+"_"+pol+".tif", None, rtcName+"_shape.shp")
 
     os.chdir("..")
 
