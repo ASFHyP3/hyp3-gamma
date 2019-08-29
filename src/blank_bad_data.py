@@ -75,8 +75,8 @@ if __name__ == '__main__':
         print('ERROR: PAR input file (%s) does not exist!' % args.parFile)
         exit(1)
 
-    x = int(getParameter(args.parFile,"range_samp_1"))
-    y = int(getParameter(args.parFile,"az_samp_1"))
+    x = int(getParameter(args.parFile,"range_samp_2"))
+    y = int(getParameter(args.parFile,"az_samp_2"))
 
     blank_bad_data(args.rawFile,x,y,left=args.left,right=args.right,cut=args.cut)
     
