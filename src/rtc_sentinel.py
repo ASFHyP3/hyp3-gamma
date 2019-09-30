@@ -368,7 +368,8 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     makeAsfBrowse(sigmafile,outfile) 
     os.remove(sigmafile)
 
-    raster_boundary2shape(rtcName+"_"+pol+".tif", None, rtcName+"_shape.shp")
+    raster_boundary2shape(rtcName+"_"+pol+".tif", None, rtcName+"_shape.shp",use_closing=False,
+                          pixel_shift=True, fill_holes=True)
 
     os.chdir("..")
 
@@ -863,8 +864,8 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
         exit(1)
 
-    create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     fix_geotiff_locations()
+    create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     logFile = logging.getLogger().handlers[0].baseFilename
     rtcName=baseName+"_"+pol+".tif"
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
