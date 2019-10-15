@@ -29,7 +29,7 @@ def check_coreg(input,post,max_offset=50,max_error=2):
     display("SAR file: {}".format(input),f)
     display("Checking coregistration using {} meters".format(post),f)
     display("Setting maximum offset to be {}".format(max_offset),f)
-    display("Settimg maximum error to be {}".format(max_error),f)
+    display("Setting maximum error to be {}".format(max_error),f)
 
     myfile = "mk_geo_radcal_2.log"
     if os.path.isdir("geo_HH"):
