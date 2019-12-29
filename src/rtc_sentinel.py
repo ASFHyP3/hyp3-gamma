@@ -42,8 +42,10 @@ import saa_func_lib as saa
 from execute import execute 
 from get_dem import get_dem
 from utm2dem import utm2dem
+from ps2dem import ps2dem
 from get_bb_from_shape import get_bb_from_shape
 from getDemFor import getDemFile
+from getParameter import getParameter
 from createAmp import createAmp
 from byteSigmaScale import byteSigmaScale
 from makeAsfBrowse import makeAsfBrowse
@@ -125,7 +127,6 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     logging.info("Processing the {} polarization".format(pol))
 
     mgrd = "{out}.{pol}.mgrd".format(out=outName,pol=pol)
-    utm = "{out}.{pol}.utm".format(out=outName,pol=pol)
     small_map = "{out}_small_map".format(out=outName)
     tif = "image_cal_map.mli.tif"
 
@@ -256,7 +257,6 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
         mpol = "HH"
 
     mgrd = "{out}.{pol}.mgrd".format(out=outfile,pol=cpol)
-    utm = "{out}.{pol}.utm".format(out=outfile,pol=cpol)
     small_map = "{out}_small_map".format(out=outfile)
     tif = "image_cal_map.mli.tif"
 
@@ -747,6 +747,10 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         looks = int(res/10+0.5)
         logging.info("Setting looks to {}".format(looks))
 
+    # get rid of ending "/" 
+    if inFile.endswith("/"):
+        inFile = inFile[0:len(inFile)-1]
+
     if not os.path.exists(inFile):
         logging.error("ERROR: Input file {} does not exist".format(inFile))
         exit(1)
@@ -805,13 +809,16 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
             aoi.append(maxY)
             print aoi
         if aoi is not None:
-            demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,True,post=30)
+            demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,post=30)
         else:
-            logging.info("Calling getDemFile with {} {} {} {}".format(inFile,tifdem,True,30))
-            demfile,demType = getDemFile(inFile,tifdem,utmFlag=True,post=30)
+            demfile,demType = getDemFile(inFile,tifdem,post=30)
+
         dem = "area.dem"
         parfile = "area.dem.par"
-        utm2dem(tifdem,dem,parfile)
+        if "GIMP" in demType or "REMA" in demType:
+            ps2dem(tifdem,dem,parfile) 
+        else:
+            utm2dem(tifdem,dem,parfile)
         os.remove(tifdem)
     elif ".tif" in dem:
         tiff_dem = dem
@@ -889,33 +896,51 @@ if __name__ == '__main__':
   parser.add_argument('input',help='Name of input file, either .zip or .SAFE')
   parser.add_argument("-o","--outputResolution",type=float,help="Desired output resolution")
   group = parser.add_mutually_exclusive_group()
-  group.add_argument("-e","--externalDEM",help="Specify a DEM file to use")
+  group.add_argument("-e","--externalDEM",
+      help="Specify a DEM file to use - must be in UTM projection")
   group.add_argument("-a","--aoi",help="Specify AOI to use",type=float,nargs=4,
       metavar=('LON_MIN','LAT_MIN','LON_MAX','LAT_MAX'))
   group.add_argument("-s","--shape",help="Specify shape file to use")
   parser.add_argument("-n",action="store_false",help="Do not perform matching")
-  parser.add_argument("-d",action="store_true",help="if matching fails, use dead reckoning")
-  parser.add_argument("-g",action="store_true",help="create gamma0 instead of sigma0")
+  parser.add_argument("--fail",action="store_true",help="if matching fails, fail the program \
+      default:use dead reckoning")
+  parser.add_argument("--sigma",action="store_true",help="create sigma0 instead of gamma0")
+  parser.add_argument("--amp",action="store_true",help="create amplitude images instead of power")
+
   parser.add_argument("-l",action="store_true",help="create a lo-res output (30m)")
-  parser.add_argument("-p",action="store_true",help="create power images instead of amplitude")
   parser.add_argument("-f",action="store_true",help="run enhanced lee filter")
   parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
-  parser.add_argument("-t","--terms",type=int,help="set the number of terms in matching polynomial",
-           default=6)
+  parser.add_argument("-t","--terms",type=int,default=1,
+      help="set the number of terms in matching polynomial (default is 1)")
   parser.add_argument('--output',help='base name of the output files')
   parser.add_argument("--par",help="Stack processing - use specified offset file and don't match")
   parser.add_argument("--nocrosspol",help="Do not process the cross pol image",action="store_true")
   args = parser.parse_args()
 
-  logFile = "{}_{}_log.txt".format(os.path.splitext(args.input)[0],os.getpid())
+  logFile = "{}_{}_log.txt".format(args.input.rpartition('.')[0],os.getpid())
   logging.basicConfig(filename=logFile,format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.DEBUG)
   logging.getLogger().addHandler(logging.StreamHandler())
   logging.info("Starting run")
+  
+  if args.fail:
+    deadFlag = False
+  else :
+    deadFlag = True 
+
+  if not args.sigma:
+    gammaFlag = True
+  else:
+    gammaFlag = False 
+
+  if args.amp:
+    pwrFlag = False
+  else:
+    pwrFlag = True 
 
   rtc_sentinel_gamma(args.input,outName=args.output,res=args.outputResolution,dem=args.externalDEM,
-                     aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=args.d,
-                     gammaFlag=args.g,loFlag=args.l,pwrFlag=args.p,filterFlag=args.f,
+                     aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=deadFlag,
+                     gammaFlag=gammaFlag,loFlag=args.l,pwrFlag=pwrFlag,filterFlag=args.f,
                      looks=args.looks,terms=args.terms,par=args.par,
                      noCrossPol=args.nocrosspol)
                         
