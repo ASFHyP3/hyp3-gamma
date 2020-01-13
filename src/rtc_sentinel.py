@@ -98,7 +98,7 @@ def perform_sanity_checks():
 
 
 def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,terms,par,noCrossPol):
+                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth):
     
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(inName))
@@ -120,7 +120,9 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
     if par is not None:
         logging.info("    Offset file                       : {}".format(par))
     logging.info("    Process crosspol                  : {}".format(not noCrossPol))
-   
+    logging.info("    Smooth DEM tiles                  : {}".format(smooth))
+
+
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
                 filterFlag,pwrFlag,browse_res,outName,dem,date,terms,par=None):
 
@@ -546,7 +548,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
 
 
 def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
-                            shape,pwrFlag,filterFlag,pol,looks,logFile):
+                            shape,pwrFlag,filterFlag,pol,looks,logFile,smooth,terms,
+                            noCrossPol,par):
 
     out = "PRODUCT"
     logname = "{}/{}.log".format(out,basename)
@@ -557,17 +560,24 @@ def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag
     options = ""
     if loFlag:
         options = options + "-l "
-    if deadFlag:
-        options = options + "-d "
+    if not deadFlag:
+        options = options + "--fail "
     if matchFlag:
         options = options + "-n "
-    if gammaFlag:
-        options = options + "-g "
+    if not gammaFlag:
+        options = options + "--sigma "
     if filterFlag:
         options = options + "-f "
-    if pwrFlag:
-        options = options + "-p "
+    if not pwrFlag:
+        options = options + "--amp "
+    if smooth:
+        options = options + "--smooth "
     options = options + "-k {}".format(looks)
+    options = options + "-t {}".format(terms)
+    if par:
+        options = options + "--par {}".format(par)
+    if noCrossPol:
+        options = options + "--noCrossPol".format(noCrossPol)
     if aoi:
         options = options + "-a {}".format(aoi)
     if shape:
@@ -727,8 +737,8 @@ def clean_prod_dir():
 
 def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
                        deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
-                       filterFlag=None,looks=None,terms=6,par=None,
-                       noCrossPol=False):
+                       filterFlag=None,looks=None,terms=1,par=None,
+                       noCrossPol=False,smooth=False):
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
@@ -744,7 +754,13 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         browse_res = res
         
     if looks is None:
-        looks = int(res/10+0.5)
+        if res == 30:
+            if "GRD" in inFile:
+                looks = 6
+            else:
+                looks = 3 
+        else:
+            looks = int(res/10+0.5)
         logging.info("Setting looks to {}".format(looks))
 
     # get rid of ending "/" 
@@ -794,7 +810,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     auxName = baseName
 
     report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,terms,par,noCrossPol)
+                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth)
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
@@ -813,13 +829,17 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         else:
             demfile,demType = getDemFile(inFile,tifdem,post=30)
 
-        dem = "area.dem"
-        parfile = "area.dem.par"
-        if "GIMP" in demType or "REMA" in demType:
-            ps2dem(tifdem,dem,parfile) 
+        if 'REMA' in demType and smooth:
+            logging.info("Preparing to smooth DEM tiles")
+            dem, parfile = smooth_dem_tiles("DEM",build=True)
         else:
-            utm2dem(tifdem,dem,parfile)
-        os.remove(tifdem)
+            dem = "area.dem"
+            parfile = "area.dem.par"
+            if "GIMP" in demType or "REMA" in demType:
+                ps2dem(tifdem,dem,parfile) 
+            else:
+                utm2dem(tifdem,dem,parfile)
+            os.remove(tifdem)
     elif ".tif" in dem:
         tiff_dem = dem
         dem = "area.dem"
@@ -886,7 +906,8 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     logging.info("===================================================================")
 
     create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
-                        shape,pwrFlag,filterFlag,pol,looks,logFile)
+                        shape,pwrFlag,filterFlag,pol,looks,logFile,smooth,terms,
+                        noCrossPol,par)
 
 
 if __name__ == '__main__':
@@ -906,10 +927,11 @@ if __name__ == '__main__':
       default:use dead reckoning")
   parser.add_argument("--sigma",action="store_true",help="create sigma0 instead of gamma0")
   parser.add_argument("--amp",action="store_true",help="create amplitude images instead of power")
-
+  parser.add_argument("--smooth",action="store_true",help="smooth DEM file before terrain correction")
   parser.add_argument("-l",action="store_true",help="create a lo-res output (30m)")
   parser.add_argument("-f",action="store_true",help="run enhanced lee filter")
-  parser.add_argument("-k","--looks",type=int,help="set the number of looks to take")
+  parser.add_argument("-k","--looks",type=int,
+      help="set the number of looks to take (def:3 for SLC/6 for GRD)")
   parser.add_argument("-t","--terms",type=int,default=1,
       help="set the number of terms in matching polynomial (default is 1)")
   parser.add_argument('--output',help='base name of the output files')
@@ -942,5 +964,4 @@ if __name__ == '__main__':
                      aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=deadFlag,
                      gammaFlag=gammaFlag,loFlag=args.l,pwrFlag=pwrFlag,filterFlag=args.f,
                      looks=args.looks,terms=args.terms,par=args.par,
-                     noCrossPol=args.nocrosspol)
-                        
+                     noCrossPol=args.nocrosspol,smooth=args.smooth)
