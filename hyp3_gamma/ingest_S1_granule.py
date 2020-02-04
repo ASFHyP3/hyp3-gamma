@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
-from execute import execute
+from hyp3lib.execute import execute
 import logging
 import shutil
-import glob
-from par_s1_slc_single import par_s1_slc_single
-from SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
-from getBursts import getBursts
-from get_orb import downloadSentinelOrbitFile_2
+from hyp3lib.par_s1_slc_single import par_s1_slc_single
+from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
+from hyp3lib.getBursts import getBursts
+from hyp3lib.get_orb import downloadSentinelOrbitFile_2
 import os
 
 def ingest_S1_granule(inFile,pol,look_fact,outFile):

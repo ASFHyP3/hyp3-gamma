@@ -2,7 +2,7 @@
 
 import glob
 import os
-import saa_func_lib as saa
+from hyp3lib import saa_func_lib as saa
 from osgeo import gdal
 
 

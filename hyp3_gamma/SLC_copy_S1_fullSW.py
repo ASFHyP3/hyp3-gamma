@@ -3,8 +3,8 @@
 import logging
 import argparse
 from argparse import RawTextHelpFormatter
-from execute import execute
-from getParameter import getParameter
+from hyp3lib.execute import execute
+from hyp3lib.getParameter import getParameter
 import os
 import shutil
 

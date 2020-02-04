@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
 import argparse
-import saa_func_lib as saa
-import os, sys
+import hyp3lib.saa_func_lib as saa
+import os
+import sys
 import numpy as np
 from osgeo import gdal,osr,gdalconst
-from execute import execute
+from hyp3lib.execute import execute
 
 def utm2dem(inDem,outDem,demPar,dataType="float"):
     demParIn = "dem_par.in"

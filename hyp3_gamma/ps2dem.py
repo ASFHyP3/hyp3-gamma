@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
 import argparse
-import saa_func_lib as saa
+import hyp3lib.saa_func_lib as saa
 import numpy as np
 import os, sys
 import logging
-from osgeo import gdal,osr,gdalconst
-from execute import execute
+from osgeo import gdal, osr
+from hyp3lib.execute import execute
 
 def ps2dem(inDem,outDem,demPar):
     demParIn = "dem_par.in"
