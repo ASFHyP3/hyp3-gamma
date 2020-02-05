@@ -1,9 +1,9 @@
 import re, os
 import logging
-#
-# Read a value from a par file
-#
+
+
 def getParameter(parFile,parameter,uselogging=False):
+    """Read a value from a par file"""
 
     if os.path.isfile(parFile):
         myfile = open(parFile,"r")
