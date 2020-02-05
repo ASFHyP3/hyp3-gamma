@@ -1,12 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""re-process S1 SLC imagery into gamma format SLCs"""
 
 import logging
 import argparse
-from argparse import RawTextHelpFormatter
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 import os
+import sys
 import shutil
+
 
 def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None,raml=10,azml=2):
     
@@ -75,14 +77,17 @@ def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None
     os.chdir(wrk)
 
 
-if __name__ == '__main__':
+def main():
+    """Main entrypoint"""
 
+    # entrypoint name can differ from module name, so don't pass 0-arg
+    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
 
-    parser = argparse.ArgumentParser(prog='SLC_copy_S1_fullSW.py',
-      description='Pre-process S1 SLC imagery into gamma format SLCs',
-      formatter_class=RawTextHelpFormatter)
-
-    parser.add_argument('outDir',help="Absolute path to destination folder")    
+    parser = argparse.ArgumentParser(
+        prog=os.path.basename(__file__),
+        description=__doc__,
+    )
+    parser.add_argument('outDir',help="Absolute path to destination folder")
     parser.add_argument('slcID',help="SLC identifier (e.g. 20150429)")
     parser.add_argument('slcTab',help='SLC Tab file')
     parser.add_argument('burstTab',help='Burst tab for which bursts to copy')
@@ -91,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('-p','--path',help='Path to DEM file',dest="path")
     parser.add_argument('-rl','--rangelooks',default='10',help='Number of range looks',dest="rl") 
     parser.add_argument('-al','--azimuthlooks',default='2',help='Number of range looks',dest="al") 
-    args = parser.parse_args()
+    args = parser.parse_args(cli_args)
 
     if not os.path.exists(args.slcTab):
         logging.error("ERROR:  Can't find slc tab file {}".format(args.slcTab))
@@ -105,8 +110,11 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
+    SLC_copy_S1_fullSW(
+        args.outDir, args.slcID, args.slcTab, args.burstTab, args.mode, args.dem,
+        args.path, args.rl, args.al
+    )
 
 
-
-    SLC_copy_S1_fullSW(args.outDir,args.slcID,args.slcTab,args.burstTab,args.mode,args.dem,args.path,args.rl,args.al)
-
+if __name__ == '__main__':
+    main()

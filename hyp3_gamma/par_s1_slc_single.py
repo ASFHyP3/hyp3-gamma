@@ -1,11 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""Pre-process S1 SLC imagery into gamma format SLCs"""
 
 import logging
 import argparse
-from argparse import RawTextHelpFormatter
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 import os
+import sys
 import glob
 from hyp3lib.get_orb import downloadSentinelOrbitFile_2
 
@@ -114,20 +115,29 @@ def par_s1_slc_single(myfile,pol=None):
     os.chdir(wrk)
 
 
-if __name__ == '__main__':
+def main():
+    """Main entrypoint"""
 
-    parser = argparse.ArgumentParser(prog='par_s1_slc_single.py',
-      description='Pre-process S1 SLC imagery into gamma format SLCs',
-      formatter_class=RawTextHelpFormatter)
-    parser.add_argument('infile',help='input SAFE file name')
-    parser.add_argument('-p','--pol',default='vv',help='name of polarization to process (default vv)')
-    args = parser.parse_args()
-    
+    # entrypoint name can differ from module name, so don't pass 0-arg
+    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
+
+    parser = argparse.ArgumentParser(
+        prog=os.path.basename(__file__),
+        description=__doc__,
+    )
+    parser.add_argument('infile', help='input SAFE file name')
+    parser.add_argument('-p', '--pol', default='vv', help='name of polarization to process (default vv)')
+    args = parser.parse_args(cli_args)
+
     logFile = "par_s1_slc_single_log.txt"
-    logging.basicConfig(filename=logFile,format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p',level=logging.DEBUG)
+    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
-    par_s1_slc_single(args.infile,args.pol)    
+    par_s1_slc_single(args.infile, args.pol)
+
+
+if __name__ == '__main__':
+    main()
 

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import re, os
 import logging
 #

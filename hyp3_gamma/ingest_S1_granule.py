@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from hyp3lib.execute import execute
 import logging
 import shutil

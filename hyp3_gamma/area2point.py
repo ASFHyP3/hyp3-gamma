@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import glob
 import os
 from hyp3lib import saa_func_lib as saa

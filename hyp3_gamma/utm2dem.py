@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""Convert a geotiff DEM into GAMMA internal format"""
 
 import argparse
 import hyp3lib.saa_func_lib as saa
@@ -7,6 +8,7 @@ import sys
 import numpy as np
 from osgeo import gdal,osr,gdalconst
 from hyp3lib.execute import execute
+
 
 def utm2dem(inDem,outDem,demPar,dataType="float"):
     demParIn = "dem_par.in"
@@ -107,22 +109,29 @@ def utm2dem(inDem,outDem,demPar,dataType="float"):
     filename, file_extension = os.path.splitext(outDem)
     os.remove(outDem.replace(file_extension,".hdr"))
 
+
+def main():
+    """Main entrypoint"""
+
+    # entrypoint name can differ from module name, so don't pass 0-arg
+    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
+
+    parser = argparse.ArgumentParser(
+        prog=os.path.basename(__file__),
+        description=__doc__,
+    )
+    parser.add_argument('utm_dem', help='name of GeoTIFF file (input)')
+    parser.add_argument('dem', help='DEM data (output)')
+    parser.add_argument('dempar', help='Gamma DEM parameter file (output)')
+    parser.add_argument('-t', '--dataType', help='Desired output data type (float or int16)', default='float')
+    args = parser.parse_args(cli_args)
+
+    if not os.path.exists(args.utm_dem):
+        print('ERROR: GeoTIFF file (%s) does not exist!' % args.utm_dem)
+        sys.exit(1)
+
+    utm2dem(args.utm_dem, args.dem, args.dempar, args.dataType)
+
+
 if __name__ == '__main__':
-
-  parser = argparse.ArgumentParser(prog='utm2dem.py',
-    description='Convert a geotiff DEM into GAMMA internal format')
-  parser.add_argument('utm_dem', help='name of GeoTIFF file (input)')
-  parser.add_argument('dem', help='DEM data (output)')
-  parser.add_argument('dempar', help='Gamma DEM parameter file (output)')
-  parser.add_argument('-t','--dataType', help='Desired output data type (float or int16)',default='float')
-
-  if len(sys.argv) == 1:
-    parser.print_help()
-    sys.exit(1)
-  args = parser.parse_args()
-
-  if not os.path.exists(args.utm_dem):
-    print('ERROR: GeoTIFF file (%s) does not exist!' % args.utm_dem)
-    sys.exit(1)
-
-  utm2dem(args.utm_dem,args.dem,args.dempar,args.dataType)
+    main()
