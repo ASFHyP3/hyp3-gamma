@@ -23,7 +23,7 @@ def ingest_S1_granule(inFile,pol,look_fact,outFile):
 
         try:
             logging.info("Trying to get orbit file information from file {}".format(inFile))
-	    orbfile,tmp = downloadSentinelOrbitFile_2(inFile)
+            orbfile,tmp = downloadSentinelOrbitFile_2(inFile)
             logging.debug("Applying precision orbit information")
             cmd = "S1_OPOD_vec {grd}.par {eof}".format(grd=grd,eof=orbfile)
             execute(cmd,uselogging=True)
