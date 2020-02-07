@@ -55,8 +55,6 @@ def ps2dem(inDem,outDem,demPar):
         north = north + pix_north / 2.0
         logging.info("Update pixel upper northing (m): {}    easting (m): {}".format(north,east))
 
-    pix_size = pix_east
-
     # Create the input file for create_dem_par    
     f = open(demParIn,"w")
     f.write("PS\n")
