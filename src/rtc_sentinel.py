@@ -880,7 +880,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
             browse_res,outName,dem,date,terms,par=par)
 
-        if vhlist and not noCrossPol:
+        if hvlist and not noCrossPol:
             cpol = "HV"
             logging.info("Found HV polarization - processing")
             rtcName=baseName+"_"+cpol+".tif"
