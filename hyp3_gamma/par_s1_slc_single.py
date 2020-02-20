@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Pre-process S1 SLC imagery into gamma format SLCs"""
 
+from __future__ import print_function, absolute_import, division, unicode_literals
+
 import logging
 import argparse
 from hyp3lib.execute import execute
