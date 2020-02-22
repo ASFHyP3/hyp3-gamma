@@ -8,7 +8,6 @@ import argparse
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 import os
-import sys
 import shutil
 
 
