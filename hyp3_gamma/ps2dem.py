@@ -111,9 +111,6 @@ def ps2dem(inDem,outDem,demPar):
 def main():
     """Main entrypoint"""
 
-    # entrypoint name can differ from module name, so don't pass 0-arg
-    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
-
     parser = argparse.ArgumentParser(
         prog=os.path.basename(__file__),
         description=__doc__,
@@ -127,7 +124,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
-    args = parser.parse_args(cli_args)
+    args = parser.parse_args()
 
     if not os.path.exists(args.ps_dem):
         logging.info('ERROR: GeoTIFF file (%s) does not exist!' % args.ps_dem)

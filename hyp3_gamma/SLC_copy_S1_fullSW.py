@@ -82,9 +82,6 @@ def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None
 def main():
     """Main entrypoint"""
 
-    # entrypoint name can differ from module name, so don't pass 0-arg
-    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
-
     parser = argparse.ArgumentParser(
         prog=os.path.basename(__file__),
         description=__doc__,
@@ -98,7 +95,7 @@ def main():
     parser.add_argument('-p','--path',help='Path to DEM file',dest="path")
     parser.add_argument('-rl','--rangelooks',default='10',help='Number of range looks',dest="rl") 
     parser.add_argument('-al','--azimuthlooks',default='2',help='Number of range looks',dest="al") 
-    args = parser.parse_args(cli_args)
+    args = parser.parse_args()
 
     if not os.path.exists(args.slcTab):
         logging.error("ERROR:  Can't find slc tab file {}".format(args.slcTab))

@@ -120,16 +120,13 @@ def par_s1_slc_single(myfile,pol=None):
 def main():
     """Main entrypoint"""
 
-    # entrypoint name can differ from module name, so don't pass 0-arg
-    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
-
     parser = argparse.ArgumentParser(
         prog=os.path.basename(__file__),
         description=__doc__,
     )
     parser.add_argument('infile', help='input SAFE file name')
     parser.add_argument('-p', '--pol', default='vv', help='name of polarization to process (default vv)')
-    args = parser.parse_args(cli_args)
+    args = parser.parse_args()
 
     logFile = "par_s1_slc_single_log.txt"
     logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',

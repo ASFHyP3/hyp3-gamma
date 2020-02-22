@@ -115,9 +115,6 @@ def utm2dem(inDem,outDem,demPar,dataType="float"):
 def main():
     """Main entrypoint"""
 
-    # entrypoint name can differ from module name, so don't pass 0-arg
-    cli_args = sys.argv[1:] if len(sys.argv) > 1 else None
-
     parser = argparse.ArgumentParser(
         prog=os.path.basename(__file__),
         description=__doc__,
@@ -126,7 +123,7 @@ def main():
     parser.add_argument('dem', help='DEM data (output)')
     parser.add_argument('dempar', help='Gamma DEM parameter file (output)')
     parser.add_argument('-t', '--dataType', help='Desired output data type (float or int16)', default='float')
-    args = parser.parse_args(cli_args)
+    args = parser.parse_args()
 
     if not os.path.exists(args.utm_dem):
         print('ERROR: GeoTIFF file (%s) does not exist!' % args.utm_dem)
