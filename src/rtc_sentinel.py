@@ -54,13 +54,12 @@ from rtc2color import rtc2color
 from xml2meta import sentinel2meta
 from asf_utils import write_asf_meta
 from copy_metadata import copy_metadata
-from make_arc_thumb import pngtothumb
 from ingest_S1_granule import ingest_S1_granule
 from make_cogs import cogify_dir
 from area2point import fix_geotiff_locations
 from getParameter import getParameter
 from raster_boundary2shape import raster_boundary2shape
-
+from create_metadata import create_arc_xml 
 
 
 def perform_sanity_checks():
@@ -121,6 +120,24 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
         logging.info("    Offset file                       : {}".format(par))
     logging.info("    Process crosspol                  : {}".format(not noCrossPol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
+
+
+def get_tile_list():
+    tile_list = None
+    for myfile in glob.glob("DEM/*.tif"):
+        tile = os.path.basename(myfile)
+        if tile_list is not None:
+            tile_list = tile_list + ", " + tile
+        else:
+            tile_list = tile
+     
+    cnt = len(tile_list)
+    if cnt > 2:
+        logging.info("Found DEM tile list of {}".format(tile_list)) 
+        return tile_list
+    else:
+        logging.warning("Warning: no DEM tile list created")
+        return(None)
 
 
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
@@ -374,177 +391,6 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
                           pixel_shift=True, fill_holes=True)
 
     os.chdir("..")
-
-
-def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
-                   demType,spacing,hyp3_ver,gamma_ver):
-
-    spacing = int(spacing)
-
-    # Create XML metadata files
-    etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
-    back = os.getcwd()
-    os.chdir("PRODUCT")
-    now = datetime.datetime.now()
-    date = now.strftime("%Y%m%d")
-    time = now.strftime("%H%M%S")
-    dt = now.strftime("%Y-%m-%dT%H:%M:%S")
-    year = now.year
-    basename = os.path.basename(infile)
-    granulename = os.path.splitext(basename)[0]
-    flooks = looks*30
-    if gammaFlag:
-        power_type = "gamma"
-    else:
-        power_type = "sigma"
-    if pwrFlag:
-        format_type = "power"
-    else:
-        format_type = "amplitude"
-    if filterFlag:
-        filterStr = "has"
-    else:
-        filterStr = "has not"
-
-    if inputType == "SLC":
-        full_type = "Single-Look Complex"
-    else:
-        full_type = "Ground Range Detected"
-
-    if "NED" in demType:
-        if "13" in demType:
-            resa = "1/3"
-            resm = 10
-        elif "1" in demType:
-            resa = 1
-            resm = 30
-        else:
-            resa = 2
-            resm = 60
-    else:
-        if "1" in demType:
-            resa = 1
-            resm = 30
-        else:
-            resa = 3
-            resm = 90
-
-    for myfile in glob.glob("*.tif"):
-        f = None
-        this_pol = None
-        if cpol is None:
-            cpol = "ZZ"
-        if pol in myfile or cpol in myfile:
-            f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir),"r")
-            g = open("{}.xml".format(myfile),"w")
-            encoded_jpg = pngtothumb("{}.png".format(outfile))
-            if pol in myfile:
-                this_pol = pol
-            else:
-                this_pol = cpol
-        elif "ls_map" in myfile:
-            f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir),"r")
-            g = open("{}.xml".format(myfile),"w")
-            cmd = "pbmmake 100 75 | pnmtopng > white.png"
-            execute(cmd,uselogging=True)
-            encoded_jpg = pngtothumb("white.png")
-            os.remove("white.png")
-        elif "inc_map" in myfile:
-            f = open("{}/RTC_GAMMA_Template_inc.xml".format(etc_dir),"r")
-            g = open("{}.xml".format(myfile),"w")
-            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
-        elif "dem" in myfile:
-            if "NED" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir),"r")
-            else:
-                f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir),"r")
-            g = open("{}.xml".format(myfile),"w")
-            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
-        if f is not None: 
-            for line in f:
-                line = line.replace("[DATE]",date)
-                line = line.replace("[TIME]","{}00".format(time))
-                line = line.replace("[DATETIME]",dt)
-                line = line.replace("[YEARPROCESSED]","{}".format(year))
-                line = line.replace("[YEARACQUIRED]",infile[17:21])
-                line = line.replace("[TYPE]",inputType)
-                line = line.replace("[FULL_TYPE]",full_type)
-                line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
-                if this_pol is not None:
-                    line = line.replace("[POL]",this_pol)
-                line = line.replace("[POWERTYPE]",power_type)
-                line = line.replace("[GRAN_NAME]",granulename)
-                line = line.replace("[FORMAT]",format_type)
-                line = line.replace("[LOOKS]","{}".format(looks))
-                line = line.replace("[FILT]","{}".format(filterStr))
-                line = line.replace("[FLOOKS]","{}".format(flooks))
-                line = line.replace("[SPACING]","{}".format(spacing))
-                line = line.replace("[DEM]","{}".format(demType))
-                line = line.replace("[RESA]","{}".format(resa))
-                line = line.replace("[RESM]","{}".format(resm))
-                line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
-                line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
-                g.write("{}\n".format(line))
-            f.close()
-            g.close()
-
-    for myfile in glob.glob("*.png"):
-
-        if "rgb" in myfile:
-            f = open("{}/RTC_GAMMA_Template_color_png.xml".format(etc_dir),"r")
-            encoded_jpg = pngtothumb("{}_rgb.png".format(outfile))
-        else:
-            f = open("{}/RTC_GAMMA_Template_grayscale_png.xml".format(etc_dir),"r")
-            encoded_jpg = pngtothumb("{}.png".format(outfile))
-
-        if "large" in myfile:
-            res = "medium"
-        else:
-            res = "low"
-
-        g = open("{}.xml".format(myfile),"w")
-        for line in f:
-            line = line.replace("[DATE]",date)
-            line = line.replace("[TIME]","{}00".format(time))
-            line = line.replace("[DATETIME]",dt)
-            line = line.replace("[YEARPROCESSED]","{}".format(year))
-            line = line.replace("[YEARACQUIRED]",infile[17:21])
-            line = line.replace("[TYPE]",inputType)
-            line = line.replace("[FULL_TYPE]",full_type)
-            line = line.replace("[THUMBNAIL_BINARY_STRING]",encoded_jpg)
-            line = line.replace("[GRAN_NAME]",granulename)
-            line = line.replace("[RES]",res)
-            line = line.replace("[SPACING]","{}".format(spacing))
-            line = line.replace("[FORMAT]",format_type)
-            line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
-            line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
-            g.write("{}\n".format(line))
-        f.close()
-        g.close()
-
-    f = open("{}/README_Template.txt".format(etc_dir),"r")
-    g = open("README.txt","w")
-    for line in f:
-        line = line.replace("[DATE]",date)
-        line = line.replace("[TIME]","{}00".format(time))
-        line = line.replace("[DATETIME]",dt)
-        line = line.replace("[GRAN_NAME]",granulename)
-        line = line.replace("[YEARPROCESSED]","{}".format(year))
-        line = line.replace("[YEARACQUIRED]",infile[17:21])
-        line = line.replace("[POWERTYPE]",power_type)
-        line = line.replace("[FORMAT]",format_type)
-        line = line.replace("[LOOKS]","{}".format(looks))
-        line = line.replace("[SPACING]","{}".format(spacing))
-        line = line.replace("[DEM]","{}".format(demType))
-        line = line.replace("[RESA]","{}".format(resa))
-        line = line.replace("[RESM]","{}".format(resm))
-        line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
-        line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
-        g.write("{}".format(line))
-    f.close()
-    g.close()
-
-    os.chdir(back)
 
 
 def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
@@ -896,8 +742,9 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     logFile = logging.getLogger().handlers[0].baseFilename
     rtcName=baseName+"_"+pol+".tif"
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
+    demTiles = get_tile_list()
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
-                   demType,res,hyp3_ver,gamma_ver)
+                   demType,demTiles,res,hyp3_ver,gamma_ver)
     cogify_dir(res=res)
     clean_prod_dir()
     perform_sanity_checks()
