@@ -53,7 +53,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 2
             resm = 60
-        PCS = "WGS 1984 UTM"
+        pcs = "WGS 1984 UTM"
     elif "SRTMGL" in demType:
         if "1" in demType:
             resa = 1
@@ -61,15 +61,15 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 3
             resm = 90
-        PCS = "WGS 1984 UTM"
+        pcs = "WGS 1984 UTM"
     elif "EU_DEM" in demType
         resa = 1
         resm = 30
-        PCS = "WGS 1984 Antarctic Polar Stereographic"
+        pcs = "WGS 1984 Antarctic Polar Stereographic"
     elif "GIMP" in demType
         resa = 1
         resm = 30
-        PCS = "WGS 1984 NSIDC Polar Stereographic North"
+        pcs = "WGS 1984 NSIDC Polar Stereographic North"
     else:
         logging.error("Unrecognized DEM type: {}".format(demType))
         exit(1)
@@ -130,6 +130,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
                 line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
                 line = line.replace("[DEM_TILES]","{}".format(demTiles))
+                line = line.replace("[PCS]","{}".format(pcs))
                 g.write("{}\n".format(line))
             f.close()
             g.close()
@@ -166,6 +167,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
             line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
             line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
             line = line.replace("[DEM_TILES]","{}".format(demTiles))
+            line = line.replace("[PCS]","{}".format(pcs))
             g.write("{}\n".format(line))
         f.close()
         g.close()
@@ -189,6 +191,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
         line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
         line = line.replace("[DEM_TILES]","{}".format(demTiles))
+        line = line.replace("[PCS]","{}".format(pcs))
         g.write("{}".format(line))
     f.close()
     g.close()
