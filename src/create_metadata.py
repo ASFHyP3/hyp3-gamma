@@ -62,11 +62,11 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
             resa = 3
             resm = 90
         pcs = "WGS 1984 UTM"
-    elif "EU_DEM" in demType
+    elif "EU_DEM" in demType:
         resa = 1
         resm = 30
         pcs = "WGS 1984 Antarctic Polar Stereographic"
-    elif "GIMP" in demType
+    elif "GIMP" in demType:
         resa = 1
         resm = 30
         pcs = "WGS 1984 NSIDC Polar Stereographic North"
