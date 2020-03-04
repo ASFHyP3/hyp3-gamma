@@ -101,8 +101,16 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         elif "dem" in myfile:
             if "NED" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir),"r")
-            else:
+            elif "SRTM" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir),"r")
+            elif "EUDEM" in demType:
+                f = open("{}/RTC_GAMMA_Template_dem_EUDEM.xml".format(etc_dir),"r")
+            elif "GIMP" in demType:
+                f = open("{}/RTC_GAMMA_Template_dem_GIMP.xml".format(etc_dir),"r")
+            elif "REMA" in demType:
+                f = open("{}/RTC_GAMMA_Template_dem_REMA.xml".format(etc_dir),"r")
+            else:
+                logging.error("ERROR: Unrecognized dem type: {}".format(demType)) 
             g = open("{}.xml".format(myfile),"w")
             encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
         if f is not None:
@@ -129,7 +137,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 line = line.replace("[RESM]","{}".format(resm))
                 line = line.replace("[HYP3_VER]","{}".format(hyp3_ver))
                 line = line.replace("[GAMMA_VER]","{}".format(gamma_ver))
-                line = line.replace("[DEM_TILES]","{}".format(demTiles))
+                line = line.replace("[TILES]","{}".format(demTiles))
                 line = line.replace("[PCS]","{}".format(pcs))
                 g.write("{}\n".format(line))
             f.close()
