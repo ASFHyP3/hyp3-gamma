@@ -1,5 +1,5 @@
 # HyP3 Metadata Templates
-This directory structure contains the metadata templates for HyP3 products.  
+This repository contains the metadata templates for HyP3 products.  
 
 Each different processor for each process has its own set of templates, because there are significant differences in the output files and processing method depending on the processor used (i.e. GAMMA vs. S1TBX).  
 
