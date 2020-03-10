@@ -19,11 +19,13 @@ In order to render properly in ArcGIS, the xml files must be formatted in a very
     a. Check the boxes for Keep line breaks and Keep line breaks in text  
     b. Set the Keep blank lines to 0  
     c. Set the Wrap attributes to Do not wrap and remove checks from wrapping and spaces settings  
+    
 ![](SettingsImages/Editor_CodeStyle_XML_Other.JPG)  
 
 For ease of viewing when editing, in the Editor > General settings, scroll down to Soft Wraps, and make the following changes:  
 1. Check the soft wrap files option, and add ; *.xml to the list of file types  
 2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if you'd like (I prefer an additional 2 spaces).   
+
 ![](SettingsImages/Editor_General_SoftWraps.JPG)  
 
 
