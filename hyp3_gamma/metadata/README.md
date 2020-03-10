@@ -9,11 +9,11 @@ The goal is for each process to have a README file, which gives an overview of t
 
 ## ArcGIS-Compatible Metadata
 
-In order to render properly in ArcGIS, the xml files must be formatted in a very rigid way. When editing the files in PyCharm, the following settings are necessary for the xml to render properly:
+When editing the templates in PyCharm, the following settings must be changed if the edited xml files are to render properly in ArcGIS.
 
 1. In Editor > Code Style > XML > Tabs and Indents, set the Indent values to 0  
 
-![](SettingsImages/Editor_CodeStyle_XML_TabsIndents.JPG)
+![](SettingsImages/Editor_CodeStyle_XML_TabsIndents.JPG)  
 
 2. In Editor > Code Style > XML > Other:  
     a. Check the boxes for Keep line breaks and Keep line breaks in text  
@@ -27,6 +27,10 @@ For ease of viewing when editing, in the Editor > General settings, scroll down 
 2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if you'd like (I prefer an additional 2 spaces).   
 
 ![](SettingsImages/Editor_General_SoftWraps.JPG)  
+
+You can create different schemas in the Editor > Code Style > XML settings, and I have generated one for writing and one for editing xml files. When editing, it can be helpful to apply indentations to see the tag structure more clearly. In those settings, I have the indentations set to 4 and 8, and choose to align the attributes. From the File - Settings menu, I select the Edit schema in Editor > Code Style > XML, then open the template xml file and select Reformat Code from the Code menu. After editing, I change the settings to select the Write schema instead, and again select Reformat Code from the Code menu. This removes the indentations, allowing for proper parsing of the xml in ArcGIS.
+
+
 
 
 
