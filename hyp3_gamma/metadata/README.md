@@ -33,7 +33,7 @@ For ease of viewing when editing, in the Editor > General settings, scroll down 
 
 **************
 **************
-Note that if there are any new lines that are added directly in a text editor by using the return key, they will not render properly in ArcGIS if there are tabs/indentation applied to the code in PyCharm. One way to avoid these issues is to use html formatting tags instead. It's a bit tedious, but it will ensure that the code can be parsed just as well in ArcGIS as in PyCharm.  
+Note that if there are any new lines that are added directly in a text editor by using the return key, they will not render properly in ArcGIS if there are tabs/indentation applied to the code in PyCharm (or any other editor). One way to avoid these issues is to use html formatting tags instead. It's a bit tedious, but it will ensure that the code can be parsed just as well in ArcGIS as in PyCharm.  
 
 If you have text breaks that are NOT formatted in the html tags, another option is to change the tabs and indent settings in PyCharm, then reformat the code. To use this method:
 
