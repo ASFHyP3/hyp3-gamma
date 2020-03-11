@@ -13,7 +13,7 @@ When editing the xml templates in PyCharm, care must be taken to keep them in a 
 
 Use Ctrl+Alt+S to open the settings window, or select Settings from the File menu.
 
-####Change the hard wrap settings:
+###Change the hard wrap settings:
 In Editor > Code Style > XML > Other:
 1. Check the boxes for Keep line breaks and Keep line breaks in text  
 2. Set the "Keep blank lines" option to 0  
@@ -21,7 +21,7 @@ In Editor > Code Style > XML > Other:
 
 ![](SettingsImages/Editor_CodeStyle_XML_Other.JPG)  
 
-####Change the soft wrap settings:
+###Change the soft wrap settings:
 For ease of viewing when editing, in the Editor > General settings, scroll down to Soft Wraps, and make the following changes:  
 1. Check the soft wrap files option, and add ; *.xml to the list of file types  
 2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if desired
