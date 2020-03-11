@@ -1,34 +1,46 @@
 # HyP3 Metadata Templates
 This repository contains the metadata templates for HyP3 products.  
 
-Each different processor for each process has its own set of templates, because there are significant differences in the output files and processing method depending on the processor used (i.e. GAMMA vs. S1TBX).  
+Each different processor for each process has its own set of templates, as there are significant differences in the output files and processing method depending on the processor used (i.e. GAMMA vs. S1TBX).  
 
 Each processor has its own directory, and each of those directories has subdirectories for the process types available for that processor. For example, the GAMMA directory has subdirectories for RTC, InSAR, RGB Decomposition, RGB Difference, and Threshold Change Detection.  
 
-The goal is for each process to have a README file, which gives an overview of the product, including a list of all of the files contained in the product zip file with brief summaries for each file. In addition, some processes have individual xml files for each of the raster files contained in the product archive. They have been designed and formatted to display correctly in the ArcGIS metadata environment (Item Description in ArcGIS Desktop, and Metadata tab in ArcGIS Pro).  
+The goal is for each process to have a README text file, which gives an overview of the product, including a list of all of the files contained in the product zip file with brief summaries for each file. In addition, some processes have individual xml files for each of the raster files contained in the product archive. They have been designed and formatted to display correctly in the ArcGIS metadata environment (Item Description in ArcGIS Desktop, and Metadata tab in ArcGIS Pro).  
 
 ## ArcGIS-Compatible Metadata
 
-When editing the templates in PyCharm, the following settings must be changed if the edited xml files are to render properly in ArcGIS.
+When editing the xml templates in PyCharm, care must be taken to keep them in a format that can be properly parsed by ArcGIS. Most importantly, the hard wrap options must be disabled. There are also some adjustments that can be made to the default settings to improve the display of the xml elements while editing the content.   
 
-1. In Editor > Code Style > XML > Tabs and Indents, set the Indent values to 0  
+Use Ctrl+Alt+S to open the settings window, or select Settings from the File menu.
 
-![](SettingsImages/Editor_CodeStyle_XML_TabsIndents.JPG)  
+####Change the hard wrap settings:
+In Editor > Code Style > XML > Other:
+1. Check the boxes for Keep line breaks and Keep line breaks in text  
+2. Set the "Keep blank lines" option to 0  
+3. **Set the Wrap attributes to "Do not wrap" and remove checks from wrapping and spaces settings**
 
-2. In Editor > Code Style > XML > Other:  
-    a. Check the boxes for Keep line breaks and Keep line breaks in text  
-    b. Set the Keep blank lines to 0  
-    c. Set the Wrap attributes to Do not wrap and remove checks from wrapping and spaces settings  
-    
 ![](SettingsImages/Editor_CodeStyle_XML_Other.JPG)  
 
+####Change the soft wrap settings:
 For ease of viewing when editing, in the Editor > General settings, scroll down to Soft Wraps, and make the following changes:  
 1. Check the soft wrap files option, and add ; *.xml to the list of file types  
-2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if you'd like (I prefer an additional 2 spaces).   
+2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if desired
 
 ![](SettingsImages/Editor_General_SoftWraps.JPG)  
 
-You can create different schemas in the Editor > Code Style > XML settings, and I have generated one for writing and one for editing xml files. When editing, it can be helpful to apply indentations to see the tag structure more clearly. In those settings, I have the indentations set to 4 and 8, and choose to align the attributes. From the File - Settings menu, I select the Edit schema in Editor > Code Style > XML, then open the template xml file and select Reformat Code from the Code menu. After editing, I change the settings to select the Write schema instead, and again select Reformat Code from the Code menu. This removes the indentations, allowing for proper parsing of the xml in ArcGIS.
+
+**************
+**************
+Note that if there are any new lines that are added directly in a text editor by using the return key, they will not render properly in ArcGIS if there are tabs/indentation applied to the code in PyCharm. One way to avoid these issues is to use html formatting tags instead. It's a bit tedious, but it will ensure that the code can be parsed just as well in ArcGIS as in PyCharm.  
+
+If you have text breaks that are NOT formatted in the html tags, another option is to change the tabs and indent settings in PyCharm, then reformat the code. To use this method:
+
+1. In Editor > Code Style > XML > Tabs and Indents, set the Indent and Continuation Indent values to 0 and click OK
+2. With the XML file open, select Reformat Code from the Code menu to remove the tab-based indentations.
+
+![](SettingsImages/Editor_CodeStyle_XML_TabsIndents.JPG)  
+
+If you use this approach frequently, you may want to create different schemes in the Editor > Code Style > XML settings. For example, save an Edit scheme, which keeps the indentation settings (i.e. Indent: 4, Continuation Indent: 8), and a Write scheme, which sets both to 0. 
 
 
 
