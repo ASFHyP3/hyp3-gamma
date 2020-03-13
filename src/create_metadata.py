@@ -5,6 +5,7 @@
 import os
 import datetime
 import glob
+import logging
 from make_arc_thumb import pngtothumb
 from execute import execute
 
@@ -103,7 +104,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                 f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir),"r")
             elif "SRTM" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir),"r")
-            elif "EUDEM" in demType:
+            elif "EU_DEM" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_EUDEM.xml".format(etc_dir),"r")
             elif "GIMP" in demType:
                 f = open("{}/RTC_GAMMA_Template_dem_GIMP.xml".format(etc_dir),"r")
