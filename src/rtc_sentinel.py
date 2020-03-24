@@ -45,7 +45,6 @@ from utm2dem import utm2dem
 from ps2dem import ps2dem
 from get_bb_from_shape import get_bb_from_shape
 from getDemFor import getDemFile
-from getParameter import getParameter
 from createAmp import createAmp
 from byteSigmaScale import byteSigmaScale
 from makeAsfBrowse import makeAsfBrowse
@@ -96,16 +95,16 @@ def perform_sanity_checks():
                     logging.debug("...ok")
 
 
-def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth):
+def report_kwargs(inName,outName,res,dem,roi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
+                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth,area):
     
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(inName))
     logging.info("    Output name                       : {}".format(outName))
     logging.info("    Output resolution                 : {}".format(res))
     logging.info("    DEM file                          : {}".format(dem))
-    if aoi is not None:
-        logging.info("    Area of Interest                  : {}".format(aoi)) 
+    if roi is not None:
+        logging.info("    Area of Interest                  : {}".format(roi)) 
     if shape is not None:
         logging.info("    Shape File                        : {}".format(shape)) 
     logging.info("    Match flag                        : {}".format(matchFlag))
@@ -120,6 +119,7 @@ def report_kwargs(inName,outName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,
         logging.info("    Offset file                       : {}".format(par))
     logging.info("    Process crosspol                  : {}".format(not noCrossPol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
+    logging.info("    Save Pixel Area                   : {}".format(area))
 
 
 def get_tile_list():
@@ -141,7 +141,7 @@ def get_tile_list():
 
 
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
-                filterFlag,pwrFlag,browse_res,outName,dem,date,terms,par=None):
+                filterFlag,pwrFlag,browse_res,outName,dem,date,terms,par=None,area=False):
 
     logging.info("Processing the {} polarization".format(pol))
 
@@ -151,10 +151,10 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     # Ingest the granule into gamma format
     ingest_S1_granule(inFile,pol,look_fact,mgrd)  
+    width = getParameter("{}.par".format(mgrd),"range_samples")
 
     # Apply filter if requested
     if filterFlag:
-        width = getParameter("{}.par".format(mgrd),"range_samples")
         el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
@@ -211,10 +211,29 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     os.chdir(dir)
 
+#    cmd = "float_math image_cal_map.mli image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
+#    execute(cmd)
+
+######## YOU ARE HERE i
+
+    # Divide sigma0 by sin(theta) to get beta0
+    cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+
+    cmd = "float_math image_cal_map.mli image_1.sin_theta image_1.beta {wid} 3 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+
+    cmd = "float_math image_1.beta image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+
+
+
     # Make Geotiff Files
     cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(outName)
     execute(cmd,uselogging=True)
     cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(outName)
+    execute(cmd,uselogging=True)
+    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outName)
     execute(cmd,uselogging=True)
     cmd = "data2geotiff area.dem_par area.dem 2 outdem.tif"
     execute(cmd,uselogging=True)
@@ -264,6 +283,9 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
     shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
     shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
     shutil.copy("image.diff_par","{}/{}_diff.par".format(outDir,auxName))
+    if area:
+        shutil.move("{}.flat.tif".format(outName),"{}/{}-flat.tif".format(outDir,auxName))
+        
     os.chdir("..")
 
     
@@ -393,7 +415,7 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
     os.chdir("..")
 
 
-def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
+def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag,roi,
                             shape,pwrFlag,filterFlag,pol,looks,logFile,smooth,terms,
                             noCrossPol,par):
 
@@ -424,8 +446,8 @@ def create_consolidated_log(basename,outName,loFlag,deadFlag,matchFlag,gammaFlag
         options = options + "--par {}".format(par)
     if noCrossPol:
         options = options + "--noCrossPol".format(noCrossPol)
-    if aoi:
-        options = options + "-a {}".format(aoi)
+    if roi:
+        options = options + "-a {}".format(roi)
     if shape:
         options = options + "-s {}".format(shape)
 
@@ -581,14 +603,30 @@ def clean_prod_dir():
         os.remove(myfile)
     os.chdir("..")
 
-def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None,matchFlag=True,
-                       deadFlag=None,gammaFlag=None,loFlag=None,pwrFlag=None,
-                       filterFlag=None,looks=None,terms=1,par=None,
-                       noCrossPol=False,smooth=False):
+def rtc_sentinel_gamma(inFile,
+                       outName=None,
+                       res=None,
+                       dem=None,
+                       roi=None,
+                       shape=None,
+                       matchFlag=True,
+                       deadFlag=None,
+                       gammaFlag=None,
+                       loFlag=None,
+                       pwrFlag=None,
+                       filterFlag=None,
+                       looks=None,
+                       terms=1,
+                       par=None,
+                       noCrossPol=False,
+                       smooth=False,
+                       area=False):
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
+
+    logging.info("Area flag is {}".format(area))
 
     if res is None:
         res = 10
@@ -655,8 +693,8 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
        baseName = outName
     auxName = baseName
 
-    report_kwargs(inFile,baseName,res,dem,aoi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
-                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth)
+    report_kwargs(inFile,baseName,res,dem,roi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
+                  pwrFlag,filterFlag,looks,terms,par,noCrossPol,smooth,area)
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
@@ -664,14 +702,14 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         if shape is not None:
             minX,minY,maxX,maxY = get_bb_from_shape(shape)
             print minX,minY,maxX,maxY
-            aoi = []
-            aoi.append(minX)
-            aoi.append(minY)
-            aoi.append(maxX)
-            aoi.append(maxY)
-            print aoi
-        if aoi is not None:
-            demType = get_dem(aoi[0],aoi[1],aoi[2],aoi[3],tifdem,post=30)
+            roi = []
+            roi.append(minX)
+            roi.append(minY)
+            roi.append(maxX)
+            roi.append(maxY)
+            print roi
+        if roi is not None:
+            demType = get_dem(roi[0],roi[1],roi[2],roi[3],tifdem,post=30)
         else:
             demfile,demType = getDemFile(inFile,tifdem,post=30)
 
@@ -710,7 +748,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         pol = "VV"
         rtcName=baseName+"_"+pol+".tif"
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,date,terms,par=par)
+            browse_res,outName,dem,date,terms,par=par,area=area)
           
         if vhlist and not noCrossPol:
             cpol = "VH"
@@ -724,7 +762,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
         pol = "HH"
         rtcName=baseName+"_"+pol+".tif"
         process_pol(inFile,rtcName,auxName,pol,res,looks,matchFlag,deadFlag,gammaFlag,filterFlag,pwrFlag,
-            browse_res,outName,dem,date,terms,par=par)
+            browse_res,outName,dem,date,terms,par=par,area=area)
 
         if hvlist and not noCrossPol:
             cpol = "HV"
@@ -752,7 +790,7 @@ def rtc_sentinel_gamma(inFile,outName=None,res=None,dem=None,aoi=None,shape=None
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,aoi,
+    create_consolidated_log(auxName,outName,loFlag,deadFlag,matchFlag,gammaFlag,roi,
                         shape,pwrFlag,filterFlag,pol,looks,logFile,smooth,terms,
                         noCrossPol,par)
 
@@ -766,7 +804,7 @@ if __name__ == '__main__':
   group = parser.add_mutually_exclusive_group()
   group.add_argument("-e","--externalDEM",
       help="Specify a DEM file to use - must be in UTM projection")
-  group.add_argument("-a","--aoi",help="Specify AOI to use",type=float,nargs=4,
+  group.add_argument("-r","--roi",help="Specify ROI to use",type=float,nargs=4,
       metavar=('LON_MIN','LAT_MIN','LON_MAX','LAT_MAX'))
   group.add_argument("-s","--shape",help="Specify shape file to use")
   parser.add_argument("-n",action="store_false",help="Do not perform matching")
@@ -784,6 +822,7 @@ if __name__ == '__main__':
   parser.add_argument('--output',help='base name of the output files')
   parser.add_argument("--par",help="Stack processing - use specified offset file and don't match")
   parser.add_argument("--nocrosspol",help="Do not process the cross pol image",action="store_true")
+  parser.add_argument("-a","--area",help="Keep area map",action="store_true")
   args = parser.parse_args()
 
   logFile = "{}_{}_log.txt".format(args.input.rpartition('.')[0],os.getpid())
@@ -807,8 +846,25 @@ if __name__ == '__main__':
   else:
     pwrFlag = True 
 
-  rtc_sentinel_gamma(args.input,outName=args.output,res=args.outputResolution,dem=args.externalDEM,
-                     aoi=args.aoi,shape=args.shape,matchFlag=args.n,deadFlag=deadFlag,
-                     gammaFlag=gammaFlag,loFlag=args.l,pwrFlag=pwrFlag,filterFlag=args.f,
-                     looks=args.looks,terms=args.terms,par=args.par,
-                     noCrossPol=args.nocrosspol,smooth=args.smooth)
+  logging.info("Pixel area flag: {}".format(args.area))
+
+  rtc_sentinel_gamma(args.input,
+                     outName=args.output,
+                     res=args.outputResolution,
+                     dem=args.externalDEM,
+                     roi=args.roi,
+                     shape=args.shape,
+                     matchFlag=args.n,
+                     deadFlag=deadFlag,
+                     gammaFlag=gammaFlag,
+                     loFlag=args.l,
+                     pwrFlag=pwrFlag,
+                     filterFlag=args.f,
+                     looks=args.looks,
+                     terms=args.terms,
+                     par=args.par,
+                     noCrossPol=args.nocrosspol,
+                     smooth=args.smooth,
+                     area=args.area)
+
+

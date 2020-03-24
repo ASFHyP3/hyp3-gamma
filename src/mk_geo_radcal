@@ -336,6 +336,8 @@ $pix_sigma0_0 = "$geo_dir/$scene_id"."_0.pix";  #sigma0 normalization area
 $pix_sigma0_1 = "$geo_dir/$scene_id"."_1.pix";
 $pix_sigma0_0_ras = "$geo_dir/$scene_id"."_0.pix.$ext";
 $pix_sigma0_1_ras = "$geo_dir/$scene_id"."_1.pix.$ext";
+$area_map = "$geo_dir/$scene_id"."_area_map.pix";
+$area_map_geotiff = "$geo_dir/$scene_id"."_area_map.tif";
 
 $sim_rdc0 = "$geo_dir/$scene_id"."_0.sim_rdc";
 $sim_rdc1 = "$geo_dir/$scene_id"."_1.sim_rdc";
@@ -692,6 +694,7 @@ if ($mode == 3) {
       execute("ratio $ellipse_pix_sigma0  $pix_sigma0_1 $ratio_sigma0 $mli_width[1] 1 1", $log);
       execute("product $mli $ratio_sigma0 $mli_pix_cal $mli_width[1] 1 1", $log);
       execute("blank_bad_data.py $mli_pix_cal $diff_par ",$log);
+      execute("geocode_back $pix_sigma0_1 $mli_width[1] $gc1 $area_map $dem_seg_width[1] $dem_seg_lines[1] 2 0",$log);
       execute("geocode_back $mli_pix_cal $mli_width[1] $gc1 $mli_cal_map $dem_seg_width[1] $dem_seg_lines[1] 2 0",$log);
       execute("raspwr $mli_cal_map $dem_seg_width[1] 1 0 1 1 $scd $expd 1 $mli_cal_map_ras", $log);
       if ($dem_seg_proj[1] eq "SCH"){
@@ -699,6 +702,7 @@ if ($mode == 3) {
       }
       else{
         execute("data2geotiff $dem_seg_par $mli_cal_map 2 $mli_cal_map_geotiff", $log);
+        execute("data2geotiff $dem_seg_par $area_map 2 $area_map_geotiff", $log);
       }
       if ($qflg == 0){
         execute("disras_dem_par $mli_cal_map_ras $dem_seg_par&", $log);
@@ -727,6 +731,7 @@ if ($mode == 3) {
   print "terrain geocoded SAR image raster file: $mli_map_ras\n";
   print "terrain geocoded SAR image DEM parameter file: $dem_seg_par\n";
   if ($cal_flg == 1){
+    print "pixel-area : $area_map_geotiff\n";
     print "pixel-area normalized terrain geocoded SAR image: $mli_cal_map\n";
     print "pixel-area normalized terrain geocoded SAR image raster file: $mli_cal_map_ras\n"; 
   }
@@ -742,8 +747,9 @@ if ($mode == 3) {
   print LOG "terrain geocoded SAR image raster file: $mli_map_ras\n";
   print LOG "terrain geocoded SAR image DEM parameter file: $dem_seg_par\n";
   if($cal_flg ==1){
-    print  LOG "pixel-area normalized terrain geocoded SAR image: $mli_cal_map\n";
-    print  LOG "pixel-area normalized terrain geocoded SAR image raster file: $mli_cal_map_ras\n";
+    print LOG "pixel-area : $area_map_geotiff\n";
+    print LOG "pixel-area normalized terrain geocoded SAR image: $mli_cal_map\n";
+    print LOG "pixel-area normalized terrain geocoded SAR image raster file: $mli_cal_map_ras\n";
   }
   print LOG "DEM in SAR RDC coordinates: $dem_seg_rdc\n";
   print LOG "DEM in SAR RDC coordinates raster image: $dem_seg_rdc_ras\n";
