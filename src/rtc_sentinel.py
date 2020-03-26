@@ -211,11 +211,6 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     os.chdir(dir)
 
-#    cmd = "float_math image_cal_map.mli image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
-#    execute(cmd)
-
-######## YOU ARE HERE i
-
     # Divide sigma0 by sin(theta) to get beta0
     cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
     execute(cmd)
@@ -225,8 +220,6 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     cmd = "float_math image_1.beta image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
     execute(cmd)
-
-
 
     # Make Geotiff Files
     cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(outName)
@@ -279,12 +272,12 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
         copy_metadata(tif,"image_cal_map.mli_amp.tif")
         shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,tifName))
         
-    shutil.move("{}.ls_map.tif".format(outName),"{}/{}-ls_map.tif".format(outDir,auxName))
-    shutil.move("{}.inc_map.tif".format(outName),"{}/{}-inc_map.tif".format(outDir,auxName))
-    shutil.move("{}.dem.tif".format(outName),"{}/{}-dem.tif".format(outDir,auxName))
+    shutil.move("{}.ls_map.tif".format(outName),"{}/{}_ls_map.tif".format(outDir,auxName))
+    shutil.move("{}.inc_map.tif".format(outName),"{}/{}_inc_map.tif".format(outDir,auxName))
+    shutil.move("{}.dem.tif".format(outName),"{}/{}_dem.tif".format(outDir,auxName))
     shutil.copy("image.diff_par","{}/{}_diff.par".format(outDir,auxName))
     if area:
-        shutil.move("{}.flat.tif".format(outName),"{}/{}-flat.tif".format(outDir,auxName))
+        shutil.move("{}.flat.tif".format(outName),"{}/{}_flat_{}.tif".format(outDir,auxName,pol))
         
     os.chdir("..")
 
@@ -303,10 +296,10 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
 
     # Ingest the granule into gamma format
     ingest_S1_granule(inFile,cpol,look_fact,mgrd)
+    width = getParameter("{}.par".format(mgrd),"range_samples")
     
     # Apply filtering if requested
     if filterFlag:
-        width = getParameter("{}.par".format(mgrd),"range_samples")
         el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd,wid=width,el=el_looks)
         execute(cmd,uselogging=True)
@@ -335,14 +328,27 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     execute(cmd,uselogging=True)
 
     os.chdir(dir)
-    
-    # Make geotif file
+
+    # Divide sigma0 by sin(theta) to get beta0
+    cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+
+    cmd = "float_math image_cal_map.mli image_1.sin_theta image_1.beta {wid} 3 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+
+    cmd = "float_math image_1.beta image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
+    execute(cmd)
+	
+    # Make geotiff file
     if gammaFlag:
         gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_gamma0'.format(cpol)])
     else:
         gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(cpol)])
     shutil.move("tmp.tif",tif)
-    
+   
+    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outfile)
+    execute(cmd,uselogging=True)
+  
     # Make browse resolution file
     createAmp(tif,nodata=0)
     if (res == browse_res):
@@ -366,7 +372,9 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     else:
         copy_metadata(tif,"image_cal_map.mli_amp.tif")
         shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
-        
+    if area:
+        shutil.move("{}.flat.tif".format(outName),"{}/{}_flat_{}.tif".format(outDir,auxName,cpol))
+
     os.chdir("..")
                   
     
@@ -391,19 +399,19 @@ def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
   
     os.chdir("../PRODUCT")
 
-    infile = "{}-inc_map.tif".format(rtcName)
-    outfile = "{}-inc_map".format(rtcName)
+    infile = "{}_inc_map.tif".format(rtcName)
+    outfile = "{}_inc_map".format(rtcName)
     sigmafile = infile.replace(".tif","_sigma.tif")
     byteSigmaScale(infile,sigmafile)
     makeAsfBrowse(sigmafile,outfile) 
     os.remove(sigmafile)
 
-    infile = "{}-ls_map.tif".format(rtcName)
-    outfile = "{}-ls_map".format(rtcName)
+    infile = "{}_ls_map.tif".format(rtcName)
+    outfile = "{}_ls_map".format(rtcName)
     makeAsfBrowse(infile,outfile) 
 
-    infile = "{}-dem.tif".format(rtcName)
-    outfile = "{}-dem".format(rtcName)
+    infile = "{}_dem.tif".format(rtcName)
+    outfile = "{}_dem".format(rtcName)
     sigmafile = infile.replace(".tif","_sigma.tif")
     byteSigmaScale(infile,sigmafile)
     makeAsfBrowse(sigmafile,outfile) 
@@ -540,10 +548,10 @@ def create_iso_xml(outfile,outname,pol,cpol,inFile,output,demType,log):
 
     g.write("oversampled dem file = {}\n".format(dem_seg))
     g.write("oversampled dem metadata = {}\n".format(dem_seg_par))
-    g.write("original dem file = {}/{}-dem.tif\n".format(out,outname))
-    g.write("layover shadow mask = {}/{}-ls_map.tif\n".format(out,outname))
+    g.write("original dem file = {}/{}_dem.tif\n".format(out,outname))
+    g.write("layover shadow mask = {}/{}_ls_map.tif\n".format(out,outname))
     g.write("layover shadow stats = {}/ls_map.stat\n".format(geo_dir))
-    g.write("incidence angle file = {}/{}-inc_map.tif\n".format(out,outname))
+    g.write("incidence angle file = {}/{}_inc_map.tif\n".format(out,outname))
     g.write("incidence angle metadata = {}/inc_map.meta\n".format(geo_dir))
 
     g.write("input {} file = {}\n".format(pol,outfile))
