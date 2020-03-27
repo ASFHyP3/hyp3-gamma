@@ -71,6 +71,10 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         resa = 1
         resm = 30
         pcs = "WGS 1984 NSIDC Polar Stereographic North"
+    elif "REMA" in demType:
+        resa = 1
+        resm = 30
+        pcs = "WGS 1984 Antarctic Polar Stereographic"
     else:
         logging.error("Unrecognized DEM type: {}".format(demType))
         exit(1)
@@ -181,7 +185,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         f.close()
         g.close()
 
-    f = open("{}/README_Template.txt".format(etc_dir),"r")
+    f = open("{}/README_RTC_GAMMA.txt".format(etc_dir),"r")
     g = open("README.txt","w")
     for line in f:
         line = line.replace("[DATE]",date)

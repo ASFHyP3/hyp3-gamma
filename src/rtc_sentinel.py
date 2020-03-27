@@ -283,7 +283,7 @@ def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gamm
 
     
 def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFlag,browse_res,
-                            outfile,dem,date,terms,par=None):
+                            outfile,dem,date,terms,par=None,area=False):
 
     if cpol == "VH":
         mpol = "VV"
@@ -309,6 +309,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     if gammaFlag:
         options = options + "-g "
     
+    home_dir = os.getcwd() 
     dir = "geo_{}".format(cpol)
     mdir = "geo_{}".format(mpol)
     if not os.path.isdir(dir):
@@ -319,7 +320,7 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     os.symlink("../geo_{}/image_0.ls_map".format(mpol),"{}/image_0.ls_map".format(dir))
     os.symlink("../geo_{}/image_0.inc_map".format(mpol),"{}/image_0.inc_map".format(dir))
     os.symlink("../geo_{}/image_0.sim".format(mpol),"{}/image_0.sim".format(dir))
-    os.symlink("../geo_{}/image_0.pix_map".format(mpol),"{}/image_0.pix_map".format(dir))
+    os.symlink("../geo_{}/area.dem_par".format(mpol),"{}/area.dem_par".format(dir))
    
     if par: 
         shutil.cp(par,"{}/image.diff_par".format(dir))
@@ -346,9 +347,6 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
         gdal.Translate("tmp.tif",tif,metadataOptions = ['Band1={}_sigma0'.format(cpol)])
     shutil.move("tmp.tif",tif)
    
-    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outfile)
-    execute(cmd,uselogging=True)
-  
     # Make browse resolution file
     createAmp(tif,nodata=0)
     if (res == browse_res):
@@ -367,15 +365,18 @@ def process_2nd_pol(inFile,rtcName,cpol,res,look_fact,gammaFlag,filterFlag,pwrFl
     if not os.path.exists(outDir):
         os.mkdir(outDir)
 
+    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outfile)
+    execute(cmd,uselogging=True)
+  
     if pwrFlag:
         shutil.move(tif,"{}/{}".format(outDir,rtcName))
     else:
         copy_metadata(tif,"image_cal_map.mli_amp.tif")
         shutil.move("image_cal_map.mli_amp.tif","{}/{}".format(outDir,rtcName))
     if area:
-        shutil.move("{}.flat.tif".format(outName),"{}/{}_flat_{}.tif".format(outDir,auxName,cpol))
+        shutil.move("{}.flat.tif".format(outfile),"{}/{}_flat_{}.tif".format(outDir,rtcName,cpol))
 
-    os.chdir("..")
+    os.chdir(home_dir)
                   
     
 def create_browse_images(outName,rtcName,res,pol,cpol,browse_res):
@@ -763,7 +764,7 @@ def rtc_sentinel_gamma(inFile,
             rtcName=baseName+"_"+cpol+".tif"
             logging.info("Found VH polarization - processing")
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                        outName,dem,date,terms,par=par)
+                        outName,dem,date,terms,par=par,area=area)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
@@ -777,7 +778,7 @@ def rtc_sentinel_gamma(inFile,
             logging.info("Found HV polarization - processing")
             rtcName=baseName+"_"+cpol+".tif"
             process_2nd_pol(inFile,rtcName,cpol,res,looks,gammaFlag,filterFlag,pwrFlag,browse_res,
-                        outName,dem,date,terms,par=par)
+                        outName,dem,date,terms,par=par,area=area)
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
