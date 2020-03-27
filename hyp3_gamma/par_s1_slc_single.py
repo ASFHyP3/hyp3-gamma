@@ -9,7 +9,7 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 import os
 import glob
-from hyp3lib.get_orb import downloadSentinelOrbitFile_2
+from hyp3lib.get_orb import downloadSentinelOrbitFile
 
 #
 # This subroutine assembles the par_S1_SLC gamma commands
@@ -29,7 +29,7 @@ def make_cmd(val,acqdate,path,pol=None):
     return cmd
 
 
-def par_s1_slc_single(myfile,pol=None):
+def par_s1_slc_single(myfile, pol=None):
 
     wrk = os.getcwd()
    
@@ -89,7 +89,7 @@ def par_s1_slc_single(myfile,pol=None):
     # Fetch precision state vectors
     try:
         logging.info("Getting precision orbit information")
-        orb,tmp = downloadSentinelOrbitFile_2(myfile)
+        orb,tmp = downloadSentinelOrbitFile(myfile)
         logging.info("Applying precision orbit information")
         execute("S1_OPOD_vec {}_001.slc.par {}".format(acqdate,orb))
         execute("S1_OPOD_vec {}_002.slc.par {}".format(acqdate,orb))
