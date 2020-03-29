@@ -8,21 +8,29 @@ import glob
 import logging
 from make_arc_thumb import pngtothumb
 from execute import execute
+from getParameter import getParameter
 
 def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,demTiles,spacing,hyp3_ver,gamma_ver):
 
     spacing = int(spacing)
+    proj_name = getParameter("geo_{}/area.dem_par".format(pol.upper()),"projection_name")
+    if "UTM" in proj_name:
+        zone = getParameter("geo_{}/area.dem_par".format(pol.upper()),"projection_zone")
+    else:
+        zone = None
 
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     back = os.getcwd()
     os.chdir("PRODUCT")
+
     now = datetime.datetime.now()
     date = now.strftime("%Y%m%d")
     time = now.strftime("%H%M%S")
     dt = now.strftime("%Y-%m-%dT%H:%M:%S")
     year = now.year
+
     basename = os.path.basename(infile)
     granulename = os.path.splitext(basename)[0]
     flooks = looks*30
@@ -54,7 +62,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 2
             resm = 60
-        pcs = "WGS 1984 UTM"
+        pcs = "WGS 1984 UTM zone {}".format(zone)
     elif "SRTMGL" in demType:
         if "1" in demType:
             resa = 1
@@ -62,7 +70,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 3
             resm = 90
-        pcs = "WGS 1984 UTM"
+        pcs = "WGS 1984 UTM zone {}".format(zone)
     elif "EU_DEM" in demType:
         resa = 1
         resm = 30
