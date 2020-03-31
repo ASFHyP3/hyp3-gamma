@@ -14,9 +14,9 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                    demType,demTiles,spacing,hyp3_ver,gamma_ver):
 
     spacing = int(spacing)
-    proj_name = getParameter("big.par".format(pol.upper()),"projection_name")
+    proj_name = getParameter("area.dem.par".format(pol.upper()),"projection_name")
     if "UTM" in proj_name:
-        zone = getParameter("big.par".format(pol.upper()),"projection_zone")
+        zone = getParameter("area.dem.par".format(pol.upper()),"projection_zone")
     else:
         zone = None
 
