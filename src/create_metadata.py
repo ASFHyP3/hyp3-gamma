@@ -14,9 +14,9 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
                    demType,demTiles,spacing,hyp3_ver,gamma_ver):
 
     spacing = int(spacing)
-    proj_name = getParameter("geo_{}/area.dem_par".format(pol.upper()),"projection_name")
+    proj_name = getParameter("big.par".format(pol.upper()),"projection_name")
     if "UTM" in proj_name:
-        zone = getParameter("geo_{}/area.dem_par".format(pol.upper()),"projection_zone")
+        zone = getParameter("big.par".format(pol.upper()),"projection_zone")
     else:
         zone = None
 
@@ -74,7 +74,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
     elif "EU_DEM" in demType:
         resa = 1
         resm = 30
-        pcs = "WGS 1984 Antarctic Polar Stereographic"
+        pcs = "WGS 1984 UTM zone {}".format(zone)
     elif "GIMP" in demType:
         resa = 1
         resm = 30
