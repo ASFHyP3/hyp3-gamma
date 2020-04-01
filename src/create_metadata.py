@@ -13,12 +13,14 @@ from getParameter import getParameter
 def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,demTiles,spacing,hyp3_ver,gamma_ver):
 
-    spacing = int(spacing)
-    proj_name = getParameter("area.dem.par".format(pol.upper()),"projection_name")
-    if "UTM" in proj_name:
-        zone = getParameter("area.dem.par".format(pol.upper()),"projection_zone")
-    else:
+    try:
+        proj_name = getParameter("area.dem.par".format(pol.upper()),"projection_name")
+        if "UTM" in proj_name:
+            zone = getParameter("area.dem.par".format(pol.upper()),"projection_zone")
+    except:
         zone = None
+    logging.info("Zone is {}".format(zone))
+
 
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
@@ -33,6 +35,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
 
     basename = os.path.basename(infile)
     granulename = os.path.splitext(basename)[0]
+    spacing = int(spacing)
     flooks = looks*30
     if gammaFlag:
         power_type = "gamma"
