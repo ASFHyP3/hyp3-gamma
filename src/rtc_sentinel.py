@@ -59,6 +59,7 @@ from area2point import fix_geotiff_locations
 from getParameter import getParameter
 from raster_boundary2shape import raster_boundary2shape
 from create_metadata import create_arc_xml 
+from asf_geometry import reproject2grid
 
 
 def perform_sanity_checks():
@@ -93,6 +94,34 @@ def perform_sanity_checks():
                     logging.error("ERROR: lr2 = {}".format(lr2))
                 else:
                     logging.debug("...ok")
+
+
+def reproject_dir(demType,res,prod_dir=None):
+
+    if "REMA" in demType:
+#        epsg = "EPSG:3031"
+         epsg = 3031
+    elif "GIMP" in demType:
+#       epsg = "EPSG:3413"
+        epsg = 3413
+    else:
+        return
+
+    tmpGeotiff = "tmp_reproj_dir_{}.tif".format(os.getpid())
+    if prod_dir:
+        home = os.getcwd()
+        os.chdir(prod_dir)
+
+    for inGeotiff in glob.glob("*.tif"):
+        inRaster = gdal.Open(inGeotiff)
+        outRaster = reproject2grid(inRaster, epsg, xRes=res)
+        inRaster = None
+        gdal.Translate(tmpGeotiff,outRaster)  
+        os.remove(inGeotiff)
+        shutil.move(tmpGeotiff, inGeotiff)
+
+    if prod_dir:
+        os.chdir(home)
 
 
 def report_kwargs(inName,outName,res,dem,roi,shape,matchFlag,deadFlag,gammaFlag,loFlag,
@@ -792,6 +821,7 @@ def rtc_sentinel_gamma(inFile,
     demTiles = get_tile_list()
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,demTiles,res,hyp3_ver,gamma_ver)
+    reproject_dir(demType,res,prod_dir="PRODUCT")
     cogify_dir(res=res)
     clean_prod_dir()
     perform_sanity_checks()
