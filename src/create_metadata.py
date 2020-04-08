@@ -9,10 +9,22 @@ import logging
 from make_arc_thumb import pngtothumb
 from execute import execute
 from getParameter import getParameter
+from file_subroutines import get_dem_tile_list
+from saa_func_lib import getCorners
+
+# Get the UTM N/S designation
+def get_hemisphere(fi):
+    ullon,lrlon,lrlat,ullat = getCorners(fi)
+    if lrlat + ullat >= 0:
+        return("N")
+    else:
+        return("S")
+
 
 def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
-                   demType,demTiles,spacing,hyp3_ver,gamma_ver):
+                   demType,spacing,hyp3_ver,gamma_ver,rtcName):
 
+    print("create_arc_xml: CWD is {}".format(os.getcwd()))
     try:
         proj_name = getParameter("area.dem.par".format(pol.upper()),"projection_name")
         if "UTM" in proj_name:
@@ -20,7 +32,8 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
     except:
         zone = None
     logging.info("Zone is {}".format(zone))
-
+   
+    demTiles = get_dem_tile_list()    
 
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
@@ -35,8 +48,11 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
 
     basename = os.path.basename(infile)
     granulename = os.path.splitext(basename)[0]
+
     spacing = int(spacing)
     flooks = looks*30
+    hemi = get_hemisphere(rtcName)
+
     if gammaFlag:
         power_type = "gamma"
     else:
@@ -65,7 +81,7 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 2
             resm = 60
-        pcs = "WGS 1984 UTM zone {}".format(zone)
+        pcs = "WGS 1984 UTM Zone {}{}".format(zone,hemi)
     elif "SRTMGL" in demType:
         if "1" in demType:
             resa = 1
@@ -73,15 +89,15 @@ def create_arc_xml(infile,outfile,inputType,gammaFlag,pwrFlag,filterFlag,looks,p
         else:
             resa = 3
             resm = 90
-        pcs = "WGS 1984 UTM zone {}".format(zone)
+        pcs = "WGS 1984 UTM Zone {}{}".format(zone,hemi)
     elif "EU_DEM" in demType:
         resa = 1
         resm = 30
-        pcs = "WGS 1984 UTM zone {}".format(zone)
+        pcs = "WGS 1984 UTM Zone {}{}".format(zone,hemi)
     elif "GIMP" in demType:
         resa = 1
         resm = 30
-        pcs = "WGS 1984 NSIDC Polar Stereographic North"
+        pcs = "WGS 1984 NSIDC Sea Ice Polar Stereographic North"
     elif "REMA" in demType:
         resa = 1
         resm = 30

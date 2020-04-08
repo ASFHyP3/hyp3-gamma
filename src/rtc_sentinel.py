@@ -151,24 +151,6 @@ def report_kwargs(inName,outName,res,dem,roi,shape,matchFlag,deadFlag,gammaFlag,
     logging.info("    Save Pixel Area                   : {}".format(area))
 
 
-def get_tile_list():
-    tile_list = None
-    for myfile in glob.glob("DEM/*.tif"):
-        tile = os.path.basename(myfile)
-        if tile_list is not None:
-            tile_list = tile_list + ", " + tile
-        else:
-            tile_list = tile
-     
-    cnt = len(tile_list)
-    if cnt > 2:
-        logging.info("Found DEM tile list of {}".format(tile_list)) 
-        return tile_list
-    else:
-        logging.warning("Warning: no DEM tile list created")
-        return(None)
-
-
 def process_pol(inFile,rtcName,auxName,pol,res,look_fact,matchFlag,deadFlag,gammaFlag,
                 filterFlag,pwrFlag,browse_res,outName,dem,date,terms,par=None,area=False):
 
@@ -818,9 +800,8 @@ def rtc_sentinel_gamma(inFile,
     logFile = logging.getLogger().handlers[0].baseFilename
     rtcName=baseName+"_"+pol+".tif"
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
-    demTiles = get_tile_list()
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
-                   demType,demTiles,res,hyp3_ver,gamma_ver)
+                   demType,res,hyp3_ver,gamma_ver,rtcName)
     reproject_dir(demType,res,prod_dir="PRODUCT")
     cogify_dir(res=res)
     clean_prod_dir()
