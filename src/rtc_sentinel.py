@@ -796,13 +796,16 @@ def rtc_sentinel_gamma(inFile,
         exit(1)
 
     fix_geotiff_locations()
+    reproject_dir(demType,res,prod_dir="PRODUCT")
+    reproject_dir(demType,res,prod_dir="geo_{}".format(pol))
+    if cpol:
+        reproject_dir(demType,res,prod_dir="geo_{}".format(cpol))
     create_browse_images(outName,auxName,res,pol,cpol,browse_res)
     logFile = logging.getLogger().handlers[0].baseFilename
     rtcName=baseName+"_"+pol+".tif"
     hyp3_ver,gamma_ver=create_iso_xml(rtcName,auxName,pol,cpol,inFile,outName,demType,logFile)
     create_arc_xml(inFile,auxName,inputType,gammaFlag,pwrFlag,filterFlag,looks,pol,cpol,
                    demType,res,hyp3_ver,gamma_ver,rtcName)
-    reproject_dir(demType,res,prod_dir="PRODUCT")
     cogify_dir(res=res)
     clean_prod_dir()
     perform_sanity_checks()

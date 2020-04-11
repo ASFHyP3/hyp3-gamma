@@ -102,7 +102,7 @@
     <mdHrLv>
         <ScopeCd value="005"/>
     </mdHrLv>
-    <mdFileID>RTC_GAMMA_Template_dem_GIMP_200310</mdFileID>
+    <mdFileID>RTC_GAMMA_Template_dem_GIMP_200407</mdFileID>
     <mdLang>
         <languageCode value="eng"/>
         <countryCode value="US"/>
@@ -141,7 +141,7 @@
             </scpLvl>
         </dqScope>
         <dataLineage>
-            <statement>The digital elevation model is served in the NSIDC Polar Stereographic North projection, and products generated with this DEM remain in this projection. A geoid adjustment has been applied to the source DEM. At the start of terrain correction, the best DEM covering the SAR image is selected, and DEM tiles are mosaicked to cover the image extent before being used for processing.</statement>
+            <statement>The digital elevation model is served in the NSIDC Sea Ice Polar Stereographic North projection (WGS 84), and products generated with this DEM remain in this projection. A geoid adjustment has been applied to the source DEM. At the start of terrain correction, the best DEM covering the SAR image is selected, and DEM tiles are mosaicked to cover the image extent before being used for processing.</statement>
         </dataLineage>
     </dqInfo>
     <mdMaint xmlns="">
