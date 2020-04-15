@@ -4,5 +4,5 @@ def test_hyp3_geocode(script_runner):
 
 
 def test_proc_geocode(script_runner):
-    ret = script_runner.run('proc_geocode', '-h')
+    ret = script_runner.run('geocode_sentinel.py', '-h')
     assert ret.success
