@@ -70,18 +70,18 @@ def blank_bad_data(raw_file, x, y, left=15, right=15):
 
     # For each line in the file
     for i in range(y):
-        # Black out the start of the line 
+        # Black out the start of the line
         for j in range(x):
             if data[i, j] != 0:
                 data[i, :j + left] = 0
                 break
-        # Black out the end of the line 
+        # Black out the end of the line
         for j in range(x - 1, 0, -1):
             if data[i, j] != 0:
                 data[i, j - right:] = 0
                 break
 
-    # Write out the data            
+    # Write out the data
     data = data.byteswap()
     data.tofile(raw_file)
 
