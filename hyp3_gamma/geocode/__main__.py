@@ -229,7 +229,7 @@ def main():
     Main entrypoint for hyp3_geocode
     """
     processor = Processor(
-        'geocode', process_geocode_gamma, sleep_time=3, sci_version=hyp3_geocode.__version__
+        'geocode_gamma', process_geocode_gamma, sleep_time=3, sci_version=hyp3_geocode.__version__
     )
     processor.run()
 
