@@ -20,8 +20,7 @@ from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_arc_thumb import pngtothumb
 
-from hyp3_geocode import __version__
-
+import hyp3_geocode
 
 
 def create_dem_par(basename, data_type, pixel_size, lat_max, lat_min, lon_max, lon_min, post):
@@ -140,7 +139,7 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
 
 def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
     """Create XML metadata files"""
-    cfgdir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "config"))
+    cfgdir = os.path.abspath(os.path.join(os.path.dirname(hyp3_geocode.__file__), "etc"))
     back = os.getcwd()
     os.chdir("PRODUCT")
     now = datetime.datetime.now()
@@ -339,7 +338,8 @@ def main():
                         help="Make output gamma0 instead of sigma0")
     parser.add_argument("-o", "--offset",
                         help="Optional offset file to use during geocoding")
-    parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
+    parser.add_argument('--version', action='version',
+                        version=f'%(prog)s {hyp3_geocode.__version__}')
     args = parser.parse_args()
 
     log_file = f"{args.outfile}_{os.getpid()}_log.txt"
