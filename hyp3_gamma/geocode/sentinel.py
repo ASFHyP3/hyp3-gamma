@@ -88,14 +88,14 @@ def blank_bad_data(raw_file, x, y, left=15, right=15):
 
 def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=True, gamma0_flag=False,
                 offset=None):
-    logging.info(f"Processing the {pol} polarization")
+    logging.info("Processing the {pol} polarization".format(pol=pol))
     # FIXME: make_tab_flag isn't used... should it be doing something?
-    logging.debug(f'Unused option make_tab_flag was {make_tab_flag}')
+    logging.debug('Unused option make_tab_flag was {make_tab_flag}'.format(make_tab_flag=make_tab_flag))
 
-    mgrd = f"{outfile}.{pol}.mgrd"
-    utm = f"{outfile}.{pol}.utm"
-    area_map = f"{outfile}_area_map.par"
-    small_map = f"{outfile}_small_map"
+    mgrd = "{outfile}.{pol}.mgrd".format(outfile=outfile, pol=pol)
+    utm = "{outfile}.{pol}.utm".format(outfile=outfile, pol=pol)
+    area_map = "{outfile}_area_map.par".format(outfile=outfile)
+    small_map = "{outfile}_small_map".format(outfile=outfile)
 
     look_fact = np.floor((pixel_size / 10.0) + 0.5)
     if look_fact < 1:
@@ -106,34 +106,38 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
 
     if gamma0_flag:
         # Convert sigma-0 to gamma-0
-        cmd = f"radcal_MLI {mgrd} {mgrd}.par - {mgrd}.sigma - 0 0 -1"
+        cmd = "radcal_MLI {mgrd} {mgrd}.par - {mgrd}.sigma - 0 0 -1".format(mgrd=mgrd)
         execute(cmd, uselogging=True)
-        cmd = f"radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamma - 0 0 2"
+        cmd = "radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamm - 0 0 2".format(mgrd=mgrd)
         execute(cmd, uselogging=True)
-        shutil.move(f"{mgrd}.gamma", mgrd)
+        shutil.move("{mgrd}.gamma".format(mgrd=mgrd), mgrd)
 
     # Blank out the bad data at the left and right edges
-    dsx = int(getParameter(f"{mgrd}.par", "range_samples", uselogging=True))
-    dsy = int(getParameter(f"{mgrd}.par", "azimuth_lines", uselogging=True))
+    dsx = int(getParameter("{mgrd}.par".format(mgrd=mgrd), "range_samples", uselogging=True))
+    dsy = int(getParameter("{mgrd}.par".format(mgrd=mgrd), "azimuth_lines", uselogging=True))
 
     if "GRD" in type_:
         blank_bad_data(mgrd, dsx, dsy, left=20, right=20)
 
     # Create geocoding look up table
     if offset:
-        cmd = f"gec_map {mgrd}.par {offset} {area_map} {height} {small_map}.par {small_map}.utm_to_rdc"
+        cmd = "gec_map {mgrd}.par {offset} {area_map} {height} {small_map}.par {small_map}.utm_to_rdc".format(
+            mgrd=mgrd, offset=offset, area_map=area_map, height=height, small_map=small_map)
     else:
-        cmd = f"gec_map {mgrd}.par - {area_map} {height} {small_map}.par {small_map}.utm_to_rdc"
+        cmd = "gec_map {mgrd}.par - {area_map} {height} {small_map}.par {small_map}.utm_to_rdc".format(
+            mgrd=mgrd, area_map=area_map, height=height, small_map=small_map)
     execute(cmd, uselogging=True)
 
     # Gecode the granule
-    out_size = getParameter(f"{small_map}.par", "width", uselogging=True)
-    cmd = f"geocode_back {mgrd} {dsx} {small_map}.utm_to_rdc {utm} {out_size}"
+    out_size = getParameter("{small_map}.par".format(small_map=small_map), "width", uselogging=True)
+    cmd = "geocode_back {mgrd} {dsx} {small_map}.utm_to_rdc {utm} {out_size}".format(
+        mgrd=mgrd, dsx=dsx, small_map=small_map, utm=utm, out_size=out_size
+    )
     execute(cmd, uselogging=True)
 
     # Create the geotiff file
-    tiffile = f"{outfile}_{pol}.tif"
-    cmd = f"data2geotiff {small_map}.par {utm} 2 {tiffile}"
+    tiffile = "{outfile}_{pol}.tif".format(outfile=outfile, pol=pol)
+    cmd = "data2geotiff {small_map}.par {utm} 2 {tiffile}".format(small_map=small_map, utm=utm, tiffile=tiffile)
     execute(cmd, uselogging=True)
 
 
@@ -162,8 +166,8 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
         power_type = "sigma"
 
     for myfile in glob.glob("*.tif"):
-        with open(f"{cfgdir}/GeocodingTemplate.xml", "r") as f:
-            with open(f"{myfile}.xml", "w") as g:
+        with open("{cfgdir}/GeocodingTemplate.xml".format(cfgdir=cfgdir), "r") as f:
+            with open("{myfile}.xml".format(myfile=myfile), "w") as g:
                 if "vv" in myfile:
                     pol = "vv"
                 elif "vh" in myfile:
@@ -188,7 +192,7 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
                     line = line.replace("[POWERTYPE]", power_type)
                     line = line.replace("[GRAN_NAME]", granulename)
                     line = line.replace("[FORMAT]", "power")
-                    g.write(f"{line}\n")
+                    g.write("{line}\n".format(line=line))
 
     for myfile in glob.glob("*.png"):
         if "rgb" in myfile:
@@ -203,8 +207,8 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
         else:
             res = "low"
 
-        with open(f"{cfgdir}/GeocodingTemplate_{scale}_png.xml", "r") as f:
-            with open(f"{myfile}.xml", "w") as g:
+        with open("{cfgdir}/GeocodingTemplate_{scale}_png.xml".format(cfgdir=cfgdir, scale=scale), "r") as f:
+            with open("{myfile}.xml".format(myfile=myfile), "w") as g:
                 for line in f:
                     line = line.replace("[DATE]", date)
                     line = line.replace("[TIME]", "{}00".format(time))
@@ -217,7 +221,7 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
                     line = line.replace("[RES]", res)
                     line = line.replace("[GRAN_NAME]", granulename)
                     line = line.replace("[FORMAT]", "power")
-                    g.write(f"{line}\n")
+                    g.write("{line}\n".format(line=line))
 
     os.chdir(back)
 
@@ -339,10 +343,10 @@ def main():
     parser.add_argument("-o", "--offset",
                         help="Optional offset file to use during geocoding")
     parser.add_argument('--version', action='version',
-                        version=f'%(prog)s {hyp3_geocode.__version__}')
+                        version='%(prog)s {}'.format(hyp3_geocode.__version__))
     args = parser.parse_args()
 
-    log_file = f"{args.outfile}_{os.getpid()}_log.txt"
+    log_file = "{}_{}_log.txt".format(args.outfile, os.getpid())
     logging.basicConfig(
         filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO

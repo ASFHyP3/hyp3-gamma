@@ -101,8 +101,8 @@ def download(cfg, granule):
     else:
         typ = "l0"
 
-    log.info(f'Downloading {granule} with get_asf.py')
-    execute(cfg, f"get_asf.py --{typ} --dir={cfg['workdir']} {granule}")
+    log.info('Downloading {granule} with get_asf.py'.format(granule=granule))
+    execute(cfg, "get_asf.py --{typ} --dir={dir} {granule}".format(typ=typ, dir=cfg['workdir'], granule=granule))
 
     if 'GRD' in granule or 'SLC' in granule:
         zip_file = os.path.join(cfg['workdir'], granule + '.zip')
@@ -111,7 +111,7 @@ def download(cfg, granule):
         if zip_file:
             granule = os.path.splitext(os.path.basename(zip_file))[0]
         else:
-            log.info(f'Nothing found for {granule}')
+            log.info('Nothing found for {granule}'.format(granule=granule))
             return granule
 
     if not os.path.isfile(zip_file):
@@ -123,9 +123,9 @@ def download(cfg, granule):
         unzip(zip_file, cfg['workdir'])
 
         if granule.startswith('S1'):
-            safe_file = os.path.join(cfg['workdir'], f'{granule}.SAFE')
+            safe_file = os.path.join(cfg['workdir'], '{granule}.SAFE'.format(granule=granule))
             if not os.path.isdir(safe_file):
-                raise Exception(f'Failed to unzip, SAFE directory not found: {safe_file}')
+                raise Exception('Failed to unzip, SAFE directory not found: {safe_file}'.format(safe_file=safe_file))
 
     log.info('Unzip completed.')
 
@@ -134,11 +134,11 @@ def download(cfg, granule):
 
 def process_geocode_gamma(cfg, n):
     try:
-        log.info(f'Processing GAMMA Geocode "{cfg["sub_name"]}" for "{cfg["username"]}"')
+        log.info('Processing GAMMA Geocode "{}" for "{}"'.format(cfg["sub_name"], cfg["username"]))
 
         in_granule = cfg['granule']
 
-        cfg['log'] = f"Processing started at {datetime.now()}\n\n"
+        cfg['log'] = "Processing started at {}\n\n".format(datetime.now())
         g = download(cfg, in_granule)
 
         if in_granule.startswith('S1'):
@@ -147,7 +147,7 @@ def process_geocode_gamma(cfg, n):
                 raise Exception('Sentinel RAW data is not supported: ' + in_granule)
             d = g[17:25]
             sd = d[0:4]+'-'+d[4:6]+'-'+d[6:8]
-            cfg["email_text"] = f"This is an RTC product from {sd}."
+            cfg["email_text"] = "This is an RTC product from {sd}.".format(sd=sd)
 
             hi_res = extra_arg_is(cfg, 'resolution', '10m')
             if hi_res:
@@ -163,7 +163,7 @@ def process_geocode_gamma(cfg, n):
             args += ['-t', height]
 
             out_name = build_output_name(g, cfg['workdir'], opts_str + cfg['suffix'])
-            log.info(f'Output name: {out_name}')
+            log.info('Output name: {out_name}'.format(out_name=out_name))
 
             args += [g + '.SAFE', out_name]
 
@@ -174,7 +174,7 @@ def process_geocode_gamma(cfg, n):
 
         product = find_product(cfg['workdir'])
         if not os.path.isdir(product):
-            log.info(f'PRODUCT directory not found: {product}')
+            log.info('PRODUCT directory not found: {product}'.format(product=product))
             log.error('Processing failed')
             raise Exception("Processing failed: PRODUCT directory not found")
         else:
@@ -208,7 +208,7 @@ def process_geocode_gamma(cfg, n):
 
                 record_metrics(cfg, conn)
                 if 'lag' in cfg and 'email_text' in cfg:
-                    cfg['email_text'] += f"\nYou are receiving this product {cfg['lag']} after it was acquired."
+                    cfg['email_text'] += "\nYou are receiving this product {} after it was acquired.".format(cfg['lag'])
 
                 upload_product(zip_file, cfg, conn, browse_path=browse_path)
                 success(conn, cfg)
