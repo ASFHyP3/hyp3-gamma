@@ -166,8 +166,9 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
         power_type = "sigma"
 
     for myfile in glob.glob("*.tif"):
-        with open("{cfgdir}/GeocodingTemplate.xml".format(cfgdir=cfgdir), "r") as f:
-            with open("{myfile}.xml".format(myfile=myfile), "w") as g:
+        # NOTE: Need to open as bytes so we can write encoded_jpg thumbnail to file
+        with open("{cfgdir}/GeocodingTemplate.xml".format(cfgdir=cfgdir), "rb") as f:
+            with open("{myfile}.xml".format(myfile=myfile), "wb") as g:
                 if "vv" in myfile:
                     pol = "vv"
                 elif "vh" in myfile:
@@ -178,21 +179,21 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
                     pol = "hv"
 
                 for line in f:
-                    line = line.replace("[DATE]", date)
-                    line = line.replace("[TIME]", "{}00".format(time))
-                    line = line.replace("[DATETIME]", dt)
-                    line = line.replace("[HEIGHT]", "{}".format(height))
-                    line = line.replace("[YEARPROCESSED]", "{}".format(year))
-                    line = line.replace("[YEARACQUIRED]", infile[17:21])
-                    line = line.replace("[TYPE]", type_)
-                    line = line.replace("[FULL_TYPE]", full_type)
-                    line = line.replace("[SPACING]", "{}".format(int(pixel_size)))
-                    line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
-                    line = line.replace("[POL]", pol)
-                    line = line.replace("[POWERTYPE]", power_type)
-                    line = line.replace("[GRAN_NAME]", granulename)
-                    line = line.replace("[FORMAT]", "power")
-                    g.write("{line}\n".format(line=line))
+                    line = line.replace(b"[DATE]", bytes(date, 'utf-8'))
+                    line = line.replace(b"[TIME]", bytes("{}00".format(time), 'utf-8'))
+                    line = line.replace(b"[DATETIME]", bytes(dt, 'utf-8'))
+                    line = line.replace(b"[HEIGHT]", bytes("{}".format(height), 'utf-8'))
+                    line = line.replace(b"[YEARPROCESSED]", bytes("{}".format(year), 'utf-8'))
+                    line = line.replace(b"[YEARACQUIRED]", bytes(infile[17:21], 'utf-8'))
+                    line = line.replace(b"[TYPE]", bytes(type_, 'utf-8'))
+                    line = line.replace(b"[FULL_TYPE]", bytes(full_type, 'utf-8'))
+                    line = line.replace(b"[SPACING]", bytes("{}".format(int(pixel_size)), 'utf-8'))
+                    line = line.replace(b"[THUMBNAIL_BINARY_STRING]", encoded_jpg)
+                    line = line.replace(b"[POL]", bytes(pol, 'utf-8'))
+                    line = line.replace(b"[POWERTYPE]", bytes(power_type, 'utf-8'))
+                    line = line.replace(b"[GRAN_NAME]", bytes(granulename, 'utf-8'))
+                    line = line.replace(b"[FORMAT]", b"power")
+                    g.write(line + b'\n')
 
     for myfile in glob.glob("*.png"):
         if "rgb" in myfile:
@@ -207,21 +208,21 @@ def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
         else:
             res = "low"
 
-        with open("{cfgdir}/GeocodingTemplate_{scale}_png.xml".format(cfgdir=cfgdir, scale=scale), "r") as f:
-            with open("{myfile}.xml".format(myfile=myfile), "w") as g:
+        with open("{cfgdir}/GeocodingTemplate_{scale}_png.xml".format(cfgdir=cfgdir, scale=scale), "rb") as f:
+            with open("{myfile}.xml".format(myfile=myfile), "wb") as g:
                 for line in f:
-                    line = line.replace("[DATE]", date)
-                    line = line.replace("[TIME]", "{}00".format(time))
-                    line = line.replace("[DATETIME]", dt)
-                    line = line.replace("[YEARPROCESSED]", "{}".format(year))
-                    line = line.replace("[YEARACQUIRED]", infile[17:21])
-                    line = line.replace("[TYPE]", type_)
-                    line = line.replace("[FULL_TYPE]", full_type)
-                    line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
-                    line = line.replace("[RES]", res)
-                    line = line.replace("[GRAN_NAME]", granulename)
-                    line = line.replace("[FORMAT]", "power")
-                    g.write("{line}\n".format(line=line))
+                    line = line.replace(b"[DATE]", bytes(date, 'utf-8'))
+                    line = line.replace(b"[TIME]", bytes("{}00".format(time), 'utf-8'))
+                    line = line.replace(b"[DATETIME]", bytes(dt, 'utf-8'))
+                    line = line.replace(b"[YEARPROCESSED]", bytes("{}".format(year), 'utf-8'))
+                    line = line.replace(b"[YEARACQUIRED]", bytes(infile[17:21], 'utf-8'))
+                    line = line.replace(b"[TYPE]", bytes(type_, 'utf-8'))
+                    line = line.replace(b"[FULL_TYPE]", bytes(full_type, 'utf-8'))
+                    line = line.replace(b"[THUMBNAIL_BINARY_STRING]", encoded_jpg)
+                    line = line.replace(b"[RES]", bytes(res, 'utf-8'))
+                    line = line.replace(b"[GRAN_NAME]", bytes(granulename, 'utf-8'))
+                    line = line.replace(b"[FORMAT]", b"power")
+                    g.write(line + b'\n')
 
     os.chdir(back)
 
