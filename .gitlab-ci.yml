@@ -1,0 +1,284 @@
+# setuptools-scm doesn't work well with a shallow clone, see:
+#    https://docs.gitlab.com/ee/ci/yaml/#shallow-cloning
+variables:
+  GIT_DEPTH: 0
+
+.conda_template: &before_conda_env
+  - source $HOME/.bashrc
+  - conda update -n base -c defaults conda
+  - conda install -c conda-forge -y tox tox-conda
+
+.before_template: &before_defaults
+  - python3 -m pip install --upgrade pip
+  - python3 -m pip install --upgrade setuptools wheel twine s3pypi "setuptools-scm[toml]" importlib_metadata
+
+
+# NOTE: the templates below are so that we can add additional jobs to the CI
+#       pipeline for merge requests (MR). Ideally, anytime someone pushes to *any*
+#       branch, we would just run basic static analysis, and then, when a MR is
+#       opened, we'd add in building and deploying the python package to S3 and
+#       the docker container to ECR so that reviewers can easily test the MR.
+#       HOWEVER, gitlab's merge requests pipelines work differently than other
+#       pipelines meaning we need to specify `only: [branches, merge_requests]`
+#       for jobs we want to always run:
+#           https://stackoverflow.com/questions/52746338/in-gitlab-ci-is-there-a-variable-for-a-merge-requests-target-branch/52944197#52944197
+#       But doing so creates both a "push" pipeline and a "MR" pipeline, so the
+#       `always_run` jobs are run in duplicate. There doesn't seem to be any
+#       easy way around this currently:
+#           https://gitlab.com/gitlab-org/gitlab-foss/issues/56632
+#      So, our team we'll have to live with duplicates for a bit, and follow
+#      "only open a MR when you're ready for review!" best practice.
+.always_run_template: &always_run
+  only:
+    - branches
+    - merge_requests
+
+.mr_protected_template: &only_mr_protected
+  only:
+    - merge_requests
+    - master
+    - develop
+
+
+default:
+  image:
+    name: continuumio/miniconda3:latest
+    entrypoint: ["/bin/bash"]
+  before_script:
+    - *before_defaults
+
+stages:
+    - tools-bot
+    - static analysis
+    - test
+    - dependancy analysis
+    - package
+    - containerize
+    - verify
+    # TODO: - trigger
+
+
+Tag version:
+  stage: tools-bot
+  before_script:
+    - chmod 600 ${GITLAB_TOOLS_BOT_SSH}
+    - git config core.sshCommand "ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${GITLAB_TOOLS_BOT_SSH} -F /dev/null"
+    - git config --global user.email "UAF-asf-apd@alaska.edu"
+    - git config --global user.name "Tools-bot"
+    - git remote set-url origin git@scm.asf.alaska.edu:hyp3/hyp3-rtc-gamma.git
+    - git fetch --all
+    - apt-get install -y jq curl
+    - 'export MERGE_REQUEST_PARENT=$(git log --pretty=%P -n 1 "${CI_COMMIT_SHA}" | awk -F '' '' ''{print $2}'')'
+    - 'export BUMP_PART=$(curl -LsS -H "PRIVATE-TOKEN: ${GITLAB_TOOLS_BOT_PAK}" "https://scm.asf.alaska.edu/api/v4/projects/${CI_PROJECT_ID}/repository/commits/${MERGE_REQUEST_PARENT}/merge_requests" | jq -c --raw-output ''.[0].labels[] | select(. == "major" or . == "minor" or . == "patch")'' | sort | head -1)'
+    - *before_defaults
+    - python3 -m pip install bump2version
+  script:
+    - 'bump2version --current-version $(git describe --abbrev=0) --tag --tag-message "$(printf "%q" "${CI_COMMIT_MESSAGE}")" "${BUMP_PART}"'
+    - git push --tags
+    - git checkout develop && git pull --ff-only
+    - git merge --ff-only origin/master
+    - git push -o ci.skip
+  only:
+    - master
+
+
+bandit SAST:
+  stage: static analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install bandit
+  script:
+    - bandit -r hyp3_rtc_gamma || true  # suppress error for this run
+    - bandit -r hyp3_rtc_gamma -f html -o bandit_report.html
+  allow_failure: true
+  artifacts:
+    when: on_failure
+    paths:
+      - bandit_report.html
+  <<: *always_run
+
+trufflehog secrets:
+  stage: static analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install trufflehog gitdb2=="2.*"
+  script:
+    - export LAST_TAG_HASH=$(git show-ref --hash -- $(git describe --abbrev=0))
+    - trufflehog --regex --entropy True --since_commit "${LAST_TAG_HASH}" file://"${PWD}" > trufflehog_report.txt
+  artifacts:
+    when: on_failure
+    paths:
+      - trufflehog_report.txt
+  <<: *always_run
+
+gitleaks:
+  stage: static analysis
+  image:
+    name: "zricethezav/gitleaks"
+    entrypoint: ["/bin/bash"]
+  before_script: []
+  script:
+    - export LAST_TAG_HASH=$(git show-ref --hash -- $(git describe --abbrev=0))
+    # NOTE: commit range goes back into history; commit-from == HEAD by default
+    - gitleaks -v --repo-path=./ --config=./.gitlab/gitleaks.toml --commit-to="${LAST_TAG_HASH}"
+      --report=gitleaks_report.json
+  artifacts:
+    when: on_failure
+    paths:
+      - gitleaks_report.json
+  <<: *always_run
+
+flake8:
+  stage: static analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install flake8 flake8-import-order flake8-blind-except flake8-builtins
+  script:
+    - flake8 --max-line-length=120 --import-order-style=pycharm
+      --application-import-names hyp3_rtc_gamma
+      --statistics --tee --output-file flake8_report.txt
+  artifacts:
+    when: on_failure
+    paths:
+      - flake8_report.txt
+  <<: *always_run
+
+pylint:
+  stage: static analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install pylint
+  script:
+    - pylint -r y  hyp3_rtc_gamma 2>&1 | tee pylint_report.txt
+  allow_failure: true
+  artifacts:
+    when: on_failure
+    paths:
+      - pylint_report.txt
+  <<: *always_run
+
+xenon:
+  stage: static analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install xenon radon
+  script:
+    - xenon -a B -m A -b A hyp3_rtc_gamma
+  after_script:
+    - radon cc -s -a -O radon_cc_report.txt hyp3_rtc_gamma
+    - radon raw -s -O radon_raw_report.txt hyp3_rtc_gamma
+    - radon mi -s -x F -O radon_mi_report.txt hyp3_rtc_gamma
+    - radon hal -O radon_hal_report.txt hyp3_rtc_gamma
+  allow_failure: true
+  artifacts:
+    when: on_failure
+    paths:
+      - radon_*_report.txt
+  <<: *always_run
+
+
+pytest 37:
+  stage: test
+  before_script:
+    - *before_conda_env
+  script:
+    - tox --develop -e py37 -- --cov=hyp3_rtc_gamma
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
+  artifacts:
+    paths:
+      - pip_freeze_*.txt
+      - conda_export_*.txt
+  <<: *always_run
+
+safety 37:
+  stage: dependancy analysis
+  before_script:
+    - *before_defaults
+    - python3 -m pip install safety
+  script:
+    - safety check --full-report --stdin < pip_freeze_py37.txt
+    - awk -F '=' '/^[^#]/ {print $1 "==" $2}' conda_export_py37.txt | safety check --full-report --stdin
+  needs:
+    - job: "pytest 37"
+      artifacts: true
+  <<: *always_run
+
+
+package S3 PyPI:
+  stage: package
+  script:
+    - echo "Building version $(python3 setup.py --version)"
+    - python3 setup.py sdist bdist_wheel
+    - echo "Uploading version $(python3 setup.py --version) to S3-PyPI"
+    - s3pypi --bucket hyp3-pypi --verbose
+  <<: *only_mr_protected
+
+
+dockerize:
+  stage: containerize
+  tags:
+    - docker
+    - apd-dev
+  before_script:
+    - python3 -m pip install --user "setuptools>=42" wheel "setuptools-scm[toml]>=3.4"
+    - export SDIST_VERSION=$(python3 setup.py --version)
+    - export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
+    - aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20170707_MSP_ISP_DIFF_LAT.linux64_ubuntu1604.tar.gz .
+    - tar -zxvf GAMMA_SOFTWARE-20170707_MSP_ISP_DIFF_LAT.linux64_ubuntu1604.tar.gz
+  script:
+    - docker build --no-cache
+      -t ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
+      --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}"
+      --label org.opencontainers.image.version="${SDIST_VERSION}"
+      --label org.opencontainers.image.revision="${CI_COMMIT_SHORT_SHA}"
+      --build-arg S3_PYPI_HOST=${S3_PYPI_HOST} .
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${HYP3_REGISTRY}
+    - docker push ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
+  <<: *only_mr_protected
+
+
+verify S3 PyPI:
+  stage: verify
+  before_script:
+    - *before_conda_env
+    - *before_defaults
+    - export SDIST_VERSION=$(python3 setup.py --version)
+  script:
+    - tox -e py37-verify
+  <<: *only_mr_protected
+
+verify dockerize (test):
+  stage: verify
+  tags:
+    - docker
+    - apd-dev
+  before_script:
+    - python3 -m pip install --user "setuptools>=42" wheel "setuptools-scm[toml]>=3.4"
+    - export SDIST_VERSION=$(python3 setup.py --version)
+  script:
+    - docker tag ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_} ${HYP3_REGISTRY}/hyp3-rtc-gamma:test
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${HYP3_REGISTRY}
+    - docker push ${HYP3_REGISTRY}/hyp3-rtc-gamma:test
+  needs:
+    - job: "dockerize"
+      artifacts: true
+  only:
+    - develop
+
+verify dockerize:
+  stage: verify
+  tags:
+    - docker
+    - apd-dev
+  before_script:
+    - python3 -m pip install --user "setuptools>=42" wheel "setuptools-scm[toml]>=3.4"
+    - export SDIST_VERSION=$(python3 setup.py --version)
+  script:
+    - docker tag ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_} ${HYP3_REGISTRY}/hyp3-rtc-gamma:latest
+    - aws ecr get-login-password | docker login --username AWS --password-stdin ${HYP3_REGISTRY}
+    - docker push ${HYP3_REGISTRY}/hyp3-rtc-gamma:latest
+  needs:
+    - job: "dockerize"
+      artifacts: true
+  only:
+    - master

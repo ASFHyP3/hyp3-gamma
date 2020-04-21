@@ -1,1 +1,3 @@
-# hyp3-rtc-gamma
+# HyP3 RTC GAMMA
+
+HyP3 plugin for radiometric terrain correction using GAMMA
