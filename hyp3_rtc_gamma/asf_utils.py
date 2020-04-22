@@ -1,10 +1,9 @@
-#!/usr/bin/python
-
-import os
-import sys
-import ConfigParser
+import configparser
 import datetime
+import os
+
 import numpy as np
+
 
 # Configuration file utilities
 def read_config_file(configFile, section):
@@ -17,7 +16,7 @@ def read_config_file(configFile, section):
 
   if os.path.exists(configFile):
     c = {}
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.optionxform = str
     config.read(configFile)
     path_items = config.items(section)

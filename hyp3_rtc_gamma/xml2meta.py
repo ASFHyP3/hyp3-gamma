@@ -1,18 +1,13 @@
-#!/usr/bin/python
-
 import argparse
-from argparse import RawTextHelpFormatter
-import os
-import sys
-import lxml.etree as et
-from osgeo import ogr
-from osgeo import ogr, osr
-import datetime
-import scipy.constants as sc
-from asf_utils import *
 import logging
-#import asf.log
+import sys
+from argparse import RawTextHelpFormatter
 
+import lxml.etree as et
+import scipy.constants as sc
+from osgeo import ogr
+
+from hyp3_rtc_gamma.asf_utils import *
 
 # establish a stub root logger to avoid syntax errors
 # we'll configure this later on using asf.log

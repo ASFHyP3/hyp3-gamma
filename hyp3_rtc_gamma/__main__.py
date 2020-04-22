@@ -193,7 +193,7 @@ def process_rtc_gamma(cfg, n):
             safe_dir = g + '.SAFE'
             args += [safe_dir, ]
 
-            process(cfg, 'run_new_rtc', args)
+            process(cfg, 'rtc_sentinel.py', args)
 
         elif in_granule.startswith('E1') \
                 or in_granule.startswith('E2') \
@@ -212,7 +212,7 @@ def process_rtc_gamma(cfg, n):
             opts_str = '-12.5m'
             args = ["-g", "-d", os.path.basename(raw)]
 
-            process(cfg, 'run_rtc_legacy', args)
+            process(cfg, 'rtc_legacy.py', args)
 
         else:
             raise Exception('Unrecognized: ' + in_granule)

@@ -1,13 +1,13 @@
-#!/usr/bin/python
-
-import saa_func_lib as saa
-import glob
-from osgeo import gdal
-import numpy as np
-from ps2dem import ps2dem
-import os
 import argparse
+import glob
 import logging
+import os
+import sys
+
+from hyp3lib import saa_func_lib as saa
+from hyp3lib.ps2dem import ps2dem
+from osgeo import gdal
+
 
 def smooth_dem_tiles(demdir,build=True):
 
@@ -30,7 +30,7 @@ def smooth_dem_tiles(demdir,build=True):
         src_ds = gdal.Open(mytif)    
         (x1,y1,trans,proj,data) = saa.read_gdal_file(src_ds)
         if src_ds is None:
-            print 'Unable to open %s' % mytif
+            print('Unable to open %s' % mytif)
             sys.exit(1)
 
         srcband = src_ds.GetRasterBand(1) 

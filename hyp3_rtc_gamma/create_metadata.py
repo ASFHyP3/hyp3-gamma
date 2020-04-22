@@ -1,16 +1,16 @@
-#!/usr/bin/python
+"""Create ArcGIS compatible xml metadata"""
 
-# Create arcgis compatible xml metadata
-
-import os
 import datetime
 import glob
 import logging
-from make_arc_thumb import pngtothumb
-from execute import execute
-from getParameter import getParameter
-from file_subroutines import get_dem_tile_list
-from saa_func_lib import getCorners
+import os
+
+from hyp3lib.execute import execute
+from hyp3lib.file_subroutines import get_dem_tile_list
+from hyp3lib.getParameter import getParameter
+from hyp3lib.make_arc_thumb import pngtothumb
+from hyp3lib.saa_func_lib import getCorners
+
 
 # Get the UTM N/S designation
 def get_hemisphere(fi):
