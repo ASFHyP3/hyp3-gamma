@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import re
+import sys
 
 import numpy as np
 from hyp3lib.getParameter import getParameter
@@ -16,18 +17,18 @@ def calc(s, l, r, a):
     return rpt, apt
 
 
-def display(str, f, ERROR=False):
-    if ERROR:
-        logging.error("{}".format(str))
+def display(message, f, error=False):
+    if error:
+        logging.error("{}".format(message))
     else:
-        logging.info("{}".format(str))
-    f.write("{}\n".format(str))
+        logging.info("{}".format(message))
+    f.write("{}\n".format(message))
 
 
-def check_coreg(input, post, max_offset=50, max_error=2):
+def check_coreg(sar_file, post, max_offset=50, max_error=2):
     f = open('coreg_check.log', 'w')
 
-    display("SAR file: {}".format(input), f)
+    display("SAR file: {}".format(sar_file), f)
     display("Checking coregistration using {} meters".format(post), f)
     display("Setting maximum offset to be {}".format(max_offset), f)
     display("Setting maximum error to be {}".format(max_error), f)
@@ -44,9 +45,9 @@ def check_coreg(input, post, max_offset=50, max_error=2):
     elif os.path.isdir("geo"):
         mlog = "geo/{}".format(myfile)
     else:
-        display("ERROR: Can't find {}".format(myfile), f, ERROR=True)
+        display("ERROR: Can't find {}".format(myfile), f, error=True)
         f.close()
-        exit(-1)
+        sys.exit(-1)
 
     a = np.zeros(6)
     r = np.zeros(6)
@@ -107,19 +108,15 @@ def check_coreg(input, post, max_offset=50, max_error=2):
                 display("std dev is too high, using dead reckoning", f)
                 display("Granule failed coregistration", f)
                 f.close()
-                exit(-1)
+                sys.exit(-1)
     g.close()
 
     mlog = glob.glob('geo_??/*.diff_par')[0]
-    if mlog:
-        platform = "NOT_LEGACY"
-    else:
+    if not mlog:
         mlog = glob.glob('geo/*.diff_par')[0]
-        if mlog:
-            platform = "LEGACY"
-        else:
+        if not mlog:
             logging.error("Can't find diff_par file")
-            return (-1)
+            return -1
 
     if os.path.exists(mlog):
         ns = int(getParameter(mlog, "range_samp_1"))
@@ -129,7 +126,7 @@ def check_coreg(input, post, max_offset=50, max_error=2):
     else:
         logging.error("Can't find diff par file {}".format(mlog))
         f.close()
-        exit(-1)
+        sys.exit(-1)
 
     rpt, apt = calc(1, 1, r, a)
     pt1 = np.sqrt(rpt * rpt + apt * apt)
@@ -164,7 +161,7 @@ def check_coreg(input, post, max_offset=50, max_error=2):
     else:
         display("Granule failed coregistration", f)
         f.close()
-        exit(-1)
+        sys.exit(-1)
 
 
 if __name__ == '__main__':

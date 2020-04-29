@@ -5,6 +5,7 @@ import glob
 import logging
 import os
 import shutil
+import sys
 import zipfile
 
 from hyp3lib import saa_func_lib as saa
@@ -126,7 +127,6 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     logging.info("Processing the {} polarization".format(pol))
 
     mgrd = "{out}.{pol}.mgrd".format(out=outName, pol=pol)
-    small_map = "{out}_small_map".format(out=outName)
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
@@ -142,58 +142,61 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
 
     options = "-p -j -n {} -q -c ".format(terms)
     if gammaFlag:
-        options = options + "-g "
+        options += "-g "
 
     logging.info("Running RTC process... initializing")
-    dir = "geo_{}".format(pol)
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 0 {opt}".format(
-        mgrd=mgrd, dem=dem, dir=dir, res=res, opt=options)
+    geo_dir = "geo_{}".format(pol)
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
+          " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 0" \
+          " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
     execute(cmd, uselogging=True)
 
     if matchFlag and not par:
         fail = False
         logging.info("Running RTC process... coarse matching")
-        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 1 {opt}".format(
-            mgrd=mgrd, dem=dem, dir=dir, res=res, opt=options)
+        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
+              " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 1" \
+              " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
         try:
             execute(cmd, uselogging=True)
-        except:
+        except Exception:
             logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
 
         logging.info("Running RTC process... fine matching")
-        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 2 {opt}".format(
-            mgrd=mgrd, dem=dem, dir=dir, res=res, opt=options)
+        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
+              " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 2" \
+              " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
         try:
             execute(cmd, uselogging=True)
-        except:
+        except Exception:
             if not deadFlag:
                 logging.error("ERROR: Failed to match images")
-                exit(1)
+                sys.exit(1)
             else:
                 logging.warning("WARNING: Coregistration has failed; defaulting to dead reckoning")
-                os.remove("{}/{}".format(dir, "image.diff_par"))
+                os.remove("{}/{}".format(geo_dir, "image.diff_par"))
                 fail = True
 
         if not fail:
             try:
                 check_coreg(outName, res, max_offset=75, max_error=2.0)
-            except:
+            except Exception:
                 if not deadFlag:
                     logging.error("ERROR: Failed the coregistration check")
-                    exit(1)
+                    sys.exit(1)
                 else:
                     logging.warning("WARNING: Coregistration check has failed; defaulting to dead reckoning")
-                    os.remove("{}/{}".format(dir, "image.diff_par"))
+                    os.remove("{}/{}".format(geo_dir, "image.diff_par"))
 
     logging.info("Running RTC process... finalizing")
     if par:
-        shutil.copy(par, "{}/image.diff_par".format(dir))
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {dir}/area.dem {dir}/area.dem_par {dir} image {res} 3 ".format(
-        mgrd=mgrd, dem=dem, dir=dir, res=res)
-    cmd = cmd + "{opt}".format(opt=options)
+        shutil.copy(par, "{}/image.diff_par".format(geo_dir))
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
+          " {dir}/area.dem {dir}/area.dem_par {dir} image " \
+          "{res} 3 {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
     execute(cmd, uselogging=True)
 
-    os.chdir(dir)
+    os.chdir(geo_dir)
 
     # Divide sigma0 by sin(theta) to get beta0
     cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
@@ -223,7 +226,7 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     shutil.move("tmp.tif", tif)
     createAmp(tif, nodata=0)
 
-    # Make meta files and stats 
+    # Make meta files and stats
     cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(outName)
     execute(cmd, uselogging=True)
     cmd = "stats -overstat -overmeta ls_map"
@@ -237,14 +240,14 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(pol)
     execute(cmd, uselogging=True)
 
-    # Make browse resolution tif file 
+    # Make browse resolution tif file
     if (res == browse_res):
         shutil.copy("image_cal_map.mli_amp.tif", "{}_{}_{}m.tif".format(outName, pol, browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outName, pol, browse_res), "image_cal_map.mli_amp.tif",
                        xRes=browse_res, yRes=browse_res)
 
-    # Move files into the product directory 
+    # Move files into the product directory
     outDir = "../PRODUCT"
     if not os.path.exists(outDir):
         os.mkdir(outDir)
@@ -274,7 +277,6 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
         mpol = "HH"
 
     mgrd = "{out}.{pol}.mgrd".format(out=outfile, pol=cpol)
-    small_map = "{out}_small_map".format(out=outfile)
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
@@ -290,29 +292,29 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
 
     options = "-p -j -n {} -q -c ".format(terms)
     if gammaFlag:
-        options = options + "-g "
+        options += "-g "
 
     home_dir = os.getcwd()
-    dir = "geo_{}".format(cpol)
+    geo_dir = "geo_{}".format(cpol)
     mdir = "geo_{}".format(mpol)
-    if not os.path.isdir(dir):
-        os.mkdir(dir)
+    if not os.path.isdir(geo_dir):
+        os.mkdir(geo_dir)
 
-    shutil.copy("geo_{}/image.diff_par".format(mpol), "{}".format(dir))
-    os.symlink("../geo_{}/image_0.map_to_rdc".format(mpol), "{}/image_0.map_to_rdc".format(dir))
-    os.symlink("../geo_{}/image_0.ls_map".format(mpol), "{}/image_0.ls_map".format(dir))
-    os.symlink("../geo_{}/image_0.inc_map".format(mpol), "{}/image_0.inc_map".format(dir))
-    os.symlink("../geo_{}/image_0.sim".format(mpol), "{}/image_0.sim".format(dir))
-    os.symlink("../geo_{}/area.dem_par".format(mpol), "{}/area.dem_par".format(dir))
+    shutil.copy("geo_{}/image.diff_par".format(mpol), "{}".format(geo_dir))
+    os.symlink("../geo_{}/image_0.map_to_rdc".format(mpol), "{}/image_0.map_to_rdc".format(geo_dir))
+    os.symlink("../geo_{}/image_0.ls_map".format(mpol), "{}/image_0.ls_map".format(geo_dir))
+    os.symlink("../geo_{}/image_0.inc_map".format(mpol), "{}/image_0.inc_map".format(geo_dir))
+    os.symlink("../geo_{}/image_0.sim".format(mpol), "{}/image_0.sim".format(geo_dir))
+    os.symlink("../geo_{}/area.dem_par".format(mpol), "{}/area.dem_par".format(geo_dir))
 
     if par:
-        shutil.cp(par, "{}/image.diff_par".format(dir))
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3 ".format(
-        mgrd=mgrd, dem=dem, mdir=mdir, dir=dir, res=res)
-    cmd = cmd + " " + options
+        shutil.copy(par, "{}/image.diff_par".format(geo_dir))
+    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
+          " {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3" \
+          " {opts}".format(mgrd=mgrd, dem=dem, mdir=mdir, dir=geo_dir, res=res, opts=options)
     execute(cmd, uselogging=True)
 
-    os.chdir(dir)
+    os.chdir(geo_dir)
 
     # Divide sigma0 by sin(theta) to get beta0
     cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
@@ -419,40 +421,40 @@ def create_consolidated_log(basename, outName, loFlag, deadFlag, matchFlag, gamm
     f.write("Consolidated log for: {}\n".format(outName))
     options = ""
     if loFlag:
-        options = options + "-l "
+        options += "-l "
     if not deadFlag:
-        options = options + "--fail "
+        options += "--fail "
     if matchFlag:
-        options = options + "-n "
+        options += "-n "
     if not gammaFlag:
-        options = options + "--sigma "
+        options += "--sigma "
     if filterFlag:
-        options = options + "-f "
+        options += "-f "
     if not pwrFlag:
-        options = options + "--amp "
+        options += "--amp "
     if smooth:
-        options = options + "--smooth "
-    options = options + "-k {}".format(looks)
-    options = options + "-t {}".format(terms)
+        options += "--smooth "
+    options += "-k {}".format(looks)
+    options += "-t {}".format(terms)
     if par:
-        options = options + "--par {}".format(par)
+        options += "--par {}".format(par)
     if noCrossPol:
-        options = options + "--noCrossPol".format(noCrossPol)
+        options += "--noCrossPol".format(noCrossPol)
     if roi:
-        options = options + "-a {}".format(roi)
+        options += "-a {}".format(roi)
     if shape:
-        options = options + "-s {}".format(shape)
+        options += "-s {}".format(shape)
 
     cmd = "rtc_sentinel.py " + options
     f.write("Command: {}\n".format(cmd))
     f.close()
 
-    dir = "geo_{}".format(pol)
+    geo_dir = "geo_{}".format(pol)
     add_log(logFile, logname)
-    add_log("{}/mk_geo_radcal_0.log".format(dir), logname)
-    add_log("{}/mk_geo_radcal_1.log".format(dir), logname)
-    add_log("{}/mk_geo_radcal_2.log".format(dir), logname)
-    add_log("{}/mk_geo_radcal_3.log".format(dir), logname)
+    add_log("{}/mk_geo_radcal_0.log".format(geo_dir), logname)
+    add_log("{}/mk_geo_radcal_1.log".format(geo_dir), logname)
+    add_log("{}/mk_geo_radcal_2.log".format(geo_dir), logname)
+    add_log("{}/mk_geo_radcal_3.log".format(geo_dir), logname)
     add_log("coreg_check.log", logname)
 
 
@@ -484,8 +486,9 @@ def create_iso_xml(outfile, outname, pol, cpol, inFile, output, demType, log):
 
     out = "PRODUCT"
 
-    cmd = "xsltproc --stringparam path {path} --stringparam timestamp timestring --stringparam file_size 1000 --stringparam server stuff --output out.xml sentinel_xml.xsl {path}/manifest.safe".format(
-        path=path)
+    cmd = "xsltproc --stringparam path {path} --stringparam timestamp timestring" \
+          " --stringparam file_size 1000 --stringparam server stuff" \
+          " --output out.xml sentinel_xml.xsl {path}/manifest.safe".format(path=path)
     execute(cmd, uselogging=True)
 
     m = sentinel2meta("out.xml")
@@ -639,13 +642,13 @@ def rtc_sentinel_gamma(inFile,
             looks = int(res / 10 + 0.5)
         logging.info("Setting looks to {}".format(looks))
 
-    # get rid of ending "/" 
+    # get rid of ending "/"
     if inFile.endswith("/"):
         inFile = inFile[0:len(inFile) - 1]
 
     if not os.path.exists(inFile):
         logging.error("ERROR: Input file {} does not exist".format(inFile))
-        exit(1)
+        sys.exit(1)
     if "zip" in inFile:
         zip_ref = zipfile.ZipFile(inFile, 'r')
         zip_ref.extractall(".")
@@ -725,7 +728,7 @@ def rtc_sentinel_gamma(inFile,
         demType = "Unknown"
     else:
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
-        exit(1)
+        sys.exit(1)
 
     vvlist = glob.glob("{}/*/*vv*.tiff".format(inFile))
     vhlist = glob.glob("{}/*/*vh*.tiff".format(inFile))
@@ -764,7 +767,7 @@ def rtc_sentinel_gamma(inFile,
 
     if hhlist is None and vvlist is None:
         logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
-        exit(1)
+        sys.exit(1)
 
     fix_geotiff_locations()
     reproject_dir(demType, res, prod_dir="PRODUCT")

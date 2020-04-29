@@ -4,6 +4,7 @@ import datetime
 import glob
 import logging
 import os
+import sys
 
 from hyp3lib.execute import execute
 from hyp3lib.file_subroutines import get_dem_tile_list
@@ -12,24 +13,25 @@ from hyp3lib.make_arc_thumb import pngtothumb
 from hyp3lib.saa_func_lib import getCorners
 
 
-# Get the UTM N/S designation
 def get_hemisphere(fi):
+    """Get the UTM N/S designation"""
     ullon, lrlon, lrlat, ullat = getCorners(fi)
     if lrlat + ullat >= 0:
-        return ("N")
+        return "N"
     else:
-        return ("S")
+        return "S"
 
 
 def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, looks, pol, cpol,
                    demType, spacing, hyp3_ver, gamma_ver, rtcName):
     print("create_arc_xml: CWD is {}".format(os.getcwd()))
+    zone = None
     try:
         proj_name = getParameter("area.dem.par".format(pol.upper()), "projection_name")
         if "UTM" in proj_name:
             zone = getParameter("area.dem.par".format(pol.upper()), "projection_zone")
-    except:
-        zone = None
+    except Exception:
+        pass
     logging.info("Zone is {}".format(zone))
 
     demTiles = get_dem_tile_list()
@@ -103,7 +105,7 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
         pcs = "WGS 1984 Antarctic Polar Stereographic"
     else:
         logging.error("Unrecognized DEM type: {}".format(demType))
-        exit(1)
+        sys.exit(1)
 
     for myfile in glob.glob("*.tif"):
         f = None

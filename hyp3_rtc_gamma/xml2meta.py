@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 from argparse import RawTextHelpFormatter
 
@@ -7,7 +8,7 @@ import lxml.etree as et
 import scipy.constants as sc
 from osgeo import ogr
 
-from hyp3_rtc_gamma.asf_utils import *
+from hyp3_rtc_gamma import asf_utils
 
 # establish a stub root logger to avoid syntax errors
 # we'll configure this later on using asf.log
@@ -15,9 +16,9 @@ log = logging.getLogger()
 
 
 def sentinel2meta(xmlFile):
-    m = meta_init()
-    m = meta_init_sar(m)
-    m = meta_init_location(m)
+    m = asf_utils.meta_init()
+    m = asf_utils.meta_init_sar(m)
+    m = asf_utils.meta_init_location(m)
     parser = et.XMLParser(remove_blank_text=True)
     meta = et.parse(xmlFile, parser)
 
@@ -244,7 +245,7 @@ if __name__ == '__main__':
 
     if args.data == 'sentinel':
         log.info('Converting Sentinel XML file (%s) ...' % args.xmlFile)
-        m = sentinel2meta(args.xmlFile)
-        write_asf_meta(m, args.metaFile)
+        asf_meta = sentinel2meta(args.xmlFile)
+        asf_utils.write_asf_meta(asf_meta, args.metaFile)
     else:
         log.error("Conversion for '%s' data not defined!" % args.data)

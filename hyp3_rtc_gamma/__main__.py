@@ -12,16 +12,16 @@ from hyp3proclib import (
     clip_tiffs_to_roi,
     execute,
     extra_arg_is,
-    get_extra_arg,
     failure,
     find_browses,
+    get_extra_arg,
     process,
     record_metrics,
     success,
     unzip,
     upload_product,
+    user_ok_for_jers,
     zip_dir,
-    user_ok_for_jers
 )
 from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import add_citation, cleanup_workdir

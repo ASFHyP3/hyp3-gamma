@@ -10,7 +10,6 @@ from osgeo import gdal
 
 
 def smooth_dem_tiles(demdir, build=True):
-    back = os.getcwd()
     os.chdir(demdir)
 
     for mytif in glob.glob("*_8m_dem.tif"):

@@ -277,7 +277,7 @@ def write_asf_meta(m, metaFile):
         outF.write('meta_version: ' + m['meta_version'][0] + '\n\n')
 
         # General block
-        outF.write('general {                                  # Begin parameters' \
+        outF.write('general {                                  # Begin parameters'
                    ' generally used in remote sensing\n')
         writeStr(outF, m, 'general.name')
         writeStr(outF, m, 'general.sensor')
@@ -311,7 +311,7 @@ def write_asf_meta(m, metaFile):
 
         # SAR block
         if s['sar']:
-            outF.write('sar {                                      # Begin ' \
+            outF.write('sar {                                      # Begin '
                        'parameters used specifically in SAR imaging\n')
             writeStr(outF, m, 'sar.polarization')
             writeStr(outF, m, 'sar.image_type')
@@ -359,7 +359,7 @@ def write_asf_meta(m, metaFile):
 
         # Projection block
         if s['projection']:
-            outF.write('projection {                               # Map Projection' \
+            outF.write('projection {                               # Map Projection'
                        ' parameters\n')
             writeStr(outF, m, 'projection.type')
             writeStr(outF, m, 'projection.startX')
@@ -374,9 +374,9 @@ def write_asf_meta(m, metaFile):
             writeStr(outF, m, 'projection.datum')
             writeStr(outF, m, 'projection.height')
             if 'projection.param.utm.zone' in m.keys():
-                outF.write('    param {                                    # ' \
+                outF.write('    param {                                    # '
                            'Projection specific parameters\n')
-                outF.write('        utm {                                      # ' \
+                outF.write('        utm {                                      # '
                            'Begin Universal Transverse Mercator Projection\n')
                 writeStr(outF, m, 'projection.param.utm.zone')
                 writeStr(outF, m, 'projection.param.utm.false_easting')
@@ -384,29 +384,29 @@ def write_asf_meta(m, metaFile):
                 writeStr(outF, m, 'projection.param.utm.latitude')
                 writeStr(outF, m, 'projection.param.utm.longitude')
                 writeStr(outF, m, 'projection.param.utm.scale_factor')
-                outF.write('        }                                          # End ' \
+                outF.write('        }                                          # End '
                            'utm\n')
-                outF.write('    }                                          # End ' \
+                outF.write('    }                                          # End '
                            'param\n\n')
             elif 'projection.param.ps.slat' in m.keys():
-                outF.write('    param {                                    # ' \
+                outF.write('    param {                                    # '
                            'Projection specific parameters\n')
-                outF.write('        ps {                                       # ' \
+                outF.write('        ps {                                       # '
                            'Begin Polar Stereographic Projection\n')
                 writeStr(outF, m, 'projection.param.ps.slat')
                 writeStr(outF, m, 'projection.param.ps.slon')
                 writeStr(outF, m, 'projection.param.ps.false_easting')
                 writeStr(outF, m, 'projection.param.ps.false_northing')
-                outF.write('        }                                          # End ' \
+                outF.write('        }                                          # End '
                            'ps\n')
-                outF.write('    }                                          # End ' \
+                outF.write('    }                                          # End '
                            'param\n\n')
-            outF.write('}                                          # End projection' \
+            outF.write('}                                          # End projection'
                        '\n')
 
         # Location block
         if s['location']:
-            outF.write('location {                                 # Block ' \
+            outF.write('location {                                 # Block '
                        'containing image corner coordinates\n')
             writeStr(outF, m, 'location.lat_start_near_range')
             writeStr(outF, m, 'location.lon_start_near_range')
@@ -416,20 +416,20 @@ def write_asf_meta(m, metaFile):
             writeStr(outF, m, 'location.lon_end_near_range')
             writeStr(outF, m, 'location.lat_end_far_range')
             writeStr(outF, m, 'location.lon_end_far_range')
-            outF.write('}                                          # End location' \
+            outF.write('}                                          # End location'
                        '\n\n')
 
     outF.close()
 
 
 # Data manipulation functions
-def power2db(input, output):
+def power2db(img_file, output):
     # Get metadata
-    metaIn = input.replace('.img', '.meta')
+    metaIn = img_file.replace('.img', '.meta')
     m = parse_asf_meta(metaIn)
 
     # Converting power scale to dB values
-    power = np.fromfile(input, dtype='>f4')
+    power = np.fromfile(img_file, dtype='>f4')
     power[power <= 0.0001] = 0.0001
     db = 10.0 * np.log10(power)
     db.astype('>f4').tofile(output)
@@ -443,14 +443,14 @@ def power2db(input, output):
     write_asf_meta(m, metaOut)
 
 
-def fix_value(input, output, valIn, valOut, tolerance):
+def fix_value(img_file, output, valIn, valOut, tolerance):
     # Take care of metadata
-    metaIn = input.replace('.img', '.meta')
+    metaIn = img_file.replace('.img', '.meta')
     metaOut = output.replace('.img', '.meta')
     cmd = ('cp %s %s' % (metaIn, metaOut))
     os.system(cmd)
 
     # Checking values
-    values = np.fromfile(input, dtype='>f4')
+    values = np.fromfile(img_file, dtype='>f4')
     values[abs(values - valIn) < tolerance] = valOut
     values.astype('>f4').tofile(output)
