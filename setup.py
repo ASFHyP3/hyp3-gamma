@@ -35,6 +35,9 @@ setup(
         'hyp3lib',
         'hyp3proclib',
         'importlib_metadata',
+        'lxml',
+        'numpy',
+        'scipy',
     ],
 
     extras_require={
