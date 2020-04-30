@@ -66,7 +66,7 @@ def smooth_dem_tiles(demdir, build=True):
         return "full_area.dem", "full_area.dem.par"
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(prog="smooth_dem_tiles.py",
                                      description="Smooth REMA DEM tiles using fill_gaps")
     parser.add_argument("dir", help="Directory containing REMA DEMs to smooth")
@@ -80,3 +80,6 @@ if __name__ == "__main__":
     logging.info("Starting run")
 
     smooth_dem_tiles(args.dir, build=args.n)
+
+if __name__ == "__main__":
+    main()
