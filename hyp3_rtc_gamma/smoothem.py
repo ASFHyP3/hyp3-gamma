@@ -81,5 +81,6 @@ def main():
 
     smooth_dem_tiles(args.dir, build=args.n)
 
+
 if __name__ == "__main__":
     main()
