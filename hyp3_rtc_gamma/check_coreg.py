@@ -1,3 +1,5 @@
+"""Checks results of Gamma RTC coregistration process"""
+
 import argparse
 import glob
 import logging
@@ -157,29 +159,35 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
 
     if ret == 0:
         display("Granule passed coregistration", f)
-        return (0)
+        return 0
     else:
         display("Granule failed coregistration", f)
         f.close()
         sys.exit(-1)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='check_coreg',
-                                     description='Checks results of Gamma RTC coregistration process')
+def main():
+    """Main entrypoint"""
+    parser = argparse.ArgumentParser(
+        prog='check_coreg.py',
+        description=__doc__,
+    )
     parser.add_argument('input', help='Name of input SAR file')
-    parser.add_argument('post', help='Posting of the SAR image', type=float)
-    parser.add_argument('-o', '--max_offset', help='Set the maximum allowable max_offset (meters)', type=float,
-                        default=50)
-    parser.add_argument('-e', '--max_error',
-                        help='Set the maximum allowable standard deviation of max_offset fit (pixels)', type=int,
-                        default=2)
+    parser.add_argument('post', type=float, help='Posting of the SAR image')
+    parser.add_argument('-o', '--max_offset', type=float, default=50,
+                        help='Set the maximum allowable max_offset (meters)')
+    parser.add_argument('-e', '--max_error', type=int, default=2,
+                        help='Set the maximum allowable standard deviation of max_offset fit (pixels)')
     args = parser.parse_args()
 
-    logFile = "check_coreg.log"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    log_file = "check_coreg.log"
+    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
     check_coreg(args.input, args.post, args.max_offset, args.max_error)
+
+
+if __name__ == "__main__":
+    main()

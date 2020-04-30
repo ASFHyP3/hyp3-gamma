@@ -1,8 +1,8 @@
+"""Converts an XML metadata file into an ASF metadata file"""
+
 import argparse
 import logging
 import os
-import sys
-from argparse import RawTextHelpFormatter
 
 import lxml.etree as et
 import scipy.constants as sc
@@ -10,22 +10,21 @@ from osgeo import ogr
 
 from hyp3_rtc_gamma import metadata_utils
 
-# establish a stub root logger to avoid syntax errors
-# we'll configure this later on using asf.log
 log = logging.getLogger()
 
 
-def sentinel2meta(xmlFile):
+def sentinel2meta(xml_file):
     m = metadata_utils.meta_init()
     m = metadata_utils.meta_init_sar(m)
     m = metadata_utils.meta_init_location(m)
     parser = et.XMLParser(remove_blank_text=True)
-    meta = et.parse(xmlFile, parser)
+    meta = et.parse(xml_file, parser)
 
     # Determine location and centroid
     ring = ogr.Geometry(ogr.wkbLinearRing)
     poly = ogr.Geometry(ogr.wkbPolygon)
     bounds = meta.xpath('//boundary')
+    point = None
     for bound in bounds:
         lat = bound.xpath('polygon/point[@id="1"]/lat')[0].text
         m['location.lat_start_near_range'] = \
@@ -116,29 +115,29 @@ def sentinel2meta(xmlFile):
         m['general.bands'] = ('VV,VH', m['general.bands'][1])
     if product_type == 'GRD':
         line_count = meta.xpath('/sentinel/metadata/image/height')[0].text
+        sample_count = meta.xpath('/sentinel/metadata/image/width')[0].text
+        x_pixel_size = meta.xpath('/sentinel/metadata/image/x_spacing')[0].text
+        y_pixel_size = meta.xpath('/sentinel/metadata/image/y_spacing')[0].text
     elif product_type == 'SLC':
         param = ('/sentinel/metadata/image/IW1_{0}/height'.format(polarization))
         line_count = meta.xpath(param)[0].text
-    m['general.line_count'] = (line_count, m['general.line_count'][1])
-    if product_type == 'GRD':
-        sample_count = meta.xpath('/sentinel/metadata/image/width')[0].text
-    elif product_type == 'SLC':
         param = ('/sentinel/metadata/image/IW1_{0}/width'.format(polarization))
         sample_count = meta.xpath(param)[0].text
+        param = ('/sentinel/metadata/image/IW1_{0}/x_spacing'.format(polarization))
+        x_pixel_size = meta.xpath(param)[0].text
+        param = ('/sentinel/metadata/image/IW1_{0}/y_spacing'.format(polarization))
+        y_pixel_size = meta.xpath(param)[0].text
+    else:
+        log.warning('Unkown product type!')
+        line_count = None
+        sample_count = None
+        x_pixel_size = None
+        y_pixel_size = None
+    m['general.line_count'] = (line_count, m['general.line_count'][1])
     m['general.sample_count'] = (sample_count, m['general.sample_count'][1])
     m['general.start_line'] = ('0', m['general.start_line'][1])
     m['general.start_sample'] = ('0', m['general.start_sample'][1])
-    if product_type == 'GRD':
-        x_pixel_size = meta.xpath('/sentinel/metadata/image/x_spacing')[0].text
-    elif product_type == 'SLC':
-        param = ('/sentinel/metadata/image/IW1_{0}/x_spacing'.format(polarization))
-        x_pixel_size = meta.xpath(param)[0].text
     m['general.x_pixel_size'] = (x_pixel_size, m['general.x_pixel_size'][1])
-    if product_type == 'GRD':
-        y_pixel_size = meta.xpath('/sentinel/metadata/image/y_spacing')[0].text
-    elif product_type == 'SLC':
-        param = ('/sentinel/metadata/image/IW1_{0}/y_spacing'.format(polarization))
-        y_pixel_size = meta.xpath(param)[0].text
     m['general.y_pixel_size'] = (y_pixel_size, m['general.y_pixel_size'][1])
     m['general.center_latitude'] = \
         (str(point[0]), m['general.center_latitude'][1])
@@ -223,29 +222,33 @@ def sentinel2meta(xmlFile):
     return m
 
 
-if __name__ == '__main__':
+def file_exists(file_arg):
+    """
+    Convenience "type" function for argparse to check if a file exists
+    """
+    if not os.path.exists(file_arg):
+        raise argparse.ArgumentTypeError(f"XML metadata file {file_arg} does not exist")
+    return file_arg
 
-    parser = argparse.ArgumentParser(prog='xml2meta',
-                                     description='Converts an XML metadata file into an ASF metadata file',
-                                     formatter_class=RawTextHelpFormatter)
-    parser.add_argument('data', help='name of data source')
-    parser.add_argument('xmlFile', help='name of the XML metadata file (input)')
+
+def main():
+    """Main entrypoint"""
+    parser = argparse.ArgumentParser(
+        prog='xml2meta.py',
+        description=__doc__,
+    )
+    parser.add_argument('data', type=str.lower, choices=('sentinel',),
+                        help='name of data source')
+    parser.add_argument('xmlFile', type=file_exists, help='name of the XML metadata file (input)')
     parser.add_argument('metaFile', help='name of the metadata file (output)')
     parser.add_argument('-s --screen', action='store_true', dest='screen',
                         help='log to the console (as well as to syslog)')
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
     args = parser.parse_args()
-    # log = asf.log.getLogger(screen = args.screen)
 
-    if not os.path.exists(args.xmlFile):
-        log.error('XML metadata file (%s) does not exist!' % args.xmlFile)
-        sys.exit(1)
+    log.info('Converting Sentinel XML file (%s) ...' % args.xmlFile)
+    asf_meta = sentinel2meta(args.xmlFile)
+    metadata_utils.write_asf_meta(asf_meta, args.metaFile)
 
-    if args.data == 'sentinel':
-        log.info('Converting Sentinel XML file (%s) ...' % args.xmlFile)
-        asf_meta = sentinel2meta(args.xmlFile)
-        metadata_utils.write_asf_meta(asf_meta, args.metaFile)
-    else:
-        log.error("Conversion for '%s' data not defined!" % args.data)
+
+if __name__ == "__main__":
+    main()

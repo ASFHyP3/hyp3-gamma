@@ -19,9 +19,9 @@ def smooth_dem_tiles(demdir, build=True):
 
     for mytif in glob.glob("*_8m_dem_30m.tif"):
 
-        newName = mytif.replace(".tif", "_smooth.tif")
-        print("newName {}".format(newName))
-        if not os.path.isfile(newName):
+        new_name = mytif.replace(".tif", "_smooth.tif")
+        print("new_name {}".format(new_name))
+        if not os.path.isfile(new_name):
 
             print("Cleaning up DEM {}".format(mytif))
 
@@ -32,31 +32,25 @@ def smooth_dem_tiles(demdir, build=True):
                 sys.exit(1)
 
             srcband = src_ds.GetRasterBand(1)
-            noData = srcband.GetNoDataValue()
+            no_data = srcband.GetNoDataValue()
 
-            print("noData value is {}".format(noData))
-
-            #        data[np.isnan(data)]=0.0001
-            #        data[data==0] = 1
-            #        data[data==noData] = 0
-            #        saa.write_gdal_file_float(newName,trans,proj,data,nodata=0)
-            #        print("wrote tmp tif")
+            print("noData value is {}".format(no_data))
 
             dem = mytif.replace(".tif", ".dem")
             par = dem + ".par"
             ps2dem(mytif, dem, par)
 
-            tmpName = mytif.replace(".tif", "_tmp.dem")
-            cmd = "fill_gaps {in1} {width} {out} - - 1 100".format(in1=dem, width=x1, out=tmpName)
+            tmp_name = mytif.replace(".tif", "_tmp.dem")
+            cmd = "fill_gaps {in1} {width} {out} - - 1 100".format(in1=dem, width=x1, out=tmp_name)
             os.system(cmd)
 
-            cmd = "data2geotiff {par} {in1} 2 {out}".format(par=par, in1=tmpName, out=newName)
+            cmd = "data2geotiff {par} {in1} 2 {out}".format(par=par, in1=tmp_name, out=new_name)
             os.system(cmd)
 
-            print("removing {} {} {}".format(dem, par, tmpName))
+            print("removing {} {} {}".format(dem, par, tmp_name))
             os.remove(dem)
             os.remove(par)
-            os.remove(tmpName)
+            os.remove(tmp_name)
 
     if build:
         cmd = "gdalbuildvrt full_area.vrt *_smooth.tif"
@@ -69,7 +63,7 @@ def smooth_dem_tiles(demdir, build=True):
         os.system(cmd)
 
         logging.info("Finished creating output")
-        return ("full_area.dem", "full_area.dem.par")
+        return "full_area.dem", "full_area.dem.par"
 
 
 if __name__ == "__main__":

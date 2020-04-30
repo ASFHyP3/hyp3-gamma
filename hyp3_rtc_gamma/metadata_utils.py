@@ -1,42 +1,31 @@
 def meta_init():
-    m = {}
-    m['meta_version'] = ('3.6', '')
-
-    # General block
-    m['general.name'] = ('???', 'File name')
-    m['general.sensor'] = ('???', 'Imaging satellite')
-    m['general.sensor_name'] = ('???', 'Imaging sensor')
-    m['general.mode'] = ('???', 'Imaging mode')
-    m['general.receiving_station'] = ('???', 'Downlinking ground station')
-    m['general.processor'] = ('???', 'Name and Version of Processor')
-    m['general.data_type'] = ('???', 'Type of samples (e.g. REAL64)')
-    m['general.image_data_type'] = \
-        ('???', 'Image data type (e.g. AMPLITUDE_IMAGE')
-    m['general.radiometry'] = ('AMPLITUDE', 'Radiometry (e.g. SIGMA)')
-    m['general.acquisition_date'] = ('???', 'Acquisition date of the data')
-    m['general.orbit'] = ('-999999999', 'Orbit Number for this datatake')
-    m['general.orbit_direction'] = ('?', "Ascending 'A', or descending 'D'")
-    m['general.frame'] = ('-999999999', 'Frame for this image [-1 if n/a]')
-    m['general.band_count'] = ('1', 'Number of bands in image')
-    m['general.bands'] = ('???', 'Band of the sensor')
-    m['general.line_count'] = ('-999999999', 'Number of lines in image')
-    m['general.sample_count'] = ('-999999999', 'Number of samples in image')
-    m['general.start_line'] = \
-        ('-999999999', 'First line relative to original image')
-    m['general.start_sample'] = \
-        ('-999999999', 'First sample relative to original image')
-    m['general.x_pixel_size'] = ('NaN', 'Range pixel size [m]')
-    m['general.y_pixel_size'] = ('NaN', 'Azimuth pixel size [m]')
-    m['general.center_latitude'] = ('NaN', 'Approximate image center latitude')
-    m['general.center_longitude'] = ('NaN', 'Approximate image center longitude')
-    m['general.re_major'] = ('NaN', 'Major (equator) Axis of earth [m]')
-    m['general.re_minor'] = ('NaN', 'Minor (polar) Axis of earth [m]')
-    m['general.bit_error_rate'] = ('NaN', 'Fraction of bits which are in error')
-    m['general.missing_lines'] = \
-        ('-999999999', 'Number of missing lines in data take')
-    m['general.no_data'] = ('NaN', 'Value indicating no data for a pixel')
-
-    return m
+    return {
+        'meta_version': ('3.6', ''), 'general.name': ('???', 'File name'),
+        'general.sensor': ('???', 'Imaging satellite'), 'general.sensor_name': ('???', 'Imaging sensor'),
+        'general.mode': ('???', 'Imaging mode'), 'general.receiving_station': ('???', 'Downlinking ground station'),
+        'general.processor': ('???', 'Name and Version of Processor'),
+        'general.data_type': ('???', 'Type of samples (e.g. REAL64)'),
+        'general.image_data_type': ('???', 'Image data type (e.g. AMPLITUDE_IMAGE'),
+        'general.radiometry': ('AMPLITUDE', 'Radiometry (e.g. SIGMA)'),
+        'general.acquisition_date': ('???', 'Acquisition date of the data'),
+        'general.orbit': ('-999999999', 'Orbit Number for this datatake'),
+        'general.orbit_direction': ('?', "Ascending 'A', or descending 'D'"),
+        'general.frame': ('-999999999', 'Frame for this image [-1 if n/a]'),
+        'general.band_count': ('1', 'Number of bands in image'), 'general.bands': ('???', 'Band of the sensor'),
+        'general.line_count': ('-999999999', 'Number of lines in image'),
+        'general.sample_count': ('-999999999', 'Number of samples in image'),
+        'general.start_line': ('-999999999', 'First line relative to original image'),
+        'general.start_sample': ('-999999999', 'First sample relative to original image'),
+        'general.x_pixel_size': ('NaN', 'Range pixel size [m]'),
+        'general.y_pixel_size': ('NaN', 'Azimuth pixel size [m]'),
+        'general.center_latitude': ('NaN', 'Approximate image center latitude'),
+        'general.center_longitude': ('NaN', 'Approximate image center longitude'),
+        'general.re_major': ('NaN', 'Major (equator) Axis of earth [m]'),
+        'general.re_minor': ('NaN', 'Minor (polar) Axis of earth [m]'),
+        'general.bit_error_rate': ('NaN', 'Fraction of bits which are in error'),
+        'general.missing_lines': ('-999999999', 'Number of missing lines in data take'),
+        'general.no_data': ('NaN', 'Value indicating no data for a pixel')
+    }
 
 
 def meta_init_sar(m):
@@ -137,7 +126,7 @@ def get_meta_sections(m):
     return s
 
 
-def writeStr(outF, m, key):
+def writeStr(out_file, m, key):
     value = m[key][0]
     comment = m[key][1]
     line = ''
@@ -148,17 +137,15 @@ def writeStr(outF, m, key):
     while len(line) < 42 + (len(name) - 1) * 4:
         line += ' '
     line += ' # ' + comment + '\n'
-    outF.write(line)
+    out_file.write(line)
 
 
-def write_asf_meta(m, metaFile):
-    # Get metadata sections
+def write_asf_meta(m, meta_file):
     s = get_meta_sections(m)
 
     # Write header comments
-    with open(metaFile, 'w') as outF:
-        outF.write('# This file contains the metadata for satellite capture file '
-                   'of the same base name.\n')
+    with open(meta_file, 'w') as outF:
+        outF.write('# This file contains the metadata for satellite capture file of the same base name.\n')
         outF.write("#      '?' is likely an unknown single character value.\n")
         outF.write("#      '???' is likely an unknown string of characters.\n")
         outF.write("#      '-999999999' is likely an unknown integer value.\n")
@@ -166,8 +153,8 @@ def write_asf_meta(m, metaFile):
         outF.write('meta_version: ' + m['meta_version'][0] + '\n\n')
 
         # General block
-        outF.write('general {                                  # Begin parameters'
-                   ' generally used in remote sensing\n')
+        outF.write('general {                                  '
+                   '# Begin parameters generally used in remote sensing\n')
         writeStr(outF, m, 'general.name')
         writeStr(outF, m, 'general.sensor')
         writeStr(outF, m, 'general.sensor_name')
@@ -196,12 +183,13 @@ def write_asf_meta(m, metaFile):
         writeStr(outF, m, 'general.bit_error_rate')
         writeStr(outF, m, 'general.missing_lines')
         writeStr(outF, m, 'general.no_data')
-        outF.write('}                                          # End general\n\n')
+        outF.write('}                                          '
+                   '# End general\n\n')
 
         # SAR block
         if s['sar']:
-            outF.write('sar {                                      # Begin '
-                       'parameters used specifically in SAR imaging\n')
+            outF.write('sar {                                      '
+                       '# Begin parameters used specifically in SAR imaging\n')
             writeStr(outF, m, 'sar.polarization')
             writeStr(outF, m, 'sar.image_type')
             writeStr(outF, m, 'sar.look_direction')
@@ -244,12 +232,13 @@ def write_asf_meta(m, metaFile):
             writeStr(outF, m, 'sar.incid_a(3)')
             writeStr(outF, m, 'sar.incid_a(4)')
             writeStr(outF, m, 'sar.incid_a(5)')
-            outF.write('}                                          # End sar\n\n')
+            outF.write('}                                          '
+                       '# End sar\n\n')
 
         # Projection block
         if s['projection']:
-            outF.write('projection {                               # Map Projection'
-                       ' parameters\n')
+            outF.write('projection {                               '
+                       '# Map Projection parameters\n')
             writeStr(outF, m, 'projection.type')
             writeStr(outF, m, 'projection.startX')
             writeStr(outF, m, 'projection.startY')
@@ -263,40 +252,42 @@ def write_asf_meta(m, metaFile):
             writeStr(outF, m, 'projection.datum')
             writeStr(outF, m, 'projection.height')
             if 'projection.param.utm.zone' in m.keys():
-                outF.write('    param {                                    # '
-                           'Projection specific parameters\n')
-                outF.write('        utm {                                      # '
-                           'Begin Universal Transverse Mercator Projection\n')
+                outF.write('    param {                                    '
+                           '# Projection specific parameters\n')
+                outF.write(
+                    '        utm {                                      '
+                    '# Begin Universal Transverse Mercator Projection\n'
+                )
                 writeStr(outF, m, 'projection.param.utm.zone')
                 writeStr(outF, m, 'projection.param.utm.false_easting')
                 writeStr(outF, m, 'projection.param.utm.false_northing')
                 writeStr(outF, m, 'projection.param.utm.latitude')
                 writeStr(outF, m, 'projection.param.utm.longitude')
                 writeStr(outF, m, 'projection.param.utm.scale_factor')
-                outF.write('        }                                          # End '
-                           'utm\n')
-                outF.write('    }                                          # End '
-                           'param\n\n')
+                outF.write('        }                                          '
+                           '# End utm\n')
+                outF.write('    }                                          '
+                           '# End param\n\n')
             elif 'projection.param.ps.slat' in m.keys():
-                outF.write('    param {                                    # '
-                           'Projection specific parameters\n')
-                outF.write('        ps {                                       # '
-                           'Begin Polar Stereographic Projection\n')
+                outF.write('    param {                                    '
+                           '# Projection specific parameters\n')
+                outF.write('        ps {                                       '
+                           '# Begin Polar Stereographic Projection\n')
                 writeStr(outF, m, 'projection.param.ps.slat')
                 writeStr(outF, m, 'projection.param.ps.slon')
                 writeStr(outF, m, 'projection.param.ps.false_easting')
                 writeStr(outF, m, 'projection.param.ps.false_northing')
-                outF.write('        }                                          # End '
-                           'ps\n')
-                outF.write('    }                                          # End '
-                           'param\n\n')
-            outF.write('}                                          # End projection'
-                       '\n')
+                outF.write('        }                                          '
+                           '# End ps\n')
+                outF.write('    }                                          '
+                           '# End param\n\n')
+            outF.write('}                                          '
+                       '# End projection\n')
 
         # Location block
         if s['location']:
-            outF.write('location {                                 # Block '
-                       'containing image corner coordinates\n')
+            outF.write('location {                                 '
+                       '# Block containing image corner coordinates\n')
             writeStr(outF, m, 'location.lat_start_near_range')
             writeStr(outF, m, 'location.lon_start_near_range')
             writeStr(outF, m, 'location.lat_start_far_range')
@@ -305,7 +296,7 @@ def write_asf_meta(m, metaFile):
             writeStr(outF, m, 'location.lon_end_near_range')
             writeStr(outF, m, 'location.lat_end_far_range')
             writeStr(outF, m, 'location.lon_end_far_range')
-            outF.write('}                                          # End location'
-                       '\n\n')
+            outF.write('}                                          '
+                       '# End location\n\n')
 
     outF.close()

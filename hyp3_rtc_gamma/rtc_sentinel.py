@@ -1,4 +1,4 @@
-"""Create Radiometrically Terrain-Corrected (RTC) files using GAMMA software"""
+"""Create a Radiometrically Terrain-Corrected (RTC) image from a  Sentinel-1 scene sing GAMMA software"""
 
 import argparse
 import datetime
@@ -800,21 +800,24 @@ def rtc_sentinel_gamma(inFile,
                             noCrossPol, par)
 
 
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(prog='rtc_sentinel',
-                                     description='Creates an RTC image from a Sentinel 1 Scene using GAMMA software')
+def main():
+    """Main entrypoint"""
+    parser = argparse.ArgumentParser(
+        prog='rtc_sentinel.py',
+        description=__doc__,
+    )
     parser.add_argument('input', help='Name of input file, either .zip or .SAFE')
     parser.add_argument("-o", "--outputResolution", type=float, help="Desired output resolution")
+
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-e", "--externalDEM",
-                       help="Specify a DEM file to use - must be in UTM projection")
-    group.add_argument("-r", "--roi", help="Specify ROI to use", type=float, nargs=4,
-                       metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'))
+    group.add_argument("-e", "--externalDEM", help="Specify a DEM file to use - must be in UTM projection")
+    group.add_argument("-r", "--roi", type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
+                       help="Specify ROI to use")
     group.add_argument("-s", "--shape", help="Specify shape file to use")
+
     parser.add_argument("-n", action="store_false", help="Do not perform matching")
-    parser.add_argument("--fail", action="store_true", help="if matching fails, fail the program \
-      default:use dead reckoning")
+    parser.add_argument("--fail", action="store_true",
+                        help="if matching fails, fail the program. Default: use dead reckoning")
     parser.add_argument("--sigma", action="store_true", help="create sigma0 instead of gamma0")
     parser.add_argument("--amp", action="store_true", help="create amplitude images instead of power")
     parser.add_argument("--smooth", action="store_true", help="smooth DEM file before terrain correction")
@@ -826,33 +829,19 @@ if __name__ == '__main__':
                         help="set the number of terms in matching polynomial (default is 1)")
     parser.add_argument('--output', help='base name of the output files')
     parser.add_argument("--par", help="Stack processing - use specified offset file and don't match")
-    parser.add_argument("--nocrosspol", help="Do not process the cross pol image", action="store_true")
-    parser.add_argument("-a", "--area", help="Keep area map", action="store_true")
+    parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
+    parser.add_argument("-a", "--area", action="store_true", help="Keep area map")
     args = parser.parse_args()
 
-    logFile = "{}_{}_log.txt".format(args.input.rpartition('.')[0], os.getpid())
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    log_file = "{}_{}_log.txt".format(args.input.rpartition('.')[0], os.getpid())
+    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
-    if args.fail:
-        deadFlag = False
-    else:
-        deadFlag = True
-
-    if not args.sigma:
-        gammaFlag = True
-    else:
-        gammaFlag = False
-
-    if args.amp:
-        pwrFlag = False
-    else:
-        pwrFlag = True
-
     logging.info("Pixel area flag: {}".format(args.area))
 
+    # FIXME: This function's inputs should be 1:1 (name and value!) with CLI args!
     rtc_sentinel_gamma(args.input,
                        outName=args.output,
                        res=args.outputResolution,
@@ -860,10 +849,10 @@ if __name__ == '__main__':
                        roi=args.roi,
                        shape=args.shape,
                        matchFlag=args.n,
-                       deadFlag=deadFlag,
-                       gammaFlag=gammaFlag,
+                       deadFlag=not args.fail,
+                       gammaFlag=args.sigma,
                        loFlag=args.l,
-                       pwrFlag=pwrFlag,
+                       pwrFlag=not args.amp,
                        filterFlag=args.f,
                        looks=args.looks,
                        terms=args.terms,
@@ -871,3 +860,7 @@ if __name__ == '__main__':
                        noCrossPol=args.nocrosspol,
                        smooth=args.smooth,
                        area=args.area)
+
+
+if __name__ == "__main__":
+    main()
