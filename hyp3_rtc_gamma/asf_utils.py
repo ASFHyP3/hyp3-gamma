@@ -1,76 +1,3 @@
-import configparser
-import datetime
-import os
-
-import numpy as np
-
-
-# Configuration file utilities
-def read_config_file(configFile, section):
-    c = None
-    if not os.path.exists(configFile):
-        configPath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                  os.pardir, 'config'))
-        configFile = os.path.join(configPath, configFile)
-
-    if os.path.exists(configFile):
-        c = {}
-        config = configparser.ConfigParser()
-        config.optionxform = str
-        config.read(configFile)
-        path_items = config.items(section)
-        for key, value in path_items:
-            c[key] = value
-
-    return c
-
-
-def get_config_value(configFile, section, key):
-    c = read_config_file(configFile, section)
-    if key in c.keys():
-        return c[key]
-    else:
-        return None
-
-
-# Temporary directory function
-def make_tmp_dir(path, prefix):
-    # Generate the temporary directory in location defined in the configuration
-    # file states. As general failover method generate a temporary directory in
-    # the current directory
-
-    tmpStr = prefix + '_' + datetime.datetime.utcnow().isoformat()
-    if path:
-        tmpDir = os.path.join(path, tmpStr)
-    else:
-        tmpDir = tmpStr
-    os.makedirs(tmpDir)
-
-    return tmpDir
-
-
-# Date utilities
-def getDateStr(timestamp, delta):
-    newDate = timestamp + datetime.timedelta(days=delta)
-    dateStr = newDate.strftime('%d-%b-%Y')
-
-    return dateStr
-
-
-# ASF tools metadata functions
-def update_meta_value(metaFile, param, value):
-    with open(metaFile, 'r') as fp:
-        lines = fp.readlines()
-    fp.close()
-    with open(metaFile, 'w') as fp:
-        for line in lines:
-            if param not in line:
-                fp.write(line)
-            else:
-                fp.write('    %s %s\n' % (param, value))
-    fp.close()
-
-
 def meta_init():
     m = {}
     m['meta_version'] = ('3.6', '')
@@ -192,44 +119,6 @@ def meta_init_location(m):
     return m
 
 
-def parse_asf_meta(metaFile):
-    # Read meta file
-    with open(metaFile) as inF:
-        lines = inF.readlines()
-    inF.close()
-
-    # Go through lines and fill in dictionary
-    m = {}
-    level = 0
-    section = ''
-    for line in lines:
-        line = line.strip().split('#')
-        content = line[0].rstrip()
-        if len(content) > 0:
-            if len(line) > 1:
-                comment = line[1].lstrip()
-            else:
-                comment = ''
-            if '{' in content:
-                level += 1
-                tmp = content.split(' ')[0]
-                section = section + tmp + '.'
-                value = '{'
-            elif '}' in content:
-                tmp = section.split('.')
-                for i in range(0, len(tmp)):
-                    section = tmp[i] + '.'
-                level -= 1
-                if level == 0:
-                    section = ''
-            else:
-                key = section + content.split(': ')[0].strip()
-                value = content.split(': ')[1].strip()
-                m[key] = (value, comment)
-
-    return m
-
-
 def get_meta_sections(m):
     key_names = (
         'general', 'sar', 'optical', 'thermal', 'projection',
@@ -254,11 +143,11 @@ def writeStr(outF, m, key):
     line = ''
     name = key.split('.')
     for i in range(1, len(name)):
-        line = line + '    '
-    line = line + name[len(name) - 1] + ': ' + value
-    while (len(line) < 42 + (len(name) - 1) * 4):
-        line = line + ' '
-    line = line + ' # ' + comment + '\n'
+        line += '    '
+    line += name[len(name) - 1] + ': ' + value
+    while len(line) < 42 + (len(name) - 1) * 4:
+        line += ' '
+    line += ' # ' + comment + '\n'
     outF.write(line)
 
 
@@ -420,37 +309,3 @@ def write_asf_meta(m, metaFile):
                        '\n\n')
 
     outF.close()
-
-
-# Data manipulation functions
-def power2db(img_file, output):
-    # Get metadata
-    metaIn = img_file.replace('.img', '.meta')
-    m = parse_asf_meta(metaIn)
-
-    # Converting power scale to dB values
-    power = np.fromfile(img_file, dtype='>f4')
-    power[power <= 0.0001] = 0.0001
-    db = 10.0 * np.log10(power)
-    db.astype('>f4').tofile(output)
-
-    # Take care of metadata
-    (value, comment) = m['general.radiometry']
-    m['general.radiometry'] = ('SIGMA_DB', comment)
-    (value, comment) = m['general.no_data']
-    m['general.no_data'] = ('-40', comment)
-    metaOut = output.replace('.img', '.meta')
-    write_asf_meta(m, metaOut)
-
-
-def fix_value(img_file, output, valIn, valOut, tolerance):
-    # Take care of metadata
-    metaIn = img_file.replace('.img', '.meta')
-    metaOut = output.replace('.img', '.meta')
-    cmd = ('cp %s %s' % (metaIn, metaOut))
-    os.system(cmd)
-
-    # Checking values
-    values = np.fromfile(img_file, dtype='>f4')
-    values[abs(values - valIn) < tolerance] = valOut
-    values.astype('>f4').tofile(output)
