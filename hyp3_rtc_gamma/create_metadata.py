@@ -12,6 +12,8 @@ from hyp3lib.getParameter import getParameter
 from hyp3lib.make_arc_thumb import pngtothumb
 from hyp3lib.saa_func_lib import getCorners
 
+import hyp3_rtc_gamma.etc
+
 
 def get_hemisphere(fi):
     """Get the UTM N/S designation"""
@@ -37,7 +39,7 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
     demTiles = get_dem_tile_list()
 
     # Create XML metadata files
-    etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
+    etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
     back = os.getcwd()
     os.chdir("PRODUCT")
 
