@@ -223,8 +223,8 @@ dockerize:
     - python3 -m pip install --user "setuptools>=42" wheel "setuptools-scm[toml]>=3.4"
     - export SDIST_VERSION=$(python3 setup.py --version)
     - export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
-    - aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20170707_MSP_ISP_DIFF_LAT.linux64_ubuntu1604.tar.gz .
-    - tar -zxvf GAMMA_SOFTWARE-20170707_MSP_ISP_DIFF_LAT.linux64_ubuntu1604.tar.gz
+    - aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
+    - tar -zxvf GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
   script:
     - docker build --no-cache
       -t ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
