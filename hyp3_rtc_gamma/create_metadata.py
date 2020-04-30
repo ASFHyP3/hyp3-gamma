@@ -24,8 +24,8 @@ def get_hemisphere(fi):
         return "S"
 
 
-def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, looks, pol, cpol,
-                   demType, spacing, hyp3_ver, gamma_ver, rtcName):
+def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
+                   dem_type, spacing, hyp3_ver, gamma_ver, rtc_name):
     print("create_arc_xml: CWD is {}".format(os.getcwd()))
     zone = None
     try:
@@ -36,7 +36,7 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
         pass
     logging.info("Zone is {}".format(zone))
 
-    demTiles = get_dem_tile_list()
+    dem_tiles = get_dem_tile_list()
 
     # Create XML metadata files
     etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
@@ -54,129 +54,128 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
 
     spacing = int(spacing)
     flooks = looks * 30
-    hemi = get_hemisphere(rtcName)
+    hemi = get_hemisphere(rtc_name)
 
-    if gammaFlag:
+    if gamma_flag:
         power_type = "gamma"
     else:
         power_type = "sigma"
-    if pwrFlag:
+    if pwr_flag:
         format_type = "power"
     else:
         format_type = "amplitude"
-    if filterFlag:
-        filterStr = "has"
+    if filter_flag:
+        filter_str = "has"
     else:
-        filterStr = "has not"
+        filter_str = "has not"
 
-    if inputType == "SLC":
+    if input_type == "SLC":
         full_type = "Single-Look Complex"
     else:
         full_type = "Ground Range Detected"
 
-    if "NED" in demType:
-        if "13" in demType:
+    if "NED" in dem_type:
+        if "13" in dem_type:
             resa = "1/3"
             resm = 10
-        elif "1" in demType:
+        elif "1" in dem_type:
             resa = 1
             resm = 30
         else:
             resa = 2
             resm = 60
         pcs = "WGS 1984 UTM Zone {}{}".format(zone, hemi)
-    elif "SRTMGL" in demType:
-        if "1" in demType:
+    elif "SRTMGL" in dem_type:
+        if "1" in dem_type:
             resa = 1
             resm = 30
         else:
             resa = 3
             resm = 90
         pcs = "WGS 1984 UTM Zone {}{}".format(zone, hemi)
-    elif "EU_DEM" in demType:
+    elif "EU_DEM" in dem_type:
         resa = 1
         resm = 30
         pcs = "WGS 1984 UTM Zone {}{}".format(zone, hemi)
-    elif "GIMP" in demType:
+    elif "GIMP" in dem_type:
         resa = 1
         resm = 30
         pcs = "WGS 1984 NSIDC Sea Ice Polar Stereographic North"
-    elif "REMA" in demType:
+    elif "REMA" in dem_type:
         resa = 1
         resm = 30
         pcs = "WGS 1984 Antarctic Polar Stereographic"
     else:
-        logging.error("Unrecognized DEM type: {}".format(demType))
+        logging.error("Unrecognized DEM type: {}".format(dem_type))
         sys.exit(1)
 
     for myfile in glob.glob("*.tif"):
-        f = None
-        this_pol = None
-        if cpol is None:
-            cpol = "ZZ"
-        if pol in myfile or cpol in myfile:
-            f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir), "r")
-            g = open("{}.xml".format(myfile), "w")
-            encoded_jpg = pngtothumb("{}.png".format(outfile))
-            if pol in myfile:
-                this_pol = pol
+        with open("{}.xml".format(myfile), "w") as g:
+            f = None
+            this_pol = None
+            if cpol is None:
+                cpol = "ZZ"
+            if pol in myfile or cpol in myfile:
+                f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir), "r")
+
+                encoded_jpg = pngtothumb("{}.png".format(outfile))
+                if pol in myfile:
+                    this_pol = pol
+                else:
+                    this_pol = cpol
+            elif "ls_map" in myfile:
+                f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir), "r")
+                cmd = "pbmmake 100 75 | pnmtopng > white.png"
+                execute(cmd, uselogging=True)
+                encoded_jpg = pngtothumb("white.png")
+                os.remove("white.png")
+            elif "inc_map" in myfile:
+                f = open("{}/RTC_GAMMA_Template_inc.xml".format(etc_dir), "r")
+                encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
+            elif "dem" in myfile:
+                if "NED" in dem_type:
+                    f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir), "r")
+                elif "SRTM" in dem_type:
+                    f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir), "r")
+                elif "EU_DEM" in dem_type:
+                    f = open("{}/RTC_GAMMA_Template_dem_EUDEM.xml".format(etc_dir), "r")
+                elif "GIMP" in dem_type:
+                    f = open("{}/RTC_GAMMA_Template_dem_GIMP.xml".format(etc_dir), "r")
+                elif "REMA" in dem_type:
+                    f = open("{}/RTC_GAMMA_Template_dem_REMA.xml".format(etc_dir), "r")
+                else:
+                    logging.error("ERROR: Unrecognized dem type: {}".format(dem_type))
+                encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
             else:
-                this_pol = cpol
-        elif "ls_map" in myfile:
-            f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir), "r")
-            g = open("{}.xml".format(myfile), "w")
-            cmd = "pbmmake 100 75 | pnmtopng > white.png"
-            execute(cmd, uselogging=True)
-            encoded_jpg = pngtothumb("white.png")
-            os.remove("white.png")
-        elif "inc_map" in myfile:
-            f = open("{}/RTC_GAMMA_Template_inc.xml".format(etc_dir), "r")
-            g = open("{}.xml".format(myfile), "w")
-            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
-        elif "dem" in myfile:
-            if "NED" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir), "r")
-            elif "SRTM" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir), "r")
-            elif "EU_DEM" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_EUDEM.xml".format(etc_dir), "r")
-            elif "GIMP" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_GIMP.xml".format(etc_dir), "r")
-            elif "REMA" in demType:
-                f = open("{}/RTC_GAMMA_Template_dem_REMA.xml".format(etc_dir), "r")
-            else:
-                logging.error("ERROR: Unrecognized dem type: {}".format(demType))
-            g = open("{}.xml".format(myfile), "w")
-            encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
-        if f is not None:
-            for line in f:
-                line = line.replace("[DATE]", date)
-                line = line.replace("[TIME]", "{}00".format(time))
-                line = line.replace("[DATETIME]", dt)
-                line = line.replace("[YEARPROCESSED]", "{}".format(year))
-                line = line.replace("[YEARACQUIRED]", infile[17:21])
-                line = line.replace("[TYPE]", inputType)
-                line = line.replace("[FULL_TYPE]", full_type)
-                line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
-                if this_pol is not None:
-                    line = line.replace("[POL]", this_pol)
-                line = line.replace("[POWERTYPE]", power_type)
-                line = line.replace("[GRAN_NAME]", granulename)
-                line = line.replace("[FORMAT]", format_type)
-                line = line.replace("[LOOKS]", "{}".format(looks))
-                line = line.replace("[FILT]", "{}".format(filterStr))
-                line = line.replace("[FLOOKS]", "{}".format(flooks))
-                line = line.replace("[SPACING]", "{}".format(spacing))
-                line = line.replace("[DEM]", "{}".format(demType))
-                line = line.replace("[RESA]", "{}".format(resa))
-                line = line.replace("[RESM]", "{}".format(resm))
-                line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
-                line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-                line = line.replace("[TILES]", "{}".format(demTiles))
-                line = line.replace("[PCS]", "{}".format(pcs))
-                g.write("{}\n".format(line))
-            f.close()
-            g.close()
+                encoded_jpg = None
+            if f is not None:
+                for line in f:
+                    line = line.replace("[DATE]", date)
+                    line = line.replace("[TIME]", "{}00".format(time))
+                    line = line.replace("[DATETIME]", dt)
+                    line = line.replace("[YEARPROCESSED]", "{}".format(year))
+                    line = line.replace("[YEARACQUIRED]", infile[17:21])
+                    line = line.replace("[TYPE]", input_type)
+                    line = line.replace("[FULL_TYPE]", full_type)
+                    line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
+                    if this_pol is not None:
+                        line = line.replace("[POL]", this_pol)
+                    line = line.replace("[POWERTYPE]", power_type)
+                    line = line.replace("[GRAN_NAME]", granulename)
+                    line = line.replace("[FORMAT]", format_type)
+                    line = line.replace("[LOOKS]", "{}".format(looks))
+                    line = line.replace("[FILT]", "{}".format(filter_str))
+                    line = line.replace("[FLOOKS]", "{}".format(flooks))
+                    line = line.replace("[SPACING]", "{}".format(spacing))
+                    line = line.replace("[DEM]", "{}".format(dem_type))
+                    line = line.replace("[RESA]", "{}".format(resa))
+                    line = line.replace("[RESM]", "{}".format(resm))
+                    line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
+                    line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
+                    line = line.replace("[TILES]", "{}".format(dem_tiles))
+                    line = line.replace("[PCS]", "{}".format(pcs))
+                    g.write("{}\n".format(line))
+                f.close()
 
     for myfile in glob.glob("*.png"):
 
@@ -199,17 +198,17 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
             line = line.replace("[DATETIME]", dt)
             line = line.replace("[YEARPROCESSED]", "{}".format(year))
             line = line.replace("[YEARACQUIRED]", infile[17:21])
-            line = line.replace("[TYPE]", inputType)
+            line = line.replace("[TYPE]", input_type)
             line = line.replace("[FULL_TYPE]", full_type)
             line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
             line = line.replace("[GRAN_NAME]", granulename)
             line = line.replace("[RES]", res)
             line = line.replace("[SPACING]", "{}".format(spacing))
-            line = line.replace("[DEM]", "{}".format(demType))
+            line = line.replace("[DEM]", "{}".format(dem_type))
             line = line.replace("[FORMAT]", format_type)
             line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
             line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-            line = line.replace("[DEM_TILES]", "{}".format(demTiles))
+            line = line.replace("[DEM_TILES]", "{}".format(dem_tiles))
             line = line.replace("[PCS]", "{}".format(pcs))
             g.write("{}\n".format(line))
         f.close()
@@ -227,15 +226,15 @@ def create_arc_xml(infile, outfile, inputType, gammaFlag, pwrFlag, filterFlag, l
         line = line.replace("[POWERTYPE]", power_type)
         line = line.replace("[FORMAT]", format_type)
         line = line.replace("[LOOKS]", "{}".format(looks))
-        line = line.replace("[FILT]", "{}".format(filterStr))
+        line = line.replace("[FILT]", "{}".format(filter_str))
         line = line.replace("[FLOOKS]", "{}".format(flooks))
         line = line.replace("[SPACING]", "{}".format(spacing))
-        line = line.replace("[DEM]", "{}".format(demType))
+        line = line.replace("[DEM]", "{}".format(dem_type))
         line = line.replace("[RESA]", "{}".format(resa))
         line = line.replace("[RESM]", "{}".format(resm))
         line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
         line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-        line = line.replace("[DEM_TILES]", "{}".format(demTiles))
+        line = line.replace("[DEM_TILES]", "{}".format(dem_tiles))
         line = line.replace("[PCS]", "{}".format(pcs))
         g.write("{}".format(line))
     f.close()

@@ -30,9 +30,9 @@ from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
 import hyp3_rtc_gamma
-from hyp3_rtc_gamma.metadata_utils import write_asf_meta
 from hyp3_rtc_gamma.check_coreg import check_coreg
 from hyp3_rtc_gamma.create_metadata import create_arc_xml
+from hyp3_rtc_gamma.metadata_utils import write_asf_meta
 from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
@@ -71,79 +71,77 @@ def perform_sanity_checks():
                     logging.debug("...ok")
 
 
-def reproject_dir(demType, res, prod_dir=None):
-    if "REMA" in demType:
-        #        epsg = "EPSG:3031"
+def reproject_dir(dem_type, res, prod_dir=None):
+    if "REMA" in dem_type:
         epsg = 3031
-    elif "GIMP" in demType:
-        #       epsg = "EPSG:3413"
+    elif "GIMP" in dem_type:
         epsg = 3413
     else:
         return
 
-    tmpGeotiff = "tmp_reproj_dir_{}.tif".format(os.getpid())
+    tmp_geotiff = "tmp_reproj_dir_{}.tif".format(os.getpid())
+    home = os.getcwd()
     if prod_dir:
-        home = os.getcwd()
         os.chdir(prod_dir)
 
     for inGeotiff in glob.glob("*.tif"):
-        inRaster = gdal.Open(inGeotiff)
-        outRaster = reproject2grid(inRaster, epsg, xRes=res)
-        inRaster = None
-        gdal.Translate(tmpGeotiff, outRaster)
+        in_raster = gdal.Open(inGeotiff)
+        out_raster = reproject2grid(in_raster, epsg, xRes=res)
+        in_raster = None  # Because GDAL is weird!
+        gdal.Translate(tmp_geotiff, out_raster)
         os.remove(inGeotiff)
-        shutil.move(tmpGeotiff, inGeotiff)
+        shutil.move(tmp_geotiff, inGeotiff)
 
     if prod_dir:
         os.chdir(home)
 
 
-def report_kwargs(inName, outName, res, dem, roi, shape, matchFlag, deadFlag, gammaFlag, loFlag,
-                  pwrFlag, filterFlag, looks, terms, par, noCrossPol, smooth, area):
+def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area):
     logging.info("Parameters for this run:")
-    logging.info("    Input name                        : {}".format(inName))
-    logging.info("    Output name                       : {}".format(outName))
+    logging.info("    Input name                        : {}".format(in_name))
+    logging.info("    Output name                       : {}".format(out_name))
     logging.info("    Output resolution                 : {}".format(res))
     logging.info("    DEM file                          : {}".format(dem))
     if roi is not None:
         logging.info("    Area of Interest                  : {}".format(roi))
     if shape is not None:
         logging.info("    Shape File                        : {}".format(shape))
-    logging.info("    Match flag                        : {}".format(matchFlag))
-    logging.info("    If no match, use Dead Reckoning   : {}".format(deadFlag))
-    logging.info("    Gamma0 output                     : {}".format(gammaFlag))
-    logging.info("    Low resolution flag               : {}".format(loFlag))
-    logging.info("    Create power images               : {}".format(pwrFlag))
-    logging.info("    Speckle Filtering                 : {}".format(filterFlag))
+    logging.info("    Match flag                        : {}".format(match_flag))
+    logging.info("    If no match, use Dead Reckoning   : {}".format(dead_flag))
+    logging.info("    Gamma0 output                     : {}".format(gamma_flag))
+    logging.info("    Low resolution flag               : {}".format(lo_flag))
+    logging.info("    Create power images               : {}".format(pwr_flag))
+    logging.info("    Speckle Filtering                 : {}".format(filter_flag))
     logging.info("    Number of looks to take           : {}".format(looks))
     logging.info("    Number of terms in used in match  : {}".format(terms))
     if par is not None:
         logging.info("    Offset file                       : {}".format(par))
-    logging.info("    Process crosspol                  : {}".format(not noCrossPol))
+    logging.info("    Process crosspol                  : {}".format(not no_cross_pol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
     logging.info("    Save Pixel Area                   : {}".format(area))
 
 
-def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFlag, gammaFlag,
-                filterFlag, pwrFlag, browse_res, outName, dem, date, terms, par=None, area=False):
+def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
+                filter_flag, pwr_flag, browse_res, out_fame, dem, terms, par=None, area=False):
     logging.info("Processing the {} polarization".format(pol))
 
-    mgrd = "{out}.{pol}.mgrd".format(out=outName, pol=pol)
+    mgrd = "{out}.{pol}.mgrd".format(out=out_fame, pol=pol)
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(inFile, pol, look_fact, mgrd)
+    ingest_S1_granule(in_file, pol, look_fact, mgrd)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filter if requested
-    if filterFlag:
+    if filter_flag:
         el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd, wid=width, el=el_looks)
         execute(cmd, uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
     options = "-p -j -n {} -q -c ".format(terms)
-    if gammaFlag:
+    if gamma_flag:
         options += "-g "
 
     logging.info("Running RTC process... initializing")
@@ -153,7 +151,7 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
           " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
     execute(cmd, uselogging=True)
 
-    if matchFlag and not par:
+    if match_flag and not par:
         fail = False
         logging.info("Running RTC process... coarse matching")
         cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
@@ -171,7 +169,7 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
         try:
             execute(cmd, uselogging=True)
         except Exception:
-            if not deadFlag:
+            if not dead_flag:
                 logging.error("ERROR: Failed to match images")
                 sys.exit(1)
             else:
@@ -181,9 +179,9 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
 
         if not fail:
             try:
-                check_coreg(outName, res, max_offset=75, max_error=2.0)
+                check_coreg(out_fame, res, max_offset=75, max_error=2.0)
             except Exception:
-                if not deadFlag:
+                if not dead_flag:
                     logging.error("ERROR: Failed the coregistration check")
                     sys.exit(1)
                 else:
@@ -211,17 +209,17 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     execute(cmd)
 
     # Make Geotiff Files
-    cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(outName)
+    cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(out_fame)
     execute(cmd, uselogging=True)
-    cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(outName)
+    cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(out_fame)
     execute(cmd, uselogging=True)
-    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outName)
+    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(out_fame)
     execute(cmd, uselogging=True)
     cmd = "data2geotiff area.dem_par area.dem 2 outdem.tif"
     execute(cmd, uselogging=True)
-    gdal.Translate("{}.dem.tif".format(outName), "outdem.tif", outputType=gdal.GDT_Int16)
+    gdal.Translate("{}.dem.tif".format(out_fame), "outdem.tif", outputType=gdal.GDT_Int16)
 
-    if gammaFlag:
+    if gamma_flag:
         gdal.Translate("tmp.tif", tif, metadataOptions=['Band1={}_gamma0'.format(pol)])
     else:
         gdal.Translate("tmp.tif", tif, metadataOptions=['Band1={}_sigma0'.format(pol)])
@@ -229,11 +227,11 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     createAmp(tif, nodata=0)
 
     # Make meta files and stats
-    cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(outName)
+    cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(out_fame)
     execute(cmd, uselogging=True)
     cmd = "stats -overstat -overmeta ls_map"
     execute(cmd, uselogging=True)
-    cmd = "asf_import -format geotiff {}.inc_map.tif inc_map".format(outName)
+    cmd = "asf_import -format geotiff {}.inc_map.tif inc_map".format(out_fame)
     execute(cmd, uselogging=True)
     cmd = "stats -overstat -overmeta -mask 0 inc_map"
     execute(cmd, uselogging=True)
@@ -243,36 +241,36 @@ def process_pol(inFile, rtcName, auxName, pol, res, look_fact, matchFlag, deadFl
     execute(cmd, uselogging=True)
 
     # Make browse resolution tif file
-    if (res == browse_res):
-        shutil.copy("image_cal_map.mli_amp.tif", "{}_{}_{}m.tif".format(outName, pol, browse_res))
+    if res == browse_res:
+        shutil.copy("image_cal_map.mli_amp.tif", "{}_{}_{}m.tif".format(out_fame, pol, browse_res))
     else:
-        gdal.Translate("{}_{}_{}m.tif".format(outName, pol, browse_res), "image_cal_map.mli_amp.tif",
+        gdal.Translate("{}_{}_{}m.tif".format(out_fame, pol, browse_res), "image_cal_map.mli_amp.tif",
                        xRes=browse_res, yRes=browse_res)
 
     # Move files into the product directory
-    outDir = "../PRODUCT"
-    if not os.path.exists(outDir):
-        os.mkdir(outDir)
+    out_dir = "../PRODUCT"
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
 
-    tifName = rtcName
-    if pwrFlag:
-        shutil.move(tif, "{}/{}".format(outDir, tifName))
+    tif_name = rtc_name
+    if pwr_flag:
+        shutil.move(tif, "{}/{}".format(out_dir, tif_name))
     else:
         copy_metadata(tif, "image_cal_map.mli_amp.tif")
-        shutil.move("image_cal_map.mli_amp.tif", "{}/{}".format(outDir, tifName))
+        shutil.move("image_cal_map.mli_amp.tif", "{}/{}".format(out_dir, tif_name))
 
-    shutil.move("{}.ls_map.tif".format(outName), "{}/{}_ls_map.tif".format(outDir, auxName))
-    shutil.move("{}.inc_map.tif".format(outName), "{}/{}_inc_map.tif".format(outDir, auxName))
-    shutil.move("{}.dem.tif".format(outName), "{}/{}_dem.tif".format(outDir, auxName))
-    shutil.copy("image.diff_par", "{}/{}_diff.par".format(outDir, auxName))
+    shutil.move("{}.ls_map.tif".format(out_fame), "{}/{}_ls_map.tif".format(out_dir, aux_name))
+    shutil.move("{}.inc_map.tif".format(out_fame), "{}/{}_inc_map.tif".format(out_dir, aux_name))
+    shutil.move("{}.dem.tif".format(out_fame), "{}/{}_dem.tif".format(out_dir, aux_name))
+    shutil.copy("image.diff_par", "{}/{}_diff.par".format(out_dir, aux_name))
     if area:
-        shutil.move("{}.flat.tif".format(outName), "{}/{}_flat_{}.tif".format(outDir, auxName, pol))
+        shutil.move("{}.flat.tif".format(out_fame), "{}/{}_flat_{}.tif".format(out_dir, aux_name, pol))
 
     os.chdir("..")
 
 
-def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag, pwrFlag, browse_res,
-                    outfile, dem, date, terms, par=None, area=False):
+def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
+                    outfile, dem, terms, par=None, area=False):
     if cpol == "VH":
         mpol = "VV"
     else:
@@ -282,18 +280,18 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(inFile, cpol, look_fact, mgrd)
+    ingest_S1_granule(in_file, cpol, look_fact, mgrd)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filtering if requested
-    if filterFlag:
+    if filter_flag:
         el_looks = look_fact * 30
         cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd, wid=width, el=el_looks)
         execute(cmd, uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
     options = "-p -j -n {} -q -c ".format(terms)
-    if gammaFlag:
+    if gamma_flag:
         options += "-g "
 
     home_dir = os.getcwd()
@@ -329,7 +327,7 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
     execute(cmd)
 
     # Make geotiff file
-    if gammaFlag:
+    if gamma_flag:
         gdal.Translate("tmp.tif", tif, metadataOptions=['Band1={}_gamma0'.format(cpol)])
     else:
         gdal.Translate("tmp.tif", tif, metadataOptions=['Band1={}_sigma0'.format(cpol)])
@@ -337,7 +335,7 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
 
     # Make browse resolution file
     createAmp(tif, nodata=0)
-    if (res == browse_res):
+    if res == browse_res:
         shutil.copy("image_cal_map.mli_amp.tif", "{}_{}_{}m.tif".format(outfile, cpol, browse_res))
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outfile, cpol, browse_res), "image_cal_map.mli_amp.tif", xRes=browse_res,
@@ -350,89 +348,89 @@ def process_2nd_pol(inFile, rtcName, cpol, res, look_fact, gammaFlag, filterFlag
     execute(cmd, uselogging=True)
 
     # Move files to product directory
-    outDir = "../PRODUCT"
-    if not os.path.exists(outDir):
-        os.mkdir(outDir)
+    out_dir = "../PRODUCT"
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
 
     cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outfile)
     execute(cmd, uselogging=True)
 
-    if pwrFlag:
-        shutil.move(tif, "{}/{}".format(outDir, rtcName))
+    if pwr_flag:
+        shutil.move(tif, "{}/{}".format(out_dir, rtc_name))
     else:
         copy_metadata(tif, "image_cal_map.mli_amp.tif")
-        shutil.move("image_cal_map.mli_amp.tif", "{}/{}".format(outDir, rtcName))
+        shutil.move("image_cal_map.mli_amp.tif", "{}/{}".format(out_dir, rtc_name))
     if area:
-        shutil.move("{}.flat.tif".format(outfile), "{}/{}_flat_{}.tif".format(outDir, rtcName, cpol))
+        shutil.move("{}.flat.tif".format(outfile), "{}/{}_flat_{}.tif".format(out_dir, rtc_name, cpol))
 
     os.chdir(home_dir)
 
 
-def create_browse_images(outName, rtcName, res, pol, cpol, browse_res):
-    ampfile = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=pol, name=outName, res=browse_res)
+def create_browse_images(out_name, rtc_name, pol, cpol, browse_res):
+    ampfile = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
     if cpol:
-        ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol, name=outName, res=browse_res)
+        ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol, name=out_name, res=browse_res)
         threshold = -24
-        outfile = "{}_rgb.tif".format(outName)
+        outfile = "{}_rgb.tif".format(out_name)
         rtc2color(ampfile, ampfile2, threshold, outfile, amp=True, cleanup=True)
-        colorname = "PRODUCT/{}_rgb".format(rtcName)
+        colorname = "PRODUCT/{}_rgb".format(rtc_name)
         makeAsfBrowse(outfile, colorname)
 
     os.chdir("geo_{}".format(pol))
     outdir = "../PRODUCT"
-    outfile = "{}/{}".format(outdir, rtcName)
-    ampfile = "{name}_{pol}_{res}m.tif".format(pol=pol, name=outName, res=browse_res)
+    outfile = "{}/{}".format(outdir, rtc_name)
+    ampfile = "{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
     sigmafile = ampfile.replace(".tif", "_sigma.tif")
     byteSigmaScale(ampfile, sigmafile)
     makeAsfBrowse(sigmafile, outfile)
 
     os.chdir("../PRODUCT")
 
-    infile = "{}_inc_map.tif".format(rtcName)
-    outfile = "{}_inc_map".format(rtcName)
+    infile = "{}_inc_map.tif".format(rtc_name)
+    outfile = "{}_inc_map".format(rtc_name)
     sigmafile = infile.replace(".tif", "_sigma.tif")
     byteSigmaScale(infile, sigmafile)
     makeAsfBrowse(sigmafile, outfile)
     os.remove(sigmafile)
 
-    infile = "{}_ls_map.tif".format(rtcName)
-    outfile = "{}_ls_map".format(rtcName)
+    infile = "{}_ls_map.tif".format(rtc_name)
+    outfile = "{}_ls_map".format(rtc_name)
     makeAsfBrowse(infile, outfile)
 
-    infile = "{}_dem.tif".format(rtcName)
-    outfile = "{}_dem".format(rtcName)
+    infile = "{}_dem.tif".format(rtc_name)
+    outfile = "{}_dem".format(rtc_name)
     sigmafile = infile.replace(".tif", "_sigma.tif")
     byteSigmaScale(infile, sigmafile)
     makeAsfBrowse(sigmafile, outfile)
     os.remove(sigmafile)
 
-    raster_boundary2shape(rtcName + "_" + pol + ".tif", None, rtcName + "_shape.shp", use_closing=False,
+    raster_boundary2shape(rtc_name + "_" + pol + ".tif", None, rtc_name + "_shape.shp", use_closing=False,
                           pixel_shift=True, fill_holes=True)
 
     os.chdir("..")
 
 
-def create_consolidated_log(basename, outName, loFlag, deadFlag, matchFlag, gammaFlag, roi,
-                            shape, pwrFlag, filterFlag, pol, looks, logFile, smooth, terms,
-                            noCrossPol, par):
+def create_consolidated_log(basename, out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+                            shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
+                            no_cross_pol, par):
     out = "PRODUCT"
     logname = "{}/{}.log".format(out, basename)
     logging.info("Creating log file: {}".format(logname))
 
     f = open(logname, "w")
-    f.write("Consolidated log for: {}\n".format(outName))
+    f.write("Consolidated log for: {}\n".format(out_name))
     options = ""
-    if loFlag:
+    if lo_flag:
         options += "-l "
-    if not deadFlag:
+    if not dead_flag:
         options += "--fail "
-    if matchFlag:
+    if match_flag:
         options += "-n "
-    if not gammaFlag:
+    if not gamma_flag:
         options += "--sigma "
-    if filterFlag:
+    if filter_flag:
         options += "-f "
-    if not pwrFlag:
+    if not pwr_flag:
         options += "--amp "
     if smooth:
         options += "--smooth "
@@ -440,8 +438,8 @@ def create_consolidated_log(basename, outName, loFlag, deadFlag, matchFlag, gamm
     options += "-t {}".format(terms)
     if par:
         options += "--par {}".format(par)
-    if noCrossPol:
-        options += "--noCrossPol".format(noCrossPol)
+    if no_cross_pol:
+        options += "--noCrossPol".format(no_cross_pol)
     if roi:
         options += "-a {}".format(roi)
     if shape:
@@ -452,7 +450,7 @@ def create_consolidated_log(basename, outName, loFlag, deadFlag, matchFlag, gamm
     f.close()
 
     geo_dir = "geo_{}".format(pol)
-    add_log(logFile, logname)
+    add_log(log_file, logname)
     add_log("{}/mk_geo_radcal_0.log".format(geo_dir), logname)
     add_log("{}/mk_geo_radcal_1.log".format(geo_dir), logname)
     add_log("{}/mk_geo_radcal_2.log".format(geo_dir), logname)
@@ -480,9 +478,9 @@ def add_log(log, full_log):
     g.close()
 
 
-def create_iso_xml(outfile, outname, pol, cpol, inFile, output, demType, log):
+def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
     hdf5_name = "hdf5_list.txt"
-    path = inFile
+    path = in_file
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
     shutil.copy("{}/sentinel_xml.xsl".format(etc_dir), "sentinel_xml.xsl")
 
@@ -533,7 +531,7 @@ def create_iso_xml(outfile, outname, pol, cpol, inFile, output, demType, log):
 
     g = open(hdf5_name, "w")
     g.write("[GAMMA RTC]\n")
-    g.write("granule = {}\n".format(inFile.replace(".SAFE", "")))
+    g.write("granule = {}\n".format(in_file.replace(".SAFE", "")))
     g.write("metadata = out.meta\n")
 
     geo_dir = "geo_{}".format(pol)
@@ -571,7 +569,7 @@ def create_iso_xml(outfile, outname, pol, cpol, inFile, output, demType, log):
     g.write("gamma version = {}\n".format(gamma_ver))
     g.write("hyp3_rtc version = {}\n".format(hyp3_rtc_gamma.__version__))
     g.write("ipf version = {}\n".format(ipf_ver))
-    g.write("dem source = {}\n".format(demType))
+    g.write("dem source = {}\n".format(dem_type))
     g.write("browse image = {}/{}.png\n".format(out, outname))
     g.write("kml overlay = {}/{}.kmz\n".format(out, outname))
 
@@ -607,22 +605,22 @@ def clean_prod_dir():
     os.chdir("..")
 
 
-def rtc_sentinel_gamma(inFile,
-                       outName=None,
+def rtc_sentinel_gamma(in_file,
+                       out_name=None,
                        res=None,
                        dem=None,
                        roi=None,
                        shape=None,
-                       matchFlag=True,
-                       deadFlag=None,
-                       gammaFlag=None,
-                       loFlag=None,
-                       pwrFlag=None,
-                       filterFlag=None,
+                       match_flag=True,
+                       dead_flag=None,
+                       gamma_flag=None,
+                       lo_flag=None,
+                       pwr_flag=None,
+                       filter_flag=None,
                        looks=None,
                        terms=1,
                        par=None,
-                       noCrossPol=False,
+                       no_cross_pol=False,
                        smooth=False,
                        area=False):
     logging.info("===================================================================")
@@ -633,16 +631,16 @@ def rtc_sentinel_gamma(inFile,
 
     if res is None:
         res = 10
-    if loFlag:
+    if lo_flag:
         res = 30
 
     browse_res = 30
-    if (res > browse_res):
+    if res > browse_res:
         browse_res = res
 
     if looks is None:
         if res == 30:
-            if "GRD" in inFile:
+            if "GRD" in in_file:
                 looks = 6
             else:
                 looks = 3
@@ -651,77 +649,73 @@ def rtc_sentinel_gamma(inFile,
         logging.info("Setting looks to {}".format(looks))
 
     # get rid of ending "/"
-    if inFile.endswith("/"):
-        inFile = inFile[0:len(inFile) - 1]
+    if in_file.endswith("/"):
+        in_file = in_file[0:len(in_file) - 1]
 
-    if not os.path.exists(inFile):
-        logging.error("ERROR: Input file {} does not exist".format(inFile))
+    if not os.path.exists(in_file):
+        logging.error("ERROR: Input file {} does not exist".format(in_file))
         sys.exit(1)
-    if "zip" in inFile:
-        zip_ref = zipfile.ZipFile(inFile, 'r')
+    if "zip" in in_file:
+        zip_ref = zipfile.ZipFile(in_file, 'r')
         zip_ref.extractall(".")
         zip_ref.close()
-        inFile = inFile.replace(".zip", ".SAFE")
+        in_file = in_file.replace(".zip", ".SAFE")
 
-    plat = inFile[2:3]
-    mode = inFile[4:6]
-    inputType = inFile[7:11]
-    date = inFile[17:25]
-    time = inFile[26:32]
+    plat = in_file[2:3]
+    mode = in_file[4:6]
+    input_type = in_file[7:11]
+    date = in_file[17:25]
+    time = in_file[26:32]
 
-    if 'SLC' in inputType:
-        inputType = 'SLC'
+    if 'SLC' in input_type:
+        input_type = 'SLC'
     else:
-        inputType = 'GRD'
+        input_type = 'GRD'
 
-    if gammaFlag:
+    if gamma_flag:
         d = "g"
     else:
         d = "s"
 
-    if pwrFlag:
+    if pwr_flag:
         e = "p"
     else:
         e = "a"
 
-    if filterFlag:
+    if filter_flag:
         f = "f"
     else:
         f = "n"
 
-    if outName is None:
-        baseName = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat, mode, int(res), date, time, d, e, f)
-        outName = baseName
+    if out_name is None:
+        base_name = "S1{}_{}_RT{}_{}T{}_G_{}{}{}".format(plat, mode, int(res), date, time, d, e, f)
+        out_name = base_name
     else:
-        baseName = outName
-    auxName = baseName
+        base_name = out_name
+    aux_name = base_name
 
-    report_kwargs(inFile, baseName, res, dem, roi, shape, matchFlag, deadFlag, gammaFlag, loFlag,
-                  pwrFlag, filterFlag, looks, terms, par, noCrossPol, smooth, area)
+    report_kwargs(in_file, base_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
         tifdem = "tmp_{}_dem.tif".format(os.getpid())
         if shape is not None:
-            minX, minY, maxX, maxY = get_bb_from_shape(shape)
-            logging.info(f'bounding box: {minX}, {minY}, {maxX}, {maxY}')
-            roi = []
-            roi.append(minX)
-            roi.append(minY)
-            roi.append(maxX)
-            roi.append(maxY)
+            min_x, min_y, max_x, max_y = get_bb_from_shape(shape)
+            logging.info(f'bounding box: {min_x}, {min_y}, {max_x}, {max_y}')
+            roi = [min_x, min_y, max_x, max_y]
         if roi is not None:
-            demType = get_dem(roi[0], roi[1], roi[2], roi[3], tifdem, post=30)
+            dem_type = get_dem(roi[0], roi[1], roi[2], roi[3], tifdem, post=30)
         else:
-            demfile, demType = getDemFile(inFile, tifdem, post=30)
+            demfile, dem_type = getDemFile(in_file, tifdem, post=30)
 
-        if 'REMA' in demType and smooth:
+        if 'REMA' in dem_type and smooth:
             logging.info("Preparing to smooth DEM tiles")
             dem, parfile = smooth_dem_tiles("DEM", build=True)
         else:
             dem = "area.dem"
             parfile = "area.dem.par"
-            if "GIMP" in demType or "REMA" in demType:
+            if "GIMP" in dem_type or "REMA" in dem_type:
                 ps2dem(tifdem, dem, parfile)
             else:
                 utm2dem(tifdem, dem, parfile)
@@ -731,63 +725,67 @@ def rtc_sentinel_gamma(inFile,
         dem = "area.dem"
         parfile = "area.dem.par"
         utm2dem(tiff_dem, dem, parfile)
-        demType = "Unknown"
+        dem_type = "Unknown"
     elif os.path.isfile("{}.par".format(dem)):
-        demType = "Unknown"
+        dem_type = "Unknown"
     else:
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
         sys.exit(1)
 
-    vvlist = glob.glob("{}/*/*vv*.tiff".format(inFile))
-    vhlist = glob.glob("{}/*/*vh*.tiff".format(inFile))
-    hhlist = glob.glob("{}/*/*hh*.tiff".format(inFile))
-    hvlist = glob.glob("{}/*/*hv*.tiff".format(inFile))
+    vvlist = glob.glob("{}/*/*vv*.tiff".format(in_file))
+    vhlist = glob.glob("{}/*/*vh*.tiff".format(in_file))
+    hhlist = glob.glob("{}/*/*hh*.tiff".format(in_file))
+    hvlist = glob.glob("{}/*/*hv*.tiff".format(in_file))
 
     cpol = None
-
+    pol = None
     if vvlist:
         logging.info("Found VV polarization - processing")
         pol = "VV"
-        rtcName = baseName + "_" + pol + ".tif"
-        process_pol(inFile, rtcName, auxName, pol, res, looks, matchFlag, deadFlag, gammaFlag, filterFlag, pwrFlag,
-                    browse_res, outName, dem, date, terms, par=par, area=area)
+        rtc_name = base_name + "_" + pol + ".tif"
+        process_pol(in_file, rtc_name, aux_name, pol, res, looks,
+                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
+                    browse_res, out_name, dem, terms, par=par, area=area)
 
-        if vhlist and not noCrossPol:
+        if vhlist and not no_cross_pol:
             cpol = "VH"
-            rtcName = baseName + "_" + cpol + ".tif"
+            rtc_name = base_name + "_" + cpol + ".tif"
             logging.info("Found VH polarization - processing")
-            process_2nd_pol(inFile, rtcName, cpol, res, looks, gammaFlag, filterFlag, pwrFlag, browse_res,
-                            outName, dem, date, terms, par=par, area=area)
+            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
+                            gamma_flag, filter_flag, pwr_flag, browse_res,
+                            out_name, dem, terms, par=par, area=area)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
         pol = "HH"
-        rtcName = baseName + "_" + pol + ".tif"
-        process_pol(inFile, rtcName, auxName, pol, res, looks, matchFlag, deadFlag, gammaFlag, filterFlag, pwrFlag,
-                    browse_res, outName, dem, date, terms, par=par, area=area)
+        rtc_name = base_name + "_" + pol + ".tif"
+        process_pol(in_file, rtc_name, aux_name, pol, res, looks,
+                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
+                    browse_res, out_name, dem, terms, par=par, area=area)
 
-        if hvlist and not noCrossPol:
+        if hvlist and not no_cross_pol:
             cpol = "HV"
             logging.info("Found HV polarization - processing")
-            rtcName = baseName + "_" + cpol + ".tif"
-            process_2nd_pol(inFile, rtcName, cpol, res, looks, gammaFlag, filterFlag, pwrFlag, browse_res,
-                            outName, dem, date, terms, par=par, area=area)
+            rtc_name = base_name + "_" + cpol + ".tif"
+            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
+                            gamma_flag, filter_flag, pwr_flag, browse_res,
+                            out_name, dem, terms, par=par, area=area)
 
     if hhlist is None and vvlist is None:
-        logging.error("ERROR: Can not find VV or HH polarization in {}".inFile)
+        logging.error(f"ERROR: Can not find VV or HH polarization in {in_file}")
         sys.exit(1)
 
     fix_geotiff_locations()
-    reproject_dir(demType, res, prod_dir="PRODUCT")
-    reproject_dir(demType, res, prod_dir="geo_{}".format(pol))
+    reproject_dir(dem_type, res, prod_dir="PRODUCT")
+    reproject_dir(dem_type, res, prod_dir="geo_{}".format(pol))
     if cpol:
-        reproject_dir(demType, res, prod_dir="geo_{}".format(cpol))
-    create_browse_images(outName, auxName, res, pol, cpol, browse_res)
-    logFile = logging.getLogger().handlers[0].baseFilename
-    rtcName = baseName + "_" + pol + ".tif"
-    gamma_ver = create_iso_xml(rtcName, auxName, pol, cpol, inFile, outName, demType, logFile)
-    create_arc_xml(inFile, auxName, inputType, gammaFlag, pwrFlag, filterFlag, looks, pol, cpol,
-                   demType, res, hyp3_rtc_gamma.__version__, gamma_ver, rtcName)
+        reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
+    create_browse_images(out_name, aux_name, pol, cpol, browse_res)
+    log_file = logging.getLogger().handlers[0].baseFilename
+    rtc_name = base_name + "_" + pol + ".tif"
+    gamma_ver = create_iso_xml(rtc_name, aux_name, pol, cpol, in_file, out_name, dem_type, log_file)
+    create_arc_xml(in_file, aux_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
+                   dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(res=res)
     clean_prod_dir()
     perform_sanity_checks()
@@ -795,9 +793,9 @@ def rtc_sentinel_gamma(inFile,
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(auxName, outName, loFlag, deadFlag, matchFlag, gammaFlag, roi,
-                            shape, pwrFlag, filterFlag, pol, looks, logFile, smooth, terms,
-                            noCrossPol, par)
+    create_consolidated_log(aux_name, out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+                            shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
+                            no_cross_pol, par)
 
 
 def main():
@@ -843,21 +841,21 @@ def main():
 
     # FIXME: This function's inputs should be 1:1 (name and value!) with CLI args!
     rtc_sentinel_gamma(args.input,
-                       outName=args.output,
+                       out_name=args.output,
                        res=args.outputResolution,
                        dem=args.externalDEM,
                        roi=args.roi,
                        shape=args.shape,
-                       matchFlag=args.n,
-                       deadFlag=not args.fail,
-                       gammaFlag=args.sigma,
-                       loFlag=args.l,
-                       pwrFlag=not args.amp,
-                       filterFlag=args.f,
+                       match_flag=args.n,
+                       dead_flag=not args.fail,
+                       gamma_flag=args.sigma,
+                       lo_flag=args.l,
+                       pwr_flag=not args.amp,
+                       filter_flag=args.f,
                        looks=args.looks,
                        terms=args.terms,
                        par=args.par,
-                       noCrossPol=args.nocrosspol,
+                       no_cross_pol=args.nocrosspol,
                        smooth=args.smooth,
                        area=args.area)
 
