@@ -125,8 +125,7 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
                     this_pol = cpol
             elif "ls_map" in myfile:
                 f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir), "r")
-                cmd = "pbmmake 100 75 | pnmtopng > white.png"
-                execute(cmd, uselogging=True)
+                execute("pbmmake 100 75 | pnmtopng > white.png", uselogging=True)
                 encoded_jpg = pngtothumb("white.png")
                 os.remove("white.png")
             elif "inc_map" in myfile:
