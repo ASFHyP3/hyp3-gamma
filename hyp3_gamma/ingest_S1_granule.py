@@ -18,8 +18,8 @@ def ingest_S1_granule(inFile,pol,look_fact,outFile):
     
     # Ingest the granule into gamma format
     if "GRD" in inputType:
-        cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml \
-              {inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=pol,grd=grd)
+        cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml " \
+              "{inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=pol,grd=grd)
         execute(cmd,uselogging=True)
 
         # Fetch precision state vectors

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Convert a polar stereo geotiff DEM into GAMMA internal format"""
 
 from __future__ import print_function, absolute_import, division, unicode_literals
@@ -94,12 +93,11 @@ def ps2dem(inDem,outDem,demPar):
     # Convert to ENVI (binary) format
     tmptif = "temporary_dem_file.tif"
     if data.dtype == np.float32:
-        fdata = data.byteswap()
-#    elif data.type == np.int16:
+        fdata = data
     else:
         # Convert to floating point
         fdata = data.astype(np.float32)
-        fdata = fdata.byteswap()
+    fdata = fdata.byteswap()
     saa.write_gdal_file_float(tmptif,trans,proj,fdata)
     gdal.Translate(outDem,tmptif,format="ENVI")
     os.remove(tmptif)
