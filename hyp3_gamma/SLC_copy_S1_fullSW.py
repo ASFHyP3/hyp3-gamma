@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """re-process S1 SLC imagery into gamma format SLCs"""
 
 from __future__ import print_function, absolute_import, division, unicode_literals
