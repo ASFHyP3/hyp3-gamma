@@ -31,18 +31,15 @@ RUN apt-get update && apt-get upgrade -y && \
 
 COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
 
-COPY mapready-build/bin/* /usr/local/bin/
-COPY mapready-build/doc/* /usr/local/doc/
-COPY mapready-build/lib/* /usr/local/lib/
-COPY mapready-build/man/* /usr/local/man/
-COPY mapready-build/share/* /usr/local/share/
-
-ARG S3_PYPI_HOST
+COPY mapready-build/bin /usr/local/MapReady/bin/
+COPY mapready-build/lib /usr/local/MapReady/lib/
+COPY mapready-build/share /usr/local/MapReady/share/
 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
     python3 -m pip install --no-cache-dir GDAL==2.2.3 statsmodels==0.9 pandas==0.23
 
+ARG S3_PYPI_HOST
 ARG SDIST_SPEC
 
 RUN python3 -m pip install --no-cache-dir hyp3_rtc_gamma${SDIST_SPEC} \
@@ -66,8 +63,8 @@ ENV DISP_HOME=$GAMMA_HOME/DISP
 ENV LAT_HOME=$GAMMA_HOME/LAT
 ENV PATH=$PATH:$MSP_HOME/bin:$ISP_HOME/bin:$DIFF_HOME/bin:$LAT_HOME/bin:$DISP_HOME/bin
 ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts
-ENV MAPREADY_HOME /usr/local/mapready
-ENV PATH $PATH:$MAPREADY_HOME/bin:$MAPREADY_HOME/lib:$MAPREADY_HOME/share
+ENV MAPREADY_HOME=/usr/local/MapReady
+ENV PATH=$PATH:$MAPREADY_HOME/bin:$MAPREADY_HOME/lib:$MAPREADY_HOME/share
 ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
