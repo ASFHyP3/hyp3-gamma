@@ -27,15 +27,15 @@ RUN apt-get update && apt-get upgrade -y && \
     libhdf5-100 libhdf5-dev libjpeg-dev liblapack-dev liblapack3 libpng-dev \
     libproj-dev libshp-dev libtiff5-dev libxml2-dev python3-dev python3-h5py \
     python3-matplotlib python3-pip python3-scipy unzip vim wget && \
-    apt-get clean && pip3 install --upgrade pip
+    apt-get clean && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
 COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
 
-COPY software/mapready-build/bin/* /usr/local/bin/
-COPY software/mapready-build/doc/* /usr/local/doc/
-COPY software/mapready-build/lib/* /usr/local/lib/
-COPY software/mapready-build/man/* /usr/local/man/
-COPY software/mapready-build/share/* /usr/local/share/
+COPY mapready-build/bin/* /usr/local/bin/
+COPY mapready-build/doc/* /usr/local/doc/
+COPY mapready-build/lib/* /usr/local/lib/
+COPY mapready-build/man/* /usr/local/man/
+COPY mapready-build/share/* /usr/local/share/
 
 ARG S3_PYPI_HOST
 
