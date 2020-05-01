@@ -20,13 +20,22 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=true
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y unzip vim wget curl gdal-bin libgdal-dev libgdal20 gimp \
-    gnuplot  gnuplot-data gnuplot-qt libblas-dev libblas3 libfftw3-dev \
-    libgtk2.0-bin libgtk2.0-common libgtk2.0-dev libhdf5-dev libhdf5-100 \
-    liblapack-dev liblapack3 python3-dev python3-pip python3-h5py python3-matplotlib python3-scipy && \
+    apt-get install --no-install-recommends -y bison curl flex g++ gcc gdal-bin \
+    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 libcunit1-dev \
+    libexif-dev libfftw3-dev libgdal-dev libgdal20 libgeotiff-dev libglade2-dev \
+    libglib2.0-dev libgsl-dev libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
+    libhdf5-100 libhdf5-dev libjpeg-dev liblapack-dev liblapack3 libpng-dev \
+    libproj-dev libshp-dev libtiff5-dev libxml2-dev python3-dev python3-h5py \
+    python3-matplotlib python3-pip python3-scipy unzip vim wget && \
     apt-get clean && pip3 install --upgrade pip
 
 COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
+
+COPY software/mapready-build/bin/* /usr/local/bin/
+COPY software/mapready-build/doc/* /usr/local/doc/
+COPY software/mapready-build/lib/* /usr/local/lib/
+COPY software/mapready-build/man/* /usr/local/man/
+COPY software/mapready-build/share/* /usr/local/share/
 
 ARG S3_PYPI_HOST
 
@@ -34,7 +43,9 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
     python3 -m pip install --no-cache-dir GDAL==2.2.3 statsmodels==0.9 pandas==0.23
 
-RUN python3 -m pip install --no-cache-dir hyp3_rtc_gamma \
+ARG SDIST_SPEC
+
+RUN python3 -m pip install --no-cache-dir hyp3_rtc_gamma${SDIST_SPEC} \
     --trusted-host "${S3_PYPI_HOST}" \
     --extra-index-url "http://${S3_PYPI_HOST}"
 
@@ -55,6 +66,8 @@ ENV DISP_HOME=$GAMMA_HOME/DISP
 ENV LAT_HOME=$GAMMA_HOME/LAT
 ENV PATH=$PATH:$MSP_HOME/bin:$ISP_HOME/bin:$DIFF_HOME/bin:$LAT_HOME/bin:$DISP_HOME/bin
 ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts
+ENV MAPREADY_HOME /usr/local/mapready
+ENV PATH $PATH:$MAPREADY_HOME/bin:$MAPREADY_HOME/lib:$MAPREADY_HOME/share
 ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
