@@ -20,7 +20,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=true
 
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y bison curl flex g++ gcc gdal-bin \
+    apt-get install -y bison curl flex g++ gcc gdal-bin \
     gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 libcunit1-dev \
     libexif-dev libfftw3-dev libgdal-dev libgdal20 libgeotiff-dev libglade2-dev \
     libglib2.0-dev libgsl-dev libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
