@@ -235,21 +235,12 @@ dockerize:
       --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}"
       --label org.opencontainers.image.version="${SDIST_VERSION}"
       --label org.opencontainers.image.revision="${CI_COMMIT_SHORT_SHA}"
-      --build-arg S3_PYPI_HOST=${S3_PYPI_HOST} .
+      --build-arg S3_PYPI_HOST=${S3_PYPI_HOST}
+      --build-arg SDIST_SPEC="==${SDIST_VERSION}" .
     - aws ecr get-login-password | docker login --username AWS --password-stdin ${HYP3_REGISTRY}
     - docker push ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
   <<: *only_mr_protected
 
-
-verify S3 PyPI:
-  stage: verify
-  before_script:
-    - *before_conda_env
-    - *before_defaults
-    - export SDIST_VERSION=$(python3 setup.py --version)
-  script:
-    - tox -e py37-verify
-  <<: *only_mr_protected
 
 verify dockerize (test):
   stage: verify
