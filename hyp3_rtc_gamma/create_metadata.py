@@ -110,133 +110,130 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
         sys.exit(1)
 
     for myfile in glob.glob("*.tif"):
-        with open("{}.xml".format(myfile), "w") as g:
-            f = None
+        with open("{}.xml".format(myfile), "wb") as g:
             this_pol = None
             if cpol is None:
                 cpol = "ZZ"
-            if pol in myfile or cpol in myfile:
-                f = open("{}/RTC_GAMMA_Template.xml".format(etc_dir), "r")
 
+            if pol in myfile or cpol in myfile:
+                template_suffix = ''
                 encoded_jpg = pngtothumb("{}.png".format(outfile))
                 if pol in myfile:
                     this_pol = pol
                 else:
                     this_pol = cpol
             elif "ls_map" in myfile:
-                f = open("{}/RTC_GAMMA_Template_ls.xml".format(etc_dir), "r")
+                template_suffix = '_ls'
                 execute("pbmmake 100 75 | pnmtopng > white.png", uselogging=True)
                 encoded_jpg = pngtothumb("white.png")
                 os.remove("white.png")
             elif "inc_map" in myfile:
-                f = open("{}/RTC_GAMMA_Template_inc.xml".format(etc_dir), "r")
+                template_suffix = '_inc'
                 encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
             elif "dem" in myfile:
                 if "NED" in dem_type:
-                    f = open("{}/RTC_GAMMA_Template_dem_NED.xml".format(etc_dir), "r")
+                    template_suffix = '_dem_NED'
                 elif "SRTM" in dem_type:
-                    f = open("{}/RTC_GAMMA_Template_dem_SRTM.xml".format(etc_dir), "r")
+                    template_suffix = '_dem_SRTM'
                 elif "EU_DEM" in dem_type:
-                    f = open("{}/RTC_GAMMA_Template_dem_EUDEM.xml".format(etc_dir), "r")
+                    template_suffix = '_dem_EUDEM'
                 elif "GIMP" in dem_type:
-                    f = open("{}/RTC_GAMMA_Template_dem_GIMP.xml".format(etc_dir), "r")
+                    template_suffix = '_dem_GIMP'
                 elif "REMA" in dem_type:
-                    f = open("{}/RTC_GAMMA_Template_dem_REMA.xml".format(etc_dir), "r")
+                    template_suffix = '_dem_REMA'
                 else:
                     logging.error("ERROR: Unrecognized dem type: {}".format(dem_type))
                 encoded_jpg = pngtothumb("{}.png".format(os.path.splitext(myfile)[0]))
             else:
+                template_suffix = None
                 encoded_jpg = None
-            if f is not None:
-                for line in f:
-                    line = line.replace("[DATE]", date)
-                    line = line.replace("[TIME]", "{}00".format(time))
-                    line = line.replace("[DATETIME]", dt)
-                    line = line.replace("[YEARPROCESSED]", "{}".format(year))
-                    line = line.replace("[YEARACQUIRED]", infile[17:21])
-                    line = line.replace("[TYPE]", input_type)
-                    line = line.replace("[FULL_TYPE]", full_type)
-                    line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
-                    if this_pol is not None:
-                        line = line.replace("[POL]", this_pol)
-                    line = line.replace("[POWERTYPE]", power_type)
-                    line = line.replace("[GRAN_NAME]", granulename)
-                    line = line.replace("[FORMAT]", format_type)
-                    line = line.replace("[LOOKS]", "{}".format(looks))
-                    line = line.replace("[FILT]", "{}".format(filter_str))
-                    line = line.replace("[FLOOKS]", "{}".format(flooks))
-                    line = line.replace("[SPACING]", "{}".format(spacing))
-                    line = line.replace("[DEM]", "{}".format(dem_type))
-                    line = line.replace("[RESA]", "{}".format(resa))
-                    line = line.replace("[RESM]", "{}".format(resm))
-                    line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
-                    line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-                    line = line.replace("[TILES]", "{}".format(dem_tiles))
-                    line = line.replace("[PCS]", "{}".format(pcs))
-                    g.write("{}\n".format(line))
-                f.close()
+
+            if template_suffix is not None:
+                with open("{}/RTC_GAMMA_Template{}.xml".format(etc_dir, template_suffix), "rb") as f:
+                    for line in f:
+                        line = line.replace(b"[DATE]", bytes(date, 'utf-8'))
+                        line = line.replace(b"[TIME]", bytes("{}00".format(time), 'utf-8'))
+                        line = line.replace(b"[DATETIME]", bytes(dt, 'utf-8'))
+                        line = line.replace(b"[YEARPROCESSED]", bytes("{}".format(year), 'utf-8'))
+                        line = line.replace(b"[YEARACQUIRED]", infile[17:21])
+                        line = line.replace(b"[TYPE]", input_type)
+                        line = line.replace(b"[FULL_TYPE]", bytes(full_type, 'utf-8'))
+                        line = line.replace(b"[THUMBNAIL_BINARY_STRING]", encoded_jpg)
+                        if this_pol is not None:
+                            line = line.replace(b"[POL]", bytes(this_pol, 'utf-8'))
+                        line = line.replace(b"[POWERTYPE]", bytes(power_type, 'utf-8'))
+                        line = line.replace(b"[GRAN_NAME]", granulename)
+                        line = line.replace(b"[FORMAT]", bytes(format_type, 'utf-8'))
+                        line = line.replace(b"[LOOKS]", bytes("{}".format(looks), 'utf-8'))
+                        line = line.replace(b"[FILT]", bytes("{}".format(filter_str), 'utf-8'))
+                        line = line.replace(b"[FLOOKS]", bytes("{}".format(flooks), 'utf-8'))
+                        line = line.replace(b"[SPACING]", bytes("{}".format(spacing), 'utf-8'))
+                        line = line.replace(b"[DEM]", bytes("{}".format(dem_type), 'utf-8'))
+                        line = line.replace(b"[RESA]", bytes("{}".format(resa), 'utf-8'))
+                        line = line.replace(b"[RESM]", bytes("{}".format(resm), 'utf-8'))
+                        line = line.replace(b"[HYP3_VER]", bytes("{}".format(hyp3_ver), 'utf-8'))
+                        line = line.replace(b"[GAMMA_VER]", bytes("{}".format(gamma_ver), 'utf-8'))
+                        line = line.replace(b"[TILES]", bytes("{}".format(dem_tiles), 'utf-8'))
+                        line = line.replace(b"[PCS]", bytes("{}".format(pcs), 'utf-8'))
+                        g.write(line + b'\n')
 
     for myfile in glob.glob("*.png"):
+        with open("{}.xml".format(myfile), "wb") as g:
+            if "rgb" in myfile:
+                scale = 'color'
+                encoded_jpg = pngtothumb("{}_rgb.png".format(outfile))
+            else:
+                scale = 'grayscale'
+                encoded_jpg = pngtothumb("{}.png".format(outfile))
 
-        if "rgb" in myfile:
-            f = open("{}/RTC_GAMMA_Template_color_png.xml".format(etc_dir), "r")
-            encoded_jpg = pngtothumb("{}_rgb.png".format(outfile))
-        else:
-            f = open("{}/RTC_GAMMA_Template_grayscale_png.xml".format(etc_dir), "r")
-            encoded_jpg = pngtothumb("{}.png".format(outfile))
+            if "large" in myfile:
+                res = "medium"
+            else:
+                res = "low"
 
-        if "large" in myfile:
-            res = "medium"
-        else:
-            res = "low"
+            with open("{}/RTC_GAMMA_Template_{}_png.xml".format(etc_dir, scale), "rb") as f:
+                for line in f:
+                    line = line.replace(b"[DATE]", bytes(date, 'utf-8'))
+                    line = line.replace(b"[TIME]", bytes("{}00".format(time), 'utf-8'))
+                    line = line.replace(b"[DATETIME]", bytes(dt, 'utf-8'))
+                    line = line.replace(b"[YEARPROCESSED]", bytes("{}".format(year), 'utf-8'))
+                    line = line.replace(b"[YEARACQUIRED]", infile[17:21])
+                    line = line.replace(b"[TYPE]", input_type)
+                    line = line.replace(b"[FULL_TYPE]", bytes(full_type, 'utf-8'))
+                    line = line.replace(b"[THUMBNAIL_BINARY_STRING]", encoded_jpg)
+                    line = line.replace(b"[GRAN_NAME]", granulename)
+                    line = line.replace(b"[RES]", bytes(res, 'utf-8'))
+                    line = line.replace(b"[SPACING]", bytes("{}".format(spacing), 'utf-8'))
+                    line = line.replace(b"[DEM]", bytes("{}".format(dem_type), 'utf-8'))
+                    line = line.replace(b"[FORMAT]", bytes(format_type, 'utf-8'))
+                    line = line.replace(b"[HYP3_VER]", bytes("{}".format(hyp3_ver), 'utf-8'))
+                    line = line.replace(b"[GAMMA_VER]", bytes("{}".format(gamma_ver), 'utf-8'))
+                    line = line.replace(b"[DEM_TILES]", bytes("{}".format(dem_tiles), 'utf-8'))
+                    line = line.replace(b"[PCS]", bytes("{}".format(pcs), 'utf-8'))
+                    g.write(line + b"\n")
 
-        g = open("{}.xml".format(myfile), "w")
-        for line in f:
-            line = line.replace("[DATE]", date)
-            line = line.replace("[TIME]", "{}00".format(time))
-            line = line.replace("[DATETIME]", dt)
-            line = line.replace("[YEARPROCESSED]", "{}".format(year))
-            line = line.replace("[YEARACQUIRED]", infile[17:21])
-            line = line.replace("[TYPE]", input_type)
-            line = line.replace("[FULL_TYPE]", full_type)
-            line = line.replace("[THUMBNAIL_BINARY_STRING]", encoded_jpg)
-            line = line.replace("[GRAN_NAME]", granulename)
-            line = line.replace("[RES]", res)
-            line = line.replace("[SPACING]", "{}".format(spacing))
-            line = line.replace("[DEM]", "{}".format(dem_type))
-            line = line.replace("[FORMAT]", format_type)
-            line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
-            line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-            line = line.replace("[DEM_TILES]", "{}".format(dem_tiles))
-            line = line.replace("[PCS]", "{}".format(pcs))
-            g.write("{}\n".format(line))
-        f.close()
-        g.close()
-
-    f = open("{}/README_RTC_GAMMA.txt".format(etc_dir), "r")
-    g = open("README.txt", "w")
-    for line in f:
-        line = line.replace("[DATE]", date)
-        line = line.replace("[TIME]", "{}00".format(time))
-        line = line.replace("[DATETIME]", dt)
-        line = line.replace("[GRAN_NAME]", granulename)
-        line = line.replace("[YEARPROCESSED]", "{}".format(year))
-        line = line.replace("[YEARACQUIRED]", infile[17:21])
-        line = line.replace("[POWERTYPE]", power_type)
-        line = line.replace("[FORMAT]", format_type)
-        line = line.replace("[LOOKS]", "{}".format(looks))
-        line = line.replace("[FILT]", "{}".format(filter_str))
-        line = line.replace("[FLOOKS]", "{}".format(flooks))
-        line = line.replace("[SPACING]", "{}".format(spacing))
-        line = line.replace("[DEM]", "{}".format(dem_type))
-        line = line.replace("[RESA]", "{}".format(resa))
-        line = line.replace("[RESM]", "{}".format(resm))
-        line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
-        line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
-        line = line.replace("[DEM_TILES]", "{}".format(dem_tiles))
-        line = line.replace("[PCS]", "{}".format(pcs))
-        g.write("{}".format(line))
-    f.close()
-    g.close()
+    with open("README.txt", "w") as g:
+        with open("{}/README_RTC_GAMMA.txt".format(etc_dir), "r") as f:
+            for line in f:
+                line = line.replace("[DATE]", date)
+                line = line.replace("[TIME]", "{}00".format(time))
+                line = line.replace("[DATETIME]", dt)
+                line = line.replace("[GRAN_NAME]", granulename)
+                line = line.replace("[YEARPROCESSED]", "{}".format(year))
+                line = line.replace("[YEARACQUIRED]", infile[17:21])
+                line = line.replace("[POWERTYPE]", power_type)
+                line = line.replace("[FORMAT]", format_type)
+                line = line.replace("[LOOKS]", "{}".format(looks))
+                line = line.replace("[FILT]", "{}".format(filter_str))
+                line = line.replace("[FLOOKS]", "{}".format(flooks))
+                line = line.replace("[SPACING]", "{}".format(spacing))
+                line = line.replace("[DEM]", "{}".format(dem_type))
+                line = line.replace("[RESA]", "{}".format(resa))
+                line = line.replace("[RESM]", "{}".format(resm))
+                line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
+                line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
+                line = line.replace("[DEM_TILES]", "{}".format(dem_tiles))
+                line = line.replace("[PCS]", "{}".format(pcs))
+                g.write("{}".format(line))
 
     os.chdir(back)
