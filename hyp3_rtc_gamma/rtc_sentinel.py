@@ -816,7 +816,7 @@ def main():
                        shape=args.shape,
                        match_flag=args.n,
                        dead_flag=not args.fail,
-                       gamma_flag=args.sigma,
+                       gamma_flag=not args.sigma,
                        lo_flag=args.l,
                        pwr_flag=not args.amp,
                        filter_flag=args.f,
