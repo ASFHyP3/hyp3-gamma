@@ -225,27 +225,22 @@ dockerize:
     - export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
     - aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
     - tar -zxvf GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
+    - curl -L https://github.com/asfadmin/ASF_MapReady/archive/f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip
+      -o ASF_MapReady-f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip
+    - unzip ASF_MapReady-f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip
+    - mv ASF_MapReady-f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5 ASF_MapReady-devel
   script:
     - docker build --no-cache
       -t ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
       --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}"
       --label org.opencontainers.image.version="${SDIST_VERSION}"
       --label org.opencontainers.image.revision="${CI_COMMIT_SHORT_SHA}"
-      --build-arg S3_PYPI_HOST=${S3_PYPI_HOST} .
+      --build-arg S3_PYPI_HOST=${S3_PYPI_HOST}
+      --build-arg SDIST_SPEC="==${SDIST_VERSION}" .
     - aws ecr get-login-password | docker login --username AWS --password-stdin ${HYP3_REGISTRY}
     - docker push ${HYP3_REGISTRY}/hyp3-rtc-gamma:${SDIST_VERSION/+/_}
   <<: *only_mr_protected
 
-
-verify S3 PyPI:
-  stage: verify
-  before_script:
-    - *before_conda_env
-    - *before_defaults
-    - export SDIST_VERSION=$(python3 setup.py --version)
-  script:
-    - tox -e py37-verify
-  <<: *only_mr_protected
 
 verify dockerize (test):
   stage: verify

@@ -136,8 +136,7 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
     # Apply filter if requested
     if filter_flag:
         el_looks = look_fact * 30
-        cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd, wid=width, el=el_looks)
-        execute(cmd, uselogging=True)
+        execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
     options = "-p -j -n {} -q -c ".format(terms)
@@ -146,28 +145,22 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
 
     logging.info("Running RTC process... initializing")
     geo_dir = "geo_{}".format(pol)
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
-          " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 0" \
-          " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
-    execute(cmd, uselogging=True)
+    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+            f" {geo_dir}/area.dem_par {geo_dir} image {res} 0 {options}", uselogging=True)
 
     if match_flag and not par:
         fail = False
         logging.info("Running RTC process... coarse matching")
-        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
-              " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 1" \
-              " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
         try:
-            execute(cmd, uselogging=True)
+            execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+                    f" {geo_dir}/area.dem_par {geo_dir} image {res} 1 {options}", uselogging=True)
         except Exception:
             logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
 
         logging.info("Running RTC process... fine matching")
-        cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
-              " {dir}/area.dem {dir}/area.dem_par {dir} image {res} 2" \
-              " {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
         try:
-            execute(cmd, uselogging=True)
+            execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+                    f" {geo_dir}/area.dem_par {geo_dir} image {res} 2 {options}", uselogging=True)
         except Exception:
             if not dead_flag:
                 logging.error("ERROR: Failed to match images")
@@ -191,32 +184,24 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
     logging.info("Running RTC process... finalizing")
     if par:
         shutil.copy(par, "{}/image.diff_par".format(geo_dir))
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
-          " {dir}/area.dem {dir}/area.dem_par {dir} image " \
-          "{res} 3 {opt}".format(mgrd=mgrd, dem=dem, dir=geo_dir, res=res, opt=options)
-    execute(cmd, uselogging=True)
+    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+            f" {geo_dir}/area.dem_par {geo_dir} image {res} 3 {options}", uselogging=True)
 
     os.chdir(geo_dir)
 
     # Divide sigma0 by sin(theta) to get beta0
-    cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_0.inc_map - image_1.sin_theta {width} 7 - - 1 1 - 0")
 
-    cmd = "float_math image_cal_map.mli image_1.sin_theta image_1.beta {wid} 3 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_cal_map.mli image_1.sin_theta image_1.beta {width} 3 - - 1 1 - 0")
 
-    cmd = "float_math image_1.beta image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_1.beta image_0.sim image_1.flat {width} 3 - - 1 1 - 0")
 
     # Make Geotiff Files
-    cmd = "data2geotiff area.dem_par image_0.ls_map 5 {}.ls_map.tif".format(out_fame)
-    execute(cmd, uselogging=True)
-    cmd = "data2geotiff area.dem_par image_0.inc_map 2 {}.inc_map.tif".format(out_fame)
-    execute(cmd, uselogging=True)
-    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(out_fame)
-    execute(cmd, uselogging=True)
-    cmd = "data2geotiff area.dem_par area.dem 2 outdem.tif"
-    execute(cmd, uselogging=True)
+    execute(f"data2geotiff area.dem_par image_0.ls_map 5 {out_fame}.ls_map.tif", uselogging=True)
+    execute(f"data2geotiff area.dem_par image_0.inc_map 2 {out_fame}.inc_map.tif", uselogging=True)
+    execute(f"data2geotiff area.dem_par image_1.flat 2 {out_fame}.flat.tif", uselogging=True)
+    execute(f"data2geotiff area.dem_par area.dem 2 outdem.tif", uselogging=True)
+
     gdal.Translate("{}.dem.tif".format(out_fame), "outdem.tif", outputType=gdal.GDT_Int16)
 
     if gamma_flag:
@@ -227,18 +212,12 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
     createAmp(tif, nodata=0)
 
     # Make meta files and stats
-    cmd = "asf_import -format geotiff {}.ls_map.tif ls_map".format(out_fame)
-    execute(cmd, uselogging=True)
-    cmd = "stats -overstat -overmeta ls_map"
-    execute(cmd, uselogging=True)
-    cmd = "asf_import -format geotiff {}.inc_map.tif inc_map".format(out_fame)
-    execute(cmd, uselogging=True)
-    cmd = "stats -overstat -overmeta -mask 0 inc_map"
-    execute(cmd, uselogging=True)
-    cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(pol)
-    execute(cmd, uselogging=True)
-    cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(pol)
-    execute(cmd, uselogging=True)
+    execute(f"asf_import -format geotiff {out_fame}.ls_map.tif ls_map", uselogging=True)
+    execute("stats -overstat -overmeta ls_map", uselogging=True)
+    execute(f"asf_import -format geotiff {out_fame}.inc_map.tif inc_map", uselogging=True)
+    execute("stats -overstat -overmeta -mask 0 inc_map", uselogging=True)
+    execute(f"asf_import -format geotiff image_cal_map.mli_amp.tif tc_{pol}", uselogging=True)
+    execute(f"stats -nostat -overmeta -mask 0 tc_{pol}", uselogging=True)
 
     # Make browse resolution tif file
     if res == browse_res:
@@ -286,8 +265,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     # Apply filtering if requested
     if filter_flag:
         el_looks = look_fact * 30
-        cmd = "enh_lee {mgrd} temp.mgrd {wid} {el} 1 7 7".format(mgrd=mgrd, wid=width, el=el_looks)
-        execute(cmd, uselogging=True)
+        execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
     options = "-p -j -n {} -q -c ".format(terms)
@@ -309,22 +287,18 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
 
     if par:
         shutil.copy(par, "{}/image.diff_par".format(geo_dir))
-    cmd = "mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par" \
-          " {mdir}/area.dem {mdir}/area.dem_par {dir} image {res} 3" \
-          " {opts}".format(mgrd=mgrd, dem=dem, mdir=mdir, dir=geo_dir, res=res, opts=options)
-    execute(cmd, uselogging=True)
+
+    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem"
+            f" {mdir}/area.dem_par {geo_dir} image {res} 3 {options}", uselogging=True)
 
     os.chdir(geo_dir)
 
     # Divide sigma0 by sin(theta) to get beta0
-    cmd = "float_math image_0.inc_map - image_1.sin_theta {wid} 7 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_0.inc_map - image_1.sin_theta {width} 7 - - 1 1 - 0")
 
-    cmd = "float_math image_cal_map.mli image_1.sin_theta image_1.beta {wid} 3 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_cal_map.mli image_1.sin_theta image_1.beta {width} 3 - - 1 1 - 0")
 
-    cmd = "float_math image_1.beta image_0.sim image_1.flat {wid} 3 - - 1 1 - 0".format(wid=width)
-    execute(cmd)
+    execute(f"float_math image_1.beta image_0.sim image_1.flat {width} 3 - - 1 1 - 0")
 
     # Make geotiff file
     if gamma_flag:
@@ -342,18 +316,15 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
                        yRes=browse_res)
 
     # Create meta files and stats
-    cmd = "asf_import -format geotiff image_cal_map.mli_amp.tif tc_{}".format(cpol)
-    execute(cmd, uselogging=True)
-    cmd = "stats -nostat -overmeta -mask 0 tc_{}".format(cpol)
-    execute(cmd, uselogging=True)
+    execute(f"asf_import -format geotiff image_cal_map.mli_amp.tif tc_{cpol}", uselogging=True)
+    execute(f"stats -nostat -overmeta -mask 0 tc_{cpol}", uselogging=True)
 
     # Move files to product directory
     out_dir = "../PRODUCT"
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
 
-    cmd = "data2geotiff area.dem_par image_1.flat 2 {}.flat.tif".format(outfile)
-    execute(cmd, uselogging=True)
+    execute(f"data2geotiff area.dem_par image_1.flat 2 {outfile}.flat.tif", uselogging=True)
 
     if pwr_flag:
         shutil.move(tif, "{}/{}".format(out_dir, rtc_name))
@@ -481,15 +452,14 @@ def add_log(log, full_log):
 def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
     hdf5_name = "hdf5_list.txt"
     path = in_file
-    etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
+    etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
     shutil.copy("{}/sentinel_xml.xsl".format(etc_dir), "sentinel_xml.xsl")
 
     out = "PRODUCT"
 
-    cmd = "xsltproc --stringparam path {path} --stringparam timestamp timestring" \
-          " --stringparam file_size 1000 --stringparam server stuff" \
-          " --output out.xml sentinel_xml.xsl {path}/manifest.safe".format(path=path)
-    execute(cmd, uselogging=True)
+    execute(f"xsltproc --stringparam path {path} --stringparam timestamp timestring"
+            f" --stringparam file_size 1000 --stringparam server stuff"
+            f" --output out.xml sentinel_xml.xsl {path}/manifest.safe", uselogging=True)
 
     m = sentinel2meta("out.xml")
     write_asf_meta(m, "out.meta")
@@ -575,13 +545,11 @@ def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
 
     g.close()
 
-    cmd = "write_hdf5_xml {} {}.xml".format(hdf5_name, outname)
-    execute(cmd, uselogging=True)
+    execute(f"write_hdf5_xml {hdf5_name} {outname}.xml", uselogging=True)
 
     logging.info("Generating {}.iso.xml with {}/rtc_iso.xsl\n".format(outname, etc_dir))
 
-    cmd = "xsltproc {etc}/rtc_iso.xsl {out}.xml > {out}.iso.xml".format(etc=etc_dir, out=outname)
-    execute(cmd, uselogging=True)
+    execute(f"xsltproc {etc_dir}/rtc_iso.xsl {outname}.xml > {outname}.iso.xml", uselogging=True)
 
     shutil.copy("{}.iso.xml".format(outname), "{}".format(out))
 
