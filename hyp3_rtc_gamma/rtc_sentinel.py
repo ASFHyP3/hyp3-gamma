@@ -452,7 +452,7 @@ def add_log(log, full_log):
 def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
     hdf5_name = "hdf5_list.txt"
     path = in_file
-    etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
+    etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
     shutil.copy("{}/sentinel_xml.xsl".format(etc_dir), "sentinel_xml.xsl")
 
     out = "PRODUCT"
