@@ -31,9 +31,12 @@ RUN apt-get update && apt-get upgrade -y && \
 
 COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
 
-COPY mapready-build/bin /usr/local/MapReady/bin/
-COPY mapready-build/lib /usr/local/MapReady/lib/
-COPY mapready-build/share /usr/local/MapReady/share/
+COPY ASF_MapReady-devel /usr/local/MapReady/src/
+
+RUN cd /usr/local/MapReady/src && \
+    ./configure --prefix /usr/local/MapReady && \
+    make && make install && \
+    cd /usr/local/MapReady && rm -r src/
 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
