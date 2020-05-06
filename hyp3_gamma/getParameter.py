@@ -6,26 +6,22 @@ import re
 
 def getParameter(parFile, parameter, uselogging=False):
     """Read a value from a par file"""
-
+    value = None
     try:
-        myfile = open(parFile, "r")
-    except IOError: 
+        with open(parFile, "r") as myfile:
+            parameter = parameter.lower()
+            for line in myfile:
+                if parameter in line.lower():
+                    t = re.split(":", line)
+                    value = t[1].strip()
+    except IOError:
         if uselogging:
             logging.error("Unable to find file {}".format(parFile))
         raise Exception("ERROR: Unable to find file {}".format(parFile))
 
-    value = None
-    parameter = parameter.lower()
-    for line in myfile:
-        if parameter in line.lower():
-            t = re.split(":", line)
-            value = t[1].strip()
-    myfile.close()
-
-    try:
-        if value:
-            return value
-    except:    
+    if value is None:
         if uselogging:
             logging.error("Unable to find parameter {} in file {}".format(parameter, parFile))
         raise Exception("ERROR: Unable to find parameter {} in file {}".format(parameter, parFile))
+
+    return value
