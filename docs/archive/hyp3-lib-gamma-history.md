@@ -13,6 +13,10 @@ This is a significant refactor of `hyp3-lib` into a `pip` installable package ca
 **NOTE:** There are significant changes to the overall repository structure and this will break all 
 existing HyP3 workflows!
  
+### Removed
+ * Any official python 2 support (Note: this version will *likely* still work with python 2, but future versions are
+  not expected to)
+
 ### Added
 * A packaging and testing structure -- now `pip` installable and testing is done via `pytest` and `tox` 
 * `hyp3lib.draw_polygon_on_raster` has been included from the depreciated `python_data_utils`
@@ -23,7 +27,8 @@ existing HyP3 workflows!
 
 ### Changed
 *  All python modules have the `from __future__ import print_function, absolute_import, division, unicode_literals` 
- imports added to make python 2 behave more like python 3 
+ imports added to make python 2 behave more like python 3 (NOTE: Python 2 is not longer officially supported, but it
+  *should* work for this version)
 * All of `hyp3-lib/src` is now contained in the `hyp3lib` package
 * Any "script" in in hyp3-lib has been turned into an entrypoint with the same name and should mostly function
  identically if `hpy3lib` in installed. This includes:
@@ -58,6 +63,7 @@ existing HyP3 workflows!
   * `resample_geotiff.py`
   * `rtc2colordiff.py`
   * `rtc2color.py`
+  * `simplify_shapefile.py`
   * `SLC_copy_S1_fullSW.py`
   * `subset_geotiff_shape.py`
   * `tileList2shape.py`
