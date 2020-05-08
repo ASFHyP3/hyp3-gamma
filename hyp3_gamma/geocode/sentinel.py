@@ -106,10 +106,8 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
 
     if gamma0_flag:
         # Convert sigma-0 to gamma-0
-        cmd = "radcal_MLI {mgrd} {mgrd}.par - {mgrd}.sigma - 0 0 -1".format(mgrd=mgrd)
-        execute(cmd, uselogging=True)
-        cmd = "radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamm - 0 0 2".format(mgrd=mgrd)
-        execute(cmd, uselogging=True)
+        execute(f"radcal_MLI {mgrd} {mgrd}.par - {mgrd}.sigma - 0 0 -1", uselogging=True)
+        execute(f"radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamm - 0 0 2", uselogging=True)
         shutil.move("{mgrd}.gamma".format(mgrd=mgrd), mgrd)
 
     # Blank out the bad data at the left and right edges
@@ -120,25 +118,17 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
         blank_bad_data(mgrd, dsx, dsy, left=20, right=20)
 
     # Create geocoding look up table
-    if offset:
-        cmd = "gec_map {mgrd}.par {offset} {area_map} {height} {small_map}.par {small_map}.utm_to_rdc".format(
-            mgrd=mgrd, offset=offset, area_map=area_map, height=height, small_map=small_map)
-    else:
-        cmd = "gec_map {mgrd}.par - {area_map} {height} {small_map}.par {small_map}.utm_to_rdc".format(
-            mgrd=mgrd, area_map=area_map, height=height, small_map=small_map)
-    execute(cmd, uselogging=True)
+    if offset is None:
+        offset = '-'
+    execute(f"gec_map {mgrd}.par {offset} {area_map} {height} {small_map}.par {small_map}.utm_to_rdc", uselogging=True)
 
     # Gecode the granule
     out_size = getParameter("{small_map}.par".format(small_map=small_map), "width", uselogging=True)
-    cmd = "geocode_back {mgrd} {dsx} {small_map}.utm_to_rdc {utm} {out_size}".format(
-        mgrd=mgrd, dsx=dsx, small_map=small_map, utm=utm, out_size=out_size
-    )
-    execute(cmd, uselogging=True)
+    execute(f"geocode_back {mgrd} {dsx} {small_map}.utm_to_rdc {utm} {out_size}", uselogging=True)
 
     # Create the geotiff file
     tiffile = "{outfile}_{pol}.tif".format(outfile=outfile, pol=pol)
-    cmd = "data2geotiff {small_map}.par {utm} 2 {tiffile}".format(small_map=small_map, utm=utm, tiffile=tiffile)
-    execute(cmd, uselogging=True)
+    execute(f"data2geotiff {small_map}.par {utm} 2 {tiffile}", uselogging=True)
 
 
 def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
@@ -250,9 +240,7 @@ def make_products(outfile, pol, cp=None):
         # Direct call to rtc2color overran the memory (128 GB)
         #        rtc2color(ampfile,ampfile2, threshold, outfile2, amp=True, cleanup=True)
         # Trying this instead
-        cmd = "rtc2color.py -amp -cleanup {fp} {cp} {th} {out}".format(fp=ampfile, cp=ampfile2, th=threshold,
-                                                                       out=outfile2)
-        execute(cmd, uselogging=True)
+        execute(f"rtc2color.py -amp -cleanup {ampfile} {ampfile2} {threshold} {outfile2}", uselogging=True)
 
         colorname = "{}_rgb".format(outfile)
         makeAsfBrowse(outfile2, colorname)
@@ -290,9 +278,9 @@ def geocode_sentinel(infile, outfile, pixel_size=30.0, height=0, gamma0_flag=Fal
     # Create par file covering the area we want to geocode
     lat_max, lat_min, lon_max, lon_min = get_bounding_box_file(infile)
     logging.debug("Input Coordinates: {} {} {} {}".format(lat_max, lat_min, lon_max, lon_min))
-    area_map = "{}_area_map".format(outfile)
+    area_map = f"{outfile}_area_map"
     demParIn = create_dem_par(area_map, "float", pixel_size, lat_max, lat_min, lon_max, lon_min, post)
-    execute("create_dem_par {}.par < {}".format(area_map, demParIn), uselogging=True)
+    execute(f"create_dem_par {area_map}.par < {demParIn}", uselogging=True)
 
     # Get list of files to process
     vvlist = glob.glob("{}/*/*vv*.tiff".format(infile))
