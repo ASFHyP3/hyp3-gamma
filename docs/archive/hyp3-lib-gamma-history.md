@@ -6,9 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://scm.asf.alaska.edu/hyp3/hyp3-lib/compare/v1.0.0...develop) -- likely v1.1.0
-
-
 ## [v1.0.0](https://scm.asf.alaska.edu/hyp3/hyp3-lib/compare/v0.8.1...v1.0.0)
 
 This is a significant refactor of `hyp3-lib` into a `pip` installable package called `hyp3lib`.
