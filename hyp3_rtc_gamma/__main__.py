@@ -161,6 +161,12 @@ def process_rtc_gamma(cfg, n):
             else:
                 args = []
 
+            if extra_arg_is(cfg, 'matching', 'no'):
+                opts_str += '_nomatch'
+                args += ['-n']
+            else:
+                opts_str += '_match'
+
             if extra_arg_is(cfg, 'power', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
                 opts_str += '_amp'
                 args += ['--amp']
