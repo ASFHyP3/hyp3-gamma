@@ -6,21 +6,21 @@ jobs:
   flake8:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8  flake8-import-order flake8-blind-except flake8-builtins
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8  flake8-import-order flake8-blind-except flake8-builtins
 
-    - name: Lint with flake8
-      run: |
-        flake8 --max-line-length=120 --import-order-style=pycharm --statistics \
-            --application-import-names hyp3_rtc_gamma
+      - name: Lint with flake8
+        run: |
+          flake8 --max-line-length=120 --import-order-style=pycharm --statistics \
+              --application-import-names hyp3_rtc_gamma
 
 
   gitleaks:
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: 0
 
       - name: Scan for secrets with gitleaks
         uses: zricethezav/gitleaks-action@master
@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: '0'
+          fetch-depth: 0
 
       - uses: actions/setup-python@v1
         with:
