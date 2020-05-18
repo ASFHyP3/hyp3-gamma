@@ -22,8 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
 
       - uses: goanpeca/setup-miniconda@v1
         with:
@@ -139,8 +137,6 @@ jobs:
     needs: package
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: '0'
 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
