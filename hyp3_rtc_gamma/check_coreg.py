@@ -11,7 +11,7 @@ import numpy as np
 from hyp3lib.getParameter import getParameter
 
 
-def calc(s, l, r, a):
+def calc(s, l, r, a):  # noqa: E741
     rpt = r[0] + r[1] * s + r[2] * l + r[3] * s * l + r[4] * s * s + r[5] * l * l
     apt = a[0] + a[1] * s + a[2] * l + a[3] * s * l + a[4] * s * s + a[5] * l * l
 
