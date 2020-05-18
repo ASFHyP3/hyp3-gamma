@@ -29,9 +29,9 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
     print("create_arc_xml: CWD is {}".format(os.getcwd()))
     zone = None
     try:
-        proj_name = getParameter("area.dem.par".format(pol.upper()), "projection_name")
+        proj_name = getParameter("area.dem.par", "projection_name")
         if "UTM" in proj_name:
-            zone = getParameter("area.dem.par".format(pol.upper()), "projection_zone")
+            zone = getParameter("area.dem.par", "projection_zone")
     except Exception:
         pass
     logging.info("Zone is {}".format(zone))

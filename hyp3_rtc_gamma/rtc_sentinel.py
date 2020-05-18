@@ -200,7 +200,7 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
     execute(f"data2geotiff area.dem_par image_0.ls_map 5 {out_fame}.ls_map.tif", uselogging=True)
     execute(f"data2geotiff area.dem_par image_0.inc_map 2 {out_fame}.inc_map.tif", uselogging=True)
     execute(f"data2geotiff area.dem_par image_1.flat 2 {out_fame}.flat.tif", uselogging=True)
-    execute(f"data2geotiff area.dem_par area.dem 2 outdem.tif", uselogging=True)
+    execute("data2geotiff area.dem_par area.dem 2 outdem.tif", uselogging=True)
 
     gdal.Translate("{}.dem.tif".format(out_fame), "outdem.tif", outputType=gdal.GDT_Int16)
 
@@ -410,7 +410,7 @@ def create_consolidated_log(basename, out_name, lo_flag, dead_flag, match_flag, 
     if par:
         options += "--par {}".format(par)
     if no_cross_pol:
-        options += "--noCrossPol".format(no_cross_pol)
+        options += "--nocrosspol"
     if roi:
         options += "-a {}".format(roi)
     if shape:
@@ -470,7 +470,7 @@ def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
         try:
             gamma_home = os.environ['GAMMA_HOME']
         except KeyError:
-            logging.error(f'No GAMMA_HOME environment variable defined! GAMMA is not installed.')
+            logging.error('No GAMMA_HOME environment variable defined! GAMMA is not installed.')
             raise
 
         try:
