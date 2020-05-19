@@ -9,14 +9,11 @@ from hyp3lib.getParameter import getParameter
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type):
-    cmd = "geocode_back {IN} {W} {LT} {OUT} {DEMW} {DEMN} 0 {TYPE}".format(IN=inname, W=width, LT=lt, OUT=outname,
-                                                                           DEMW=demw, DEMN=demn, TYPE=type)
-    execute(cmd, uselogging=True)
+    execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type}", uselogging=True)
 
 
 def data2geotiff(inname, outname, dempar, type):
-    cmd = "data2geotiff {DEM} {IN} {TYPE} {OUT}".format(DEM=dempar, IN=inname, OUT=outname, TYPE=type)
-    execute(cmd, uselogging=True)
+    execute(f"data2geotiff {dempar} {inname} {type} {outname}", uselogging=True)
 
 
 def unwrapping_geocoding(master, slave, step="man", rlooks=10, alooks=2, trimode=0,
@@ -52,49 +49,35 @@ def unwrapping_geocoding(master, slave, step="man", rlooks=10, alooks=2, trimode
     logging.info("            Start unwrapping")
     logging.info("-------------------------------------------------")
 
-    cmd = "cc_wave {IFGF} {MMLI} - {IFG}.cc {W}".format(IFGF=ifgf, IFG=ifgname, MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
-    cmd = "rascc {IFG}.cc {MMLI} {W} 1 1 0 1 1 .1 .9 - - - {IFG}.cc.ras".format(IFG=ifgname, MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rascc {ifgname}.cc {mmli} {width} 1 1 0 1 1 .1 .9"
+            f" - - - {ifgname}.cc.ras", uselogging=True)
 
-    cmd = "adf {IFGF} {IFGF}.adf {IFG}.adf.cc {W} {A} - 5".format(IFGF=ifgf, IFG=ifgname, W=width, A=alpha)
-    execute(cmd, uselogging=True)
+    execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
-    cmd = "rasmph_pwr {IFGF}.adf {MMLI} {W}".format(IFGF=ifgf, MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    cmd = "rascc {IFG}.adf.cc {MMLI} {W} 1 1 0 1 1 .1 .9 - - - {IFG}.adf.cc.ras".format(IFG=ifgname, MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rascc {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 .1 .9"
+            f" - - - {ifgname}.adf.cc.ras", uselogging=True)
 
-    cmd = "rascc_mask {IFG}.adf.cc {MMLI} {W} 1 1 0 1 1 0.10 0.20 ".format(IFG=ifgname, MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    cmd = "mcf {IFGF}.adf {IFG}.adf.cc {IFG}.adf.cc_mask.bmp {IFG}.adf.unw {W} {TRI} 0 0 - - {NPR} {NPA}".format(
-        IFGF=ifgf, IFG=ifgname, W=width, TRI=trimode, NPR=npatr, NPA=npata)
+    execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
+            f" - - {npatr} {npata}", uselogging=True)
 
-    #    cmd = "mcf {IFGF}.adf {IFG}.adf.cc - {IFG}.adf.unw {W} {TRI} 0 0 - - {NPR} {NPA}".format(
-    #        IFGF=ifgf,IFG=ifgname,W=width,TRI=trimode,NPR=npatr,NPA=npata)
+    execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
+            f" - {ifgname}.adf.unw.ras", uselogging=True)
 
-    execute(cmd, uselogging=True)
+    execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
+            f" - {ifgname}.vert.disp 1", uselogging=True)
 
-    cmd = "rasrmg {IFG}.adf.unw {MMLI} {W} 1 1 0 1 1 0.33333 1.0 .35 0.0 - {IFG}.adf.unw.ras".format(IFG=ifgname,
-                                                                                                     MMLI=mmli, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rashgt {ifgname}.vert.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
-    cmd = "dispmap {IFG}.adf.unw DEM/HGT_SAR_{RL}_{AL} {MMLI}.par - {IFG}.vert.disp 1".format(IFG=ifgname, RL=rlooks,
-                                                                                              AL=alooks, MMLI=mmli)
-    execute(cmd, uselogging=True)
+    execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
+            f" - {ifgname}.los.disp 0", uselogging=True)
 
-    cmd = "rashgt {IFG}.vert.disp - {W} 1 1 0 1 1 0.028".format(IFG=ifgname, W=width)
-    execute(cmd, uselogging=True)
-
-    cmd = "dispmap {IFG}.adf.unw DEM/HGT_SAR_{RL}_{AL} {MMLI}.par - {IFG}.los.disp 0".format(IFG=ifgname, RL=rlooks,
-                                                                                             AL=alooks, MMLI=mmli)
-    execute(cmd, uselogging=True)
-
-    cmd = "rashgt {IFG}.los.disp - {W} 1 1 0 1 1 0.028".format(IFG=ifgname, W=width)
-    execute(cmd, uselogging=True)
+    execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
     logging.info("-------------------------------------------------")
     logging.info("            End unwrapping")
@@ -132,9 +115,9 @@ def unwrapping_geocoding(master, slave, step="man", rlooks=10, alooks=2, trimode
     data2geotiff("{}.los.disp.bmp.geo".format(ifgname), "{}.los.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.los.disp.geo".format(ifgname), "{}.los.disp.geo.org.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/inc_flat", "{}.inc.tif".format(ifgname), dempar, 2)
-    cmd = "look_vector {MMLI}.par {OFFIT} {DEMPAR} {DEM} lv_theta lv_phi".format(MMLI=mmli, OFFIT=offit, DEMPAR=dempar,
-                                                                                 DEM=dem)
-    execute(cmd, uselogging=True)
+
+    execute(f"look_vector {mmli}.par {offit} {dempar} {dem} lv_theta lv_phi", uselogging=True)
+
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
 

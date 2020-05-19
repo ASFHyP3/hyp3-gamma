@@ -346,8 +346,8 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     output = masterDateShort + "_" + slaveDateShort
 
     process_log("Starting s1_coreg_overlap")
-    cmd = "S1_coreg_overlap SLC1_tab SLC2R_tab {OUT} {OUT}.off.it {OUT}.off.it.corrected".format(OUT=output)
-    execute(cmd, uselogging=True, logfile=log)
+    execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
+            uselogging=True, logfile=log)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
     interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, step=3)
@@ -359,8 +359,8 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     #  Generate metadata
     process_log("Collecting metadata and output files")
 
-    cmd = "base_init {}.slc.par {}.slc.par - - base > baseline.log".format(master, slave)
-    execute(cmd, uselogging=True, logfile=log)
+    execute(f"base_init {master}.slc.par {slave}.slc.par - - base > baseline.log",
+            uselogging=True, logfile=log)
     os.chdir(wrk)
 
     etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
