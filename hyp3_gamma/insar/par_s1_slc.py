@@ -81,19 +81,13 @@ def par_s1_slc(pol=None):
             os.chdir("{}.SAFE".format(folder))
 
             if single_pol == 1:
-                cmd = make_cmd(1, acqdate, path)
-                execute(cmd, uselogging=True)
-                cmd = make_cmd(2, acqdate, path)
-                execute(cmd, uselogging=True)
-                cmd = make_cmd(3, acqdate, path)
-                execute(cmd, uselogging=True)
+                execute(make_cmd(1, acqdate, path), uselogging=True)
+                execute(make_cmd(2, acqdate, path), uselogging=True)
+                execute(make_cmd(3, acqdate, path), uselogging=True)
             else:
-                cmd = make_cmd(1, acqdate, path, pol=pol)
-                execute(cmd, uselogging=True)
-                cmd = make_cmd(2, acqdate, path, pol=pol)
-                execute(cmd, uselogging=True)
-                cmd = make_cmd(3, acqdate, path, pol=pol)
-                execute(cmd, uselogging=True)
+                execute(make_cmd(1, acqdate, path, pol=pol), uselogging=True)
+                execute(make_cmd(2, acqdate, path, pol=pol), uselogging=True)
+                execute(make_cmd(3, acqdate, path, pol=pol), uselogging=True)
 
             os.chdir(path)
 

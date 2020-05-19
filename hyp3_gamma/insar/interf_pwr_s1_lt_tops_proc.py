@@ -98,14 +98,11 @@ def interf_pwr_s1_lt_tops_proc(master, slave, dem, rlooks=10, alooks=2, iter=5, 
             sys.exit(1)
         logging.info("Input DEM file {} found".format(dem))
         logging.info("Preparing initial look up table and sim_unw file")
-        cmd = "create_offset {MPAR} {SPAR} {OFF} 1 {RL} {AL} 0".format(MPAR=mpar, SPAR=spar, OFF=off, RL=rlooks,
-                                                                       AL=alooks)
-        execute(cmd, uselogging=True)
-        cmd = "rdc_trans {MMLI} {DEM} {SMLI} {LT}".format(MMLI=mmli, DEM=dem, SMLI=smli, M=master, LT=lt)
-        execute(cmd, uselogging=True)
-        cmd = "phase_sim_orb {MPAR} {SPAR} {OFF} {DEM} {IFG}.sim_unw {MPAR} -".format(MPAR=mpar, SPAR=spar, OFF=off,
-                                                                                      DEM=dem, IFG=ifgname, M=master)
-        execute(cmd, uselogging=True)
+        execute(f"create_offset {mpar} {spar} {off} 1 {rlooks} {alooks} 0", uselogging=True)
+
+        execute(f"rdc_trans {mmli} {dem} {smli} {lt}", uselogging=True)
+
+        execute(f"phase_sim_orb {mpar} {spar} {off} {dem} {ifgname}.sim_unw {mpar} -", uselogging=True)
 
     elif step == 1:
         logging.info("Starting initial coregistration with look up table")
