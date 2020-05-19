@@ -4,5 +4,5 @@ def test_hyp3_insar_gamma(script_runner):
 
 
 def test_proc_insar_gamma(script_runner):
-    ret = script_runner.run('proc_insar_gamma', '-h')
+    ret = script_runner.run('procS1StackGAMMA.py', '-h')
     assert ret.success
