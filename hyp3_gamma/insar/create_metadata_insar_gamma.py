@@ -3,12 +3,13 @@ import logging
 import os
 import sys
 
+import hyp3_insar_gamma.etc
 
 def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
     looks = pixelSize / 20
     txtlooks = "{}x{}".format(looks * 5, looks)
 
-    etcdir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
+    etcdir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
 
     back = os.getcwd()
     os.chdir("PRODUCT")
