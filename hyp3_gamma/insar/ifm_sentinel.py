@@ -12,13 +12,14 @@ from hyp3lib.execute import execute
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from lxml import etree
 
+import hyp3_insar_gamma.etc
 from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
 from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
 from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_insar_gamma.par_s1_slc import par_s1_slc
 from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
 
-# FIXME: lets not do this, mmmkay?
+# FIXME: refactor to eliminate globals
 global lasttime
 global log
 global proc_log
@@ -363,7 +364,7 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
             uselogging=True, logfile=log)
     os.chdir(wrk)
 
-    etc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, "etc"))
+    etc_dir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
     shutil.copy(os.path.join(etc_dir, "sentinel_xml.xsl"), ".")
 
     execute(f"xsltproc --stringparam path {masterFile} --stringparam timestamp timestring"
