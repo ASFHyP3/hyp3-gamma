@@ -59,7 +59,7 @@ def getDemFileGamma(filename, use_opentopo, alooks, mask):
     # If we downsized the SAR image, downsize the DEM file
     # if alks == 1, then the SAR image is roughly 20 m square -> use native dem res
     # if alks == 2, then the SAR image is roughly 40 m square -> set dem to 80 meters
-    # if alks == 3, then the SAR image is roughly 60 m square -> set dem to 120 meters 
+    # if alks == 3, then the SAR image is roughly 60 m square -> set dem to 120 meters
     # etc.
     #
     # The DEM is set to double the res because it will be 1/2'd by the procedure

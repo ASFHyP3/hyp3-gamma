@@ -5,6 +5,7 @@ import sys
 
 import hyp3_insar_gamma.etc
 
+
 def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
     looks = pixelSize / 20
     txtlooks = "{}x{}".format(looks * 5, looks)

@@ -8,12 +8,12 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
 
-def geocode_back(inname, outname, width, lt, demw, demn, type):
-    execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type}", uselogging=True)
+def geocode_back(inname, outname, width, lt, demw, demn, type_):
+    execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
 
-def data2geotiff(inname, outname, dempar, type):
-    execute(f"data2geotiff {dempar} {inname} {type} {outname}", uselogging=True)
+def data2geotiff(inname, outname, dempar, type_):
+    execute(f"data2geotiff {dempar} {inname} {type_} {outname}", uselogging=True)
 
 
 def unwrapping_geocoding(master, slave, step="man", rlooks=10, alooks=2, trimode=0,
