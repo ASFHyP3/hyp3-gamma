@@ -24,15 +24,16 @@ def create_slc2r_tab(SLC2tab, SLC2Rtab):
                 g.write("{}\n".format(out).encode())
 
 
-def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iter):
-    if cnt < iter + 1:
+def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
+                    master, slave, lt, rlooks, alooks, iterations):
+    if cnt < iterations + 1:
         offi = ifgname + ".off_{}".format(cnt)
     else:
         offi = ifgname + ".off.it.corrected.temp"
 
     if cnt == 0:
         offit = "-"
-    elif cnt < iter + 1:
+    elif cnt < iterations + 1:
         offit = ifgname + ".off.it"
     else:
         offit = ifgname + ".off.it.corrected"
@@ -46,7 +47,7 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, mas
 
     execute(f"create_offset {mpar} {spar} {offi} 1 {rlooks} {alooks} 0", uselogging=True)
 
-    if cnt < iter + 1:
+    if cnt < iterations + 1:
         cmd_sfx = "256 64 offsets 1 64 256 0.2"
     else:
         cmd_sfx = "512 256 - 1 16 64 0.2"
@@ -55,7 +56,7 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, mas
     with open("offsetfit{}.log".format(cnt), "w") as log:
         execute(f"offset_fit offs snr {offi} - - 0.2 1", uselogging=True, logfile=log)
 
-    if cnt < iter + 1:
+    if cnt < iterations + 1:
         ifg_diff_sfx = f'it{cnt}'
     else:
         ifg_diff_sfx = 'man'
@@ -69,14 +70,14 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, mas
     if cnt == 0:
         offit = ifgname + ".off.it"
         shutil.copy(offi, offit)
-    elif cnt < iter + 1:
+    elif cnt < iterations + 1:
         execute(f"offset_add {offit} {offi} {offi}.temp", uselogging=True)
         shutil.copy("{}.temp".format(offi), offit)
     else:
         execute(f"offset_add {offit} {offi} {offi}.out", uselogging=True)
 
 
-def interf_pwr_s1_lt_tops_proc(master, slave, dem, rlooks=10, alooks=2, iter=5, step=0):
+def interf_pwr_s1_lt_tops_proc(master, slave, dem, rlooks=10, alooks=2, iterations=5, step=0):
     # Setup various file names that we'll need
     ifgname = "{}_{}".format(master, slave)
     SLC2tab = "SLC2_tab"
@@ -107,18 +108,19 @@ def interf_pwr_s1_lt_tops_proc(master, slave, dem, rlooks=10, alooks=2, iter=5, 
     elif step == 1:
         logging.info("Starting initial coregistration with look up table")
         coregister_data(
-            0, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iter
+            0, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iterations
         )
     elif step == 2:
         logging.info("Starting iterative coregistration with look up table")
-        for n in range(1, iter + 1):
+        for n in range(1, iterations + 1):
             coregister_data(
-                n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iter
+                n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iterations
             )
     elif step == 3:
         logging.info("Starting single interation coregistration with look up table")
         coregister_data(
-            iter + 1, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, master, slave, lt, rlooks, alooks, iter
+            iterations + 1, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
+            master, slave, lt, rlooks, alooks, iterations
         )
     else:
         logging.error("ERROR: Unrecognized step {}; must be from 0 - 2".format(step))
@@ -150,7 +152,7 @@ def main():
     logging.info("Starting run")
 
     interf_pwr_s1_lt_tops_proc(args.master, args.slave, args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                               iter=args.iter, step=args.step)
+                               iterations=args.iter, step=args.step)
 
 
 if __name__ == "__main__":

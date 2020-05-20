@@ -150,22 +150,22 @@ def getBurstOverlaps(masterDir, slaveDir):
 
 def getFileType(myfile):
     if "SDV" in myfile:
-        type = "SDV"
+        file_type = "SDV"
         pol = "vv"
     elif "SDH" in myfile:
-        type = "SDH"
+        file_type = "SDH"
         pol = "hh"
     elif "SSV" in myfile:
-        type = "SSV"
+        file_type = "SSV"
         pol = "vv"
     elif "SSH" in myfile:
-        type = "SSH"
+        file_type = "SSH"
         pol = "hh"
     else:
-        type = None
+        file_type = None
         pol = None
 
-    return type, pol
+    return file_type, pol
 
 
 def makeHDF5List(master, slave, outdir, output, dem_source, logname):
@@ -267,12 +267,12 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
         logging.error("ERROR: Slave file {} is not of type IW_SLC!".format(slaveFile))
         sys.exit(1)
 
-    type, pol = getFileType(masterFile)
+    file_type, pol = getFileType(masterFile)
 
     if cp_flag:
-        if type == "SDV":
+        if file_type == "SDV":
             pol = "vh"
-        elif type == "SDH":
+        elif file_type == "SDH":
             pol = "hv"
         else:
             logging.info("Flag type mismatch -- processing {}".format(pol))
@@ -325,13 +325,13 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     # Interferogram creation, matching, refinement
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 0")
     hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iter=3, step=0)
+    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=0)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 1")
     interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, step=1)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iter=3, step=2)
+    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=2)
 
     g = open("offsetfit3.log")
     offset = 1.0
