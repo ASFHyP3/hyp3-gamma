@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 
+from hyp3lib.system import gamma_version
+
 import hyp3_insar_gamma.etc
 
 
@@ -34,15 +36,7 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
     else:
         logging.warning("No version.txt file found in {}".format(etcdir))
 
-    # FIXME: Need to get this from hyp3lib
-    ver_file = "{}/ASF_Gamma_version.txt".format(os.environ['GAMMA_HOME'])
-    gamma_ver = None
-    if os.path.exists(ver_file):
-        with open(ver_file, "r") as f:
-            for line in f:
-                gamma_ver = line.strip()
-    else:
-        logging.warning("No ASF_Gamma_version.txt file found in {}".format(os.environ['GAMMA_HOME']))
+    gamma_ver = gamma_version()
 
     if "NED" in demType:
         if "13" in demType:
