@@ -10,6 +10,7 @@ import sys
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
+from hyp3lib.system import gamma_version
 from lxml import etree
 
 import hyp3_insar_gamma.etc
@@ -169,7 +170,7 @@ def getFileType(myfile):
 
 
 def makeHDF5List(master, slave, outdir, output, dem_source, logname):
-    gamma_version = "99.99.99"
+    gamma_ver = gamma_version()
     with open("hdf5.txt", "w") as f:
         f.write("[Gamma DInSar]\n")
         f.write("granule = s1_vertical_displacement\n")
@@ -185,7 +186,7 @@ def makeHDF5List(master, slave, outdir, output, dem_source, logname):
         f.write("unwrapped phase = {}.adf.unw.geo.tif\n".format(os.path.join(outdir, output)))
         f.write("vertical displacement = {}.vert.disp.geo.tif\n".format(os.path.join(outdir, output)))
         f.write("mli.par file = {}.mli.par\n".format(os.path.join(outdir, master)))
-        f.write("gamma version = {}\n".format(gamma_version))
+        f.write("gamma version = {}\n".format(gamma_ver))
         f.write("dem source = {}\n".format(dem_source))
         f.write("main log = {}\n".format(logname))
         f.write("processing log = processing.log\n")
