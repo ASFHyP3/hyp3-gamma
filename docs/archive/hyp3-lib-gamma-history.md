@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.1.0](https://scm.asf.alaska.edu/hyp3/hyp3-lib/compare/v1.0.0...v1.1.0)
+
+### Added
+* `GC_map_mod` bash script, which is used by a few science codes (this has been translated to bash from tcsh)
+* `hyp3lib.system` module for getting system information needed by the science codes
+  * includes a `gamma_version` function which will attempt to determine and validate the GAMMA software version
+
 ## [v1.0.0](https://scm.asf.alaska.edu/hyp3/hyp3-lib/compare/v0.8.1...v1.0.0)
 
 This is a significant refactor of `hyp3-lib` into a `pip` installable package called `hyp3lib`.
