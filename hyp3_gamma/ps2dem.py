@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import sys
+import warnings
 from pathlib import Path
 from typing import Union
 
@@ -12,6 +13,7 @@ from osgeo import gdal, osr
 
 import hyp3lib.saa_func_lib as saa
 from hyp3lib.execute import execute
+from hyp3lib.system import gamma_version
 
 
 def ps2dem(in_dem: Union[str, Path], out_dem: str, dem_par: str):
@@ -42,20 +44,18 @@ def ps2dem(in_dem: Union[str, Path], out_dem: str, dem_par: str):
     prj = src_ds.GetProjection()
 
     srs = osr.SpatialReference(wkt=prj)
+
     lat_of_origin = srs.GetProjParm("latitude_of_origin")
-    central_meridian = srs.GetProjParm("central_meridian")
-
-    s = prj.split("[")
-    for t in s:
-        if "false_northing" in t:
-            u = t.split('"')
-            v = u[2].split(",")
-            w = v[1].split("]")
-            false_north = w[0]
-            logging.info("found false_north {}".format(false_north))
-
     logging.info("latitude of origin {}".format(lat_of_origin))
+
+    central_meridian = srs.GetProjParm("central_meridian")
     logging.info("central_meridian   {}".format(central_meridian))
+
+    false_easting = srs.GetProjParm('false_easting')
+    logging.info("false_easting      {}".format(false_easting))
+
+    false_northing = srs.GetProjParm('false_northing')
+    logging.info("false_northing     {}".format(false_northing))
 
     string = src_ds.GetMetadata()
     pixasarea = string["AREA_OR_POINT"]
@@ -66,20 +66,45 @@ def ps2dem(in_dem: Union[str, Path], out_dem: str, dem_par: str):
         north = north + pix_north / 2.0
         logging.info("Update pixel upper northing (m): {}    easting (m): {}".format(north, east))
 
-    with open(dem_par_in, "w") as f:
-        f.write("PS\n")
-        f.write("WGS84\n")
-        f.write("1\n")
-        f.write(f"{lat_of_origin}\n")
-        f.write(f"{central_meridian}\n")
-        f.write(f"{basename}\n")
-        f.write("REAL*4\n")
-        f.write("0\n")
-        f.write("1\n")
-        f.write(f"{np.abs(xsize)}\n")
-        f.write(f"{np.abs(ysize)}\n")
-        f.write(f"{pix_north} {pix_east}\n")
-        f.write(f"{north} {east}\n")
+    gamma_ver = gamma_version()
+    if gamma_ver.startswith('2017'):
+        warnings.warn('GAMMA versions prior to 2019 will not be supported in hyp3lib 2.0+',
+                      DeprecationWarning, stacklevel=2)
+        with open(dem_par_in, "w") as f:
+            f.write("PS\n")
+            f.write("WGS84\n")
+            f.write("1\n")
+            f.write(f"{lat_of_origin}\n")
+            f.write(f"{central_meridian}\n")
+            f.write(f"{basename}\n")
+            f.write("REAL*4\n")
+            f.write("0\n")
+            f.write("1\n")
+            f.write(f"{np.abs(xsize)}\n")
+            f.write(f"{np.abs(ysize)}\n")
+            f.write(f"{pix_north} {pix_east}\n")
+            f.write(f"{north} {east}\n")
+    else:
+        with open(dem_par_in, "w") as f:
+            f.write("PS\n")
+            f.write("WGS84\n")
+            f.write("1\n")
+            f.write("other\n")
+            f.write(f"{srs.GetAttrValue('PROJECTION')}\n")
+            f.write("0\n")
+            f.write(f"{false_easting}\n")
+            f.write(f"{false_northing}\n")
+            f.write("1\n")
+            f.write(f"{central_meridian}\n")
+            f.write(f"{lat_of_origin}\n")
+            f.write(f"{basename}\n")
+            f.write("REAL*4\n")
+            f.write("0\n")
+            f.write("1\n")
+            f.write(f"{np.abs(xsize)}\n")
+            f.write(f"{np.abs(ysize)}\n")
+            f.write(f"{pix_north} {pix_east}\n")
+            f.write(f"{north} {east}\n")
 
     if os.path.isfile(dem_par):
         os.remove(dem_par)
