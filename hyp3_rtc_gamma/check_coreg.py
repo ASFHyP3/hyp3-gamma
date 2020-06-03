@@ -11,28 +11,39 @@ import numpy as np
 from hyp3lib.getParameter import getParameter
 
 
+class CoregLogger:
+    """A local logging context to create a coregistration log file"""
+    def __init__(self, logger=None, file_name='coreg_check.log', file_mode='w'):
+        """
+        :param logger: The logger to use for logging (defaults to root logger)
+        :param file_name: file to write coregistation log to
+        :param file_mode: mode to open the coregistration log file in
+        """
+        self.logger = logger
+        self.file_handler = logging.FileHandler(file_name, mode=file_mode)
+
+    def __enter__(self):
+        if self.logger is None:
+            self.logger = logging.getLogger()
+        self.logger.addHandler(self.file_handler)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logger.removeHandler(self.file_handler)
+        self.file_handler.close()
+
+
 def calc(s, l, r, a):  # noqa: E741
     rpt = r[0] + r[1] * s + r[2] * l + r[3] * s * l + r[4] * s * s + r[5] * l * l
     apt = a[0] + a[1] * s + a[2] * l + a[3] * s * l + a[4] * s * s + a[5] * l * l
-
-    logging.info(f'{rpt}, {apt}')
     return rpt, apt
 
 
-def display(message, f, error=False):
-    if error:
-        logging.error("{}".format(message))
-    else:
-        logging.info("{}".format(message))
-    f.write("{}\n".format(message))
-
-
 def check_coreg(sar_file, post, max_offset=50, max_error=2):
-    with open('coreg_check.log', 'w') as f:
-        display("SAR file: {}".format(sar_file), f)
-        display("Checking coregistration using {} meters".format(post), f)
-        display("Setting maximum offset to be {}".format(max_offset), f)
-        display("Setting maximum error to be {}".format(max_error), f)
+    with CoregLogger:
+        logging.info(f"SAR file: {sar_file}")
+        logging.info(f"Checking coregistration using {post} meters")
+        logging.info(f"Setting maximum offset to be {max_offset}")
+        logging.info(f"Setting maximum error to be {max_error}")
 
         myfile = "mk_geo_radcal_2.log"
         if os.path.isdir("geo_HH"):
@@ -46,7 +57,7 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
         elif os.path.isdir("geo"):
             mlog = "geo/{}".format(myfile)
         else:
-            display("ERROR: Can't find {}".format(myfile), f, error=True)
+            logging.error(f"ERROR: Can't find {myfile}")
             sys.exit(-1)
 
         a = np.zeros(6)
@@ -59,12 +70,12 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                     vals = tmp[1].split()
                     if len(vals) == 1:
                         r[0] = float(vals[0])
-                        display("Range offset is {}".format(r), f)
+                        logging.info(f"Range offset is {r}")
                     elif len(vals) == 3:
                         r[0] = float(vals[0])
                         r[1] = float(vals[1])
                         r[2] = float(vals[2])
-                        display("Range polynomial is {}".format(r), f)
+                        logging.info(f"Range polynomial is {r}")
                     elif len(vals) == 6:
                         r[0] = float(vals[0])
                         r[1] = float(vals[1])
@@ -72,19 +83,19 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                         r[3] = float(vals[3])
                         r[4] = float(vals[4])
                         r[5] = float(vals[5])
-                        display("Range polynomial is {}".format(r), f)
+                        logging.info(f"Range polynomial is {r}")
 
                 if 'final azimuth offset poly. coeff.:' in line:
                     tmp = re.split(":", line)
                     vals = tmp[1].split()
                     if len(vals) == 1:
                         a[0] = float(vals[0])
-                        display("Azimuth offset is {}".format(a), f)
+                        logging.info(f"Azimuth offset is {a}")
                     elif len(vals) == 3:
                         a[0] = float(vals[0])
                         a[1] = float(vals[1])
                         a[2] = float(vals[2])
-                        display("Azimuth polynomial is {}".format(a), f)
+                        logging.info(f"Azimuth polynomial is {a}")
                     elif len(vals) == 6:
                         a[0] = float(vals[0])
                         a[1] = float(vals[1])
@@ -92,7 +103,7 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                         a[3] = float(vals[3])
                         a[4] = float(vals[4])
                         a[5] = float(vals[5])
-                        display("Azimuth polynomial is {}".format(a), f)
+                        logging.info(f"Azimuth polynomial is {a}")
 
                 if 'final model fit std. dev. (samples) range:' in line:
                     tmp = re.split(":", line)
@@ -100,13 +111,13 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                     rng_error = float(vals[0])
                     val = tmp[2].strip()
                     azi_error = float(val)
-                    display("Range std dev: {}  Azimuth std dev: {}".format(rng_error, azi_error), f)
+                    logging.info(f"Range std dev: {rng_error}  Azimuth std dev: {azi_error}")
                     error = np.sqrt(rng_error * rng_error + azi_error * azi_error)
-                    display("error is {}".format(error), f)
+                    logging.info(f"error is {error}")
                     if error > max_error:
-                        display("error > max_error", f)
-                        display("std dev is too high, using dead reckoning", f)
-                        display("Granule failed coregistration", f)
+                        logging.info("error > max_error")
+                        logging.info("std dev is too high, using dead reckoning")
+                        logging.info("Granule failed coregistration")
                         sys.exit(-1)
 
         mlog = glob.glob('geo_??/*.diff_par')[0]
@@ -118,45 +129,45 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
 
         if os.path.exists(mlog):
             ns = int(getParameter(mlog, "range_samp_1"))
-            display("Number of samples is {}".format(ns), f)
+            logging.info(f"Number of samples is {ns}")
             nl = int(getParameter(mlog, "az_samp_1"))
-            display("Number of lines is {}".format(nl), f)
+            logging.info(f"Number of lines is {nl}")
         else:
-            logging.error("Can't find diff par file {}".format(mlog))
+            logging.error(f"Can't find diff par file {mlog}")
             sys.exit(-1)
 
         rpt, apt = calc(1, 1, r, a)
         pt1 = np.sqrt(rpt * rpt + apt * apt)
-        display("Point 1 offset is {}".format(pt1), f)
+        logging.info(f"Point 1 offset is {pt1} = sqrt({rpt}**2 + {apt}**2)")
 
         rpt, apt = calc(ns, 1, r, a)
         pt2 = np.sqrt(rpt * rpt + apt * apt)
-        display("Point 2 offset is {}".format(pt2), f)
+        logging.info(f"Point 2 offset is {pt2} = sqrt({rpt}**2 + {apt}**2)")
 
         rpt, apt = calc(1, nl, r, a)
         pt3 = np.sqrt(rpt * rpt + apt * apt)
-        display("Point 3 offset is {}".format(pt3), f)
+        logging.info(f"Point 3 offset is {pt3} = sqrt({rpt}**2 + {apt}**2)")
 
         rpt, apt = calc(ns, nl, r, a)
         pt4 = np.sqrt(rpt * rpt + apt * apt)
-        display("Point 4 offset is {}".format(pt4), f)
+        logging.info(f"Point 4 offset is {pt4} = sqrt({rpt}**2 + {apt}**2)")
 
         top = max(pt1, pt2, pt3, pt4)
         offset = top * post
 
-        display("Found absolute offset of {} meters".format(offset), f)
+        logging.info(f"Found absolute offset of {offset} meters")
         if offset < max_offset:
-            display("...keeping offset", f)
+            logging.info("...keeping offset")
             ret = 0
         else:
-            display("offset too large, using dead reckoning", f)
+            logging.info("offset too large, using dead reckoning")
             ret = -1
 
         if ret == 0:
-            display("Granule passed coregistration", f)
+            logging.info("Granule passed coregistration")
             return 0
         else:
-            display("Granule failed coregistration", f)
+            logging.info("Granule failed coregistration")
             sys.exit(-1)
 
 
@@ -174,10 +185,12 @@ def main():
                         help='Set the maximum allowable standard deviation of max_offset fit (pixels)')
     args = parser.parse_args()
 
-    log_file = "check_coreg.log"
-    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        stream=sys.stdout
+    )
     logging.info("Starting run")
 
     check_coreg(args.input, args.post, args.max_offset, args.max_error)
