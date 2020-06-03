@@ -11,6 +11,10 @@ import numpy as np
 from hyp3lib.getParameter import getParameter
 
 
+class CoregistrationError(Exception):
+    """Error to raise when coregistration fails"""
+
+
 class CoregLogger:
     """A local logging context to create a coregistration log file"""
     def __init__(self, logger=None, file_name='coreg_check.log', file_mode='w'):
@@ -57,8 +61,7 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
         elif os.path.isdir("geo"):
             mlog = "geo/{}".format(myfile)
         else:
-            logging.error(f"ERROR: Can't find {myfile}")
-            sys.exit(-1)
+            raise CoregistrationError(f"Can't find {myfile}")
 
         a = np.zeros(6)
         r = np.zeros(6)
@@ -118,14 +121,13 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                         logging.info("error > max_error")
                         logging.info("std dev is too high, using dead reckoning")
                         logging.info("Granule failed coregistration")
-                        sys.exit(-1)
+                        raise CoregistrationError('error > max_error')
 
         mlog = glob.glob('geo_??/*.diff_par')[0]
         if not mlog:
             mlog = glob.glob('geo/*.diff_par')[0]
             if not mlog:
-                logging.error("Can't find diff_par file")
-                return -1
+                raise CoregistrationError("Can't find diff_par file")
 
         if os.path.exists(mlog):
             ns = int(getParameter(mlog, "range_samp_1"))
@@ -133,8 +135,7 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
             nl = int(getParameter(mlog, "az_samp_1"))
             logging.info(f"Number of lines is {nl}")
         else:
-            logging.error(f"Can't find diff par file {mlog}")
-            sys.exit(-1)
+            raise CoregistrationError(f"Can't find diff par file {mlog}")
 
         rpt, apt = calc(1, 1, r, a)
         pt1 = np.sqrt(rpt * rpt + apt * apt)
@@ -156,19 +157,10 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
         offset = top * post
 
         logging.info(f"Found absolute offset of {offset} meters")
-        if offset < max_offset:
-            logging.info("...keeping offset")
-            ret = 0
-        else:
-            logging.info("offset too large, using dead reckoning")
-            ret = -1
+        if offset >= max_offset:
+            raise CoregistrationError("offset too large, using dead reckoning")
 
-        if ret == 0:
-            logging.info("Granule passed coregistration")
-            return 0
-        else:
-            logging.info("Granule failed coregistration")
-            sys.exit(-1)
+        logging.info("Granule passed coregistration")
 
 
 def main():

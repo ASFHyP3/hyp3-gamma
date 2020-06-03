@@ -1,7 +1,6 @@
 """Create a Radiometrically Terrain-Corrected (RTC) image from a  Sentinel-1 scene sing GAMMA software"""
 
 import argparse
-import datetime
 import glob
 import logging
 import os
@@ -32,7 +31,7 @@ from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
 import hyp3_rtc_gamma
-from hyp3_rtc_gamma.check_coreg import check_coreg
+from hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
 from hyp3_rtc_gamma.create_metadata import create_arc_xml
 from hyp3_rtc_gamma.metadata_utils import write_asf_meta
 from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
@@ -175,7 +174,7 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
         if not fail:
             try:
                 check_coreg(out_fame, res, max_offset=75, max_error=2.0)
-            except Exception:
+            except CoregistrationError:
                 if not dead_flag:
                     logging.error("ERROR: Failed the coregistration check")
                     sys.exit(1)
