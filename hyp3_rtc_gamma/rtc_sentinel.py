@@ -9,6 +9,7 @@ import shutil
 import sys
 import zipfile
 
+from hyp3lib import ExecuteError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
@@ -154,14 +155,14 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
         try:
             execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
                     f" {geo_dir}/area.dem_par {geo_dir} image {res} 1 {options}", uselogging=True)
-        except Exception:
+        except ExecuteError:
             logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
 
         logging.info("Running RTC process... fine matching")
         try:
             execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
                     f" {geo_dir}/area.dem_par {geo_dir} image {res} 2 {options}", uselogging=True)
-        except Exception:
+        except ExecuteError:
             if not dead_flag:
                 logging.error("ERROR: Failed to match images")
                 sys.exit(1)
