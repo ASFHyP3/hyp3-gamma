@@ -27,6 +27,7 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.ps2dem import ps2dem
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
+from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
@@ -450,7 +451,7 @@ def add_log(log, full_log):
     g.close()
 
 
-def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
+def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log, gamma_ver):
     hdf5_name = "hdf5_list.txt"
     path = in_file
     etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
@@ -464,30 +465,6 @@ def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
 
     m = sentinel2meta("out.xml")
     write_asf_meta(m, "out.meta")
-
-    # TODO: This could probably moved to a function in hyp3lib
-    gamma_ver = os.getenv('GAMMA_VERSION')
-    if gamma_ver is None:
-        try:
-            gamma_home = os.environ['GAMMA_HOME']
-        except KeyError:
-            logging.error('No GAMMA_HOME environment variable defined! GAMMA is not installed.')
-            raise
-
-        try:
-            with open(f"{gamma_home}/ASF_Gamma_version.txt") as f:
-                gamma_ver = f.readlines()[-1].strip()
-        except IOError:
-            logging.warning(
-                f"No GAMMA_VERSION environment variable or ASF_Gamma_version.txt "
-                f"file found in GAMMA_HOME:\n     {os.getenv('GAMMA_HOME')}\n"
-                f"Attempting to parse GAMMA version from its install directory"
-            )
-            gamma_ver = os.path.basename(gamma_home).split('-')[-1]
-    try:
-        datetime.datetime.strptime(gamma_ver, '%Y%m%d')
-    except ValueError:
-        logging.warning(f'GAMMA version {gamma_ver} does not conform to the expected YYYYMMDD format')
 
     ver_file = "{}/manifest.safe".format(path)
     ipf_ver = None
@@ -553,8 +530,6 @@ def create_iso_xml(outfile, outname, pol, cpol, in_file, output, dem_type, log):
     execute(f"xsltproc {etc_dir}/rtc_iso.xsl {outname}.xml > {outname}.iso.xml", uselogging=True)
 
     shutil.copy("{}.iso.xml".format(outname), "{}".format(out))
-
-    return gamma_ver
 
 
 def clean_prod_dir():
@@ -752,7 +727,8 @@ def rtc_sentinel_gamma(in_file,
     create_browse_images(out_name, aux_name, pol, cpol, browse_res)
     log_file = logging.getLogger().handlers[0].baseFilename
     rtc_name = base_name + "_" + pol + ".tif"
-    gamma_ver = create_iso_xml(rtc_name, aux_name, pol, cpol, in_file, out_name, dem_type, log_file)
+    gamma_ver = gamma_version()
+    create_iso_xml(rtc_name, aux_name, pol, cpol, in_file, out_name, dem_type, log_file, gamma_ver)
     create_arc_xml(in_file, aux_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(res=res)
