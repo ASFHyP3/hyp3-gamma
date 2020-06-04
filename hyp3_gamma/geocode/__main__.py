@@ -116,16 +116,16 @@ def download(cfg, granule):
 
     if not os.path.isfile(zip_file):
         raise Exception('Could not find expected download file: ' + zip_file)
-    else:
-        log.info('Download complete')
-        log.info('Unzipping ' + zip_file)
 
-        unzip(zip_file, cfg['workdir'])
+    log.info('Download complete')
+    log.info('Unzipping ' + zip_file)
 
-        if granule.startswith('S1'):
-            safe_file = os.path.join(cfg['workdir'], '{granule}.SAFE'.format(granule=granule))
-            if not os.path.isdir(safe_file):
-                raise Exception('Failed to unzip, SAFE directory not found: {safe_file}'.format(safe_file=safe_file))
+    unzip(zip_file, cfg['workdir'])
+
+    if granule.startswith('S1'):
+        safe_file = os.path.join(cfg['workdir'], '{granule}.SAFE'.format(granule=granule))
+        if not os.path.isdir(safe_file):
+            raise Exception('Failed to unzip, SAFE directory not found: {safe_file}'.format(safe_file=safe_file))
 
     log.info('Unzip completed.')
 
@@ -177,41 +177,40 @@ def process_geocode_gamma(cfg, n):
             log.info('PRODUCT directory not found: {product}'.format(product=product))
             log.error('Processing failed')
             raise Exception("Processing failed: PRODUCT directory not found")
-        else:
 
-            out_path = os.path.join(cfg['workdir'], out_name)
-            log.info('Output path: ' + out_path)
+        out_path = os.path.join(cfg['workdir'], out_name)
+        log.info('Output path: ' + out_path)
 
-            zip_file = out_path + '.zip'
-            if os.path.isdir(out_path):
-                shutil.rmtree(out_path)
-            if os.path.isfile(zip_file):
-                os.unlink(zip_file)
-            cfg['out_path'] = out_path
+        zip_file = out_path + '.zip'
+        if os.path.isdir(out_path):
+            shutil.rmtree(out_path)
+        if os.path.isfile(zip_file):
+            os.unlink(zip_file)
+        cfg['out_path'] = out_path
 
-            with get_db_connection('hyp3-db') as conn:
-                clip_tiffs_to_roi(cfg, conn, product)
+        with get_db_connection('hyp3-db') as conn:
+            clip_tiffs_to_roi(cfg, conn, product)
 
-                log.debug('Renaming '+product+' to '+out_path)
-                os.rename(product, out_path)
+            log.debug('Renaming '+product+' to '+out_path)
+            os.rename(product, out_path)
 
-                browse_path = find_png(out_path)
-                cfg['attachment'] = browse_path
-                add_browse(cfg, 'LOW-RES', browse_path)
+            browse_path = find_png(out_path)
+            cfg['attachment'] = browse_path
+            add_browse(cfg, 'LOW-RES', browse_path)
 
-                find_browses(cfg, out_path)
-                add_citation(cfg, out_path)
-                zip_dir(out_path, zip_file)
+            find_browses(cfg, out_path)
+            add_citation(cfg, out_path)
+            zip_dir(out_path, zip_file)
 
-                cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-                cfg['original_product_size'] = 0
+            cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
+            cfg['original_product_size'] = 0
 
-                record_metrics(cfg, conn)
-                if 'lag' in cfg and 'email_text' in cfg:
-                    cfg['email_text'] += "\nYou are receiving this product {} after it was acquired.".format(cfg['lag'])
+            record_metrics(cfg, conn)
+            if 'lag' in cfg and 'email_text' in cfg:
+                cfg['email_text'] += "\nYou are receiving this product {} after it was acquired.".format(cfg['lag'])
 
-                upload_product(zip_file, cfg, conn, browse_path=browse_path)
-                success(conn, cfg)
+            upload_product(zip_file, cfg, conn, browse_path=browse_path)
+            success(conn, cfg)
 
     except Exception as e:
         log.exception('Processing failed')
