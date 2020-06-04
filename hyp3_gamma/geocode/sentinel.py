@@ -107,7 +107,7 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
     if gamma0_flag:
         # Convert sigma-0 to gamma-0
         execute(f"radcal_MLI {mgrd} {mgrd}.par - {mgrd}.sigma - 0 0 -1", uselogging=True)
-        execute(f"radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamm - 0 0 2", uselogging=True)
+        execute(f"radcal_MLI {mgrd}.sigma {mgrd}.par - {mgrd}.gamma - 0 0 2", uselogging=True)
         shutil.move("{mgrd}.gamma".format(mgrd=mgrd), mgrd)
 
     # Blank out the bad data at the left and right edges
