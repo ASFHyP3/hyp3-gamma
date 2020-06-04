@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.0.0](https://scm.asf.alaska.edu/hyp3/hyp3-geocode/compare/v0.0.0...v1.0.0)
+## [v1.0.1](https://github.com/asfadmin/hyp3-geocode/compare/v1.0.0...v1.0.1)
+
+This fixes a bug in the sigma-0 to gamma-0 conversion
+
+## [v1.0.0](https://github.com/asfadmin/hyp3-geocode/compare/v0.0.0...v1.0.0)
 
 This is a significant refactor of `hyp3-geocode` into:
  * A `pip` installable package called `hyp3_geocode`
