@@ -19,9 +19,10 @@ class CoregLogger:
     """A local logging context to create a coregistration log file"""
     def __init__(self, logger=None, file_name='coreg_check.log', file_mode='w'):
         """
-        :param logger: The logger to use for logging (defaults to root logger)
-        :param file_name: file to write coregistation log to
-        :param file_mode: mode to open the coregistration log file in
+        Args:
+            logger: The logger to use for logging (defaults to root logger)
+            file_name: file to write coregistation log to
+            file_mode: mode to open the coregistration log file in
         """
         self.logger = logger
         self.file_handler = logging.FileHandler(file_name, mode=file_mode)
@@ -43,7 +44,7 @@ def calc(s, l, r, a):  # noqa: E741
 
 
 def check_coreg(sar_file, post, max_offset=50, max_error=2):
-    with CoregLogger:
+    with CoregLogger():
         logging.info(f"SAR file: {sar_file}")
         logging.info(f"Checking coregistration using {post} meters")
         logging.info(f"Setting maximum offset to be {max_offset}")
