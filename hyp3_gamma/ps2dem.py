@@ -3,7 +3,6 @@
 import argparse
 import logging
 import os
-import sys
 import warnings
 from pathlib import Path
 from typing import Union
@@ -158,8 +157,7 @@ def main():
     args = parser.parse_args()
 
     if not os.path.exists(args.ps_dem):
-        logging.info('ERROR: GeoTIFF file (%s) does not exist!' % args.ps_dem)
-        sys.exit(1)
+        parser.error(f'GeoTIFF file {args.ps_dem} does not exist!')
 
     ps2dem(args.ps_dem, args.dem, args.dempar)
 

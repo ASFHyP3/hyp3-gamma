@@ -1,13 +1,12 @@
 """Convert a geotiff DEM into GAMMA internal format"""
 
-from __future__ import print_function, absolute_import, division, unicode_literals
-
 import argparse
-import hyp3lib.saa_func_lib as saa
 import os
-import sys
+
 import numpy as np
-from osgeo import gdal,osr,gdalconst
+from osgeo import gdal, osr, gdalconst
+
+import hyp3lib.saa_func_lib as saa
 from hyp3lib.execute import execute
 
 
@@ -125,8 +124,7 @@ def main():
     args = parser.parse_args()
 
     if not os.path.exists(args.utm_dem):
-        print('ERROR: GeoTIFF file (%s) does not exist!' % args.utm_dem)
-        sys.exit(1)
+        parser.error(f'GeoTIFF file {args.utm_dem} does not exist!')
 
     utm2dem(args.utm_dem, args.dem, args.dempar, args.dataType)
 
