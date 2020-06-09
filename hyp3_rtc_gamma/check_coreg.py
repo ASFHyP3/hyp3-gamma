@@ -119,9 +119,9 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
                     error = np.sqrt(rng_error * rng_error + azi_error * azi_error)
                     logging.info(f"error is {error}")
                     if error > max_error:
-                        logging.info("error > max_error")
-                        logging.info("std dev is too high, using dead reckoning")
-                        logging.info("Granule failed coregistration")
+                        logging.warning("error > max_error")
+                        logging.warning("std dev is too high, using dead reckoning")
+                        logging.warning("Granule failed coregistration")
                         raise CoregistrationError('error > max_error')
 
         mlog = glob.glob('geo_??/*.diff_par')[0]
