@@ -40,8 +40,9 @@ jobs:
       - name: Safety analysis of conda environment
         shell: bash -l {0}
         run: |
-          python -m pip freeze | safety check --full-report --stdin
-          conda list --export | awk -F '=' '/^[^#]/ {print $1 "==" $2}' | safety check --full-report --stdin
+          # Ignore Safety vulerability #38264, GDAL < 3.1, because GAMMA binaries are built against GDAL 2.*
+          python -m pip freeze | safety check --full-report -i 38264 --stdin
+          conda list --export | awk -F '=' '/^[^#]/ {print $1 "==" $2}' | safety check --full-report -i 38264 --stdin
 
 
   package:
@@ -149,8 +150,8 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
-          tar -zxvf GAMMA_SOFTWARE-20191203_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
+          aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
+          tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
           curl -L https://github.com/asfadmin/ASF_MapReady/archive/f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip \
               -o ASF_MapReady-f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip
           unzip ASF_MapReady-f2bc6a7a532acc9ee0e68d579b2ddd0307972dc5.zip
