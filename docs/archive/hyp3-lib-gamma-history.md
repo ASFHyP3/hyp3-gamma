@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.1](https://github.com/asfadmin/hyp3-lib/compare/v1.2.0...v1.2.1)
+
+### Added:
+* `DemError`, `ExecuteError`, and `GeometryError` (subclasses of the generic `Exception`) for 
+  more targeted error handling
+
+### Fixed:
+* Updated the `ps2dem.py` to handle the GAMMA 2019 `create_dem_par` interface
+* Removed GIMP, REMA, and EU DEMs from the default config (Note: they are still available 
+  by editing the default config) due to many failures associated with these DEMs
+* No library functions will raise a `SystemExit` and will some subclass of `Exception`, as
+  would be expected of a library, so that errors can be handled by the calling app
+* execute raises a `hyp3lib.ExecuteError` instead of a generic `Exception` for more targeted 
+  error handling
+* `get_asf.py` will not fail silently anymore.
+
 ## [v1.2.0](https://github.com/asfadmin/hyp3-lib/compare/v1.1.0...v1.2.0)
 
 ### Added
