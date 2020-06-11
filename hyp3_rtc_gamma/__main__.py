@@ -44,9 +44,9 @@ EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 
 
 def entry():
-    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--entrypoint', choices=['hyp3_rtc_gamma', 'hyp3_rtc_gamma_v2'], default='hyp3_rtc_gamma',
+        '++entrypoint', choices=['hyp3_rtc_gamma', 'hyp3_rtc_gamma_v2'], default='hyp3_rtc_gamma',
         help='Select the HyP3 entrypoint version to use'
     )
     args, unknowns = parser.parse_known_args()
