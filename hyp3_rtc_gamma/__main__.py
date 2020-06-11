@@ -122,7 +122,7 @@ def main_v2():
 
     # unzip granule (skip this and let rtc_sentinel.py do the unzip)
 
-    hyp3_rtc_gamma.rtc_sentinel.rtc_sentinel_gamma(
+    output_folder = hyp3_rtc_gamma.rtc_sentinel.rtc_sentinel_gamma(
         in_file=granule_zip_file,
         match_flag=False,
         dead_flag=True,
@@ -142,8 +142,6 @@ def main_v2():
     # decide final product name? (move to rtc sentinel?)
 
     # zip output folder? (skip for now?)
-
-    output_folder = args.granule + '-30m-power-rtc-gamma'
 
     if args.bucket:
         upload_folder_to_s3(output_folder, args.bucket, args.bucket_prefix)
