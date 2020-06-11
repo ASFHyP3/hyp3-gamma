@@ -4,8 +4,11 @@ rtc_gamma processing for HyP3
 
 import os
 import shutil
+from argparse import ArgumentParser
 from datetime import datetime
+from mimetypes import guess_type
 
+import boto3
 from hyp3proclib import (
     add_browse,
     build_output_name,
@@ -41,7 +44,7 @@ def get_content_type(filename):
 def upload_to_s3(filenames, bucket, prefix=''):
     s3 = boto3.client('s3')
     for filename in filenames:
-        key = join(prefix, filename)
+        key = os.path.join(prefix, filename)
         extra_args = {'ContentType': get_content_type(filename)}
         s3.upload_file(filename, bucket, key, extra_args)
 
