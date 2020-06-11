@@ -1,6 +1,7 @@
 from hyp3_rtc_gamma import __main__ as main
 import os
 
+
 def test_get_content_type():
     assert main.get_content_type('foo') == 'application/octet-stream'
     assert main.get_content_type('foo.asfd') == 'application/octet-stream'
@@ -21,3 +22,17 @@ def test_download_file(tmp_path):
     os.chdir(tmp_path)
     main.download_file('https://imgs.xkcd.com/comics/automation.png')
     assert os.path.isfile('automation.png')
+
+
+def test_write_netrc_file(tmp_path):
+    os.environ['HOME'] = str(tmp_path)
+    output_file = os.path.join(tmp_path, '.netrc')
+
+    main.write_netrc_file('foo', 'bar')
+    assert os.path.isfile(output_file)
+    with open(output_file, 'r') as f:
+        assert f.read() == 'machine urs.earthdata.nasa.gov login foo password bar'
+
+    main.write_netrc_file('already_there', 'this call should do nothing')
+    with open(output_file, 'r') as f:
+        assert f.read() == 'machine urs.earthdata.nasa.gov login foo password bar'
