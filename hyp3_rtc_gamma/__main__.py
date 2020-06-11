@@ -123,13 +123,7 @@ def main_v2():
 
     # unzip granule (skip this and let rtc_sentinel.py do the unzip)
 
-    output_folder = rtc_sentinel_gamma(
-        in_file=granule_zip_file,
-        match_flag=False,
-        dead_flag=True,
-        lo_flag=True,
-        filter_flag=False,
-    )
+    output_folder = rtc_sentinel_gamma(granule_zip_file)
 
     # write esa citation file (have rtc_sentinel call new hyp3_lib function,
     # or just get rid of separate citation file)
