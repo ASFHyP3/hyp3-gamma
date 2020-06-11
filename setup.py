@@ -56,6 +56,7 @@ setup(
             'rtc_sentinel.py = hyp3_rtc_gamma.rtc_sentinel:main',
             'smooth_dem_tiles.py = hyp3_rtc_gamma.smoothem:main',
             'xml2meta.py = hyp3_rtc_gamma.xml2meta:main',
+            'hyp3_rtc_gamma_v2 = hyp3_rtc_gamma.__main__:v2_entrypoint',
         ]
     },
 
