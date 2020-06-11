@@ -2,7 +2,6 @@
 rtc_gamma processing for HyP3
 """
 
-import logging
 import os
 import shutil
 import sys
@@ -12,6 +11,7 @@ from glob import iglob
 from mimetypes import guess_type
 
 import boto3
+import requests
 from hyp3proclib import (
     add_browse,
     build_output_name,
