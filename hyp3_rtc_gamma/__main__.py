@@ -122,12 +122,6 @@ def main_v2():
 
     # unzip granule (skip this and let rtc_sentinel.py do the unzip)
 
-    # call rtc_sentinel
-    log_file = f'{args.granule}_log.txt'
-    log_format = '%(asctime)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename=log_file, format=log_format, datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-
     hyp3_rtc_gamma.rtc_sentinel.rtc_sentinel_gamma(
         in_file=granule_zip_file,
         match_flag=False,
