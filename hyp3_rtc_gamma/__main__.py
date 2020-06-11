@@ -4,6 +4,7 @@ rtc_gamma processing for HyP3
 
 import os
 import shutil
+import sys
 from argparse import ArgumentParser
 from datetime import datetime
 from mimetypes import guess_type
@@ -30,8 +31,27 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import add_citation, cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
+from pkg_resources import load_entry_point
 
 import hyp3_rtc_gamma
+
+
+def entry():
+    parser = ArgumentParser()
+    parser.add_argument('--v2', action='store_true',
+                        help='Use the HyP3 v2 entrypoint instead of v1')
+    args, unknowns = parser.parse_known_args()
+
+    if args.v2:
+        sys.argv = ['hyp3_rtc_gamma_v2', *unknowns]
+        sys.exit(
+            load_entry_point('hyp3-rtc-gamma', 'console_scripts', 'hyp3_rtc_gamma_v2')()
+        )
+    else:
+        sys.argv = ['hyp3_rtc_gamma', *unknowns]
+        sys.exit(
+            load_entry_point('hyp3-rtc-gamma', 'console_scripts', 'hyp3_rtc_gamma')()
+        )
 
 
 def get_content_type(filename):
