@@ -46,7 +46,7 @@ def upload_to_s3(filenames, bucket, prefix=''):
         s3.upload_file(filename, bucket, key, extra_args)
 
 
-def main():
+def v2_entrypoint():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
     parser.add_argument('--password', required=True)
