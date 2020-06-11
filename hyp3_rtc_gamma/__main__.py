@@ -36,6 +36,7 @@ from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
 import hyp3_rtc_gamma
+from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
 
 # v2 constants
 CHUNK_SIZE = 5242880
@@ -122,7 +123,7 @@ def main_v2():
 
     # unzip granule (skip this and let rtc_sentinel.py do the unzip)
 
-    output_folder = hyp3_rtc_gamma.rtc_sentinel.rtc_sentinel_gamma(
+    output_folder = rtc_sentinel_gamma(
         in_file=granule_zip_file,
         match_flag=False,
         dead_flag=True,
