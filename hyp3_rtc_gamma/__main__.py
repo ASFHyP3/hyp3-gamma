@@ -35,17 +35,20 @@ from hyp3proclib.proc_base import Processor
 
 import hyp3_rtc_gamma
 
+# v2 constants
+CHUNK_SIZE = 5242880
+DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
+EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 
-### v2 functions ##
 
+# v2 functions
 def write_netrc_file(username, password):
-    domain = 'urs.earthdata.nasa.gov'
     netrc_file = os.path.join(os.environ['HOME'], '.netrc')
     if os.path.isfile(netrc_file):
         print(f'WARNING - using existing .netrc file: {netrc_file}')
     else:
         with open(netrc_file, 'w') as f:
-            f.write(f'machine {domain} login {username} password {password}')
+            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
 
 
 def get_content_type(filename):
@@ -64,6 +67,27 @@ def upload_folder_to_s3(folder, bucket, prefix=''):
             s3.upload_file(filename, bucket, key, extra_args)
 
 
+def get_download_url(granule):
+    mission = granule[0] + granule[2]
+    product_type = granule[7:10]
+    if product_type == 'GRD':
+        product_type += '_' + granule[10] + granule[14]
+    url = f'{DATAPOOL_URL}/{product_type}/{mission}/{granule}.zip'
+    return url
+
+
+def download_file(url):
+    print(f"\nDownloading {url}")
+    local_filename = url.split("/")[-1]
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(local_filename, "wb") as f:
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    f.write(chunk)
+    return local_filename
+
+
 def main_v2():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
@@ -80,8 +104,7 @@ def main_v2():
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url)
 
-    # unzip granule
-      # skip this and let rtc_sentinel.py do the unzip
+    # unzip granule (skip this and let rtc_sentinel.py do the unzip)
 
     # call rtc_sentinel
     log_file = f'{args.granule}_log.txt'
@@ -97,12 +120,10 @@ def main_v2():
         filter_flag=False,
     )
 
-    # write esa citation file
-      # have rtc_sentinel call new hyp3_lib function
-      # just get rid of separate citation file)
+    # write esa citation file (have rtc_sentinel call new hyp3_lib function,
+    # or just get rid of separate citation file)
 
-    # write argis-compatable xml metadata file(s)
-      # move to rtc_sentinel
+    # write argis-compatable xml metadata file(s) (move to rtc_sentinel)
 
     # something with browse images? (move to rtc_sentinel)
 
@@ -117,7 +138,7 @@ def main_v2():
     if args.bucket:
         upload_folder_to_s3(output_folder, args.bucket, args.bucket_prefix)
 
-### end v2 functions ###
+# end v2 functions
 
 
 def find_png(dir_):
