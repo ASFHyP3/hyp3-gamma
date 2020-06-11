@@ -2,10 +2,12 @@
 rtc_gamma processing for HyP3
 """
 
+import logging
 import os
 import shutil
 from argparse import ArgumentParser
 from datetime import datetime
+from glob import iglob
 from mimetypes import guess_type
 
 import boto3
@@ -34,6 +36,18 @@ from hyp3proclib.proc_base import Processor
 import hyp3_rtc_gamma
 
 
+### v2 functions ##
+
+def write_netrc_file(username, password):
+    domain = 'urs.earthdata.nasa.gov'
+    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
+    if os.path.isfile(netrc_file):
+        print(f'WARNING - using existing .netrc file: {netrc_file}')
+    else:
+        with open(netrc_file, 'w') as f:
+            f.write(f'machine {domain} login {username} password {password}')
+
+
 def get_content_type(filename):
     content_type = guess_type(filename)[0]
     if not content_type:
@@ -41,12 +55,13 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_to_s3(filenames, bucket, prefix=''):
+def upload_folder_to_s3(folder, bucket, prefix=''):
     s3 = boto3.client('s3')
-    for filename in filenames:
-        key = os.path.join(prefix, filename)
-        extra_args = {'ContentType': get_content_type(filename)}
-        s3.upload_file(filename, bucket, key, extra_args)
+    for filename in iglob(f'{folder}/**'):
+        if os.path.isfile(filename):
+            key = os.path.join(prefix, filename)
+            extra_args = {'ContentType': get_content_type(filename)}
+            s3.upload_file(filename, bucket, key, extra_args)
 
 
 def main_v2():
@@ -58,18 +73,29 @@ def main_v2():
     parser.add_argument('granule')
     args = parser.parse_args()
 
+    write_netrc_file(args.username, args.password)
+
     # download granule from datapool
-      # via get_asf.py
+    # via get_asf.py
+    granule_url = get_download_url(args.granule)
+    granule_zip_file = download_file(granule_url)
 
     # unzip granule
       # skip this and let rtc_sentinel.py do the unzip
 
     # call rtc_sentinel
-      # with the right default parameters
-    output_files = ['output_file_1.txt', 'output_file_2.csv']
-    for output_file in output_files:
-        with open(output_file, 'w') as f:
-            f.write(args.granule)
+    log_file = f'{args.granule}_log.txt'
+    log_format = '%(asctime)s - %(levelname)s - %(message)s'
+    logging.basicConfig(filename=log_file, format=log_format, datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    hyp3_rtc_gamma.rtc_sentinel.rtc_sentinel_gamma(
+        in_file=granule_zip_file,
+        match_flag=False,
+        dead_flag=True,
+        lo_flag=True,
+        filter_flag=False,
+    )
 
     # write esa citation file
       # have rtc_sentinel call new hyp3_lib function
@@ -86,9 +112,12 @@ def main_v2():
 
     # zip output folder? (skip for now?)
 
-    # upload relevant files to s3 (remember to set content-type)
+    output_folder = args.granule + '-30m-power-rtc-gamma'
+
     if args.bucket:
-        upload_to_s3(output_files, args.bucket, args.bucket_prefix)
+        upload_folder_to_s3(output_folder, args.bucket, args.bucket_prefix)
+
+### end v2 functions ###
 
 
 def find_png(dir_):
