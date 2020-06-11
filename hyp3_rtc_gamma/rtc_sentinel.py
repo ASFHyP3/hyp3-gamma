@@ -740,6 +740,7 @@ def rtc_sentinel_gamma(in_file,
     create_consolidated_log(aux_name, out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
+    return out_name
 
 
 def main():
