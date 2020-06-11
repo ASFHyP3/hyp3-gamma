@@ -5,7 +5,8 @@ rtc_gamma processing for HyP3
 import logging
 import os
 import shutil
-from argparse import ArgumentParser
+import sys
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
 from glob import iglob
 from mimetypes import guess_type
@@ -32,6 +33,7 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import add_citation, cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
+from pkg_resources import load_entry_point
 
 import hyp3_rtc_gamma
 
@@ -49,6 +51,20 @@ def write_netrc_file(username, password):
     else:
         with open(netrc_file, 'w') as f:
             f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
+
+
+def entry():
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--entrypoint', choices=['hyp3_rtc_gamma', 'hyp3_rtc_gamma_v2'], default='hyp3_rtc_gamma',
+        help='Select the HyP3 entrypoint version to use'
+    )
+    args, unknowns = parser.parse_known_args()
+
+    sys.argv = [args.entrypoint, *unknowns]
+    sys.exit(
+        load_entry_point('hyp3_rtc_gamma', 'console_scripts', args.entrypoint)()
+    )
 
 
 def get_content_type(filename):
