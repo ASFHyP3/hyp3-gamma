@@ -43,16 +43,6 @@ DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 
 
-# v2 functions
-def write_netrc_file(username, password):
-    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
-    if os.path.isfile(netrc_file):
-        print(f'WARNING - using existing .netrc file: {netrc_file}')
-    else:
-        with open(netrc_file, 'w') as f:
-            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
-
-
 def entry():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -65,6 +55,16 @@ def entry():
     sys.exit(
         load_entry_point('hyp3_rtc_gamma', 'console_scripts', args.entrypoint)()
     )
+
+
+# v2 functions
+def write_netrc_file(username, password):
+    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
+    if os.path.isfile(netrc_file):
+        print(f'WARNING - using existing .netrc file: {netrc_file}')
+    else:
+        with open(netrc_file, 'w') as f:
+            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
 
 
 def get_content_type(filename):
