@@ -1,5 +1,6 @@
-from hyp3_rtc_gamma import __main__ as main
 import os
+
+from hyp3_rtc_gamma import __main__ as main
 
 
 def test_get_content_type():
@@ -11,11 +12,13 @@ def test_get_content_type():
 
 
 def test_get_download_url():
-    url = main.get_download_url('S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C')
-    assert url == 'https://datapool.asf.alaska.edu/GRD_HD/SA/S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C.zip'
+    granule = 'S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C'
+    url = main.get_download_url(granule)
+    assert url == f'https://datapool.asf.alaska.edu/GRD_HD/SA/{granule}.zip'
 
-    url = main.get_download_url('S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023')
-    assert url == 'https://datapool.asf.alaska.edu/SLC/SB/S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023.zip'
+    granule = 'S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023'
+    url = main.get_download_url(granule)
+    assert url == f'https://datapool.asf.alaska.edu/SLC/SB/{granule}.zip'
 
 
 def test_download_file(tmp_path):
