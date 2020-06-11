@@ -1,0 +1,23 @@
+from hyp3_rtc_gamma import __main__ as main
+import os
+
+def test_get_content_type():
+    assert main.get_content_type('foo') == 'application/octet-stream'
+    assert main.get_content_type('foo.asfd') == 'application/octet-stream'
+    assert main.get_content_type('foo.txt') == 'text/plain'
+    assert main.get_content_type('foo.zip') == 'application/zip'
+    assert main.get_content_type('foo/bar.png') == 'image/png'
+
+
+def test_get_download_url():
+    url = main.get_download_url('S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C')
+    assert url == 'https://datapool.asf.alaska.edu/GRD_HD/SA/S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C.zip'
+
+    url = main.get_download_url('S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023')
+    assert url == 'https://datapool.asf.alaska.edu/SLC/SB/S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023.zip'
+
+
+def test_download_file(tmp_path):
+    os.chdir(tmp_path)
+    main.download_file('https://imgs.xkcd.com/comics/automation.png')
+    assert os.path.isfile('automation.png')
