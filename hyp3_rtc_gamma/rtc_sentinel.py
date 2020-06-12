@@ -556,9 +556,9 @@ def rtc_sentinel_gamma(in_file,
                        shape=None,
                        match_flag=False,
                        dead_flag=True,
-                       gamma_flag=None,
+                       gamma_flag=True,
                        lo_flag=True,
-                       pwr_flag=None,
+                       pwr_flag=True,
                        filter_flag=False,
                        looks=None,
                        terms=1,
@@ -746,7 +746,7 @@ def rtc_sentinel_gamma(in_file,
     create_consolidated_log(aux_name, out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
-    return out_name
+    return 'PRODUCT'
 
 
 def main():
