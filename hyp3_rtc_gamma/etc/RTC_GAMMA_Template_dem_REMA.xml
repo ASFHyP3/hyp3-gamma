@@ -1,0 +1,183 @@
+<metadata xml:lang="en">
+    <Esri>
+        <CreaDate>[DATE]</CreaDate>
+        <CreaTime>[TIME]</CreaTime>
+        <ArcGISFormat>1.0</ArcGISFormat>
+        <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+        <SyncOnce>TRUE</SyncOnce>
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+        <DataProperties>
+            <itemProps>
+                <imsContentType export="False">002</imsContentType>
+            </itemProps>
+        </DataProperties>
+        <ArcGISProfile>NAP</ArcGISProfile>
+        <ModDate>[DATE]</ModDate>
+        <ModTime>[TIME]</ModTime>
+    </Esri>
+    <dataIdInfo>
+        <idPurp>This file is the DEM used in the radiometric terrain correction process (using GAMMA software) for a granule of [TYPE] SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of [SPACING] m. To access actual [FORMAT] values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the digital elevation model used in the radiometric terrain correction process for a granule of [FULL_TYPE] ([TYPE]) Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency). The granule was RTC processed by ASF HYP3 RTC software version [HYP3_VER] running GAMMA release [GAMMA_VER], and the extent of the DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM data if full coverage is not available. The projection is the same as the source DEM ([PCS]), but the pixel spacing was resampled from the native DEM resolution to [SPACING] m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. This granule used [DEM] as the source DEM: the Reference Elevation Model of Antarctica at [RESA] arc second (about [RESM] m) resolution.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;This DEM was constructed from hundreds of thousands of individual stereoscopic Digital Elevation Models extracted from pairs of submeter-resolution DigitalGlobe satellite imagery acquired between 2009 and 2017, and vertically registered to altimetry measurements from Cryosat-2 and ICESat. For more information and to access the full REMA dataset at the original 8-meter resolution, refer to &lt;/SPAN&gt;&lt;A href="https://www.pgc.umn.edu/data/rema/"&gt;&lt;SPAN&gt;https://www.pgc.umn.edu/data/rema&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The actual [FORMAT] data is contained in the VV/HH (primary polarization) and/or VH/HV (cross-polarization) TIFF files included in the same downloaded folder as this file. The name of the SAR granule used to generate the files in this folder is: [GRAN_NAME]. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;/SPAN&gt;&lt;A href="http://hyp3.asf.alaska.edu"&gt;&lt;SPAN&gt;http://hyp3.asf.alaska.edu&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;&lt;SPAN&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        </idAbs>
+        <idCredit>Source DEM Data: DEMs provided by the Polar Geospatial Center under NSF-OPP awards 1043681, 1559691, and 1542736.</idCredit>
+        <idCitation xmlns="">
+            <date>
+                <pubDate>[DATETIME]</pubDate>
+            </date>
+            <citRespParty xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="007"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+            </citRespParty>
+        </idCitation>
+        <searchKeys>
+            <keyword>Alaska Satellite Facility</keyword>
+            <keyword>ASF</keyword>
+            <keyword>Synthetic Aperture Radar</keyword>
+            <keyword>SAR</keyword>
+            <keyword>Radiometric Terrain Correction</keyword>
+            <keyword>RTC</keyword>
+            <keyword>Digital Elevation Model</keyword>
+            <keyword>DEM</keyword>
+            <keyword>Sentinel-1</keyword>
+        </searchKeys>
+        <dataLang>
+            <languageCode value="eng"/>
+            <countryCode value="US"/>
+        </dataLang>
+        <dataChar>
+            <CharSetCd value="004"/>
+        </dataChar>
+        <resMaint xmlns="">
+            <maintFreq>
+                <MaintFreqCd value="009"/>
+            </maintFreq>
+        </resMaint>
+        <resConst>
+            <Consts xmlns="">
+                <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;As a condition of using these data, you must acknowledge/cite the data as appropriate. For detailed information, refer to &lt;/SPAN&gt;&lt;A href="https://www.pgc.umn.edu/guides/user-services/acknowledgement-policy/"&gt;&lt;SPAN&gt;https://www.pgc.umn.edu/guides/user-services/acknowledgement-policy&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;To acknowledge its use in any published work, presentation, poster, or document: DEMs provided by the Polar Geospatial Center under NSF-OPP awards 1043681, 1559691, and 1542736.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;To cite DEM imagery in figure captions included in publications: DEM(s) created by the Polar Geospatial Center from DigitalGlobe, Inc. imagery.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Published dataset citation: Howat, I. M., Porter, C., Smith, B. E., Noh, M.-J., and Morin, P.: The Reference Elevation Model of Antarctica, The Cryosphere, 13, 665-674, https://doi.org/10.5194/tc-13-665-2019, 2019.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+                </useLimit>
+            </Consts>
+        </resConst>
+        <envirDesc>This product was generated using ASF HYP3 RTC software version [HYP3_VER], running GAMMA release [GAMMA_VER].</envirDesc>
+        <idPoC xmlns="">
+            <rpOrgName>Polar Geospatial Center (PGC), University of Minnesota</rpOrgName>
+            <role>
+                <RoleCd value="006"/>
+            </role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType="physical">
+                    <eMailAdd>pgc@umn.edu</eMailAdd>
+                    <delPoint>R280 Learning &amp; Environmental Sciences, 1954 Buford Avenue</delPoint>
+                    <city>Saint Paul</city>
+                    <adminArea>Minnesota</adminArea>
+                    <postCode>55108</postCode>
+                    <country>US</country>
+                </cntAddress>
+                <cntPhone>
+                    <voiceNum tddtty="">1-612-626-0505</voiceNum>
+                </cntPhone>
+            </rpCntInfo>
+        </idPoC>
+        <tpCat>
+            <TopicCatCd value="006"/>
+        </tpCat>
+    </dataIdInfo>
+    <mdHrLv>
+        <ScopeCd value="005"/>
+    </mdHrLv>
+    <mdFileID>RTC_GAMMA_Template_dem_REMA_200310</mdFileID>
+    <mdLang>
+        <languageCode value="eng"/>
+        <countryCode value="US"/>
+    </mdLang>
+    <mdChar>
+        <CharSetCd value="004"/>
+    </mdChar>
+    <mdDateSt>[DATE]</mdDateSt>
+    <dataSetFn>
+        <OnFunctCd value="001"/>
+    </dataSetFn>
+    <mdContact xmlns="">
+        <rpOrgName>Alaska Satellite Facility</rpOrgName>
+        <role>
+            <RoleCd value="006"/>
+        </role>
+        <rpCntInfo xmlns="">
+            <cntAddress addressType="physical">
+                <delPoint>2156 Koyukuk Dr.</delPoint>
+                <city>Fairbanks</city>
+                <adminArea>Alaska</adminArea>
+                <postCode>99775-7320</postCode>
+                <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                <country>US</country>
+            </cntAddress>
+            <cntPhone>
+                <voiceNum tddtty="">907-474-5041</voiceNum>
+            </cntPhone>
+        </rpCntInfo>
+        <displayName>Alaska Satellite Facility</displayName>
+    </mdContact>
+    <dqInfo xmlns="">
+        <dqScope>
+            <scpLvl>
+                <ScopeCd value="005"/>
+            </scpLvl>
+        </dqScope>
+        <dataLineage>
+            <statement>The digital elevation model is served in the Antarctic Polar Stereographic projection, and products generated with this DEM remain in the Antarctic Polar Stereographic projection. Holes in the source DEM dataset were filled using a DEM smoothing algorithm. A geoid adjustment has been applied to the source DEM. At the start of terrain correction, the best DEM covering the SAR image is selected, and DEM tiles are mosaicked to cover the image extent before being used for processing.</statement>
+        </dataLineage>
+    </dqInfo>
+    <mdMaint xmlns="">
+        <maintFreq>
+            <MaintFreqCd value="009"/>
+        </maintFreq>
+    </mdMaint>
+    <refSysInfo>
+        <RefSystem dimension="horizontal"/>
+    </refSysInfo>
+    <contInfo>
+        <ImgDesc xmlns="">
+            <attDesc>elevation</attDesc>
+            <contentTyp>
+                <ContentTypCd value="001"/>
+            </contentTyp>
+            <trianInd>False</trianInd>
+            <radCalDatAv>False</radCalDatAv>
+            <camCalInAv>False</camCalInAv>
+            <filmDistInAv>False</filmDistInAv>
+            <lensDistInAv>False</lensDistInAv>
+            <covDim>
+                <Band xmlns="">
+                    <valUnit>
+                        <UOM gmlID="" type="">
+                            <unitSymbol>m</unitSymbol>
+                        </UOM>
+                    </valUnit>
+                </Band>
+            </covDim>
+        </ImgDesc>
+    </contInfo>
+    <Binary>
+        <Thumbnail>
+            <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
+        </Thumbnail>
+    </Binary>
+</metadata>

@@ -1,0 +1,4 @@
+.*gitleaks.toml$
+.gitlab-ci.yml
+etc/.*.xsl
+.github/workflows/test-and-build.yml

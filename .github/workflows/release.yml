@@ -1,0 +1,44 @@
+name: Write release and finish
+
+on:
+  push:
+    tags:
+      - v*
+
+
+jobs:
+  finish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOOLS_BOT_PAK }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: HyP3 RTC GAMMA ${{ github.ref }}
+
+      - name: Attempt fast-forward develop from master
+        run: |
+          git fetch --prune
+          git checkout develop && git pull --ff-only
+          git merge --ff-only origin/master
+          git push
+
+      - name: Open PR to bring master back to develop
+        if: ${{ failure() }}
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: master
+          destination_branch: develop
+          pr_title: Pulling ${{ github.ref }} into default
+          pr_body: Fast-forward of master to default failed!
+          pr_assignee: ${{ github.actor }}
+          pr_label: tools-bot
+          pr_draft: false
+          github_token: ${{ secrets.TOOLS_BOT_PAK }}

@@ -1,0 +1,40 @@
+name: hyp3-rtc-gamma
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.7
+  - pip
+  # For packaging, and testing
+  - setuptools
+  - wheel
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
+  # For running
+  - boto3
+  - gdal=2.*
+  - imageio
+  - importlib_metadata
+  - lxml
+  - matplotlib
+  - netCDF4
+  - numpy
+  - pillow
+  - proj
+  - psycopg2
+  - pyshp
+  - requests
+  - scipy
+  - six
+  - statsmodels
+  - pip:
+    # for packaging and testing
+    - s3pypi
+    - setuptools-scm[toml]
+    - safety
+    # For running
+    - --trusted-host hyp3-pypi.s3-website-us-east-1.amazonaws.com
+      --extra-index-url http://hyp3-pypi.s3-website-us-east-1.amazonaws.com
+    - hyp3lib>=1.2.1,<2
+    - hyp3proclib~=1.0
