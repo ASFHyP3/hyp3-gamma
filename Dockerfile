@@ -74,5 +74,5 @@ ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
 
-ENTRYPOINT ["/usr/local/bin/hyp3_rtc_gamma"]
+ENTRYPOINT ["/usr/local/bin/rtc_gamma"]
 CMD ["-h"]

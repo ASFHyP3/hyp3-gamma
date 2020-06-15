@@ -554,18 +554,24 @@ def rtc_sentinel_gamma(in_file,
                        dem=None,
                        roi=None,
                        shape=None,
-                       match_flag=True,
-                       dead_flag=None,
-                       gamma_flag=None,
-                       lo_flag=None,
-                       pwr_flag=None,
-                       filter_flag=None,
+                       match_flag=False,
+                       dead_flag=True,
+                       gamma_flag=True,
+                       lo_flag=True,
+                       pwr_flag=True,
+                       filter_flag=False,
                        looks=None,
                        terms=1,
                        par=None,
                        no_cross_pol=False,
                        smooth=False,
                        area=False):
+
+    log_file = "{}_{}_log.txt".format(in_file.rpartition('.')[0], os.getpid())
+    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
@@ -740,6 +746,7 @@ def rtc_sentinel_gamma(in_file,
     create_consolidated_log(aux_name, out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
+    return 'PRODUCT'
 
 
 def main():
@@ -774,14 +781,6 @@ def main():
     parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
     parser.add_argument("-a", "--area", action="store_true", help="Keep area map")
     args = parser.parse_args()
-
-    log_file = "{}_{}_log.txt".format(args.input.rpartition('.')[0], os.getpid())
-    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
-
-    logging.info("Pixel area flag: {}".format(args.area))
 
     # FIXME: This function's inputs should be 1:1 (name and value!) with CLI args!
     rtc_sentinel_gamma(args.input,
