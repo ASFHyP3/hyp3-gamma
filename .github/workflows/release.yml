@@ -15,24 +15,6 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.TOOLS_BOT_PAK }}
 
-      - name: Get associated PR
-        uses: helaili/github-graphql-action@2.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
-        with:
-          query: .github/queries/asssociated-pr.query.yml
-          outputFile: pr.json
-          owner: asfadmin
-          name: hyp3-rtc-gamma
-          sha: ${{ github.sha }}
-
-      - name: Export PR body
-        id: pr
-        run: |
-          PR_QUERY='.data.repository.commit.associatedPullRequests.edges[0].node.body'
-          PR_BODY=$(jq --raw-output "${PR_QUERY}"  pr.json)
-          echo "::set-output name=body::${PR_BODY}"
-
       - name: Create Release
         uses: actions/create-release@v1
         env:
@@ -40,9 +22,6 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: HyP3 RTC GAMMA ${{ github.ref }}
-          body: ${{ steps.pr.outputs.body }}
-          draft: false
-          prerelease: false
 
       - name: Attempt fast-forward develop from master
         run: |
