@@ -30,7 +30,7 @@ from hyp3proclib import (
     zip_dir,
 )
 from hyp3proclib.db import get_db_connection
-from hyp3proclib.file_system import add_citation, cleanup_workdir
+from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
@@ -373,7 +373,6 @@ def process_rtc_gamma(cfg, n):
                 add_browse(cfg, 'LOW-RES', browse_path)
 
                 find_browses(cfg, out_path)
-                add_citation(cfg, out_path)
                 zip_dir(out_path, zip_file)
 
                 cfg['final_product_size'] = [os.stat(zip_file).st_size, ]

@@ -23,6 +23,7 @@ from hyp3lib.get_dem import get_dem
 from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
+from hyp3lib.metadata import add_esa_citation
 from hyp3lib.ps2dem import ps2dem
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
@@ -737,6 +738,7 @@ def rtc_sentinel_gamma(in_file,
     create_arc_xml(in_file, aux_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(res=res)
+    add_esa_citation(in_file, 'PRODUCT')
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
