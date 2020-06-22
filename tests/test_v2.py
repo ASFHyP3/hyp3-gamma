@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pytest
 from botocore.stub import ANY, Stubber
