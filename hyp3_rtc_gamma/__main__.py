@@ -7,8 +7,8 @@ import shutil
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
-from glob import iglob
 from mimetypes import guess_type
+from shutil import make_archive
 
 import boto3
 import requests
@@ -42,6 +42,7 @@ from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
 CHUNK_SIZE = 5242880
 DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
+S3_CLIENT = boto3.client('s3')
 
 
 def entry():
@@ -75,13 +76,12 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_folder_to_s3(folder, bucket, prefix=''):
-    s3 = boto3.client('s3')
-    for filename in iglob(f'{folder}/**'):
-        if os.path.isfile(filename):
-            key = os.path.join(prefix, filename)
-            extra_args = {'ContentType': get_content_type(filename)}
-            s3.upload_file(filename, bucket, key, extra_args)
+def upload_file_to_s3(filename, bucket, prefix=''):
+    key = os.path.join(prefix, filename)
+    extra_args = {'ContentType': get_content_type(filename)}
+
+    print(f'Uploading s3://{bucket}/{key}')
+    S3_CLIENT.upload_file(filename, bucket, key, extra_args)
 
 
 def get_download_url(granule):
@@ -116,30 +116,16 @@ def main_v2():
 
     write_netrc_file(args.username, args.password)
 
-    # download granule from datapool
-    # via get_asf.py
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url)
 
-    # unzip granule (skip this and let rtc_sentinel.py do the unzip)
-
     output_folder = rtc_sentinel_gamma(granule_zip_file)
 
-    # write esa citation file (have rtc_sentinel call new hyp3_lib function,
-    # or just get rid of separate citation file)
-
-    # write argis-compatable xml metadata file(s) (move to rtc_sentinel)
-
-    # something with browse images? (move to rtc_sentinel)
-
-    # clip_tiffs_to_roi? (move to rtc_sentinel)
-
-    # decide final product name? (move to rtc sentinel?)
-
-    # zip output folder? (skip for now?)
-
+    product_name = build_output_name(args.granule, '.', '-30m-power-rtc-gamma')
+    os.rename(output_folder, product_name)
+    output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
-        upload_folder_to_s3(output_folder, args.bucket, args.bucket_prefix)
+        upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
 
 # end v2 functions
 
