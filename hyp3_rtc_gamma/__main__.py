@@ -76,12 +76,12 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_file_to_s3(filename, bucket, prefix=''):
-    key = os.path.join(prefix, filename)
-    extra_args = {'ContentType': get_content_type(filename)}
+def upload_file_to_s3(path_to_file, bucket, prefix=''):
+    key = os.path.join(prefix, os.path.basename(path_to_file))
+    extra_args = {'ContentType': get_content_type(key)}
 
     print(f'Uploading s3://{bucket}/{key}')
-    S3_CLIENT.upload_file(filename, bucket, key, extra_args)
+    S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
 
 
 def get_download_url(granule):

@@ -61,9 +61,9 @@ def test_upload_file_to_s3(tmp_path, s3_stubber):
     }
     s3_stubber.add_response(method='put_object', expected_params=expected_params, service_response={})
 
-    os.chdir(tmp_path)
-    Path('myFile.zip').touch()
-    main.upload_file_to_s3('myFile.zip', 'myBucket')
+    file_to_upload = tmp_path / 'myFile.zip'
+    file_to_upload.touch()
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket')
 
 
 def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
@@ -75,6 +75,6 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
     }
     s3_stubber.add_response(method='put_object', expected_params=expected_params, service_response={})
 
-    os.chdir(tmp_path)
-    Path('myFile.txt').touch()
-    main.upload_file_to_s3('myFile.txt', 'myBucket', 'myPrefix')
+    file_to_upload = tmp_path / 'myFile.txt'
+    file_to_upload.touch()
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket', 'myPrefix')
