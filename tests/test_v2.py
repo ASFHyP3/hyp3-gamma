@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from botocore.stub import ANY, Stubber
+
 from hyp3_rtc_gamma import __main__ as main
 
 
