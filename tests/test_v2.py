@@ -1,6 +1,16 @@
 import os
 
+import pytest
+from botocore.stub import ANY, Stubber
+
 from hyp3_rtc_gamma import __main__ as main
+
+
+@pytest.fixture(autouse=True)
+def s3_stubber():
+    with Stubber(main.S3_CLIENT) as stubber:
+        yield stubber
+        stubber.assert_no_pending_responses()
 
 
 def test_get_content_type():
@@ -39,3 +49,31 @@ def test_write_netrc_file(tmp_path):
     main.write_netrc_file('already_there', 'this call should do nothing')
     with open(output_file, 'r') as f:
         assert f.read() == 'machine urs.earthdata.nasa.gov login foo password bar'
+
+
+def test_upload_file_to_s3(tmp_path, s3_stubber):
+    expected_params = {
+        'Body': ANY,
+        'Bucket': 'myBucket',
+        'Key': 'myFile.zip',
+        'ContentType': 'application/zip',
+    }
+    s3_stubber.add_response(method='put_object', expected_params=expected_params, service_response={})
+
+    file_to_upload = tmp_path / 'myFile.zip'
+    file_to_upload.touch()
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket')
+
+
+def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
+    expected_params = {
+        'Body': ANY,
+        'Bucket': 'myBucket',
+        'Key': 'myPrefix/myFile.txt',
+        'ContentType': 'text/plain',
+    }
+    s3_stubber.add_response(method='put_object', expected_params=expected_params, service_response={})
+
+    file_to_upload = tmp_path / 'myFile.txt'
+    file_to_upload.touch()
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket', 'myPrefix')
