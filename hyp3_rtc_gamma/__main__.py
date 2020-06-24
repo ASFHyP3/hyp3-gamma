@@ -41,7 +41,6 @@ import hyp3_rtc_gamma
 from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
 
 # v2 constants
-CHUNK_SIZE = 5242880
 DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
@@ -95,20 +94,21 @@ def get_download_url(granule):
     return url
 
 
-def download_file(url):
+def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
     print(f"\nDownloading {url}")
     local_filename = url.split("/")[-1]
     session = Session()
     retries = Retry(
-        total=3,
-        backoff_factor=10,
+        total=retries,
+        backoff_factor=backoff_factor,
         status_forcelist=[429, 500, 503, 504],
     )
-    session.mount('https://', HTTPAdapter(retries=retries))
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    session.mount('http://', HTTPAdapter(max_retries=retries))
     with session.get(url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+            for chunk in r.iter_content(chunk_size=chunk_size):
                 if chunk:
                     f.write(chunk)
     return local_filename
