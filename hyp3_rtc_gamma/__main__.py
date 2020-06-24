@@ -11,7 +11,6 @@ from mimetypes import guess_type
 from shutil import make_archive
 
 import boto3
-import requests
 from hyp3proclib import (
     add_browse,
     build_output_name,
@@ -34,6 +33,9 @@ from hyp3proclib.file_system import add_citation, cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
@@ -96,7 +98,14 @@ def get_download_url(granule):
 def download_file(url):
     print(f"\nDownloading {url}")
     local_filename = url.split("/")[-1]
-    with requests.get(url, stream=True) as r:
+    session = Session()
+    retries = Retry(
+        total=3,
+        backoff_factor=10,
+        status_forcelist=[429, 500, 503, 504],
+    )
+    session.mount('https://', HTTPAdapter(retries=retries))
+    with session.get(url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=CHUNK_SIZE):

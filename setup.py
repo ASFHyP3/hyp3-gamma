@@ -37,7 +37,7 @@ setup(
         'importlib_metadata',
         'lxml',
         'numpy',
-        'scipy',
+        'scipy', 'requests', 'boto3', 'urllib3'
     ],
 
     extras_require={
