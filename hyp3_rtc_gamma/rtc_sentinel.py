@@ -720,7 +720,7 @@ def rtc_sentinel_gamma(in_file,
     log_file = logging.getLogger().handlers[0].baseFilename
     rtc_name = out_name + "_" + pol + ".tif"
     gamma_ver = gamma_version()
-    create_iso_xml(rtc_name, out_name, pol, cpol, in_file, out_name, dem_type, log_file, gamma_ver)
+    create_iso_xml(rtc_name, out_name, pol, cpol, in_file, dem_type, log_file, gamma_ver)
     create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(res=res)
