@@ -140,7 +140,7 @@ def process_pol(in_file, rtc_name, aux_name, pol, res, look_fact, match_flag, de
         execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
-    options = "-p -j -n {} -q -c ".format(terms)
+    options = "-p -n {} -q -c ".format(terms)
     if gamma_flag:
         options += "-g "
 
@@ -269,7 +269,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
         execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
-    options = "-p -j -n {} -q -c ".format(terms)
+    options = "-p -n {} -q -c ".format(terms)
     if gamma_flag:
         options += "-g "
 
