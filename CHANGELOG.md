@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.2](https://github.com/asfadmin/hyp3-rtc-gamma/compare/v2.0.1...v2.0.2)
+
+### Changed
+* The v2 entrypoint will now make up to three retry attempts if it fails to download the input granule from the ASF archive.
+* Changed the name of the product README file to `<product_name>.README.txt`, e.g. `S1A_IW_RT30_20170708T161200_G_gpn.README.txt`
+* Calls to mk_geo_radcal will no longer include the `-j do not use layover-shadow map in the calculation of pixel_area` flag.  The layover-shadow map will now be consistently applied to all products.
+* Upgraded to [hyp3-lib v1.2.2](https://github.com/asfadmin/hyp3-lib/blob/develop/CHANGELOG.md#v122)
+* Removed custom blank_bad_data.py from mk_geo_radcal processing.  Border pixels for older GRD products are now cleaned using the default `make_edge` setting of `par_S1_GRD`.
+
 ## [v2.0.1](https://github.com/asfadmin/hyp3-rtc-gamma/compare/v2.0.0...v2.0.1)
 
 ### Changed

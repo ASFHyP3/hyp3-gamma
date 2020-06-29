@@ -212,7 +212,7 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
                     line = line.replace(b"[PCS]", bytes("{}".format(pcs), 'utf-8'))
                     g.write(line + b"\n")
 
-    with open("README.txt", "w") as g:
+    with open(f'{outfile}.README.txt', 'w') as g:
         with open("{}/README_RTC_GAMMA.txt".format(etc_dir), "r") as f:
             for line in f:
                 line = line.replace("[DATE]", date)
