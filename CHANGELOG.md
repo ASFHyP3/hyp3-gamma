@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.0.3](https://github.com/asfadmin/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
+
+## Fixed
+* Updates the minimum required `hyp3lib` and `hyp3proclib` version to bring in the
+  [`get_dem.py` NoData bugfix](https://github.com/asfadmin/hyp3-lib/pull/175) and
+  the [`default_rtc_resolution` bugfix](https://github.com/asfadmin/hyp3-proc-lib/pull/4),
+  respectively
+
 ## [v2.0.2](https://github.com/asfadmin/hyp3-rtc-gamma/compare/v2.0.1...v2.0.2)
 
 ### Changed
