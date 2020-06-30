@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.2.3](https://github.com/asfadmin/hyp3-lib/compare/v1.2.2...v1.2.3)
+
+### Fixed:
+* `get_dem.py` will raise an exception if it cannot determine the NoData value
+  for the DEM. 
+
+### Changed:
+* `get_dem.py` will determine the correct NoData value for `SRTMGL3` DEMs
+  
 ## [v1.2.2](https://github.com/asfadmin/hyp3-lib/compare/v1.2.1...v1.2.2)
 
 ### Fixed:
