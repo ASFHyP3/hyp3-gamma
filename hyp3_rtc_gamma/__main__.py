@@ -1,7 +1,7 @@
 """
 rtc_gamma processing for HyP3
 """
-
+import glob
 import os
 import shutil
 import sys
@@ -133,9 +133,12 @@ def main_v2():
     product_name = build_output_name(args.granule, '.', '-30m-power-rtc-gamma')
     os.rename(output_folder, product_name)
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
+    browse_images = glob.glob(product_name + '/*large.png')
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
-
+        print(browse_images)
+        for image in browse_images:
+            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '_DISPLAY')
 # end v2 functions
 
 
