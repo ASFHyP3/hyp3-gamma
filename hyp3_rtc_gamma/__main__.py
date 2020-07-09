@@ -133,11 +133,11 @@ def main_v2():
     product_name = build_output_name(args.granule, '.', '-30m-power-rtc-gamma')
     os.rename(output_folder, product_name)
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
-    browse_images = glob.glob(product_name + '/*large.png')
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
+        browse_images = glob.glob(f'{product_name}/*.png')
         for image in browse_images:
-            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '_DISPLAY')
+            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '/browse')
 # end v2 functions
 
 
