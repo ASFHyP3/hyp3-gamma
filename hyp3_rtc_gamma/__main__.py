@@ -136,7 +136,6 @@ def main_v2():
     browse_images = glob.glob(product_name + '/*large.png')
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
-        print(browse_images)
         for image in browse_images:
             upload_file_to_s3(image, args.bucket, args.bucket_prefix + '_DISPLAY')
 # end v2 functions
