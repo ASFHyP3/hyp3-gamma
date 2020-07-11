@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import zipfile
+from tempfile import NamedTemporaryFile
 
 from hyp3lib import ExecuteError
 from hyp3lib import saa_func_lib as saa
@@ -350,47 +351,24 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
 
 
 def create_browse_images(out_name, pol, cpol, browse_res):
-    ampfile = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
+    out_dir = 'PRODUCT'
+
+    pol_geotiff = f'geo_{pol}/{out_name}_{pol}_{browse_res}m.tif'
+    amp_basename = f'{out_dir}/{out_name}'
+    with NamedTemporaryFile() as sigma_file:
+        byteSigmaScale(pol_geotiff, sigma_file.name)
+        makeAsfBrowse(sigma_file.name, amp_basename)
+
     if cpol:
-        ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol, name=out_name, res=browse_res)
-        threshold = -24
-        outfile = "{}_rgb.tif".format(out_name)
-        rtc2color(ampfile, ampfile2, threshold, outfile, amp=True, cleanup=True)
-        colorname = "PRODUCT/{}_rgb".format(out_name)
-        makeAsfBrowse(outfile, colorname)
+        cpol_geotiff = f'geo_{cpol}/{out_name}_{cpol}_{browse_res}m.tif'
+        color_basename = f'{out_dir}/{out_name}_rgb'
+        with NamedTemporaryFile() as rgb_tiff:
+            rtc2color(pol_geotiff, cpol_geotiff, threshold=-24, out_tif=rgb_tiff.name, amp=True, cleanup=True)
+            makeAsfBrowse(rgb_tiff.name, color_basename)
 
-    os.chdir("geo_{}".format(pol))
-    outdir = "../PRODUCT"
-    outfile = "{}/{}".format(outdir, out_name)
-    ampfile = "{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
-    sigmafile = ampfile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(ampfile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
-
-    os.chdir("../PRODUCT")
-
-    infile = "{}_inc_map.tif".format(out_name)
-    outfile = "{}_inc_map".format(out_name)
-    sigmafile = infile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(infile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
-    os.remove(sigmafile)
-
-    infile = "{}_ls_map.tif".format(out_name)
-    outfile = "{}_ls_map".format(out_name)
-    makeAsfBrowse(infile, outfile)
-
-    infile = "{}_dem.tif".format(out_name)
-    outfile = "{}_dem".format(out_name)
-    sigmafile = infile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(infile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
-    os.remove(sigmafile)
-
-    raster_boundary2shape(out_name + "_" + pol + ".tif", None, out_name + "_shape.shp", use_closing=False,
-                          pixel_shift=True, fill_holes=True)
-
-    os.chdir("..")
+    shape_geotiff = f'{out_dir}/{out_name}_{pol}.tif'
+    shape_file = f'{out_dir}/{out_name}_shape.shp'
+    raster_boundary2shape(shape_geotiff, None, shape_file, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
 def create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
@@ -540,23 +518,6 @@ def create_iso_xml(outfile, out_name, pol, cpol, in_file, dem_type, log, gamma_v
     execute(f"xsltproc {etc_dir}/rtc_iso.xsl {out_name}.xml > {out_name}.iso.xml", uselogging=True)
 
     shutil.copy("{}.iso.xml".format(out_name), "{}".format(out))
-
-
-def clean_prod_dir():
-    os.chdir("PRODUCT")
-    for myfile in glob.glob("*ls_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*ls_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*kmz"):
-        os.remove(myfile)
-    os.chdir("..")
 
 
 def rtc_sentinel_gamma(in_file,
@@ -724,7 +685,6 @@ def rtc_sentinel_gamma(in_file,
     create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(res=res)
-    clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
     logging.info("               Sentinel RTC Program - Completed")
