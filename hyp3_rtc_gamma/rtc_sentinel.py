@@ -723,7 +723,7 @@ def rtc_sentinel_gamma(in_file,
     create_iso_xml(rtc_name, out_name, pol, cpol, in_file, dem_type, log_file, gamma_ver)
     create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
-    cogify_dir(res=res)
+    cogify_dir(directory='PRODUCT')
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
