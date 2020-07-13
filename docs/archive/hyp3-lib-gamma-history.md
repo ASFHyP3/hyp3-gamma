@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.3.0](https://github.com/asfadmin/hyp3-lib/compare/v1.2.3...v1.3.0)
+
+### Changed:
+* Requires `pyproj>=2`
+* `makeAsfBrowse.py` 
+  * now only makes a single `.png` file at the formally `_large.png` resolution 
+    (by default) as small browse images had little user value
+  * CLI includes a `-n`/`--nearest-neighbor` argument to switch from GDAL's cubic
+    interpolation to to nearest neighbor when resampling GeoTIFFs. 
+  * `makeAsfBrose` API includes a `with=2048` keyword argument and the CLI includes
+    a `-w`/`--width` to set the browse image width
+* `make_cogs.py` no longer includes overviews in cogified files because HyP3's
+  products are packaged in a `.zip` file preventing overviews from being accessed
+  over the web. This change reduces our output GeoTIFF's by ~25%
+  * `make_cog` function that was only used internally has been renamed to 
+    `cogify_file` to be inline with the `cogify_dir` function provided
+    
+### Removed:
+* `get_dem.py`'s `transform_bounds` and `transform_point` functions that were 
+  only used internally have been removed because they are no longer relevant with
+  the `pyproj` upgrade
+
+
+### Fixed:
+* Coordinate transformations in `get_dem` now utilize the `pyproj>=2` syntax 
+  instead of the depreciated and broken `pyproj<2` syntax
+
 ## [v1.2.3](https://github.com/asfadmin/hyp3-lib/compare/v1.2.2...v1.2.3)
 
 ### Fixed:
