@@ -186,11 +186,6 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
                 scale = 'grayscale'
                 encoded_jpg = pngtothumb("{}.png".format(outfile))
 
-            if "large" in myfile:
-                res = "medium"
-            else:
-                res = "low"
-
             with open("{}/RTC_GAMMA_Template_{}_png.xml".format(etc_dir, scale), "rb") as f:
                 for line in f:
                     line = line.replace(b"[DATE]", bytes(date, 'utf-8'))
@@ -202,7 +197,6 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
                     line = line.replace(b"[FULL_TYPE]", bytes(full_type, 'utf-8'))
                     line = line.replace(b"[THUMBNAIL_BINARY_STRING]", encoded_jpg)
                     line = line.replace(b"[GRAN_NAME]", bytes(granulename, 'utf-8'))
-                    line = line.replace(b"[RES]", bytes(res, 'utf-8'))
                     line = line.replace(b"[SPACING]", bytes("{}".format(spacing), 'utf-8'))
                     line = line.replace(b"[DEM]", bytes("{}".format(dem_type), 'utf-8'))
                     line = line.replace(b"[FORMAT]", bytes(format_type, 'utf-8'))
