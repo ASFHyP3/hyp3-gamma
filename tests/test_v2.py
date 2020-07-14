@@ -1,5 +1,6 @@
 import os
 
+from PIL import Image
 import pytest
 from botocore.stub import ANY, Stubber
 
@@ -77,3 +78,21 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
     file_to_upload = tmp_path / 'myFile.txt'
     file_to_upload.touch()
     main.upload_file_to_s3(str(file_to_upload), 'myBucket', 'myPrefix')
+
+
+def test_create_thumbnail(image):
+    with Image.open(image) as input_image:
+        assert input_image.size == (162, 150)
+
+    thumbnail = main.create_thumbnail(image, (100, 100))
+
+    with Image.open(image) as input_image:
+        assert input_image.size == (162, 150)
+
+    with Image.open(thumbnail) as output_image:
+        assert output_image.size == (100, 93)
+
+    thumbnail = main.create_thumbnail(image, (255, 255))
+
+    with Image.open(thumbnail) as output_image:
+        assert output_image.size == (162, 150)

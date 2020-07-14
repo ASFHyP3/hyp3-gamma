@@ -11,6 +11,7 @@ from mimetypes import guess_type
 from shutil import make_archive
 
 import boto3
+from PIL import Image
 from hyp3proclib import (
     add_browse,
     build_output_name,
@@ -114,6 +115,15 @@ def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
     return local_filename
 
 
+def create_thumbnail(image, size=(100, 100)):
+    im = Image.open(image)
+    im.thumbnail(size)
+    filename, ext = os.path.splitext(image)
+    thumbnail_name = f'{filename}_thumb.{ext}'
+    im.save(thumbnail_name)
+    return thumbnail_name
+
+
 def main_v2():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
@@ -136,8 +146,10 @@ def main_v2():
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
         browse_images = glob.glob(f'{product_name}/*.png')
-        for image in browse_images:
-            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '/browse')
+        for browse in browse_images:
+            thumbnail = create_thumbnail(browse)
+            upload_file_to_s3(browse, args.bucket, args.bucket_prefix + '/browse')
+            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix + '/thumbnail')
 # end v2 functions
 
 
@@ -146,7 +158,7 @@ def find_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png") and 'rgb' in filepath:
+            if filepath.endswith(".png") and 'rgb' in filepath and 'large' not in filepath:
                 log.info('Browse image: ' + filepath)
                 return filepath
 
@@ -154,7 +166,7 @@ def find_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png"):
+            if filepath.endswith(".png") and 'large' not in filepath:
                 log.info('Browse image: ' + filepath)
                 return filepath
 
