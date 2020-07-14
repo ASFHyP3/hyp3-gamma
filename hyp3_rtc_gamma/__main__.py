@@ -1,7 +1,7 @@
 """
 rtc_gamma processing for HyP3
 """
-
+import glob
 import os
 import shutil
 import sys
@@ -135,7 +135,9 @@ def main_v2():
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
-
+        browse_images = glob.glob(f'{product_name}/*.png')
+        for image in browse_images:
+            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '/browse')
 # end v2 functions
 
 
