@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0](https://github.com/asfadmin/hyp3-lib/compare/v1.2.3...v1.3.0)
+## [1.3.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.3...v1.3.0)
 
 ### Changed:
 * Requires `pyproj>=2`
@@ -33,7 +33,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Coordinate transformations in `get_dem` now utilize the `pyproj>=2` syntax 
   instead of the depreciated and broken `pyproj<2` syntax
 
-## [1.2.3](https://github.com/asfadmin/hyp3-lib/compare/v1.2.2...v1.2.3)
+## [1.2.3](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.2...v1.2.3)
 
 ### Fixed:
 * `get_dem.py` will raise an exception if it cannot determine the NoData value
@@ -42,7 +42,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed:
 * `get_dem.py` will determine the correct NoData value for `SRTMGL3` DEMs
   
-## [1.2.2](https://github.com/asfadmin/hyp3-lib/compare/v1.2.1...v1.2.2)
+## [1.2.2](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.1...v1.2.2)
 
 ### Fixed:
 * `rtc2color.py` was applying the cleanup threshold differently to amplitude and
@@ -54,7 +54,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   type. Similar memory optimizations have been achieved by refactoring and
   leveraging numpy, with an added benefit of a 6x speedup.
 
-## [1.2.1](https://github.com/asfadmin/hyp3-lib/compare/v1.2.0...v1.2.1)
+## [1.2.1](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.0...v1.2.1)
 
 ### Added:
 * `DemError`, `ExecuteError`, and `GeometryError` (subclasses of the generic `Exception`) for 
@@ -70,20 +70,20 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   error handling
 * `get_asf.py` will not fail silently anymore.
 
-## [1.2.0](https://github.com/asfadmin/hyp3-lib/compare/v1.1.0...v1.2.0)
+## [1.2.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.1.0...v1.2.0)
 
 ### Added
  * `metadata.add_esa_citation` to add a `ESA_citation.txt` file to a directory
  * `exceptions.GranuleError` for raising issues with granules
 
-## [1.1.0](https://github.com/asfadmin/hyp3-lib/compare/v1.0.0...v1.1.0)
+## [1.1.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.0.0...v1.1.0)
 
 ### Added
 * `GC_map_mod` bash script, which is used by a few science codes (this has been translated to bash from tcsh)
 * `hyp3lib.system` module for getting system information needed by the science codes
   * includes a `gamma_version` function which will attempt to determine and validate the GAMMA software version
 
-## [1.0.0](https://github.com/asfadmin/hyp3-lib/compare/v0.8.1...v1.0.0)
+## [1.0.0](https://github.com/ASFHyP3/hyp3-lib/compare/v0.8.1...v1.0.0)
 
 This is a significant refactor of `hyp3-lib` into a `pip` installable package called `hyp3lib`.
 
