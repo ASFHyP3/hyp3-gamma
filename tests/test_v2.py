@@ -1,7 +1,7 @@
 import os
 
-from PIL import Image
 import pytest
+from PIL import Image
 from botocore.stub import ANY, Stubber
 
 from hyp3_rtc_gamma import __main__ as main
