@@ -64,7 +64,7 @@ jobs:
         with:
           query: .github/queries/asssociated-pr.query.yml
           outputFile: pr.json
-          owner: asfadmin
+          owner: ASFHyP3
           name: hyp3-rtc-gamma
           sha: ${{ github.sha }}
 
@@ -76,7 +76,7 @@ jobs:
         with:
           query: .github/queries/pr-labels.query.yml
           outputFile: labels.json
-          owner: asfadmin
+          owner: ASFHyP3
           name: hyp3-rtc-gamma
 
       - name: Upload a Build Artifact
