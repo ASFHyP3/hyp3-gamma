@@ -65,13 +65,13 @@ Each RTC image [FILT] been speckle filtered. The default is to not apply a speck
 -------------
 ## 2. Browse images in grayscale and color
 
-PNG files are generated in two different resolutions for quick visualization of the backscatter data. Each png browse image is accompanied by an aux file containing the projection and geocoding information for the file.
+PNG files are generated for quick visualization of the backscatter data. Each png browse image is accompanied by an aux file containing the projection and geocoding information for the file.
 
-All products will include a grayscale png browse image in both resolutions. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The low-resolution image is designated by a simple .png extension, while the tag _large.png indicates the medium-resolution image. 
+All products will include a grayscale png browse image. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The image is designated by a simple .png extension. 
 
-For dual-pol products, a false-color png browse image is generated in both resolutions. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
+For dual-pol products, a false-color png browse image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
 
-KMZ files are generated in the higher resolution for use in Google Earth and other compatible applications. All products will include a grayscale kmz image, and dual-pol products will also include a color browse kmz image.
+KMZ files are generated for use in Google Earth and other compatible applications. All products will include a grayscale kmz image, and dual-pol products will also include a color browse kmz image.
 
 -------------
 ## 3. DEM used to correct the data

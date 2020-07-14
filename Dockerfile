@@ -7,8 +7,8 @@ LABEL org.opencontainers.image.description="HyP3 plugin for radiometric terrain 
 LABEL org.opencontainers.image.vendor="Alaska Satellite Facility"
 LABEL org.opencontainers.image.authors="ASF APD/Tools Team <uaf-asf-apd@alaska.edu>"
 LABEL org.opencontainers.image.licenses="BSD-3-Clause"
-LABEL org.opencontainers.image.url="https://github.com/asfadmin/hyp3-rtc-gamma"
-LABEL org.opencontainers.image.source="https://github.com/asfadmin/hyp3-rtc-gamma"
+LABEL org.opencontainers.image.url="https://github.com/ASFHyP3/hyp3-rtc-gamma"
+LABEL org.opencontainers.image.source="https://github.com/ASFHyP3/hyp3-rtc-gamma"
 # LABEL org.opencontainers.image.documentation=""
 
 # Dynamic lables to define at build time via `docker build --label`

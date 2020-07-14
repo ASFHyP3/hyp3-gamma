@@ -13,7 +13,7 @@ setup(
     long_description=long_desc,
     long_description_content_type='text/markdown',
 
-    url='https://github.com/asfadmin/hyp3-rtc-gamma',
+    url='https://github.com/ASFHyP3/hyp3-rtc-gamma',
 
     author='ASF APD/Tools Team',
     author_email='uaf-asf-apd@alaska.edu',
@@ -33,7 +33,7 @@ setup(
 
     install_requires=[
         'boto3',
-        'hyp3lib>=1.2.3,<2',
+        'hyp3lib>=1.3.0,<2',
         'hyp3proclib>=1.0.1,<2',
         'importlib_metadata',
         'lxml',
