@@ -16,12 +16,11 @@ jobs:
           token: ${{ secrets.TOOLS_BOT_PAK }}
 
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: docker://antonyurchenko/git-release:latest
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: HyP3 RTC GAMMA ${{ github.ref }}
+          ALLOW_TAG_PREFIX: "true"
+          RELEASE_NAME_PREFIX: HyP3 RTC GAMMA
 
       - name: Attempt fast-forward develop from master
         run: |
@@ -41,4 +40,5 @@ jobs:
           pr_assignee: ${{ github.actor }}
           pr_label: tools-bot
           pr_draft: false
+          pr_allow_empty: true
           github_token: ${{ secrets.TOOLS_BOT_PAK }}
