@@ -158,7 +158,7 @@ def find_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png") and 'rgb' in filepath and 'large' not in filepath:
+            if filepath.endswith(".png") and 'rgb' in filepath:
                 log.info('Browse image: ' + filepath)
                 return filepath
 
@@ -166,7 +166,7 @@ def find_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png") and 'large' not in filepath:
+            if filepath.endswith(".png"):
                 log.info('Browse image: ' + filepath)
                 return filepath
 
