@@ -9,7 +9,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [2.0.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.3...v2.0.4)
 
 ### Changed
-* The v2 entrypoint will now upload browse images and thumnail images in addition to the zip file
+* The v2 entrypoint will now upload browse images and thumnail images in addition to the zip file.
+* Upgrade to [hyp3-lib 1.3.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#130).  In particular, geotiff products no longer include overviews.
+* Eliminated seprate "low-res" (1024x) and "high-res" (2048x) browse image resolutions in favor of a single 2048x image.
 
 ## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
 
