@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.3...v2.0.4)
+
+### Changed
+* The v2 entrypoint will now upload browse images and thumnail images in addition to the zip file
+
 ## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
 
 ## Fixed
