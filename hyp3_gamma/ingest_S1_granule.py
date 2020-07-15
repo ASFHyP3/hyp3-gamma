@@ -6,7 +6,7 @@ from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.getBursts import getBursts
-from hyp3lib.get_orb import downloadSentinelOrbitFile
+from hyp3lib.get_orb import download_sentinel_orbit_file
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 
 
@@ -33,7 +33,7 @@ def ingest_S1_granule(safe_dir, pol, looks, out_file, orbit_file=None):
         try:
             if orbit_file is None:
                 logging.info('Trying to get orbit file information from file {}'.format(safe_dir))
-                orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
+                orbit_file, _ = download_sentinel_orbit_file(safe_dir)
             logging.debug('Applying precision orbit information')
             cmd = f'S1_OPOD_vec {pol}.grd.par {orbit_file}'
             execute(cmd, uselogging=True)
