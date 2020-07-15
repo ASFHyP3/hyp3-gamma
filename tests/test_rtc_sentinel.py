@@ -4,11 +4,6 @@ from hyp3_rtc_gamma import rtc_sentinel
 
 
 def test_get_product_name():
-    payload = {
-        'granule_name': 'S1B_IW_SLC__1SDV_20200714T152128_20200714T152150_022469_02AA50_9A64',
-    }
-    name = rtc_sentinel.get_product_name(**payload)
-    assert match('S1B_IW_20200714T152128_DVO_RTC30_G_uepng_[0-9A-F]{6}$', name)
 
     payload = {
         'granule_name': 'S1A_S1_GRDH_1SSH_20181121T184017_20181121T184046_024690_02B6ED_6946',
@@ -32,9 +27,11 @@ def test_get_product_name():
     name = rtc_sentinel.get_product_name(**payload)
     assert match('S1B_WV_20200714T162902_SVR_RTC10_G_uepfg_[0-9A-F]{6}$', name)
 
-    payload = {
-        'granule_name': 'S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F',
-        'orbit_file': None,
-    }
-    name = rtc_sentinel.get_product_name(**payload)
+    name = rtc_sentinel.get_product_name('S1B_IW_SLC__1SDV_20200714T152128_20200714T152150_022469_02AA50_9A64')
+    assert match('S1B_IW_20200714T152128_DVO_RTC30_G_uepng_[0-9A-F]{6}$', name)
+
+    name = rtc_sentinel.get_product_name('S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F', None)
+    assert match('S1A_EW_20151118T190420_DHO_RTC30_G_uepng_[0-9A-F]{6}$', name)
+
+    name = rtc_sentinel.get_product_name('S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F', 'foo')
     assert match('S1A_EW_20151118T190420_DHO_RTC30_G_uepng_[0-9A-F]{6}$', name)
