@@ -212,14 +212,12 @@ def find_product_dir(dir_):
     return None
 
 
-def find_product_name(dir_):
-    files = glob.glob(f'{dir_}/**')
-    readme_file = None
-    for file in files:
-        if file.endswith('.README.txt'):
-            readme_file = file
-            break
-    return readme_file.split('.')[0]
+def find_product_name(directory):
+    try:
+        readme_file = glob.glob(f'{directory}/*.README.txt')[0]
+    except IndexError:
+        raise Exception(f'Could not determine product name, no README.txt file found in {directory}')
+    return os.path.basename(readme_file).split('.')[0]
 
 
 def download(cfg, granule):
