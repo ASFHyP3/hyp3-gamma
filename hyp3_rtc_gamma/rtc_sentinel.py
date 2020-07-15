@@ -642,7 +642,7 @@ def rtc_sentinel_gamma(in_file,
         input_type = 'GRD'
 
     if out_name is None:
-        out_name = get_product_name(in_file, None, res, pwr_flag, filter_flag, gamma_flag)
+        out_name = get_product_name(in_file, None, res, pwr_flag, filter_flag, gamma_flag) # TODO add orbit file
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
