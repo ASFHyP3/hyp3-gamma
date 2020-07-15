@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.6](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.5...v2.0.6)
+
+### Fixed
+* Resolved issue where thumbnail filenames ended in ..png rather than .png
+
 ## [2.0.5](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.4...v2.0.5)
 
 ### Added
