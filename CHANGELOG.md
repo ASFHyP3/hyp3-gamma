@@ -3,8 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
+and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.5](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.4...v2.0.5)
+
+### Added
+* The v2 entrypoint will now create and upload thumbnail images to S3 in addition to browse images
 
 ## [2.0.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.3...v2.0.4)
 
@@ -41,7 +46,7 @@ This is a significant refactor of `hyp3-rtc-gamma` into:
 * A `pip` installable package called `hyp3_rtc_gamma`
 * A stand alone, container-based HyP3 plugin
 
-**NOTE:** There are significant changes to the overall repository structure and 
+**NOTE:** There are significant changes to the overall repository structure and
 will break all existing HyP3 workflows!
 
 ### Removed
@@ -57,7 +62,7 @@ will break all existing HyP3 workflows!
     * 'xml2meta.py'
 * A Dockerfile to build the HyP3 plugin
 * A CI/CD workflow setup, which will build and publish the docker container
-* The processing script that used to live in the now depreciated `cloud-proj` repository has been moved into the 
+* The processing script that used to live in the now depreciated `cloud-proj` repository has been moved into the
 package as `hyp3_rtc_gamma.__main__` and also registered as a `hyp3_rtc_gamma` entrypoint
 * A second, in development, entrypoint for HyP3 v2 has been added to `hyp3_rtc_gamma.__main__`
 
@@ -65,5 +70,3 @@ package as `hyp3_rtc_gamma.__main__` and also registered as a `hyp3_rtc_gamma` e
 * All of `src/` is now contained in the `hyp3_rtc_gamma` package
 * All of `etc/`is now contained in `hyp3_rtc_gamma.etc`
 * The version number is now tracked automatically via git tags instead of in `etc/version.txt`
-
-

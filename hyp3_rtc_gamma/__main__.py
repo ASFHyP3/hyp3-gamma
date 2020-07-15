@@ -11,6 +11,7 @@ from mimetypes import guess_type
 from shutil import make_archive
 
 import boto3
+from PIL import Image
 from hyp3proclib import (
     add_browse,
     build_output_name,
@@ -114,6 +115,16 @@ def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
     return local_filename
 
 
+def create_thumbnail(input_image, size=(100, 100)):
+    filename, ext = os.path.splitext(input_image)
+    thumbnail_name = f'{filename}_thumb.{ext}'
+
+    output_image = Image.open(input_image)
+    output_image.thumbnail(size)
+    output_image.save(thumbnail_name)
+    return thumbnail_name
+
+
 def main_v2():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
@@ -136,8 +147,10 @@ def main_v2():
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
         browse_images = glob.glob(f'{product_name}/*.png')
-        for image in browse_images:
-            upload_file_to_s3(image, args.bucket, args.bucket_prefix + '/browse')
+        for browse in browse_images:
+            thumbnail = create_thumbnail(browse)
+            upload_file_to_s3(browse, args.bucket, args.bucket_prefix + '/browse')
+            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix + '/thumbnail')
 # end v2 functions
 
 
