@@ -10,15 +10,15 @@ from hyp3lib.get_orb import download_sentinel_orbit_file
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 
 
-def ingest_S1_granule(safe_dir, pol, looks, out_file, orbit_file=None):
-    """
+def ingest_S1_granule(safe_dir: str, pol: str, looks: int, out_file: str, orbit_file: str = None):
+    """Pre-process S1 imagery into GAMMA format
 
     Args:
-        safe_dir:
-        pol:
-        looks:
-        out_file:
-        orbit_file:
+        safe_dir: Sentinel-1 SAFE directory location
+        pol: polarization (e.g., 'vv')
+        looks: the number of looks to take
+        out_file: file name of the output GAMMA formatted imagery
+        orbit_file: Orbit file to use (will download a matching orbit file if None)
     """
     pol = pol.lower()
     granule_type = safe_dir[7:11]
@@ -51,21 +51,16 @@ def ingest_S1_granule(safe_dir, pol, looks, out_file, orbit_file=None):
 
     else:
         #  Ingest SLC data files into gamma format
-        par_s1_slc_single(safe_dir, pol)
+        par_s1_slc_single(safe_dir, pol, orbit_file=orbit_file)
         date = safe_dir[17:25]
-        make_tab_flag = True
-        burst_tab = getBursts(safe_dir, make_tab_flag)
+        burst_tab = getBursts(safe_dir, make_tab_flag=True)
         shutil.copy(burst_tab, date)
 
         # Mosaic the swaths together and copy SLCs over        
         back = os.getcwd()
         os.chdir(date)
-        path = '../'
-        rlooks = looks * 5
-        alooks = looks
-        SLC_copy_S1_fullSW(path, date, 'SLC_TAB', burst_tab, mode=2, raml=rlooks, azml=alooks)
+        SLC_copy_S1_fullSW('../', date, 'SLC_TAB', burst_tab, mode=2, raml=looks * 5, azml=looks)
         os.chdir(back)
 
-        # Rename files
         shutil.move(f'{date}.mli', out_file)
         shutil.move(f'{date}.mli.par', f'{out_file}.par')
