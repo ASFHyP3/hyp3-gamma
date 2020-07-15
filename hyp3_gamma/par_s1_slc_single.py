@@ -1,9 +1,6 @@
 """Pre-process S1 SLC imagery into gamma format SLCs"""
 
-from __future__ import print_function, absolute_import, division, unicode_literals
-
 import logging
-import argparse
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 import os
@@ -113,28 +110,3 @@ def par_s1_slc_single(myfile, pol=None):
     width = getParameter("{}_003.slc.par".format(acqdate),"range_samples")
     execute("rasSLC {}_003.slc {} 1 0 50 10".format(acqdate,width))
     os.chdir(wrk)
-
-
-def main():
-    """Main entrypoint"""
-
-    parser = argparse.ArgumentParser(
-        prog=os.path.basename(__file__),
-        description=__doc__,
-    )
-    parser.add_argument('infile', help='input SAFE file name')
-    parser.add_argument('-p', '--pol', default='vv', help='name of polarization to process (default vv)')
-    args = parser.parse_args()
-
-    logFile = "par_s1_slc_single_log.txt"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
-
-    par_s1_slc_single(args.infile, args.pol)
-
-
-if __name__ == '__main__':
-    main()
-
