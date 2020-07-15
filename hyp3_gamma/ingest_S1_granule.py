@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 
-from hyp3lib import ExecuteError
+from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.getBursts import getBursts
@@ -29,8 +29,7 @@ def ingest_S1_granule(safe_dir, pol, looks, out_file, orbit_file=None):
               f'{safe_dir}/*/*/noise-*{pol}*.xml {pol}.grd.par {pol}.grd'
         execute(cmd, uselogging=True)
 
-        # Fetch precision state vectors
-
+        # Ingest the precision state vectors
         try:
             if orbit_file is None:
                 logging.info('Trying to get orbit file information from file {}'.format(safe_dir))
@@ -38,10 +37,11 @@ def ingest_S1_granule(safe_dir, pol, looks, out_file, orbit_file=None):
             logging.debug('Applying precision orbit information')
             cmd = f'S1_OPOD_vec {pol}.grd.par {orbit_file}'
             execute(cmd, uselogging=True)
-        except ExecuteError:  # TODO orbit download error...
+        except OrbitDownloadError:
             logging.warning('Unable to fetch precision state vectors... continuing')
+        except ExecuteError:
+            logging.warning(f'Unable to create {pol}.grd.par file... continuing')
 
-        # Multi-look the image
         if looks > 1.0:
             cmd = f'multi_look_MLI {pol}.grd {pol}.grd.par {out_file} {out_file}.par {looks} {looks}'
             execute(cmd, uselogging=True)
