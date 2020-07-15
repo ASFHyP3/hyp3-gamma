@@ -204,13 +204,23 @@ def find_and_remove(dir_, s):
                 os.remove(filepath)
 
 
-def find_product(dir_):
+def find_product_dir(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for d in dirs:
             if d == "PRODUCT":
                 return os.path.join(subdir, d)
 
     return None
+
+
+def find_product_name(dir_):
+    files = glob.glob(f'dir_/**')
+    readme_file = None
+    for file in files:
+        if file.endswith('.README.txt'):
+            readme_file = file
+            break
+    return readme_file.split('.')[0]
 
 
 def download(cfg, granule):
@@ -345,56 +355,54 @@ def process_rtc_gamma(cfg, n):
         else:
             raise Exception('Unrecognized: ' + in_granule)
 
-        product = find_product(cfg['workdir'])
-        if not os.path.isdir(product):
-            log.info('PRODUCT directory not found: ' + product)
+        product_dir = find_product_dir(cfg['workdir'])
+        if not os.path.isdir(product_dir):
+            log.info('PRODUCT directory not found: ' + product_dir)
             log.error('Processing failed')
             raise Exception("Processing failed: PRODUCT directory not found")
-        else:
-            if extra_arg_is(cfg, "include_dem", "no"):
-                find_and_remove(product, '_dem.tif')
-            if extra_arg_is(cfg, "include_inc", "no"):
-                find_and_remove(product, '_inc_map.tif')
 
-            out_name = build_output_name(g, cfg['workdir'], opts_str + cfg['suffix'])
-            if "STD_L0_F" in out_name:
-                out_name = out_name.replace("_L0", "")
-            log.info('Output name: ' + out_name)
+        if extra_arg_is(cfg, "include_dem", "no"):
+            find_and_remove(product_dir, '_dem.tif')
+        if extra_arg_is(cfg, "include_inc", "no"):
+            find_and_remove(product_dir, '_inc_map.tif')
 
-            out_path = os.path.join(cfg['workdir'], out_name)
-            log.info('Output path: ' + out_path)
+        out_name = find_product_name(product_dir)
+        log.info('Output name: ' + out_name)
 
-            zip_file = out_path + '.zip'
-            if os.path.isdir(out_path):
-                shutil.rmtree(out_path)
-            if os.path.isfile(zip_file):
-                os.unlink(zip_file)
-            cfg['out_path'] = out_path
+        out_path = os.path.join(cfg['workdir'], out_name)
+        log.info('Output path: ' + out_path)
 
-            with get_db_connection('hyp3-db') as conn:
-                clip_tiffs_to_roi(cfg, conn, product)
+        zip_file = out_path + '.zip'
+        if os.path.isdir(out_path):
+            shutil.rmtree(out_path)
+        if os.path.isfile(zip_file):
+            os.unlink(zip_file)
+        cfg['out_path'] = out_path
 
-                log.debug('Renaming ' + product + ' to ' + out_path)
-                os.rename(product, out_path)
+        with get_db_connection('hyp3-db') as conn:
+            clip_tiffs_to_roi(cfg, conn, product_dir)
 
-                browse_path = find_png(out_path)
-                cfg['attachment'] = browse_path
-                add_browse(cfg, 'LOW-RES', browse_path)
+            log.debug('Renaming ' + product_dir + ' to ' + out_path)
+            os.rename(product_dir, out_path)
 
-                find_browses(cfg, out_path)
-                add_citation(cfg, out_path)
-                zip_dir(out_path, zip_file)
+            browse_path = find_png(out_path)
+            cfg['attachment'] = browse_path
+            add_browse(cfg, 'LOW-RES', browse_path)
 
-                cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-                cfg['original_product_size'] = 0
+            find_browses(cfg, out_path)
+            add_citation(cfg, out_path)
+            zip_dir(out_path, zip_file)
 
-                record_metrics(cfg, conn)
-                if 'lag' in cfg and 'email_text' in cfg:
-                    cfg['email_text'] += "\n" + "You are receiving this product {0} after it was acquired.".format(
-                        cfg['lag'])
+            cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
+            cfg['original_product_size'] = 0
 
-                upload_product(zip_file, cfg, conn, browse_path=browse_path)
-                success(conn, cfg)
+            record_metrics(cfg, conn)
+            if 'lag' in cfg and 'email_text' in cfg:
+                cfg['email_text'] += "\n" + "You are receiving this product {0} after it was acquired.".format(
+                    cfg['lag'])
+
+            upload_product(zip_file, cfg, conn, browse_path=browse_path)
+            success(conn, cfg)
 
     except Exception as e:
         log.exception('Processing failed')
