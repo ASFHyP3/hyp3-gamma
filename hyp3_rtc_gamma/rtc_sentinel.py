@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import zipfile
+from secrets import token_hex
 
 from hyp3lib import ExecuteError
 from hyp3lib import saa_func_lib as saa
@@ -38,15 +39,30 @@ from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
 
-def get_product_name(granule_name, resolution=30, gamma0=True, power=True, filtered=False):
+def get_product_name(granule_name, orbit_file=None, resolution=30, water_mask=False, clipped=False, gamma0=True, power=True, filtered=False):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
+    polarization = granule_name[14:16]
     datetime = granule_name[17:32]
-    g = 'g' if gamma0 else 's'
+
+    if orbit_file is None:
+        o = 'O'
+    elif 'POEORB' in orbit_file:
+        o = 'P'
+    elif 'RESORB' in orbit_file:
+        o = 'R'
+    else:
+        o = 'O'
+
+    hash = token_hex(3).upper()
+
+    w = 'w' if water_mask else 'u'
+    c = 'c' if clipped else 'e'
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
+    g = 'g' if gamma0 else 's'
 
-    product_name = f'{platform}_{beam_mode}_RT{resolution}_{datetime}_G_{g}{p}{f}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_{w}{c}{p}{f}{g}_{hash}'
     return product_name
 
 
