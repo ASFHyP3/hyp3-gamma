@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from hyp3_rtc_gamma import __main__ as main
 
 
