@@ -39,7 +39,7 @@ from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
 
-def get_product_name(granule_name, orbit_file=None, resolution=30, water_mask=False, clipped=False, gamma0=True, power=True, filtered=False):
+def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, filtered=False, gamma0=True):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
@@ -56,13 +56,11 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, water_mask=Fa
 
     hash = token_hex(3).upper()
 
-    w = 'w' if water_mask else 'u'
-    c = 'c' if clipped else 'e'
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
     g = 'g' if gamma0 else 's'
 
-    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_{w}{c}{p}{f}{g}_{hash}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_ue{p}{f}{g}_{hash}'
     return product_name
 
 
@@ -644,7 +642,7 @@ def rtc_sentinel_gamma(in_file,
         input_type = 'GRD'
 
     if out_name is None:
-        out_name = get_product_name(in_file, res, gamma_flag, pwr_flag, filter_flag)
+        out_name = get_product_name(in_file, None, res, pwr_flag, filter_flag, gamma_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
@@ -749,7 +747,7 @@ def rtc_sentinel_gamma(in_file,
     create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
-    return 'PRODUCT'
+    return 'PRODUCT', out_name
 
 
 def main():

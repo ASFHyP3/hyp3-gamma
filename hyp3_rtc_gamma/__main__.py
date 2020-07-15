@@ -139,9 +139,8 @@ def main_v2():
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url)
 
-    output_folder = rtc_sentinel_gamma(granule_zip_file)
+    output_folder, product_name = rtc_sentinel_gamma(granule_zip_file)
 
-    product_name = build_output_name(args.granule, '.', '-30m-power-rtc-gamma')
     os.rename(output_folder, product_name)
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
