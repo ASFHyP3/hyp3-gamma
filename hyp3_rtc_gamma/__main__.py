@@ -117,7 +117,7 @@ def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
 
 def create_thumbnail(input_image, size=(100, 100)):
     filename, ext = os.path.splitext(input_image)
-    thumbnail_name = f'{filename}_thumb.{ext}'
+    thumbnail_name = f'{filename}_thumb{ext}'
 
     output_image = Image.open(input_image)
     output_image.thumbnail(size)
