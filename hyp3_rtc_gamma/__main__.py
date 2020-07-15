@@ -14,7 +14,6 @@ import boto3
 from PIL import Image
 from hyp3proclib import (
     add_browse,
-    build_output_name,
     clip_tiffs_to_roi,
     execute,
     extra_arg_is,
@@ -214,7 +213,7 @@ def find_product_dir(dir_):
 
 
 def find_product_name(dir_):
-    files = glob.glob(f'dir_/**')
+    files = glob.glob(f'{dir_}/**')
     readme_file = None
     for file in files:
         if file.endswith('.README.txt'):

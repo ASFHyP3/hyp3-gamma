@@ -54,13 +54,13 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, f
     else:
         o = 'O'
 
-    hash = token_hex(3).upper()
+    product_id = token_hex(3).upper()
 
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
     g = 'g' if gamma0 else 's'
 
-    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_ue{p}{f}{g}_{hash}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_ue{p}{f}{g}_{product_id}'
     return product_name
 
 
