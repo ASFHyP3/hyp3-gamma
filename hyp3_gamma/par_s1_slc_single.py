@@ -80,7 +80,7 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
     except OrbitDownloadError:
         logging.warning('Unable to fetch precision state vectors... continuing')
     except ExecuteError:
-        logging.warning(f'Unable to create *.slc.par files... continuing')
+        logging.warning('Unable to create *.slc.par files... continuing')
 
     slc = glob.glob('*_00*.slc')
     slc.sort()
