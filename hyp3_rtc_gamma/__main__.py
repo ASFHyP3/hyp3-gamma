@@ -359,49 +359,49 @@ def process_rtc_gamma(cfg, n):
             log.info('PRODUCT directory not found: ' + product_dir)
             log.error('Processing failed')
             raise Exception("Processing failed: PRODUCT directory not found")
+        else:
+            if extra_arg_is(cfg, "include_dem", "no"):
+                find_and_remove(product_dir, '_dem.tif')
+            if extra_arg_is(cfg, "include_inc", "no"):
+                find_and_remove(product_dir, '_inc_map.tif')
 
-        if extra_arg_is(cfg, "include_dem", "no"):
-            find_and_remove(product_dir, '_dem.tif')
-        if extra_arg_is(cfg, "include_inc", "no"):
-            find_and_remove(product_dir, '_inc_map.tif')
+            out_name = find_product_name(product_dir)
+            log.info('Output name: ' + out_name)
 
-        out_name = find_product_name(product_dir)
-        log.info('Output name: ' + out_name)
+            out_path = os.path.join(cfg['workdir'], out_name)
+            log.info('Output path: ' + out_path)
 
-        out_path = os.path.join(cfg['workdir'], out_name)
-        log.info('Output path: ' + out_path)
+            zip_file = out_path + '.zip'
+            if os.path.isdir(out_path):
+                shutil.rmtree(out_path)
+            if os.path.isfile(zip_file):
+                os.unlink(zip_file)
+            cfg['out_path'] = out_path
 
-        zip_file = out_path + '.zip'
-        if os.path.isdir(out_path):
-            shutil.rmtree(out_path)
-        if os.path.isfile(zip_file):
-            os.unlink(zip_file)
-        cfg['out_path'] = out_path
+            with get_db_connection('hyp3-db') as conn:
+                clip_tiffs_to_roi(cfg, conn, product_dir)
 
-        with get_db_connection('hyp3-db') as conn:
-            clip_tiffs_to_roi(cfg, conn, product_dir)
+                log.debug('Renaming ' + product_dir + ' to ' + out_path)
+                os.rename(product_dir, out_path)
 
-            log.debug('Renaming ' + product_dir + ' to ' + out_path)
-            os.rename(product_dir, out_path)
+                browse_path = find_png(out_path)
+                cfg['attachment'] = browse_path
+                add_browse(cfg, 'LOW-RES', browse_path)
 
-            browse_path = find_png(out_path)
-            cfg['attachment'] = browse_path
-            add_browse(cfg, 'LOW-RES', browse_path)
+                find_browses(cfg, out_path)
+                add_citation(cfg, out_path)
+                zip_dir(out_path, zip_file)
 
-            find_browses(cfg, out_path)
-            add_citation(cfg, out_path)
-            zip_dir(out_path, zip_file)
+                cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
+                cfg['original_product_size'] = 0
 
-            cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-            cfg['original_product_size'] = 0
+                record_metrics(cfg, conn)
+                if 'lag' in cfg and 'email_text' in cfg:
+                    cfg['email_text'] += "\n" + "You are receiving this product {0} after it was acquired.".format(
+                        cfg['lag'])
 
-            record_metrics(cfg, conn)
-            if 'lag' in cfg and 'email_text' in cfg:
-                cfg['email_text'] += "\n" + "You are receiving this product {0} after it was acquired.".format(
-                    cfg['lag'])
-
-            upload_product(zip_file, cfg, conn, browse_path=browse_path)
-            success(conn, cfg)
+                upload_product(zip_file, cfg, conn, browse_path=browse_path)
+                success(conn, cfg)
 
     except Exception as e:
         log.exception('Processing failed')
