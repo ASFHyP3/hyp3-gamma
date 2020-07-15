@@ -85,6 +85,7 @@ def test_create_thumbnail(image):
         assert input_image.size == (162, 150)
 
     thumbnail = main.create_thumbnail(image, (100, 100))
+    assert os.path.basename(thumbnail) == 'test_thumb.png'
 
     with Image.open(image) as input_image:
         assert input_image.size == (162, 150)
