@@ -5,7 +5,7 @@ import os
 from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_orb import download_sentinel_orbit_file
+from hyp3lib.get_orb import downloadSentinelOrbitFile
 
 
 def make_cmd(swath, acquisition_date, out_dir, pol=None):
@@ -72,7 +72,7 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
     try:
         if orbit_file is None:
             logging.info(f'Trying to get orbit file information from file {safe_dir}')
-            orbit_file, _ = download_sentinel_orbit_file(safe_dir)
+            orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
         logging.info('Applying precision orbit information')
         execute(f'S1_OPOD_vec {acquisition_date}_001.slc.par {orbit_file}')
         execute(f'S1_OPOD_vec {acquisition_date}_002.slc.par {orbit_file}')
