@@ -12,6 +12,7 @@ from shutil import make_archive
 
 import boto3
 from PIL import Image
+from hyp3lib.fetch import download_file
 from hyp3proclib import (
     add_browse,
     clip_tiffs_to_roi,
@@ -33,15 +34,12 @@ from hyp3proclib.file_system import add_citation, cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
 
 # v2 constants
-DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
+SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
 
@@ -90,28 +88,8 @@ def get_download_url(granule):
     product_type = granule[7:10]
     if product_type == 'GRD':
         product_type += '_' + granule[10] + granule[14]
-    url = f'{DATAPOOL_URL}/{product_type}/{mission}/{granule}.zip'
+    url = f'{SENTINEL_DISTRIBUTION_URL}/{product_type}/{mission}/{granule}.zip'
     return url
-
-
-def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
-    print(f"\nDownloading {url}")
-    local_filename = url.split("/")[-1]
-    session = Session()
-    retries = Retry(
-        total=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=[429, 500, 503, 504],
-    )
-    session.mount('https://', HTTPAdapter(max_retries=retries))
-    session.mount('http://', HTTPAdapter(max_retries=retries))
-    with session.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=chunk_size):
-                if chunk:
-                    f.write(chunk)
-    return local_filename
 
 
 def create_thumbnail(input_image, size=(100, 100)):
@@ -136,7 +114,7 @@ def main_v2():
     write_netrc_file(args.username, args.password)
 
     granule_url = get_download_url(args.granule)
-    granule_zip_file = download_file(granule_url)
+    granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
     output_folder, product_name = rtc_sentinel_gamma(granule_zip_file)
 

@@ -9,7 +9,7 @@ import sys
 import zipfile
 from secrets import token_hex
 
-from hyp3lib import ExecuteError
+from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
@@ -21,6 +21,7 @@ from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_bb_from_shape import get_bb_from_shape
 from hyp3lib.get_dem import get_dem
+from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
@@ -150,14 +151,14 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
 
 
 def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
-                filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False):
+                filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False, orbit_file=None):
     logging.info("Processing the {} polarization".format(pol))
 
     mgrd = "{out}.{pol}.mgrd".format(out=out_name, pol=pol)
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(in_file, pol, look_fact, mgrd)
+    ingest_S1_granule(in_file, pol, look_fact, mgrd, orbit_file=orbit_file)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filter if requested
@@ -275,7 +276,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
 
 def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
-                    outfile, dem, terms, par=None, area=False):
+                    outfile, dem, terms, par=None, area=False, orbit_file=None):
     if cpol == "VH":
         mpol = "VV"
     else:
@@ -285,7 +286,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(in_file, cpol, look_fact, mgrd)
+    ingest_S1_granule(in_file, cpol, look_fact, mgrd, orbit_file=orbit_file)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filtering if requested
@@ -641,8 +642,16 @@ def rtc_sentinel_gamma(in_file,
     else:
         input_type = 'GRD'
 
+    logging.info(f'Trying to get orbit file information for file {in_file}')
+    orbit_file = None
+    try:
+        orbit_file, _ = downloadSentinelOrbitFile(in_file)
+    except OrbitDownloadError as e:
+        logging.warning(str(e))
+        logging.warning('Unable to fetch precision state vectors... continuing')
+
     if out_name is None:
-        out_name = get_product_name(in_file, None, res, pwr_flag, filter_flag, gamma_flag)  # TODO add orbit file
+        out_name = get_product_name(in_file, orbit_file, res, pwr_flag, filter_flag, gamma_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
@@ -695,7 +704,7 @@ def rtc_sentinel_gamma(in_file,
         rtc_name = out_name + "_" + pol + ".tif"
         process_pol(in_file, rtc_name, out_name, pol, res, looks,
                     match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area)
+                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
         if vhlist and not no_cross_pol:
             cpol = "VH"
@@ -711,7 +720,7 @@ def rtc_sentinel_gamma(in_file,
         rtc_name = out_name + "_" + pol + ".tif"
         process_pol(in_file, rtc_name, out_name, pol, res, looks,
                     match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area)
+                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
         if hvlist and not no_cross_pol:
             cpol = "HV"
@@ -719,7 +728,7 @@ def rtc_sentinel_gamma(in_file,
             rtc_name = out_name + "_" + cpol + ".tif"
             process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                             gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area)
+                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if hhlist is None and vvlist is None:
         logging.error(f"ERROR: Can not find VV or HH polarization in {in_file}")
