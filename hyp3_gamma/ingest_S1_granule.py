@@ -21,10 +21,10 @@ def ingest_S1_granule(safe_dir: str, pol: str, looks: int, out_file: str, orbit_
         orbit_file: Orbit file to use (will download a matching orbit file if None)
     """
     pol = pol.lower()
-    granule_type = safe_dir[7:11]
+    granule_type = safe_dir[7:10]
 
     # Ingest the granule into gamma format
-    if "GRD" in granule_type:
+    if granule_type == 'GRD':
         cmd = f'par_S1_GRD {safe_dir}/*/*{pol}*.tiff {safe_dir}/*/*{pol}*.xml {safe_dir}/*/*/calibration-*{pol}*.xml ' \
               f'{safe_dir}/*/*/noise-*{pol}*.xml {pol}.grd.par {pol}.grd'
         execute(cmd, uselogging=True)
