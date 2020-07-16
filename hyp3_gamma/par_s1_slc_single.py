@@ -49,18 +49,17 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
     image_type = safe_dir[13:16]
     logging.info(f'Found image type {image_type}')
 
-    folder = safe_dir.replace('.SAFE', '')
     datelong = safe_dir.split('_')[5]
     acquisition_date = (safe_dir.split('_')[5].split('T'))[0]
     path = os.path.join(wrk, acquisition_date)
     if not os.path.exists(path):
         os.mkdir(path)
 
-    logging.info(f'Folder is {folder}')
+    logging.info(f'SAFE directory is {safe_dir}')
     logging.info(f'Long date is {datelong}')
     logging.info(f'Acquisition date is {acquisition_date}')
 
-    os.chdir(f'{folder}.SAFE')
+    os.chdir(safe_dir)
 
     for swath in range(1, 4):
         cmd = make_cmd(swath, acquisition_date, path, pol=pol)
