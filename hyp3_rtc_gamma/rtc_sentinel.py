@@ -619,8 +619,6 @@ def rtc_sentinel_gamma(in_file,
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
 
-    logging.info("Area flag is {}".format(area))
-
     if res is None:
         res = 10
     if lo_flag:
@@ -638,12 +636,8 @@ def rtc_sentinel_gamma(in_file,
                 looks = 3
         else:
             looks = int(res / 10 + 0.5)
-        logging.info("Setting looks to {}".format(looks))
 
-    # get rid of ending "/"
-    if in_file.endswith("/"):
-        in_file = in_file[0:len(in_file) - 1]
-
+    in_file.rstrip('/')
     if not os.path.exists(in_file):
         logging.error("ERROR: Input file {} does not exist".format(in_file))
         sys.exit(1)
