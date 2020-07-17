@@ -22,16 +22,6 @@ def test_get_content_type():
     assert main.get_content_type('foo/bar.png') == 'image/png'
 
 
-def test_get_download_url():
-    granule = 'S1A_IW_GRDH_1SDV_20200611T090849_20200611T090914_032967_03D196_D46C'
-    url = main.get_download_url(granule)
-    assert url == f'https://datapool.asf.alaska.edu/GRD_HD/SA/{granule}.zip'
-
-    granule = 'S1B_IW_SLC__1SDV_20200611T071252_20200611T071322_021982_029B8F_B023'
-    url = main.get_download_url(granule)
-    assert url == f'https://datapool.asf.alaska.edu/SLC/SB/{granule}.zip'
-
-
 def test_download_file(tmp_path):
     os.chdir(tmp_path)
     main.download_file('https://imgs.xkcd.com/comics/automation.png')
