@@ -586,7 +586,7 @@ def clean_prod_dir():
 
 
 def configure_log_file():
-    log_file = f'{os.getpid()}.log'
+    log_file = f'rtc_sentinel_{os.getpid()}.log'
     log_file_handler = logging.FileHandler(log_file)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', '%m/%d/%Y %I:%M:%S %p')
     log_file_handler.setFormatter(formatter)
@@ -637,7 +637,7 @@ def rtc_sentinel_gamma(in_file,
         else:
             looks = int(res / 10 + 0.5)
 
-    in_file.rstrip('/')
+    in_file = in_file.rstrip('/')
     if not os.path.exists(in_file):
         logging.error("ERROR: Input file {} does not exist".format(in_file))
         sys.exit(1)
@@ -647,11 +647,7 @@ def rtc_sentinel_gamma(in_file,
             z.extractall()
         in_file = in_file.replace('.zip', '.SAFE')
 
-    input_type = in_file[7:11]
-    if 'SLC' in input_type:
-        input_type = 'SLC'
-    else:
-        input_type = 'GRD'
+    input_type = in_file[7:10]
 
     orbit_file = fetch_orbit_file(in_file)
 
