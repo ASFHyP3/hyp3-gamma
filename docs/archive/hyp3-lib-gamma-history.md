@@ -21,6 +21,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `get_orb.py` entrypoint now allows you to download to a specific directory and specify the providers to use in
   order of preference
 
+### Changed: 
+* Unrestricted `gdal` from `2.*` in `conda-env.yml` because there appears to be no GDAL 2 specific code in `hyp3lib`
+
 ### Removed:
 * Unused `par_s1_slc_single.py` entrypoint
 * `hyp3lib.get_orb` helper functions that are unused outside of `get_orb`:
