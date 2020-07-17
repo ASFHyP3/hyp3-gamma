@@ -1,65 +1,66 @@
-from __future__ import print_function, absolute_import, division, unicode_literals
-
-from hyp3lib.execute import execute
 import logging
+import os
 import shutil
-from hyp3lib.par_s1_slc_single import par_s1_slc_single
+
+from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
+from hyp3lib.execute import execute
 from hyp3lib.getBursts import getBursts
 from hyp3lib.get_orb import downloadSentinelOrbitFile
-import os
+from hyp3lib.par_s1_slc_single import par_s1_slc_single
 
 
-def ingest_S1_granule(inFile,pol,look_fact,outFile):
+def ingest_S1_granule(safe_dir: str, pol: str, looks: int, out_file: str, orbit_file: str = None):
+    """Pre-process S1 imagery into GAMMA format
 
+    Args:
+        safe_dir: Sentinel-1 SAFE directory location
+        pol: polarization (e.g., 'vv')
+        looks: the number of looks to take
+        out_file: file name of the output GAMMA formatted imagery
+        orbit_file: Orbit file to use (will download a matching orbit file if None)
+    """
     pol = pol.lower()
-    inputType = inFile[7:11]
-    grd = "{}.grd".format(pol)
-    
+    granule_type = safe_dir[7:10]
+
     # Ingest the granule into gamma format
-    if "GRD" in inputType:
-        cmd = "par_S1_GRD {inf}/*/*{pol}*.tiff {inf}/*/*{pol}*.xml {inf}/*/*/calibration-*{pol}*.xml " \
-              "{inf}/*/*/noise-*{pol}*.xml {grd}.par {grd}".format(inf=inFile,pol=pol,grd=grd)
-        execute(cmd,uselogging=True)
+    if granule_type == 'GRD':
+        cmd = f'par_S1_GRD {safe_dir}/*/*{pol}*.tiff {safe_dir}/*/*{pol}*.xml {safe_dir}/*/*/calibration-*{pol}*.xml ' \
+              f'{safe_dir}/*/*/noise-*{pol}*.xml {pol}.grd.par {pol}.grd'
+        execute(cmd, uselogging=True)
 
-        # Fetch precision state vectors
-
+        # Ingest the precision state vectors
         try:
-            logging.info("Trying to get orbit file information from file {}".format(inFile))
-            orbfile,tmp = downloadSentinelOrbitFile(inFile)
-            logging.debug("Applying precision orbit information")
-            cmd = "S1_OPOD_vec {grd}.par {eof}".format(grd=grd,eof=orbfile)
-            execute(cmd,uselogging=True)
-        except:
-            logging.warning("Unable to fetch precision state vectors... continuing")
-        
-        # Multi-look the image
-        if look_fact > 1.0:
-            cmd = "multi_look_MLI {grd} {grd}.par {outFile} {outFile}.par {lks} {lks}".format(grd=grd,outFile=outFile,lks=look_fact)
-            execute(cmd,uselogging=True)
+            if orbit_file is None:
+                logging.info('Trying to get orbit file information from file {}'.format(safe_dir))
+                orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
+            logging.debug('Applying precision orbit information')
+            cmd = f'S1_OPOD_vec {pol}.grd.par {orbit_file}'
+            execute(cmd, uselogging=True)
+        except OrbitDownloadError:
+            logging.warning('Unable to fetch precision state vectors... continuing')
+        except ExecuteError:
+            logging.warning(f'Unable to create {pol}.grd.par file... continuing')
+
+        if looks > 1.0:
+            cmd = f'multi_look_MLI {pol}.grd {pol}.grd.par {out_file} {out_file}.par {looks} {looks}'
+            execute(cmd, uselogging=True)
         else:
-            shutil.copy(grd,outFile)
-            shutil.copy("{}.par".format(grd),"{}.par".format(outFile))
+            shutil.copy(f'{pol}.grd', out_file)
+            shutil.copy(f'{pol}.grd.par', f'{out_file}.par')
 
     else:
         #  Ingest SLC data files into gamma format
-        par_s1_slc_single(inFile,pol)
-        date = inFile[17:25]
-        make_tab_flag = True
-        burst_tab = getBursts(inFile,make_tab_flag)
-        shutil.copy(burst_tab,date)
+        par_s1_slc_single(safe_dir, pol, orbit_file=orbit_file)
+        date = safe_dir[17:25]
+        burst_tab = getBursts(safe_dir, make_tab_flag=True)
+        shutil.copy(burst_tab, date)
 
         # Mosaic the swaths together and copy SLCs over        
         back = os.getcwd()
-        os.chdir(date) 
-        path = "../"
-        rlooks = look_fact*5
-        alooks = look_fact 
-        SLC_copy_S1_fullSW(path,date,"SLC_TAB",burst_tab,mode=2,raml=rlooks,azml=alooks)
+        os.chdir(date)
+        SLC_copy_S1_fullSW('../', date, 'SLC_TAB', burst_tab, mode=2, raml=looks * 5, azml=looks)
         os.chdir(back)
- 
-        # Rename files
-        name = "{}.mli".format(date)
-        shutil.move(name,outFile)
-        name = "{}.mli.par".format(date)
-        shutil.move(name,"{}.par".format(outFile))
+
+        shutil.move(f'{date}.mli', out_file)
+        shutil.move(f'{date}.mli.par', f'{out_file}.par')

@@ -6,7 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.3.0](https://github.com/asfadmin/hyp3-lib/compare/v1.2.3...v1.3.0)
+
+## [1.4.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.3.0...v1.4.0)
+
+### Added:
+* `hyp3lib.OrbitDownloadError` exception that will be raised for fetching orbit file problems
+* `hyp3lib.fetch` module with utilities for fetching thing from external endpoints
+  * Provides a generic `download_file` utility for downloading files from URLs
+* `orbit_file` keyword argument to `hyp3lib.ingest_S1_granule` and `hyp3lib.par_s1_slc_single` to skip fetching an
+  already downloaded orbit file
+* `providers` keyword argument to `hyp3lib.downloadSentinelOrbitFile` to specify the providers you'd like to check for
+  orbit files, in order of preference
+* `hyp3lib.get_orb.get_orbit_url` which will determine the OPOD orbit file url for a granule
+* `get_orb.py` entrypoint now allows you to download to a specific directory and specify the providers to use in
+  order of preference
+
+### Changed: 
+* Unrestricted `gdal` from `2.*` in `conda-env.yml` because there appears to be no GDAL 2 specific code in `hyp3lib`
+
+### Removed:
+* Unused `par_s1_slc_single.py` entrypoint
+* `hyp3lib.get_orb` helper functions that are unused outside of `get_orb`:
+  * `getPageContentsESA`, `getOrbitFileESA`, `getPageContents` (ASF), `findOrbFile` (ASF), `getOrbFile` (ASF) have
+    all been merged into `get_orbit_url`
+  * `dateStr2dateTime` as been removed
+  * `fetchOrbitFile` has been eliminated in favor of `hyp3lib.fetch.download_file`
+  * `downloadSentinelOrbitFileProvider` functionality has been merged into `downloadSentinelOrbitFile`
+
+## [1.3.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.3...v1.3.0)
 
 ### Changed:
 * Requires `pyproj>=2`
@@ -28,12 +55,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   only used internally have been removed because they are no longer relevant with
   the `pyproj` upgrade
 
-
 ### Fixed:
 * Coordinate transformations in `get_dem` now utilize the `pyproj>=2` syntax 
   instead of the depreciated and broken `pyproj<2` syntax
 
-## [v1.2.3](https://github.com/asfadmin/hyp3-lib/compare/v1.2.2...v1.2.3)
+## [1.2.3](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.2...v1.2.3)
 
 ### Fixed:
 * `get_dem.py` will raise an exception if it cannot determine the NoData value
@@ -42,7 +68,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed:
 * `get_dem.py` will determine the correct NoData value for `SRTMGL3` DEMs
   
-## [v1.2.2](https://github.com/asfadmin/hyp3-lib/compare/v1.2.1...v1.2.2)
+## [1.2.2](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.1...v1.2.2)
 
 ### Fixed:
 * `rtc2color.py` was applying the cleanup threshold differently to amplitude and
@@ -54,7 +80,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   type. Similar memory optimizations have been achieved by refactoring and
   leveraging numpy, with an added benefit of a 6x speedup.
 
-## [v1.2.1](https://github.com/asfadmin/hyp3-lib/compare/v1.2.0...v1.2.1)
+## [1.2.1](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.0...v1.2.1)
 
 ### Added:
 * `DemError`, `ExecuteError`, and `GeometryError` (subclasses of the generic `Exception`) for 
@@ -70,20 +96,20 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   error handling
 * `get_asf.py` will not fail silently anymore.
 
-## [v1.2.0](https://github.com/asfadmin/hyp3-lib/compare/v1.1.0...v1.2.0)
+## [1.2.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.1.0...v1.2.0)
 
 ### Added
  * `metadata.add_esa_citation` to add a `ESA_citation.txt` file to a directory
  * `exceptions.GranuleError` for raising issues with granules
 
-## [v1.1.0](https://github.com/asfadmin/hyp3-lib/compare/v1.0.0...v1.1.0)
+## [1.1.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.0.0...v1.1.0)
 
 ### Added
 * `GC_map_mod` bash script, which is used by a few science codes (this has been translated to bash from tcsh)
 * `hyp3lib.system` module for getting system information needed by the science codes
   * includes a `gamma_version` function which will attempt to determine and validate the GAMMA software version
 
-## [v1.0.0](https://github.com/asfadmin/hyp3-lib/compare/v0.8.1...v1.0.0)
+## [1.0.0](https://github.com/ASFHyP3/hyp3-lib/compare/v0.8.1...v1.0.0)
 
 This is a significant refactor of `hyp3-lib` into a `pip` installable package called `hyp3lib`.
 
