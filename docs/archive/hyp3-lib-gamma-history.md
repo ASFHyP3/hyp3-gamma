@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.4.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.3.0...v1.4.0)
+
+### Added:
+* `hyp3lib.OrbitDownloadError` exception that will be raised for fetching orbit file problems
+* `hyp3lib.fetch` module with utilities for fetching thing from external endpoints
+  * Provides a generic `download_file` utility for downloading files from URLs
+* `orbit_file` keyword argument to `hyp3lib.ingest_S1_granule` and `hyp3lib.par_s1_slc_single` to skip fetching an
+  already downloaded orbit file
+* `providers` keyword argument to `hyp3lib.downloadSentinelOrbitFile` to specify the providers you'd like to check for
+  orbit files, in order of preference
+* `hyp3lib.get_orb.get_orbit_url` which will determine the OPOD orbit file url for a granule
+* `get_orb.py` entrypoint now allows you to download to a specific directory and specify the providers to use in
+  order of preference
+
+### Removed:
+* Unused `par_s1_slc_single.py` entrypoint
+* `hyp3lib.get_orb` helper functions that are unused outside of `get_orb`:
+  * `getPageContentsESA`, `getOrbitFileESA`, `getPageContents` (ASF), `findOrbFile` (ASF), `getOrbFile` (ASF) have
+    all been merged into `get_orbit_url`
+  * `dateStr2dateTime` as been removed
+  * `fetchOrbitFile` has been eliminated in favor of `hyp3lib.fetch.download_file`
+  * `downloadSentinelOrbitFileProvider` functionality has been merged into `downloadSentinelOrbitFile`
+
 ## [1.3.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.3...v1.3.0)
 
 ### Changed:
@@ -27,7 +51,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `get_dem.py`'s `transform_bounds` and `transform_point` functions that were 
   only used internally have been removed because they are no longer relevant with
   the `pyproj` upgrade
-
 
 ### Fixed:
 * Coordinate transformations in `get_dem` now utilize the `pyproj>=2` syntax 
