@@ -2,6 +2,7 @@
 rtc_gamma processing for HyP3
 """
 import glob
+import logging
 import os
 import shutil
 import sys
@@ -62,7 +63,7 @@ def entry():
 def write_netrc_file(username, password):
     netrc_file = os.path.join(os.environ['HOME'], '.netrc')
     if os.path.isfile(netrc_file):
-        print(f'WARNING - using existing .netrc file: {netrc_file}')
+        logging.warning(f'Using existing .netrc file: {netrc_file}')
     else:
         with open(netrc_file, 'w') as f:
             f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
@@ -79,7 +80,7 @@ def upload_file_to_s3(path_to_file, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
-    print(f'Uploading s3://{bucket}/{key}')
+    logging.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
 
 
@@ -110,6 +111,9 @@ def main_v2():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('granule')
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     write_netrc_file(args.username, args.password)
 

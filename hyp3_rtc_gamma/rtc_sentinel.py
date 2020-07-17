@@ -605,9 +605,8 @@ def rtc_sentinel_gamma(in_file,
                        area=False):
 
     log_file = "{}_{}_log.txt".format(in_file.rpartition('.')[0], os.getpid())
-    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    log_file_handler = logging.FileHandler(log_file)
+    logging.getLogger().addHandler(log_file_handler)
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
@@ -745,7 +744,6 @@ def rtc_sentinel_gamma(in_file,
     if cpol:
         reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
     create_browse_images(out_name, pol, cpol, browse_res)
-    log_file = logging.getLogger().handlers[0].baseFilename
     rtc_name = out_name + "_" + pol + ".tif"
     gamma_ver = gamma_version()
     create_iso_xml(rtc_name, out_name, pol, cpol, in_file, dem_type, log_file, gamma_ver)
@@ -796,6 +794,9 @@ def main():
     parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
     parser.add_argument("-a", "--area", action="store_true", help="Keep area map")
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     # FIXME: This function's inputs should be 1:1 (name and value!) with CLI args!
     rtc_sentinel_gamma(args.input,
