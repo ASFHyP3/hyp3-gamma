@@ -45,7 +45,6 @@ def fetch_orbit_file(in_file):
     orbit_file = None
     try:
         orbit_file, _ = downloadSentinelOrbitFile(in_file)
-        logging.info(f'Using orbit file {orbit_file}')
     except OrbitDownloadError:
         logging.warning('Unable to fetch orbit file.  Continuing.')
     return orbit_file
@@ -136,7 +135,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
 
 
 def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area):
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
     logging.info("    Output name                       : {}".format(out_name))
@@ -159,6 +158,7 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
     logging.info("    Process crosspol                  : {}".format(not no_cross_pol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
     logging.info("    Save Pixel Area                   : {}".format(area))
+    logging.info("    Orbit File                        : {}".format(orbit_file))
 
 
 def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
@@ -585,6 +585,15 @@ def clean_prod_dir():
     os.chdir("..")
 
 
+def configure_log_file():
+    log_file = f'{os.getpid()}.log'
+    log_file_handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', '%m/%d/%Y %I:%M:%S %p')
+    log_file_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(log_file_handler)
+    return log_file
+
+
 def rtc_sentinel_gamma(in_file,
                        out_name=None,
                        res=None,
@@ -604,9 +613,7 @@ def rtc_sentinel_gamma(in_file,
                        smooth=False,
                        area=False):
 
-    log_file = "{}_{}_log.txt".format(in_file.rpartition('.')[0], os.getpid())
-    log_file_handler = logging.FileHandler(log_file)
-    logging.getLogger().addHandler(log_file_handler)
+    log_file = configure_log_file()
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
@@ -640,11 +647,11 @@ def rtc_sentinel_gamma(in_file,
     if not os.path.exists(in_file):
         logging.error("ERROR: Input file {} does not exist".format(in_file))
         sys.exit(1)
-    if "zip" in in_file:
-        zip_ref = zipfile.ZipFile(in_file, 'r')
-        zip_ref.extractall(".")
-        zip_ref.close()
-        in_file = in_file.replace(".zip", ".SAFE")
+    if in_file.endswith('.zip'):
+        logging.info(f'Unzipping {in_file}')
+        with zipfile.ZipFile(in_file, 'r') as z:
+            z.extractall()
+        in_file = in_file.replace('.zip', '.SAFE')
 
     input_type = in_file[7:11]
     if 'SLC' in input_type:
@@ -658,7 +665,7 @@ def rtc_sentinel_gamma(in_file,
         out_name = get_product_name(in_file, orbit_file, res, pwr_flag, filter_flag, gamma_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
