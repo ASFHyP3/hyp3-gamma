@@ -262,7 +262,6 @@ def process_rtc_gamma(cfg, n):
             cfg["email_text"] = "This is an RTC product from {0}.".format(sd)
 
             res = get_extra_arg(cfg, 'resolution', cfg['default_rtc_resolution'])
-            opts_str = f'_{res}'
 
             if res not in ('10m', '30m'):
                 raise Exception('Invalid resolution: ' + res)
@@ -273,30 +272,19 @@ def process_rtc_gamma(cfg, n):
                 args = []
 
             if extra_arg_is(cfg, 'matching', 'no'):
-                opts_str += '_nomatch'
                 args += ['-n']
-            else:
-                opts_str += '_match'
 
             if extra_arg_is(cfg, 'power', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                opts_str += '_amp'
                 args += ['--amp']
-            else:
-                opts_str += '_power'
 
             if extra_arg_is(cfg, 'gamma0', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                opts_str += '_sigma0'
                 args += ['--sigma']
-            else:
-                opts_str += '_gamma0'
 
             if extra_arg_is(cfg, 'filter', 'yes'):
                 args += ['-f']
-                opts_str += '_filt'
 
             if extra_arg_is(cfg, 'keep_area', 'yes'):
                 args += ['-n']
-                opts_str += '_flat'
 
             if res == '10m':
                 args += ['-o', '10']
@@ -326,7 +314,6 @@ def process_rtc_gamma(cfg, n):
             log.info('Changing to directory ' + d)
             os.chdir(d)
 
-            opts_str = '-12.5m'
             args = ["-g", "-d", os.path.basename(raw)]
 
             process(cfg, 'rtc_legacy.py', args)
