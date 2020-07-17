@@ -4,7 +4,6 @@ from hyp3_rtc_gamma import rtc_sentinel
 
 
 def test_get_product_name():
-
     payload = {
         'granule_name': 'S1A_S1_GRDH_1SSH_20181121T184017_20181121T184046_024690_02B6ED_6946',
         'orbit_file': 'S1A_OPER_AUX_POEORB_OPOD_20181211T120749_V20181120T225942_20181122T005942.EOF',
