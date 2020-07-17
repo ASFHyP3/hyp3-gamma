@@ -40,6 +40,17 @@ from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
 
+def fetch_orbit_file(in_file):
+    logging.info(f'Fetching orbit file for {in_file}')
+    orbit_file = None
+    try:
+        orbit_file, _ = downloadSentinelOrbitFile(in_file)
+        logging.info(f'Using orbit file {orbit_file}')
+    except OrbitDownloadError:
+        logging.warning('Unable to fetch orbit file.  Continuing.')
+    return orbit_file
+
+
 def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, filtered=False, gamma0=True):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
@@ -642,13 +653,7 @@ def rtc_sentinel_gamma(in_file,
     else:
         input_type = 'GRD'
 
-    logging.info(f'Trying to get orbit file information for file {in_file}')
-    orbit_file = None
-    try:
-        orbit_file, _ = downloadSentinelOrbitFile(in_file)
-    except OrbitDownloadError as e:
-        logging.warning(str(e))
-        logging.warning('Unable to fetch precision state vectors... continuing')
+    orbit_file = fetch_orbit_file(in_file)
 
     if out_name is None:
         out_name = get_product_name(in_file, orbit_file, res, pwr_flag, filter_flag, gamma_flag)
