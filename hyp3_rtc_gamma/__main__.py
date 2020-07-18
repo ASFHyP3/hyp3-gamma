@@ -171,10 +171,6 @@ def process_rtc_gamma(cfg, n):
             'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
         }
 
-        looks = get_extra_arg(cfg, 'looks', None)
-        if looks is not None and res != '10m':
-            args['looks'] = int(looks)
-
         product_dir, product_name = rtc_sentinel_gamma(**args)
 
         logging.info(f'Renaming {product_dir} to {product_name}')
