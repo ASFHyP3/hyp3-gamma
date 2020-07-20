@@ -657,6 +657,8 @@ def rtc_sentinel_gamma(in_file,
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
 
+    orbit_file = os.path.join(os.getcwd(), orbit_file)  # ingest_S1_granule requires absolute path
+
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
         tifdem = "tmp_{}_dem.tif".format(os.getpid())
