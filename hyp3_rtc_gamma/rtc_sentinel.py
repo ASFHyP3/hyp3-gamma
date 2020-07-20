@@ -715,7 +715,7 @@ def rtc_sentinel_gamma(in_file,
             logging.info("Found VH polarization - processing")
             process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                             gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area)
+                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
