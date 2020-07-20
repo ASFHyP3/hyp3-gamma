@@ -2,7 +2,7 @@ import glob
 import logging
 import os
 
-from hyp3lib import ExecuteError, OrbitDownloadError
+from hyp3lib import OrbitDownloadError
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
@@ -78,8 +78,6 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
         execute(f'S1_OPOD_vec {acquisition_date}_003.slc.par {orbit_file}')
     except OrbitDownloadError:
         logging.warning('Unable to fetch precision state vectors... continuing')
-    except ExecuteError:
-        logging.warning('Unable to create *.slc.par files... continuing')
 
     slc = glob.glob('*_00*.slc')
     slc.sort()
