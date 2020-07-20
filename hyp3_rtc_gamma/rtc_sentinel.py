@@ -590,7 +590,7 @@ def configure_log_file():
     log_file_handler = logging.FileHandler(log_file)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', '%m/%d/%Y %I:%M:%S %p')
     log_file_handler.setFormatter(formatter)
-    logging.getLogger().addHandler(log_file_handler)
+    logging.getLogger(__file__).addHandler(log_file_handler)
     return log_file
 
 
