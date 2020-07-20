@@ -22,6 +22,7 @@ from hyp3proclib import (
 )
 from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
+from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
@@ -187,6 +188,8 @@ def process_rtc_gamma(cfg, n):
         cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
         cfg['attachment'] = find_png(product_dir)
 
+        for handler in log.handlers:
+            log.removeHandler(handler)
         with get_db_connection('hyp3-db') as conn:
             upload_product(zip_file, cfg, conn)
             success(conn, cfg)
