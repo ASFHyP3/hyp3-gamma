@@ -16,7 +16,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed:
 * `ingest_S1_granule`, `par_s1_slc_single`: errors thrown by `S1_OPOD_vec` when applying orbit files are now raised
   rather than caught and ignored
-* `get_orb.downloadSentinelOrbitFile`: log failures fetching orbits as warnings, do not include stack trace
+* `get_orb.downloadSentinelOrbitFile`: failures fetching orbits are now logged as warnings and  do not include a stack
+  trace
 * `get_orb.get_orbit_url`: removed padding on granule start/end times for ESA API searches per example at
   https://qc.sentinel1.eo.esa.int/doc/api/
 
