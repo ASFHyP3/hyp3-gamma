@@ -657,7 +657,7 @@ def rtc_sentinel_gamma(in_file,
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
 
-    orbit_file = os.path.join(os.getcwd(), orbit_file)  # ingest_S1_granule requires absolute path
+    orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
@@ -715,7 +715,7 @@ def rtc_sentinel_gamma(in_file,
             logging.info("Found VH polarization - processing")
             process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                             gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area)
+                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
