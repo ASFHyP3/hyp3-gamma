@@ -5,20 +5,24 @@ This folder contains radiometric terrain corrected (RTC) products and their asso
 
 Processing Date/Time: [DATE] [TIME] UTC
 
-The folder and each of its contents all share the same base name, using the following convention:  
-S1x_yy_RTzz_aaaaaaaaTbbbbbb_c_def  
-x:        	Sentinel-1 Mission (A or B)  
-yy:       	Beam Mode  
-zz:       	Terrain Correction Resolution  
-aaaaaaaa: 	Start Date of Acquisition (YYYYMMDD)  
-bbbbbb:    	Start Time of Acquisition (HHMMSS)  
-c:        	Processor (Gamma or S1TBX)  
-d:        	gamma-0 (g) or sigma-0 (s) output  
-e:        	amplitude (a) or power (p) output  
-f:        	not filtered (n) or filtered (f)
+The folder and each of its contents all share the same base name, using the following convention:
+S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defkl_ssssss
+x:          Sentinel-1 Mission (A or B)
+yy:         Beam Mode
+aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
+bbbbbb:     Start Time of Acquisition (HHMMSS)
+pp:         Polarization
+o:          Orbit Type (Precise, Restituted, or Predicted)
+zz:         Terrain Correction Resolution
+d:          water masked (w) or unmasked (u)
+e:          clipped area (c) or entire area (e)
+f:          amplitude (a) or power (p) output
+k:          not filtered (n) or filtered (f)
+l:          gamma-0 (g) or sigma-0 (s) output
+ssssss:     product unique id
 
-The source granule used to generate the products contained in this folder is:  
-[GRAN_NAME]  
+The source granule used to generate the products contained in this folder is:
+[GRAN_NAME]
 
 -------------
 The side-looking geometry of SAR imagery leads to geometric and radiometric distortions, causing foreshortening, layover, shadowing, and radiometric variations due to terrain slope. Radiometric terrain correction converts unprocessed SAR data into geocoded tiff images with values directly relating to physical properties, alleviating the inherent SAR distortions. The process improves backscatter estimates and provides geolocation information, so images can be used as input for applications such as the monitoring of deforestation, land-cover classification, and delineation of wet snow-covered areas.
@@ -27,17 +31,17 @@ Refer to the ASF Sentinel-1 RTC User Guide for additional guidance on the use of
 https://asf.alaska.edu/wp-content/uploads/2019/02/Sentinel_RTC_Users_Guide.pdf
 
 Visit the GAMMA Remote Sensing website for more information about GAMMA SAR software:
-https://www.gamma-rs.ch/  
+https://www.gamma-rs.ch/
 
 -------------
 ### To cite the data: ###
 ASF DAAC [YEARPROCESSED] using GAMMA software. Contains modified Copernicus Sentinel data [YEARACQUIRED], processed by ESA.
 
 ----------------
-*Consider opening this document in a Markdown editor/viewer for easier reading.*  
+*Consider opening this document in a Markdown editor/viewer for easier reading.*
 
 *************
-# Product Contents #  
+# Product Contents #
 
 The files generated in this process include:
 
@@ -67,7 +71,7 @@ Each RTC image [FILT] been speckle filtered. The default is to not apply a speck
 
 PNG files are generated for quick visualization of the backscatter data. Each png browse image is accompanied by an aux file containing the projection and geocoding information for the file.
 
-All products will include a grayscale png browse image. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The image is designated by a simple .png extension. 
+All products will include a grayscale png browse image. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The image is designated by a simple .png extension.
 
 For dual-pol products, a false-color png browse image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
 
@@ -82,7 +86,7 @@ The best DEM publicly available for each granule is used in the RTC process, so 
 
 The DEM sources include the National Elevation Dataset (NED), the Shuttle Radar Topography Mission (SRTM), the Copernicus Land Monitoring Service EU-DEM (EUDEM), the Greenland Ice sheet Mapping Project DEM (GIMP), and the Reference Elevation Model of Antarctica DSM (REMA).
 
-The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).  
+The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).
 
 *Refer to the -dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
 
@@ -108,43 +112,43 @@ This map records the incidence angle for each pixel in the RTC image. The incide
 -------------
 ## 5. Layover-shadow mask
 
-The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with -ls_map.tif 
+The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with -ls_map.tif
 
-The pixel values are generated by adding the following values together to indicate which layover and shadow effects are impacting each pixel:  
-0  Pixel not tested for layover or shadow  
-1  Pixel tested for layover or shadow  
-2  Pixel has a look angle less than the slope angle  
-4  Pixel is in an area affected by layover  
-8  Pixel has a look angle less than the opposite of the slope angle  
-16 Pixel is in an area affected by shadow  
+The pixel values are generated by adding the following values together to indicate which layover and shadow effects are impacting each pixel:
+0  Pixel not tested for layover or shadow
+1  Pixel tested for layover or shadow
+2  Pixel has a look angle less than the slope angle
+4  Pixel is in an area affected by layover
+8  Pixel has a look angle less than the opposite of the slope angle
+16 Pixel is in an area affected by shadow
 
-_There are 17 possible different pixel values, indicating the layover, shadow, and slope conditions present added together for any given pixel._  
+_There are 17 possible different pixel values, indicating the layover, shadow, and slope conditions present added together for any given pixel._
 
-**The values in each cell can range from 0 to 31:**  
-0  Not tested for layover or shadow  
-1  Not affected by either layover or shadow  
-3  Look angle < slope angle  
-5  Affected by layover  
-7  Affected by layover; look angle < slope angle  
-9  Look angle < opposite slope angle  
-11 Look angle < slope and opposite slope angle  
-13 Affected by layover; look angle < opposite slope angle  
-15 Affected by layover; look angle < slope and opposite slope angle  
-17 Affected by shadow  
-19 Affected by shadow; look angle < slope angle  
-21 Affected by layover and shadow  
-23 Affected by layover and shadow; look angle < slope angle  
-25 Affected by shadow; look angle < opposite slope angle  
-27 Affected by shadow; look angle < slope and opposite slope angle  
-29 Affected by shadow and layover; look angle < opposite slope angle  
-31 Affected by shadow and layover; look angle < slope and opposite slope angle  
+**The values in each cell can range from 0 to 31:**
+0  Not tested for layover or shadow
+1  Not affected by either layover or shadow
+3  Look angle < slope angle
+5  Affected by layover
+7  Affected by layover; look angle < slope angle
+9  Look angle < opposite slope angle
+11 Look angle < slope and opposite slope angle
+13 Affected by layover; look angle < opposite slope angle
+15 Affected by layover; look angle < slope and opposite slope angle
+17 Affected by shadow
+19 Affected by shadow; look angle < slope angle
+21 Affected by layover and shadow
+23 Affected by layover and shadow; look angle < slope angle
+25 Affected by shadow; look angle < opposite slope angle
+27 Affected by shadow; look angle < slope and opposite slope angle
+29 Affected by shadow and layover; look angle < opposite slope angle
+31 Affected by shadow and layover; look angle < slope and opposite slope angle
 
 -------------
 ## 6. ArcGIS-compatible xml metadata files
 
 Each raster in this folder has an associated xml file. It is named with the same filename as the raster, but also includes a .xml extension. When any of the rasters are viewed in ArcGIS, the associated xml file is recognized by the software, and the contents will display in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro) for that raster. Once the file is viewed in ArcGIS, the software will update the xml file to include metadata inherent to the raster (geographic extent, raster format, etc.) along with the descriptive metadata included in the original xml file.
 
-ArcGIS users should take care not to edit the xml files directly, or to change filenames outside of the ArcGIS environment, as it may render the metadata files unreadable by ArcGIS. 
+ArcGIS users should take care not to edit the xml files directly, or to change filenames outside of the ArcGIS environment, as it may render the metadata files unreadable by ArcGIS.
 
 Users who do not use ArcGIS to interact with the data may still find the information included in the individual xml files very useful, although the xml tag system makes it look cluttered in a text editor or browser window.
 
@@ -156,7 +160,7 @@ The iso.xml file contains general information about the processing of this produ
 -------------
 ## 8. Shapefile
 
-The shapefile (comprised of the four files tagged with _shape) contains polygons indicating the full raster extent (including padding), as well as the extent of actual data (pixels with values other than NoData). 
+The shapefile (comprised of the four files tagged with _shape) contains polygons indicating the full raster extent (including padding), as well as the extent of actual data (pixels with values other than NoData).
 
 -------------
 ## 9. Log file
@@ -166,37 +170,36 @@ A textfile is generated during processing, which includes the parameters used an
 *************
 ### RTC Processing ###
 
-The basic steps in the radiometric terrain correction process are as follows:  
+The basic steps in the radiometric terrain correction process are as follows:
 1.  Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
-2.  If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s). 
-3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected. 
-4.  A mapping function is created, mapping from DEM space into SAR space. 
-5.  A simulated SAR image is created. 
-6.  The simulated SAR image and the real SAR image are coregistered. 
-7.  The mapping function is updated with the coregistration information. 
-8.  The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas. 
-9.  The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image. 
+2.  If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
+3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
+4.  A mapping function is created, mapping from DEM space into SAR space.
+5.  A simulated SAR image is created.
+6.  The simulated SAR image and the real SAR image are coregistered.
+7.  The mapping function is updated with the coregistration information.
+8.  The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
+9.  The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
 10. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
 
-The Algorithm Theoretical Basis Document (ATBD), which provides the theoretical background of the algorithms and processing flows used for the generation of this product, is available here:  
+The Algorithm Theoretical Basis Document (ATBD), which provides the theoretical background of the algorithms and processing flows used for the generation of this product, is available here:
 https://asf.alaska.edu/wp-content/uploads/2019/02/RTC_ATBD_Sentinel.pdf
 
 *************
 ### The Sentinel-1 mission ###
 
-The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. 
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle.
 
-More information about the mission is available at:  
+More information about the mission is available at:
 https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1
 
-Additional information about Sentinel-1 data, imagery, tools and applications is available at:  
- https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/ 
+Additional information about Sentinel-1 data, imagery, tools and applications is available at:
+ https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
 
 *************
-For assistance, contact the Alaska Satellite Facility:  
-uso@asf.alaska.edu  
+For assistance, contact the Alaska Satellite Facility:
+uso@asf.alaska.edu
 907-474-5041
 
 -------------
 Revised 2020-04-07
-

@@ -2,6 +2,7 @@
 rtc_gamma processing for HyP3
 """
 import glob
+import logging
 import os
 import shutil
 import sys
@@ -12,9 +13,9 @@ from shutil import make_archive
 
 import boto3
 from PIL import Image
+from hyp3lib.fetch import download_file
 from hyp3proclib import (
     add_browse,
-    build_output_name,
     clip_tiffs_to_roi,
     execute,
     extra_arg_is,
@@ -34,15 +35,12 @@ from hyp3proclib.file_system import add_citation, cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
-from requests import Session
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
 
 # v2 constants
-DATAPOOL_URL = 'https://datapool.asf.alaska.edu'
+SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
 
@@ -65,7 +63,7 @@ def entry():
 def write_netrc_file(username, password):
     netrc_file = os.path.join(os.environ['HOME'], '.netrc')
     if os.path.isfile(netrc_file):
-        print(f'WARNING - using existing .netrc file: {netrc_file}')
+        logging.warning(f'Using existing .netrc file: {netrc_file}')
     else:
         with open(netrc_file, 'w') as f:
             f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
@@ -82,7 +80,7 @@ def upload_file_to_s3(path_to_file, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
-    print(f'Uploading s3://{bucket}/{key}')
+    logging.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
 
 
@@ -91,28 +89,8 @@ def get_download_url(granule):
     product_type = granule[7:10]
     if product_type == 'GRD':
         product_type += '_' + granule[10] + granule[14]
-    url = f'{DATAPOOL_URL}/{product_type}/{mission}/{granule}.zip'
+    url = f'{SENTINEL_DISTRIBUTION_URL}/{product_type}/{mission}/{granule}.zip'
     return url
-
-
-def download_file(url, retries=3, backoff_factor=10, chunk_size=5242880):
-    print(f"\nDownloading {url}")
-    local_filename = url.split("/")[-1]
-    session = Session()
-    retries = Retry(
-        total=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=[429, 500, 503, 504],
-    )
-    session.mount('https://', HTTPAdapter(max_retries=retries))
-    session.mount('http://', HTTPAdapter(max_retries=retries))
-    with session.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=chunk_size):
-                if chunk:
-                    f.write(chunk)
-    return local_filename
 
 
 def create_thumbnail(input_image, size=(100, 100)):
@@ -134,14 +112,16 @@ def main_v2():
     parser.add_argument('granule')
     args = parser.parse_args()
 
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
     write_netrc_file(args.username, args.password)
 
     granule_url = get_download_url(args.granule)
-    granule_zip_file = download_file(granule_url)
+    granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
-    output_folder = rtc_sentinel_gamma(granule_zip_file)
+    output_folder, product_name = rtc_sentinel_gamma(granule_zip_file)
 
-    product_name = build_output_name(args.granule, '.', '-30m-power-rtc-gamma')
     os.rename(output_folder, product_name)
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
@@ -205,13 +185,21 @@ def find_and_remove(dir_, s):
                 os.remove(filepath)
 
 
-def find_product(dir_):
+def find_product_dir(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for d in dirs:
             if d == "PRODUCT":
                 return os.path.join(subdir, d)
 
     return None
+
+
+def find_product_name(directory):
+    try:
+        readme_file = glob.glob(f'{directory}/*.README.txt')[0]
+    except IndexError:
+        raise Exception(f'Could not determine product name, no README.txt file found in {directory}')
+    return os.path.basename(readme_file).split('.')[0]
 
 
 def download(cfg, granule):
@@ -274,7 +262,6 @@ def process_rtc_gamma(cfg, n):
             cfg["email_text"] = "This is an RTC product from {0}.".format(sd)
 
             res = get_extra_arg(cfg, 'resolution', cfg['default_rtc_resolution'])
-            opts_str = f'_{res}'
 
             if res not in ('10m', '30m'):
                 raise Exception('Invalid resolution: ' + res)
@@ -285,30 +272,19 @@ def process_rtc_gamma(cfg, n):
                 args = []
 
             if extra_arg_is(cfg, 'matching', 'no'):
-                opts_str += '_nomatch'
                 args += ['-n']
-            else:
-                opts_str += '_match'
 
             if extra_arg_is(cfg, 'power', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                opts_str += '_amp'
                 args += ['--amp']
-            else:
-                opts_str += '_power'
 
             if extra_arg_is(cfg, 'gamma0', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                opts_str += '_sigma0'
                 args += ['--sigma']
-            else:
-                opts_str += '_gamma0'
 
             if extra_arg_is(cfg, 'filter', 'yes'):
                 args += ['-f']
-                opts_str += '_filt'
 
             if extra_arg_is(cfg, 'keep_area', 'yes'):
                 args += ['-n']
-                opts_str += '_flat'
 
             if res == '10m':
                 args += ['-o', '10']
@@ -338,7 +314,6 @@ def process_rtc_gamma(cfg, n):
             log.info('Changing to directory ' + d)
             os.chdir(d)
 
-            opts_str = '-12.5m'
             args = ["-g", "-d", os.path.basename(raw)]
 
             process(cfg, 'rtc_legacy.py', args)
@@ -346,20 +321,18 @@ def process_rtc_gamma(cfg, n):
         else:
             raise Exception('Unrecognized: ' + in_granule)
 
-        product = find_product(cfg['workdir'])
-        if not os.path.isdir(product):
-            log.info('PRODUCT directory not found: ' + product)
+        product_dir = find_product_dir(cfg['workdir'])
+        if not os.path.isdir(product_dir):
+            log.info('PRODUCT directory not found: ' + product_dir)
             log.error('Processing failed')
             raise Exception("Processing failed: PRODUCT directory not found")
         else:
             if extra_arg_is(cfg, "include_dem", "no"):
-                find_and_remove(product, '_dem.tif')
+                find_and_remove(product_dir, '_dem.tif')
             if extra_arg_is(cfg, "include_inc", "no"):
-                find_and_remove(product, '_inc_map.tif')
+                find_and_remove(product_dir, '_inc_map.tif')
 
-            out_name = build_output_name(g, cfg['workdir'], opts_str + cfg['suffix'])
-            if "STD_L0_F" in out_name:
-                out_name = out_name.replace("_L0", "")
+            out_name = find_product_name(product_dir)
             log.info('Output name: ' + out_name)
 
             out_path = os.path.join(cfg['workdir'], out_name)
@@ -373,10 +346,10 @@ def process_rtc_gamma(cfg, n):
             cfg['out_path'] = out_path
 
             with get_db_connection('hyp3-db') as conn:
-                clip_tiffs_to_roi(cfg, conn, product)
+                clip_tiffs_to_roi(cfg, conn, product_dir)
 
-                log.debug('Renaming ' + product + ' to ' + out_path)
-                os.rename(product, out_path)
+                log.debug('Renaming ' + product_dir + ' to ' + out_path)
+                os.rename(product_dir, out_path)
 
                 browse_path = find_png(out_path)
                 cfg['attachment'] = browse_path

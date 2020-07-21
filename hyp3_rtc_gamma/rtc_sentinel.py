@@ -7,8 +7,9 @@ import os
 import shutil
 import sys
 import zipfile
+from secrets import token_hex
 
-from hyp3lib import ExecuteError
+from hyp3lib import ExecuteError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
@@ -20,6 +21,7 @@ from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_bb_from_shape import get_bb_from_shape
 from hyp3lib.get_dem import get_dem
+from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
@@ -38,15 +40,38 @@ from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
 
-def get_product_name(granule_name, resolution=30, gamma0=True, power=True, filtered=False):
+def fetch_orbit_file(in_file):
+    logging.info(f'Fetching orbit file for {in_file}')
+    orbit_file = None
+    try:
+        orbit_file, _ = downloadSentinelOrbitFile(in_file)
+    except OrbitDownloadError:
+        logging.warning('Unable to fetch orbit file.  Continuing.')
+    return orbit_file
+
+
+def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, filtered=False, gamma0=True):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
+    polarization = granule_name[14:16]
     datetime = granule_name[17:32]
-    g = 'g' if gamma0 else 's'
+
+    if orbit_file is None:
+        o = 'O'
+    elif 'POEORB' in orbit_file:
+        o = 'P'
+    elif 'RESORB' in orbit_file:
+        o = 'R'
+    else:
+        o = 'O'
+
+    product_id = token_hex(3).upper()
+
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
+    g = 'g' if gamma0 else 's'
 
-    product_name = f'{platform}_{beam_mode}_RT{resolution}_{datetime}_G_{g}{p}{f}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_ue{p}{f}{g}_{product_id}'
     return product_name
 
 
@@ -110,7 +135,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
 
 
 def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area):
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
     logging.info("    Output name                       : {}".format(out_name))
@@ -133,17 +158,18 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
     logging.info("    Process crosspol                  : {}".format(not no_cross_pol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
     logging.info("    Save Pixel Area                   : {}".format(area))
+    logging.info("    Orbit File                        : {}".format(orbit_file))
 
 
 def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
-                filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False):
+                filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False, orbit_file=None):
     logging.info("Processing the {} polarization".format(pol))
 
     mgrd = "{out}.{pol}.mgrd".format(out=out_name, pol=pol)
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(in_file, pol, look_fact, mgrd)
+    ingest_S1_granule(in_file, pol, look_fact, mgrd, orbit_file=orbit_file)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filter if requested
@@ -261,7 +287,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
 
 def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
-                    outfile, dem, terms, par=None, area=False):
+                    outfile, dem, terms, par=None, area=False, orbit_file=None):
     if cpol == "VH":
         mpol = "VV"
     else:
@@ -271,7 +297,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     tif = "image_cal_map.mli.tif"
 
     # Ingest the granule into gamma format
-    ingest_S1_granule(in_file, cpol, look_fact, mgrd)
+    ingest_S1_granule(in_file, cpol, look_fact, mgrd, orbit_file=orbit_file)
     width = getParameter("{}.par".format(mgrd), "range_samples")
 
     # Apply filtering if requested
@@ -559,6 +585,15 @@ def clean_prod_dir():
     os.chdir("..")
 
 
+def configure_log_file():
+    log_file = f'rtc_sentinel_{os.getpid()}.log'
+    log_file_handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', '%m/%d/%Y %I:%M:%S %p')
+    log_file_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(log_file_handler)
+    return log_file
+
+
 def rtc_sentinel_gamma(in_file,
                        out_name=None,
                        res=None,
@@ -578,16 +613,11 @@ def rtc_sentinel_gamma(in_file,
                        smooth=False,
                        area=False):
 
-    log_file = "{}_{}_log.txt".format(in_file.rpartition('.')[0], os.getpid())
-    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
+    log_file = configure_log_file()
 
     logging.info("===================================================================")
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
-
-    logging.info("Area flag is {}".format(area))
 
     if res is None:
         res = 10
@@ -606,32 +636,28 @@ def rtc_sentinel_gamma(in_file,
                 looks = 3
         else:
             looks = int(res / 10 + 0.5)
-        logging.info("Setting looks to {}".format(looks))
 
-    # get rid of ending "/"
-    if in_file.endswith("/"):
-        in_file = in_file[0:len(in_file) - 1]
-
+    in_file = in_file.rstrip('/')
     if not os.path.exists(in_file):
         logging.error("ERROR: Input file {} does not exist".format(in_file))
         sys.exit(1)
-    if "zip" in in_file:
-        zip_ref = zipfile.ZipFile(in_file, 'r')
-        zip_ref.extractall(".")
-        zip_ref.close()
-        in_file = in_file.replace(".zip", ".SAFE")
+    if in_file.endswith('.zip'):
+        logging.info(f'Unzipping {in_file}')
+        with zipfile.ZipFile(in_file, 'r') as z:
+            z.extractall()
+        in_file = in_file.replace('.zip', '.SAFE')
 
-    input_type = in_file[7:11]
-    if 'SLC' in input_type:
-        input_type = 'SLC'
-    else:
-        input_type = 'GRD'
+    input_type = in_file[7:10]
+
+    orbit_file = fetch_orbit_file(in_file)
 
     if out_name is None:
-        out_name = get_product_name(in_file, res, gamma_flag, pwr_flag, filter_flag)
+        out_name = get_product_name(in_file, orbit_file, res, pwr_flag, filter_flag, gamma_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area)
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
+
+    orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
@@ -681,7 +707,7 @@ def rtc_sentinel_gamma(in_file,
         rtc_name = out_name + "_" + pol + ".tif"
         process_pol(in_file, rtc_name, out_name, pol, res, looks,
                     match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area)
+                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
         if vhlist and not no_cross_pol:
             cpol = "VH"
@@ -689,7 +715,7 @@ def rtc_sentinel_gamma(in_file,
             logging.info("Found VH polarization - processing")
             process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                             gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area)
+                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if hhlist:
         logging.info("Found HH polarization - processing")
@@ -697,7 +723,7 @@ def rtc_sentinel_gamma(in_file,
         rtc_name = out_name + "_" + pol + ".tif"
         process_pol(in_file, rtc_name, out_name, pol, res, looks,
                     match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area)
+                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
         if hvlist and not no_cross_pol:
             cpol = "HV"
@@ -705,7 +731,7 @@ def rtc_sentinel_gamma(in_file,
             rtc_name = out_name + "_" + cpol + ".tif"
             process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                             gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area)
+                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if hhlist is None and vvlist is None:
         logging.error(f"ERROR: Can not find VV or HH polarization in {in_file}")
@@ -717,7 +743,6 @@ def rtc_sentinel_gamma(in_file,
     if cpol:
         reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
     create_browse_images(out_name, pol, cpol, browse_res)
-    log_file = logging.getLogger().handlers[0].baseFilename
     rtc_name = out_name + "_" + pol + ".tif"
     gamma_ver = gamma_version()
     create_iso_xml(rtc_name, out_name, pol, cpol, in_file, dem_type, log_file, gamma_ver)
@@ -733,7 +758,7 @@ def rtc_sentinel_gamma(in_file,
     create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
-    return 'PRODUCT'
+    return 'PRODUCT', out_name
 
 
 def main():
@@ -768,6 +793,9 @@ def main():
     parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
     parser.add_argument("-a", "--area", action="store_true", help="Keep area map")
     args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     # FIXME: This function's inputs should be 1:1 (name and value!) with CLI args!
     rtc_sentinel_gamma(args.input,
