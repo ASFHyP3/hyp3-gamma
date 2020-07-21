@@ -55,6 +55,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, f
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
     datetime = granule_name[17:32]
+    res = int(resolution)
 
     if orbit_file is None:
         o = 'O'
@@ -71,7 +72,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, f
     f = 'f' if filtered else 'n'
     g = 'g' if gamma0 else 's'
 
-    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{resolution}_G_ue{p}{f}{g}_{product_id}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_ue{p}{f}{g}_{product_id}'
     return product_name
 
 
