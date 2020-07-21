@@ -66,7 +66,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, f
     else:
         o = 'O'
 
-    product_id = token_hex(3).upper()
+    product_id = token_hex(2).upper()
 
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
