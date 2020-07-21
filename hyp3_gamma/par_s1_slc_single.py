@@ -73,9 +73,9 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
             logging.info(f'Trying to get orbit file information from file {safe_dir}')
             orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
         logging.info('Applying precision orbit information')
-        execute(f'S1_OPOD_vec {acquisition_date}_001.slc.par {orbit_file}')
-        execute(f'S1_OPOD_vec {acquisition_date}_002.slc.par {orbit_file}')
-        execute(f'S1_OPOD_vec {acquisition_date}_003.slc.par {orbit_file}')
+        execute(f'S1_OPOD_vec {acquisition_date}_001.slc.par {orbit_file}', uselogging=True)
+        execute(f'S1_OPOD_vec {acquisition_date}_002.slc.par {orbit_file}', uselogging=True)
+        execute(f'S1_OPOD_vec {acquisition_date}_003.slc.par {orbit_file}', uselogging=True)
     except OrbitDownloadError:
         logging.warning('Unable to fetch precision state vectors... continuing')
 
