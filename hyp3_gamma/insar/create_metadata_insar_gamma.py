@@ -6,6 +6,7 @@ import sys
 from hyp3lib.system import gamma_version
 
 import hyp3_insar_gamma.etc
+from hyp3_insar_gamma import __version__
 
 
 def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
@@ -25,16 +26,6 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
     refname = os.path.splitext(basename)[0]
     basename = os.path.basename(secFile)
     secname = os.path.splitext(basename)[0]
-
-    # FIXME: This doesn't exist anymore
-    ver_file = "{}/version.txt".format(etcdir)
-    hyp3_ver = None
-    if os.path.exists(ver_file):
-        with open(ver_file, "r") as f:
-            for line in f:
-                hyp3_ver = line.strip()
-    else:
-        logging.warning("No version.txt file found in {}".format(etcdir))
 
     gamma_ver = gamma_version()
 
@@ -82,7 +73,7 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
                 line = line.replace("[DEM]", "{}".format(demType))
                 line = line.replace("[RESA]", "{}".format(resa))
                 line = line.replace("[RESM]", "{}".format(resm))
-                line = line.replace("[HYP3_VER]", "{}".format(hyp3_ver))
+                line = line.replace("[HYP3_VER]", "{}".format(__version__))
                 line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
                 g.write("{}".format(line))
 

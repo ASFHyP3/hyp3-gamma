@@ -7,6 +7,7 @@ import os
 import sys
 import zipfile
 
+from hyp3lib import OrbitDownloadError
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
@@ -94,11 +95,11 @@ def par_s1_slc(pol=None):
             logging.info("Getting precision orbit for file {}".format(myfile))
             try:
                 _ = downloadSentinelOrbitFile(myfile)
-                execute("S1_OPOD_vec {}_001.slc.par *.EOF".format(acqdate))
-                execute("S1_OPOD_vec {}_002.slc.par *.EOF".format(acqdate))
-                execute("S1_OPOD_vec {}_003.slc.par *.EOF".format(acqdate))
-            except Exception as e:
-                print(f"Error: {e}")
+                execute(f"S1_OPOD_vec {acqdate}_001.slc.par *.EOF")
+                execute(f"S1_OPOD_vec {acqdate}_002.slc.par *.EOF")
+                execute(f"S1_OPOD_vec {acqdate}_003.slc.par *.EOF")
+            except OrbitDownloadError:
+                logging.warning('Unable to fetch precision state vectors... continuing')
 
             slc = glob.glob("*_00*.slc")
             slc.sort()
