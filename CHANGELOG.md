@@ -9,8 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [2.1.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.6...v2.1.0)
 
 ### Changed
-* Implemented new naming convention for output products.  Output zips, folders, and files now all share a common
-  format.
+* Implemented new naming convention for output products.  The names of output zips, folders, and files now all share a
+  common format.
 * Orbit files are now downloaded once at the start of processing, rather than once for each polarization image.
 * Obrit search priority is now POEORB from ESA, POEORB from ASF, RESORB from ESA, RESORB from ASF.
 * `main_v2()` now downloads Sentinel-1 data directly from ASF's NGAP distribution endpoint, rather than datapool.
