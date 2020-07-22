@@ -6,6 +6,7 @@ import os
 import shutil
 from datetime import datetime
 
+from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
     build_output_name_pair,
     earlier_granule_first,
@@ -23,7 +24,7 @@ from hyp3proclib import (
     zip_dir
 )
 from hyp3proclib.db import get_db_connection
-from hyp3proclib.file_system import add_citation, cleanup_workdir
+from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 
@@ -163,7 +164,7 @@ def hyp3_process(cfg, n):
             log.debug('Renaming ' + product + ' to ' + out_path)
             os.rename(product, out_path)
 
-            add_citation(cfg, out_path)
+            add_esa_citation(g1, out_path)
             zip_dir(out_path, zip_file)
 
             browse_img = find_color_phase_png(out_path)
