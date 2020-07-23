@@ -19,7 +19,7 @@ e:          clipped area (c) or entire area (e)
 f:          amplitude (a) or power (p) output
 k:          not filtered (n) or filtered (f)
 l:          gamma-0 (g) or sigma-0 (s) output
-ssss:       product id
+ssss:       Product ID
 
 The source granule used to generate the products contained in this folder is:
 [GRAN_NAME]
@@ -171,20 +171,21 @@ A textfile is generated during processing, which includes the parameters used an
 ### RTC Processing ###
 
 The basic steps in the radiometric terrain correction process are as follows:
-1.  Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
-2.  If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
-3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
-4.  A mapping function is created, mapping from DEM space into SAR space.
-5.  A simulated SAR image is created.
-6.  The simulated SAR image and the real SAR image are coregistered.
-7.  The mapping function is updated with the coregistration information.
-8.  The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
-9.  The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
+
+1. Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
+2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
+3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
+4. A mapping function is created, mapping from DEM space into SAR space.
+
+*DEM coregistration is not performed by default. When the matching option is selected for a custom order, steps 5-7 are performed.
+By default, the process will skip from step 4 to step 8.*
+
+5. A simulated SAR image is created.
+6. The simulated SAR image and the real SAR image are coregistered.
+7. The mapping function is updated with the coregistration information.
+8. The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
+9. The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
 10. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
-
-The Algorithm Theoretical Basis Document (ATBD), which provides the theoretical background of the algorithms and processing flows used for the generation of this product, is available here:
-https://asf.alaska.edu/wp-content/uploads/2019/02/RTC_ATBD_Sentinel.pdf
-
 *************
 ### The Sentinel-1 mission ###
 
