@@ -138,8 +138,8 @@ def find_png(product_dir):
     return None
 
 
-def find_and_remove(directory, file_path):
-    pattern = os.path.join(directory, file_path)
+def find_and_remove(directory, file_pattern):
+    pattern = os.path.join(directory, file_pattern)
     for filename in glob.glob(pattern):
         logging.info(f'Removing {filename}')
         os.remove(filename)
@@ -155,12 +155,12 @@ def process_rtc_gamma(cfg, n):
         if not re.match('S1[AB]_.._[SLC|GRD]', granule):
             raise ValueError(f'Invalid granule, only S1 SLC and GRD data are supported: {granule}')
 
-        granule_url = get_download_url(granule)
-        granule_zip_file = download_file(granule_url, chunk_size=5242880)
-
         res = get_extra_arg(cfg, 'resolution', '30m')
         if res not in ('10m', '30m'):
             raise ValueError(f'Invalid resolution, valid options are 10m or 30m: {res}')
+
+        granule_url = get_download_url(granule)
+        granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
         args = {
             'in_file': granule_zip_file,
@@ -171,7 +171,6 @@ def process_rtc_gamma(cfg, n):
             'lo_flag': res == '30m',
             'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
         }
-
         product_dir, product_name = rtc_sentinel_gamma(**args)
 
         logging.info(f'Renaming {product_dir} to {product_name}')
@@ -184,12 +183,12 @@ def process_rtc_gamma(cfg, n):
             find_and_remove(product_dir, '*_inc_map.tif*')
 
         zip_file = make_archive(base_name=product_dir, format='zip', base_dir=product_dir)
-
         cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
         cfg['attachment'] = find_png(product_dir)
 
         for handler in log.handlers:
             log.removeHandler(handler)
+
         with get_db_connection('hyp3-db') as conn:
             upload_product(zip_file, cfg, conn)
             success(conn, cfg)
