@@ -29,7 +29,6 @@ jobs:
           python-version: 3.7
           activate-environment: hyp3-rtc-gamma
           environment-file: conda-env.yml
-          channels: conda-forge, nodefaults
 
       - name: Pytest in conda environment
         shell: bash -l {0}
