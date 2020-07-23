@@ -280,7 +280,6 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     shutil.move("{}.ls_map.tif".format(out_name), "{}/{}_ls_map.tif".format(out_dir, out_name))
     shutil.move("{}.inc_map.tif".format(out_name), "{}/{}_inc_map.tif".format(out_dir, out_name))
     shutil.move("{}.dem.tif".format(out_name), "{}/{}_dem.tif".format(out_dir, out_name))
-    shutil.copy("image.diff_par", "{}/{}_diff.par".format(out_dir, out_name))
     if area:
         shutil.move("{}.flat.tif".format(out_name), "{}/{}_flat_{}.tif".format(out_dir, out_name, pol))
 
