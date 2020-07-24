@@ -177,8 +177,8 @@ The basic steps in the radiometric terrain correction process are as follows:
 3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
 4. A mapping function is created, mapping from DEM space into SAR space.
 
-*DEM coregistration is not performed by default. When the matching option is selected for a custom order, steps 5-7 are performed.
-By default, the process will skip from step 4 to step 8.*
+   *DEM coregistration is not performed by default. When the matching option is selected for a custom order, steps 5-7 are performed.
+   By default, the process will skip from step 4 to step 8.*
 
 5. A simulated SAR image is created.
 6. The simulated SAR image and the real SAR image are coregistered.
