@@ -6,7 +6,7 @@ This folder contains radiometric terrain corrected (RTC) products and their asso
 Processing Date/Time: [DATE] [TIME] UTC
 
 The folder and each of its contents all share the same base name, using the following convention:
-S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defkl_ssss
+S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defklm_ssss
 x:          Sentinel-1 Mission (A or B)
 yy:         Beam Mode
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
@@ -14,11 +14,12 @@ bbbbbb:     Start Time of Acquisition (HHMMSS)
 pp:         Polarization
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 zz:         Terrain Correction Resolution
-d:          water masked (w) or unmasked (u)
-e:          clipped area (c) or entire area (e)
-f:          amplitude (a) or power (p) output
-k:          not filtered (n) or filtered (f)
-l:          gamma-0 (g) or sigma-0 (s) output
+d:          Gamma-0 (g) or Sigma-0 (s) Output
+e:          Power (p) or Amplitude (a) Output
+f:          Unmasked (u) or Water Masked (w)
+k:          Not Filtered (n) or Filtered (f)
+l:          Entire Area (e) or Clipped Area (c)
+m:          Dead Reckoning (d) or DEM Matching (m)
 ssss:       Product ID
 
 The source granule used to generate the products contained in this folder is:
@@ -203,4 +204,4 @@ uso@asf.alaska.edu
 907-474-5041
 
 -------------
-Revised 2020-07-23
+Revised 2020-07-24
