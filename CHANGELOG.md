@@ -25,7 +25,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
 
-## Fixed
+### Fixed
 * Updates the minimum required `hyp3lib` and `hyp3proclib` version to bring in the
   [`get_dem.py` NoData bugfix](https://github.com/ASFHyP3/hyp3-lib/pull/175) and
   the [`default_rtc_resolution` bugfix](https://github.com/asfadmin/hyp3-proc-lib/pull/4),
