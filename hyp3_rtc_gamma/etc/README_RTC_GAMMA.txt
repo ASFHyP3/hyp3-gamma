@@ -85,7 +85,7 @@ The Digital Elevation Model (DEM) layer is included with standard products, but 
 
 The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The resolution of the source DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to [SPACING] m for use in RTC processing.
 
-The DEM sources include the National Elevation Dataset (NED), the Shuttle Radar Topography Mission (SRTM), the Copernicus Land Monitoring Service EU-DEM (EUDEM), the Greenland Ice sheet Mapping Project DEM (GIMP), and the Reference Elevation Model of Antarctica DSM (REMA).
+The DEM sources include the National Elevation Dataset (NED) and the Shuttle Radar Topography Mission (SRTM).
 
 The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).
 
@@ -96,12 +96,6 @@ __Summary of the DEMs used by ASF for RTC Processing__
 The *NED* provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.
 
 The *SRTM* was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
-
-The *EUDEM* combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.
-
-The *GIMP* DEM was constructed by combining ASTER and SPOT 5 DEMs over the ice sheet periphery and margin with AVHRR photoclinometry for the interior and far north, and calibrating the data to approximate mean ICESat/GLAS elevations from 2003 to 2009. For more information and to access the full GIMP dataset, refer to https://nsidc.org/data/nsidc-0645.
-
-The *REMA* DSM was constructed from hundreds of thousands of individual stereoscopic Digital Elevation Models extracted from pairs of submeter-resolution DigitalGlobe satellite imagery acquired between 2009 and 2017, and vertically registered to altimetry measurements from Cryosat-2 and ICESat. For more information and to access the full REMA dataset at the original 8-meter resolution, refer to https://www.pgc.umn.edu/data/rema.
 
 -------------
 ## 4. Incidence angle map
@@ -177,16 +171,14 @@ The basic steps in the radiometric terrain correction process are as follows:
 2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
 3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
 4. A mapping function is created, mapping from DEM space into SAR space.
+5. By default, DEM coregistration is not used. When the DEM Matching option is selected for a custom order, the following steps will be performed. *By default the process will skip from step 4 to step 6.*
+    1. A simulated SAR image is created.
+    2. The simulated SAR image and the real SAR image are coregistered.
+    3. The mapping function is updated with the coregistration information.
+6. The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
+7. The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
+8. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
 
-   *DEM coregistration is not performed by default. When the matching option is selected for a custom order, steps 5-7 are performed.
-   By default, the process will skip from step 4 to step 8.*
-
-5. A simulated SAR image is created.
-6. The simulated SAR image and the real SAR image are coregistered.
-7. The mapping function is updated with the coregistration information.
-8. The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
-9. The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
-10. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
 *************
 ### The Sentinel-1 mission ###
 
