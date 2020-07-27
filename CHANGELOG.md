@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.6...v2.1.0)
+
+### Changed
+* Implemented new naming convention for output products.  The names of output zips, folders, and files now all share a
+  common format.
+* Revised README content:
+  * Updated description of product naming scheme
+  * Removed references to EUDEM, GEMP, and REMA DEMs that are no longer used since v2.0.0.
+  * Clarified which RTC processing steps are performed when DEM matching is or is not requested.
+* Orbit files are now downloaded once at the start of processing, rather than once for each polarization image.
+* Orbit search priority is now POEORB from ESA, POEORB from ASF, RESORB from ESA, RESORB from ASF.
+* `main_v2()` now downloads Sentinel-1 data directly from ASF's NGAP distribution endpoint, rather than datapool.
+* Upgrade to [hyp3-lib v1.4.1](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#141) from 1.3.0.
+* Install hyp3-lib via conda instead of pip
+
 ## [2.0.6](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.5...v2.0.6)
 
 ### Fixed
@@ -25,7 +40,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
 
-## Fixed
+### Fixed
 * Updates the minimum required `hyp3lib` and `hyp3proclib` version to bring in the
   [`get_dem.py` NoData bugfix](https://github.com/ASFHyP3/hyp3-lib/pull/175) and
   the [`default_rtc_resolution` bugfix](https://github.com/asfadmin/hyp3-proc-lib/pull/4),

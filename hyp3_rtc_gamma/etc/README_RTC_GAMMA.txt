@@ -6,7 +6,7 @@ This folder contains radiometric terrain corrected (RTC) products and their asso
 Processing Date/Time: [DATE] [TIME] UTC
 
 The folder and each of its contents all share the same base name, using the following convention:
-S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defkl_ssss
+S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defklm_ssss
 x:          Sentinel-1 Mission (A or B)
 yy:         Beam Mode
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
@@ -14,12 +14,13 @@ bbbbbb:     Start Time of Acquisition (HHMMSS)
 pp:         Polarization
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 zz:         Terrain Correction Resolution
-d:          water masked (w) or unmasked (u)
-e:          clipped area (c) or entire area (e)
-f:          amplitude (a) or power (p) output
-k:          not filtered (n) or filtered (f)
-l:          gamma-0 (g) or sigma-0 (s) output
-ssss:       product id
+d:          Gamma-0 (g) or Sigma-0 (s) Output
+e:          Power (p) or Amplitude (a) Output
+f:          Unmasked (u) or Water Masked (w)
+k:          Not Filtered (n) or Filtered (f)
+l:          Entire Area (e) or Clipped Area (c)
+m:          Dead Reckoning (d) or DEM Matching (m)
+ssss:       Product ID
 
 The source granule used to generate the products contained in this folder is:
 [GRAN_NAME]
@@ -80,15 +81,15 @@ KMZ files are generated for use in Google Earth and other compatible application
 -------------
 ## 3. DEM used to correct the data
 
-The Digital Elevation Model (DEM) layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -dem.tif
+The Digital Elevation Model (DEM) layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _dem.tif
 
 The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The resolution of the source DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to [SPACING] m for use in RTC processing.
 
-The DEM sources include the National Elevation Dataset (NED), the Shuttle Radar Topography Mission (SRTM), the Copernicus Land Monitoring Service EU-DEM (EUDEM), the Greenland Ice sheet Mapping Project DEM (GIMP), and the Reference Elevation Model of Antarctica DSM (REMA).
+The DEM sources include the National Elevation Dataset (NED) and the Shuttle Radar Topography Mission (SRTM).
 
 The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).
 
-*Refer to the -dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
+*Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
 
 __Summary of the DEMs used by ASF for RTC Processing__
 
@@ -96,23 +97,17 @@ The *NED* provides the best available public domain raster elevation data of the
 
 The *SRTM* was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
 
-The *EUDEM* combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.
-
-The *GIMP* DEM was constructed by combining ASTER and SPOT 5 DEMs over the ice sheet periphery and margin with AVHRR photoclinometry for the interior and far north, and calibrating the data to approximate mean ICESat/GLAS elevations from 2003 to 2009. For more information and to access the full GIMP dataset, refer to https://nsidc.org/data/nsidc-0645.
-
-The *REMA* DSM was constructed from hundreds of thousands of individual stereoscopic Digital Elevation Models extracted from pairs of submeter-resolution DigitalGlobe satellite imagery acquired between 2009 and 2017, and vertically registered to altimetry measurements from Cryosat-2 and ICESat. For more information and to access the full REMA dataset at the original 8-meter resolution, refer to https://www.pgc.umn.edu/data/rema.
-
 -------------
 ## 4. Incidence angle map
 
-The incidence angle map is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with -inc_map.tif
+The incidence angle map is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _inc_map.tif
 
 This map records the incidence angle for each pixel in the RTC image. The incidence angle is the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians.
 
 -------------
 ## 5. Layover-shadow mask
 
-The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with -ls_map.tif
+The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with _ls_map.tif
 
 The pixel values are generated by adding the following values together to indicate which layover and shadow effects are impacting each pixel:
 0  Pixel not tested for layover or shadow
@@ -160,7 +155,7 @@ The iso.xml file contains general information about the processing of this produ
 -------------
 ## 8. Shapefile
 
-The shapefile (comprised of the four files tagged with _shape) contains polygons indicating the full raster extent (including padding), as well as the extent of actual data (pixels with values other than NoData).
+The shapefile (comprised of the four files tagged with _shape) contains a polygon indicating the extent of actual data (pixels with values other than NoData).
 
 -------------
 ## 9. Log file
@@ -171,19 +166,18 @@ A textfile is generated during processing, which includes the parameters used an
 ### RTC Processing ###
 
 The basic steps in the radiometric terrain correction process are as follows:
-1.  Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
-2.  If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
-3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
-4.  A mapping function is created, mapping from DEM space into SAR space.
-5.  A simulated SAR image is created.
-6.  The simulated SAR image and the real SAR image are coregistered.
-7.  The mapping function is updated with the coregistration information.
-8.  The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
-9.  The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
-10. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
 
-The Algorithm Theoretical Basis Document (ATBD), which provides the theoretical background of the algorithms and processing flows used for the generation of this product, is available here:
-https://asf.alaska.edu/wp-content/uploads/2019/02/RTC_ATBD_Sentinel.pdf
+1. Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
+2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
+3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
+4. A mapping function is created, mapping from DEM space into SAR space.
+5. By default, DEM coregistration is not used. When the DEM Matching option is selected for a custom order, the following steps will be performed. *By default the process will skip from step 4 to step 6.*
+    1. A simulated SAR image is created.
+    2. The simulated SAR image and the real SAR image are coregistered.
+    3. The mapping function is updated with the coregistration information.
+6. The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.
+7. The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.
+8. Post processing creates GeoTIFF, PNG and KMZ files, along with associated metadata.
 
 *************
 ### The Sentinel-1 mission ###
@@ -202,4 +196,4 @@ uso@asf.alaska.edu
 907-474-5041
 
 -------------
-Revised 2020-04-07
+Revised 2020-07-24
