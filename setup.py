@@ -38,9 +38,8 @@ setup(
         'importlib_metadata',
         'lxml',
         'numpy',
-        'requests',
+        'pillow',
         'scipy',
-        'urllib3',
     ],
 
     extras_require={

@@ -50,7 +50,8 @@ def fetch_orbit_file(in_file):
     return orbit_file
 
 
-def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, filtered=False, gamma0=True):
+def get_product_name(granule_name, orbit_file=None, resolution=30, gamma0=True, power=True,
+                     filtered=False, matching=False):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
@@ -68,11 +69,12 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, power=True, f
 
     product_id = token_hex(2).upper()
 
+    g = 'g' if gamma0 else 's'
     p = 'p' if power else 'a'
     f = 'f' if filtered else 'n'
-    g = 'g' if gamma0 else 's'
+    m = 'm' if matching else 'd'
 
-    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_ue{p}{f}{g}_{product_id}'
+    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
 
 
@@ -280,7 +282,6 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     shutil.move("{}.ls_map.tif".format(out_name), "{}/{}_ls_map.tif".format(out_dir, out_name))
     shutil.move("{}.inc_map.tif".format(out_name), "{}/{}_inc_map.tif".format(out_dir, out_name))
     shutil.move("{}.dem.tif".format(out_name), "{}/{}_dem.tif".format(out_dir, out_name))
-    shutil.copy("image.diff_par", "{}/{}_diff.par".format(out_dir, out_name))
     if area:
         shutil.move("{}.flat.tif".format(out_name), "{}/{}_flat_{}.tif".format(out_dir, out_name, pol))
 
@@ -653,7 +654,7 @@ def rtc_sentinel_gamma(in_file,
     orbit_file = fetch_orbit_file(in_file)
 
     if out_name is None:
-        out_name = get_product_name(in_file, orbit_file, res, pwr_flag, filter_flag, gamma_flag)
+        out_name = get_product_name(in_file, orbit_file, res, gamma_flag, pwr_flag, filter_flag, match_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
