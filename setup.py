@@ -33,14 +33,13 @@ setup(
 
     install_requires=[
         'boto3',
-        'hyp3lib>=1.3.0,<2',
+        'hyp3lib>=1.4.1,<2',
         'hyp3proclib>=1.0.1,<2',
         'importlib_metadata',
         'lxml',
         'numpy',
-        'requests',
+        'pillow',
         'scipy',
-        'urllib3',
     ],
 
     extras_require={
