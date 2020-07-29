@@ -148,13 +148,7 @@ def find_and_remove(directory, file_pattern):
 
 def process_rtc_gamma(cfg, n):
     try:
-        logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                            datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
         logging.info(f'Processing GAMMA RTC "{cfg["sub_name"]}" for "{cfg["username"]}"')
-
-        # remove handlers from hyp3proclib logger in favor of root logger
-        for handler in log.handlers:
-            log.removeHandler(handler)
 
         granule = cfg['granule']
         if not re.match('S1[AB]_.._[SLC|GRD]', granule):
@@ -202,13 +196,16 @@ def process_rtc_gamma(cfg, n):
         failure(cfg, str(e))
 
     cleanup_workdir(cfg)
-    logging.info('Done')
 
 
 def main():
     """
     Main entrypoint for hyp3_rtc_gamma
     """
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    log.propagate = False
+
     processor = Processor(
         'rtc_gamma', process_rtc_gamma, sci_version=hyp3_rtc_gamma.__version__
     )
