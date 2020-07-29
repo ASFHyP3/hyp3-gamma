@@ -13,7 +13,6 @@ from hyp3proclib import (
     execute,
     extra_arg_is,
     failure,
-    find_browses,
     get_extra_arg,
     get_looks,
     process,
@@ -35,7 +34,7 @@ def find_color_phase_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith("color_phase_large.png"):
+            if filepath.endswith("color_phase.png"):
                 log.info('Browse image: ' + filepath)
                 return filepath
 
@@ -169,13 +168,11 @@ def hyp3_process(cfg, n):
 
             browse_img = find_color_phase_png(out_path)
             new_browse_img_name = out_path + '.browse.png'
-            os.rename(browse_img, new_browse_img_name)
+            shutil.copy(browse_img, new_browse_img_name)
 
             cfg['attachment'] = new_browse_img_name
             cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
             cfg['original_product_size'] = 0
-
-            find_browses(cfg, out_path)
 
             with get_db_connection('hyp3-db') as conn:
                 record_metrics(cfg, conn)
