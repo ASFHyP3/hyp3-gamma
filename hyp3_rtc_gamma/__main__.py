@@ -148,9 +148,14 @@ def find_and_remove(directory, file_pattern):
 
 def process_rtc_gamma(cfg, n):
     try:
+
         logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                             datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
         logging.info(f'Processing GAMMA RTC "{cfg["sub_name"]}" for "{cfg["username"]}"')
+
+        # remove handlers from hyp3proclib logger in favor of root logger
+        for handler in log.handlers:
+            log.removeHandler(handler)
 
         granule = cfg['granule']
         if not re.match('S1[AB]_.._[SLC|GRD]', granule):
@@ -186,9 +191,6 @@ def process_rtc_gamma(cfg, n):
         zip_file = make_archive(base_name=product_dir, format='zip', base_dir=product_dir)
         cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
         cfg['attachment'] = find_png(product_dir)
-
-        for handler in log.handlers:
-            log.removeHandler(handler)
 
         with get_db_connection('hyp3-db') as conn:
             upload_product(zip_file, cfg, conn)
