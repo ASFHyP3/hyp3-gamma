@@ -161,7 +161,7 @@ def hyp3_process(cfg, n):
             cfg['out_path'] = out_path
 
             log.debug('Renaming ' + product + ' to ' + out_path)
-            shutil.copy(product, out_path)
+            os.rename(product, out_path)
 
             add_esa_citation(g1, out_path)
             zip_dir(out_path, zip_file)
