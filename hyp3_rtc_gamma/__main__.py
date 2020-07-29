@@ -165,7 +165,7 @@ def process_rtc_gamma(cfg, n):
 
         args = {
             'in_file': granule_zip_file,
-            'res': int(res.rstrip('m')),
+            'res': float(res.rstrip('m')),
             'match_flag': extra_arg_is(cfg, 'matching', 'yes'),
             'pwr_flag': extra_arg_is(cfg, 'power', 'yes'),
             'gamma_flag': extra_arg_is(cfg, 'gamma0', 'yes'),
