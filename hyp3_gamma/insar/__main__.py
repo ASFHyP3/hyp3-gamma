@@ -35,7 +35,7 @@ def find_color_phase_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
             filepath = os.path.join(subdir, file)
-            if filepath.endswith("color_phase_large.png"):
+            if filepath.endswith("color_phase.png"):
                 log.info('Browse image: ' + filepath)
                 return filepath
 
