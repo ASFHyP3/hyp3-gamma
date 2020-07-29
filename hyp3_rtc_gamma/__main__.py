@@ -12,6 +12,7 @@ from shutil import make_archive
 
 import boto3
 from PIL import Image
+from hyp3lib import GranuleError
 from hyp3lib.fetch import download_file
 from hyp3proclib import (
     extra_arg_is,
@@ -153,7 +154,7 @@ def process_rtc_gamma(cfg, n):
 
         granule = cfg['granule']
         if not re.match('S1[AB]_.._[SLC|GRD]', granule):
-            raise ValueError(f'Invalid granule, only S1 SLC and GRD data are supported: {granule}')
+            raise GranuleError(f'Invalid granule, only S1 SLC and GRD data are supported: {granule}')
 
         res = get_extra_arg(cfg, 'resolution', '30m')
         if res not in ('10m', '30m'):
