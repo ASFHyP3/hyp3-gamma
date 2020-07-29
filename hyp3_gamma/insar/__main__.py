@@ -13,7 +13,6 @@ from hyp3proclib import (
     execute,
     extra_arg_is,
     failure,
-    find_browses,
     get_extra_arg,
     get_looks,
     process,
@@ -162,20 +161,18 @@ def hyp3_process(cfg, n):
             cfg['out_path'] = out_path
 
             log.debug('Renaming ' + product + ' to ' + out_path)
-            os.rename(product, out_path)
+            shutil.copy(product, out_path)
 
             add_esa_citation(g1, out_path)
             zip_dir(out_path, zip_file)
 
             browse_img = find_color_phase_png(out_path)
             new_browse_img_name = out_path + '.browse.png'
-            os.rename(browse_img, new_browse_img_name)
+            shutil.copy(browse_img, new_browse_img_name)
 
             cfg['attachment'] = new_browse_img_name
             cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
             cfg['original_product_size'] = 0
-
-            find_browses(cfg, out_path)
 
             with get_db_connection('hyp3-db') as conn:
                 record_metrics(cfg, conn)
