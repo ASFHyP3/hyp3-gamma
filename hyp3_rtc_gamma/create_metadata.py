@@ -65,9 +65,9 @@ def create_arc_xml(infile, outfile, input_type, gamma_flag, pwr_flag, filter_fla
     else:
         format_type = "amplitude"
     if filter_flag:
-        filter_str = "has"
+        filter_str = "A"
     else:
-        filter_str = "has not"
+        filter_str = "No"
 
     if input_type == "SLC":
         full_type = "Single-Look Complex"
