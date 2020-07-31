@@ -717,13 +717,13 @@ def rtc_sentinel_gamma(in_file,
     if no_cross_pol:
         cpol = None
 
-    rtc_name = out_name + "_" + pol + ".tif"
+    rtc_name = f'{out_name}_{pol}.tif'
     process_pol(in_file, rtc_name, out_name, pol, res, looks,
                 match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
                 browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     if cpol:
-        rtc_name = out_name + "_" + cpol + ".tif"
+        rtc_name = f'{out_name}_{cpol}.tif'
         process_2nd_pol(in_file, rtc_name, cpol, res, looks,
                         gamma_flag, filter_flag, pwr_flag, browse_res,
                         out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
