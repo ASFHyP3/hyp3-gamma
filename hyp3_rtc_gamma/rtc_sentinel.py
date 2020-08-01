@@ -9,7 +9,7 @@ import sys
 import zipfile
 from secrets import token_hex
 
-from hyp3lib import ExecuteError, OrbitDownloadError
+from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
@@ -76,6 +76,22 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, gamma0=True, 
 
     product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
+
+
+def get_polarizations(in_file):
+    mapping = {
+        'SH': ('HH', None),
+        'SV': ('VV', None),
+        'DH': ('HH', 'HV'),
+        'DV': ('VV', 'VH'),
+    }
+    key = in_file[14:16]
+    polarizations = mapping.get(key)
+
+    if not polarizations:
+        raise GranuleError(f'Could not determine polarization(s) from {in_file}')
+
+    return polarizations
 
 
 def perform_sanity_checks():
@@ -166,7 +182,7 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
 
 def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
                 filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False, orbit_file=None):
-    logging.info("Processing the {} polarization".format(pol))
+    logging.info(f'Processing the {pol} polarization')
 
     mgrd = "{out}.{pol}.mgrd".format(out=out_name, pol=pol)
     tif = "image_cal_map.mli.tif"
@@ -290,6 +306,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
 def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
                     outfile, dem, terms, par=None, area=False, orbit_file=None):
+    logging.info(f'Processing the {cpol} polarization')
     if cpol == "VH":
         mpol = "VV"
     else:
@@ -696,48 +713,20 @@ def rtc_sentinel_gamma(in_file,
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
         sys.exit(1)
 
-    vvlist = glob.glob("{}/*/*vv*.tiff".format(in_file))
-    vhlist = glob.glob("{}/*/*vh*.tiff".format(in_file))
-    hhlist = glob.glob("{}/*/*hh*.tiff".format(in_file))
-    hvlist = glob.glob("{}/*/*hv*.tiff".format(in_file))
+    pol, cpol = get_polarizations(in_file)
+    if no_cross_pol:
+        cpol = None
 
-    cpol = None
-    pol = None
-    if vvlist:
-        logging.info("Found VV polarization - processing")
-        pol = "VV"
-        rtc_name = out_name + "_" + pol + ".tif"
-        process_pol(in_file, rtc_name, out_name, pol, res, looks,
-                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
+    rtc_name = f'{out_name}_{pol}.tif'
+    process_pol(in_file, rtc_name, out_name, pol, res, looks,
+                match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
+                browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
-        if vhlist and not no_cross_pol:
-            cpol = "VH"
-            rtc_name = out_name + "_" + cpol + ".tif"
-            logging.info("Found VH polarization - processing")
-            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
-                            gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-    if hhlist:
-        logging.info("Found HH polarization - processing")
-        pol = "HH"
-        rtc_name = out_name + "_" + pol + ".tif"
-        process_pol(in_file, rtc_name, out_name, pol, res, looks,
-                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-        if hvlist and not no_cross_pol:
-            cpol = "HV"
-            logging.info("Found HV polarization - processing")
-            rtc_name = out_name + "_" + cpol + ".tif"
-            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
-                            gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-    if hhlist is None and vvlist is None:
-        logging.error(f"ERROR: Can not find VV or HH polarization in {in_file}")
-        sys.exit(1)
+    if cpol:
+        rtc_name = f'{out_name}_{cpol}.tif'
+        process_2nd_pol(in_file, rtc_name, cpol, res, looks,
+                        gamma_flag, filter_flag, pwr_flag, browse_res,
+                        out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     fix_geotiff_locations()
     reproject_dir(dem_type, res, prod_dir="PRODUCT")
