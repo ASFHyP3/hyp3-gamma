@@ -4,34 +4,25 @@ rtc_gamma processing for HyP3
 import glob
 import logging
 import os
-import shutil
+import re
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from datetime import datetime
 from mimetypes import guess_type
 from shutil import make_archive
 
 import boto3
 from PIL import Image
+from hyp3lib import GranuleError
 from hyp3lib.fetch import download_file
 from hyp3proclib import (
-    add_browse,
-    clip_tiffs_to_roi,
-    execute,
     extra_arg_is,
     failure,
-    find_browses,
     get_extra_arg,
-    process,
-    record_metrics,
     success,
-    unzip,
     upload_product,
-    user_ok_for_jers,
-    zip_dir,
 )
 from hyp3proclib.db import get_db_connection
-from hyp3proclib.file_system import add_citation, cleanup_workdir
+from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
@@ -134,257 +125,87 @@ def main_v2():
 # end v2 functions
 
 
-def find_png(dir_):
-    # First try to find RGB
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png") and 'rgb' in filepath:
-                log.info('Browse image: ' + filepath)
-                return filepath
+def find_png(product_dir):
+    pattern = os.path.join(product_dir, '*.png')
+    png_files = glob.glob(pattern)
 
-    # No RGB, see if we can find a grayscale browse
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if filepath.endswith(".png"):
-                log.info('Browse image: ' + filepath)
-                return filepath
+    for png_file in png_files:
+        if 'rgb' in png_file:
+            return png_file
+
+    if png_files:
+        return png_files[0]
 
     return None
 
 
-def find_raw(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if filepath.endswith(".raw") and 'L0' in file:
-                log.info('Found L0 data file: ' + filepath)
-                return filepath
-
-    return None
-
-
-def find_zip(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if filepath.endswith(".zip") and ('GRD' in file or 'SLC' in file or 'L0' in file):
-                log.info('Found zip: ' + filepath)
-                return filepath
-
-    return None
-
-
-def find_and_remove(dir_, s):
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if s in file:
-                log.info('Removing from PRODUCT dir: ' + filepath)
-                os.remove(filepath)
-
-
-def find_product_dir(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for d in dirs:
-            if d == "PRODUCT":
-                return os.path.join(subdir, d)
-
-    return None
-
-
-def find_product_name(directory):
-    try:
-        readme_file = glob.glob(f'{directory}/*.README.txt')[0]
-    except IndexError:
-        raise Exception(f'Could not determine product name, no README.txt file found in {directory}')
-    return os.path.basename(readme_file).split('.')[0]
-
-
-def download(cfg, granule):
-    if granule.startswith('S1'):
-        if 'GRD' in granule:
-            typ = "GRD"
-        elif 'SLC' in granule:
-            typ = "SLC"
-        else:
-            raise Exception("Unsupported Sentinel-1: "+granule)
-    else:
-        typ = "l0"
-
-    log.info('Downloading {0} with get_asf.py'.format(granule))
-    execute(cfg, "get_asf.py --{0} --dir={1} {2}".format(typ, cfg['workdir'], granule))
-
-    if 'GRD' in granule or 'SLC' in granule:
-        zip_file = os.path.join(cfg['workdir'], granule+'.zip')
-    else:
-        zip_file = find_zip(cfg['workdir'])
-        if zip_file:
-            granule = os.path.splitext(os.path.basename(zip_file))[0]
-        else:
-            log.info('Nothing found for {0}'.format(granule))
-            return granule
-
-    if not os.path.isfile(zip_file):
-        raise Exception('Could not find expected download file: ' + zip_file)
-    else:
-        log.info('Download complete')
-        log.info('Unzipping ' + zip_file)
-
-        unzip(zip_file, cfg['workdir'])
-
-        if granule.startswith('S1'):
-            safe_file = os.path.join(cfg['workdir'], granule+'.SAFE')
-            if not os.path.isdir(safe_file):
-                raise Exception('Failed to unzip, SAFE directory not found: ' + safe_file)
-
-    log.info('Unzip completed.')
-
-    return granule
+def find_and_remove(directory, file_pattern):
+    pattern = os.path.join(directory, file_pattern)
+    for filename in glob.glob(pattern):
+        logging.info(f'Removing {filename}')
+        os.remove(filename)
 
 
 def process_rtc_gamma(cfg, n):
     try:
-        log.info('Processing GAMMA RTC "{0}" for "{1}"'.format(cfg['sub_name'], cfg['username']))
+        logging.info(f'Processing GAMMA RTC "{cfg["sub_name"]}" for "{cfg["username"]}"')
 
-        in_granule = cfg['granule']
+        granule = cfg['granule']
+        if not re.match('S1[AB]_.._[SLC|GRD]', granule):
+            raise GranuleError(f'Invalid granule, only S1 SLC and GRD data are supported: {granule}')
 
-        cfg['log'] = "Processing started at " + str(datetime.now()) + "\n\n"
-        g = download(cfg, in_granule)
+        res = get_extra_arg(cfg, 'resolution', '30m')
+        if res not in ('10m', '30m'):
+            raise ValueError(f'Invalid resolution, valid options are 10m or 30m: {res}')
 
-        if in_granule.startswith('S1'):
+        granule_url = get_download_url(granule)
+        granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
-            if 'RAW' in g:
-                raise Exception('Sentinel RAW data is not supported: ' + in_granule)
-            d = g[17:25]
-            sd = d[0:4] + '-' + d[4:6] + '-' + d[6:8]
-            cfg["email_text"] = "This is an RTC product from {0}.".format(sd)
+        args = {
+            'in_file': granule_zip_file,
+            'res': float(res.rstrip('m')),
+            'match_flag': extra_arg_is(cfg, 'matching', 'yes'),
+            'pwr_flag': extra_arg_is(cfg, 'power', 'yes'),
+            'gamma_flag': extra_arg_is(cfg, 'gamma0', 'yes'),
+            'lo_flag': res == '30m',
+            'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
+        }
+        product_dir, product_name = rtc_sentinel_gamma(**args)
 
-            res = get_extra_arg(cfg, 'resolution', cfg['default_rtc_resolution'])
+        logging.info(f'Renaming {product_dir} to {product_name}')
+        os.rename(product_dir, product_name)
+        product_dir = product_name
 
-            if res not in ('10m', '30m'):
-                raise Exception('Invalid resolution: ' + res)
+        if extra_arg_is(cfg, 'include_dem', 'no'):
+            find_and_remove(product_dir, '*_dem.tif*')
+        if extra_arg_is(cfg, 'include_inc', 'no'):
+            find_and_remove(product_dir, '*_inc_map.tif*')
 
-            if res == '30m':
-                args = ['-l']
-            else:
-                args = []
+        zip_file = make_archive(base_name=product_dir, format='zip', base_dir=product_dir)
+        cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
+        cfg['attachment'] = find_png(product_dir)
+        cfg['email_text'] = ' '
 
-            if extra_arg_is(cfg, 'matching', 'no'):
-                args += ['-n']
-
-            if extra_arg_is(cfg, 'power', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                args += ['--amp']
-
-            if extra_arg_is(cfg, 'gamma0', 'no') or extra_arg_is(cfg, 'keep_area', 'yes'):
-                args += ['--sigma']
-
-            if extra_arg_is(cfg, 'filter', 'yes'):
-                args += ['-f']
-
-            if extra_arg_is(cfg, 'keep_area', 'yes'):
-                args += ['-n']
-
-            if res == '10m':
-                args += ['-o', '10']
-            else:
-                default_looks = 6
-                if 'SLC' in in_granule:
-                    default_looks = 3
-                looks = get_extra_arg(cfg, 'looks', str(default_looks))
-                args += ['-k', looks]
-
-            safe_dir = g + '.SAFE'
-            args += [safe_dir, ]
-
-            process(cfg, 'rtc_sentinel.py', args)
-
-        elif in_granule.startswith('E1') \
-                or in_granule.startswith('E2') \
-                or in_granule.startswith('R1') or in_granule.startswith('J1'):
-
-            if in_granule.startswith('J1') and not user_ok_for_jers(cfg, cfg['user_id']):
-                raise Exception('User does not have permission to process JERS data: ' + in_granule)
-
-            log.info('Legacy granule: ' + g)
-            raw = find_raw(cfg['workdir'])
-            d = os.path.dirname(raw)
-
-            log.info('Changing to directory ' + d)
-            os.chdir(d)
-
-            args = ["-g", "-d", os.path.basename(raw)]
-
-            process(cfg, 'rtc_legacy.py', args)
-
-        else:
-            raise Exception('Unrecognized: ' + in_granule)
-
-        product_dir = find_product_dir(cfg['workdir'])
-        if not os.path.isdir(product_dir):
-            log.info('PRODUCT directory not found: ' + product_dir)
-            log.error('Processing failed')
-            raise Exception("Processing failed: PRODUCT directory not found")
-        else:
-            if extra_arg_is(cfg, "include_dem", "no"):
-                find_and_remove(product_dir, '_dem.tif')
-            if extra_arg_is(cfg, "include_inc", "no"):
-                find_and_remove(product_dir, '_inc_map.tif')
-
-            out_name = find_product_name(product_dir)
-            log.info('Output name: ' + out_name)
-
-            out_path = os.path.join(cfg['workdir'], out_name)
-            log.info('Output path: ' + out_path)
-
-            zip_file = out_path + '.zip'
-            if os.path.isdir(out_path):
-                shutil.rmtree(out_path)
-            if os.path.isfile(zip_file):
-                os.unlink(zip_file)
-            cfg['out_path'] = out_path
-
-            with get_db_connection('hyp3-db') as conn:
-                clip_tiffs_to_roi(cfg, conn, product_dir)
-
-                log.debug('Renaming ' + product_dir + ' to ' + out_path)
-                os.rename(product_dir, out_path)
-
-                browse_path = find_png(out_path)
-                cfg['attachment'] = browse_path
-                add_browse(cfg, 'LOW-RES', browse_path)
-
-                find_browses(cfg, out_path)
-                add_citation(cfg, out_path)
-                zip_dir(out_path, zip_file)
-
-                cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-                cfg['original_product_size'] = 0
-
-                record_metrics(cfg, conn)
-                if 'lag' in cfg and 'email_text' in cfg:
-                    cfg['email_text'] += "\n" + "You are receiving this product {0} after it was acquired.".format(
-                        cfg['lag'])
-
-                upload_product(zip_file, cfg, conn, browse_path=browse_path)
-                success(conn, cfg)
+        with get_db_connection('hyp3-db') as conn:
+            upload_product(zip_file, cfg, conn)
+            success(conn, cfg)
 
     except Exception as e:
-        log.exception('Processing failed')
-        log.info('Notifying user')
-
+        logging.exception('Processing failed')
+        logging.info('Notifying user')
         failure(cfg, str(e))
 
     cleanup_workdir(cfg)
-
-    log.info('Done')
 
 
 def main():
     """
     Main entrypoint for hyp3_rtc_gamma
     """
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    log.propagate = False
+
     processor = Processor(
         'rtc_gamma', process_rtc_gamma, sci_version=hyp3_rtc_gamma.__version__
     )
