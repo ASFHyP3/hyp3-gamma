@@ -100,6 +100,13 @@ def main_v2():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--resolution', type=float, choices=[10.0, 30.0])
+    parser.add_argument('--radiometry', choices=['gamma0', 'sigma0'])
+    parser.add_argument('--scale', choices=['power', 'amplitude'])
+    parser.add_argument('--speckle-filter', action='store_true')
+    parser.add_argument('--dem-matching', action='store_true')
+    parser.add_argument('--include-dem', action='store_true')
+    parser.add_argument('--include-inc-map', action='store_true')
     parser.add_argument('granule')
     args = parser.parse_args()
 
@@ -111,9 +118,23 @@ def main_v2():
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
-    output_folder, product_name = rtc_sentinel_gamma(granule_zip_file)
+    output_folder, product_name = rtc_sentinel_gamma(
+                                      in_file=granule_zip_file,
+                                      res=args.resolution,
+                                      match_flag=args.dem_matching,
+                                      pwr_flag=(args.scale=='power'),
+                                      gamma_flag=(args.radiometry=='gamma0'),
+                                      lo_flag=(args.resolution==30.0),
+                                      filter_flag=args.speckle_filter,
+                                  )
 
     os.rename(output_folder, product_name)
+
+    if not args.include_dem:
+        find_and_remove(product_name, '*_dem.tif*')
+    if not args.include_inc_map:
+        find_and_remove(product_name, '*_inc_map.tif*')
+
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
         upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
