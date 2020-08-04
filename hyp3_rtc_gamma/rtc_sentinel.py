@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import zipfile
+from math import isclose
 from secrets import token_hex
 
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
@@ -153,7 +154,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
         os.chdir(home)
 
 
-def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
@@ -167,7 +168,6 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
     logging.info("    Match flag                        : {}".format(match_flag))
     logging.info("    If no match, use Dead Reckoning   : {}".format(dead_flag))
     logging.info("    Gamma0 output                     : {}".format(gamma_flag))
-    logging.info("    Low resolution flag               : {}".format(lo_flag))
     logging.info("    Create power images               : {}".format(pwr_flag))
     logging.info("    Speckle Filtering                 : {}".format(filter_flag))
     logging.info("    Number of looks to take           : {}".format(looks))
@@ -438,7 +438,7 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     os.chdir("..")
 
 
-def create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+def create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par):
     out = "PRODUCT"
@@ -448,8 +448,6 @@ def create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag
     f = open(logname, "w")
     f.write("Consolidated log for: {}\n".format(out_name))
     options = ""
-    if lo_flag:
-        options += "-l "
     if not dead_flag:
         options += "--fail "
     if match_flag:
@@ -615,14 +613,13 @@ def configure_log_file():
 
 def rtc_sentinel_gamma(in_file,
                        out_name=None,
-                       res=None,
+                       res=30.0,
                        dem=None,
                        roi=None,
                        shape=None,
                        match_flag=False,
                        dead_flag=True,
                        gamma_flag=True,
-                       lo_flag=True,
                        pwr_flag=True,
                        filter_flag=False,
                        looks=None,
@@ -638,17 +635,12 @@ def rtc_sentinel_gamma(in_file,
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
 
-    if res is None:
-        res = 10
-    if lo_flag:
-        res = 30
-
     browse_res = 30
     if res > browse_res:
         browse_res = res
 
     if looks is None:
-        if res == 30:
+        if isclose(res, 30.0):
             if "GRD" in in_file:
                 looks = 6
             else:
@@ -673,7 +665,7 @@ def rtc_sentinel_gamma(in_file,
     if out_name is None:
         out_name = get_product_name(in_file, orbit_file, res, gamma_flag, pwr_flag, filter_flag, match_flag)
 
-    report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+    report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
 
     orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
@@ -746,7 +738,7 @@ def rtc_sentinel_gamma(in_file,
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+    create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
     return 'PRODUCT', out_name
@@ -759,7 +751,7 @@ def main():
         description=__doc__,
     )
     parser.add_argument('input', help='Name of input file, either .zip or .SAFE')
-    parser.add_argument("-o", "--outputResolution", type=float, help="Desired output resolution")
+    parser.add_argument("-o", "--outputResolution", type=float, default=30.0, help="Desired output resolution")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-e", "--externalDEM", help="Specify a DEM file to use - must be in UTM projection")
@@ -773,7 +765,6 @@ def main():
     parser.add_argument("--sigma", action="store_true", help="create sigma0 instead of gamma0")
     parser.add_argument("--amp", action="store_true", help="create amplitude images instead of power")
     parser.add_argument("--smooth", action="store_true", help="smooth DEM file before terrain correction")
-    parser.add_argument("-l", action="store_true", help="create a lo-res output (30m)")
     parser.add_argument("-f", action="store_true", help="run enhanced lee filter")
     parser.add_argument("-k", "--looks", type=int,
                         help="set the number of looks to take (def:3 for SLC/6 for GRD)")
@@ -798,7 +789,6 @@ def main():
                        match_flag=args.n,
                        dead_flag=not args.fail,
                        gamma_flag=not args.sigma,
-                       lo_flag=args.l,
                        pwr_flag=not args.amp,
                        filter_flag=args.f,
                        looks=args.looks,

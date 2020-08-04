@@ -188,7 +188,6 @@ def process_rtc_gamma(cfg, n):
             'match_flag': extra_arg_is(cfg, 'matching', 'yes'),
             'pwr_flag': extra_arg_is(cfg, 'power', 'yes'),
             'gamma_flag': extra_arg_is(cfg, 'gamma0', 'yes'),
-            'lo_flag': res == '30m',
             'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
         }
         product_dir, product_name = rtc_sentinel_gamma(**args)
