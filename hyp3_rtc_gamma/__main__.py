@@ -124,7 +124,6 @@ def main_v2():
                                       match_flag=args.dem_matching,
                                       pwr_flag=(args.scale=='power'),
                                       gamma_flag=(args.radiometry=='gamma0'),
-                                      lo_flag=(args.resolution==30.0),
                                       filter_flag=args.speckle_filter,
                                   )
 
