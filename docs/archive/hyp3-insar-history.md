@@ -45,7 +45,3 @@ will break all existing HyP3 workflows!
 * All of `src/` is now contained in the `hyp3_insar_gamma` package
 * All of `etc/` is now contained in `hyp3_insar_gamma.etc`
 * The version number is now tracked automatically via git tags instead of in `etc/version.txt`
-
-## [1.2.1]
-
-Legacy AWS AMI based HyP3 processing. 
