@@ -81,7 +81,7 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
             }
         ]
     }
-    S3_CLIENT.put_object_tagging(bucket, key, Tagging=tag_set)
+    S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
 
 
 def get_download_url(granule):
