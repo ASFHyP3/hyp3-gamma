@@ -67,12 +67,21 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_file_to_s3(path_to_file, bucket, prefix=''):
+def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
     logging.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
+    tag_set = {
+        'TagSet': [
+            {
+                'Key': 'file_type',
+                'Value': file_type
+            }
+        ]
+    }
+    S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
 
 
 def get_download_url(granule):
@@ -140,12 +149,12 @@ def main_v2():
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
-        upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
+        upload_file_to_s3(output_zip, 'product', args.bucket, args.bucket_prefix)
         browse_images = glob.glob(f'{product_name}/*.png')
         for browse in browse_images:
             thumbnail = create_thumbnail(browse)
-            upload_file_to_s3(browse, args.bucket, args.bucket_prefix + '/browse')
-            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix + '/thumbnail')
+            upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
+            upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
 # end v2 functions
 
 
