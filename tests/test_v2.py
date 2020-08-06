@@ -57,7 +57,7 @@ def test_upload_file_to_s3(tmp_path, s3_stubber):
 
     file_to_upload = tmp_path / 'myFile.zip'
     file_to_upload.touch()
-    main.upload_file_to_s3(str(file_to_upload), 'myBucket')
+    main.upload_file_to_s3(str(file_to_upload), 'file_type', 'myBucket')
 
 
 def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
@@ -71,7 +71,7 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
 
     file_to_upload = tmp_path / 'myFile.txt'
     file_to_upload.touch()
-    main.upload_file_to_s3(str(file_to_upload), 'myBucket', 'myPrefix')
+    main.upload_file_to_s3(str(file_to_upload), 'file_type', 'myPrefix', 'myBucket')
 
 
 def test_create_thumbnail(image):
