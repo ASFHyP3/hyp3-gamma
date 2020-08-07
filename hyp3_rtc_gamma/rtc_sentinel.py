@@ -7,9 +7,10 @@ import os
 import shutil
 import sys
 import zipfile
+from math import isclose
 from secrets import token_hex
 
-from hyp3lib import ExecuteError, OrbitDownloadError
+from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
@@ -78,6 +79,22 @@ def get_product_name(granule_name, orbit_file=None, resolution=30, gamma0=True, 
     return product_name
 
 
+def get_polarizations(in_file):
+    mapping = {
+        'SH': ('HH', None),
+        'SV': ('VV', None),
+        'DH': ('HH', 'HV'),
+        'DV': ('VV', 'VH'),
+    }
+    key = in_file[14:16]
+    polarizations = mapping.get(key)
+
+    if not polarizations:
+        raise GranuleError(f'Could not determine polarization(s) from {in_file}')
+
+    return polarizations
+
+
 def perform_sanity_checks():
     logging.info("Performing sanity checks on output PRODUCTs")
     tif_list = glob.glob("PRODUCT/*.tif")
@@ -137,7 +154,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
         os.chdir(home)
 
 
-def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
@@ -151,7 +168,6 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
     logging.info("    Match flag                        : {}".format(match_flag))
     logging.info("    If no match, use Dead Reckoning   : {}".format(dead_flag))
     logging.info("    Gamma0 output                     : {}".format(gamma_flag))
-    logging.info("    Low resolution flag               : {}".format(lo_flag))
     logging.info("    Create power images               : {}".format(pwr_flag))
     logging.info("    Speckle Filtering                 : {}".format(filter_flag))
     logging.info("    Number of looks to take           : {}".format(looks))
@@ -166,7 +182,7 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
 
 def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, dead_flag, gamma_flag,
                 filter_flag, pwr_flag, browse_res, dem, terms, par=None, area=False, orbit_file=None):
-    logging.info("Processing the {} polarization".format(pol))
+    logging.info(f'Processing the {pol} polarization')
 
     mgrd = "{out}.{pol}.mgrd".format(out=out_name, pol=pol)
     tif = "image_cal_map.mli.tif"
@@ -290,6 +306,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
 def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
                     outfile, dem, terms, par=None, area=False, orbit_file=None):
+    logging.info(f'Processing the {cpol} polarization')
     if cpol == "VH":
         mpol = "VV"
     else:
@@ -421,7 +438,7 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     os.chdir("..")
 
 
-def create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+def create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par):
     out = "PRODUCT"
@@ -431,8 +448,6 @@ def create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag
     f = open(logname, "w")
     f.write("Consolidated log for: {}\n".format(out_name))
     options = ""
-    if lo_flag:
-        options += "-l "
     if not dead_flag:
         options += "--fail "
     if match_flag:
@@ -598,14 +613,13 @@ def configure_log_file():
 
 def rtc_sentinel_gamma(in_file,
                        out_name=None,
-                       res=None,
+                       res=30.0,
                        dem=None,
                        roi=None,
                        shape=None,
                        match_flag=False,
                        dead_flag=True,
                        gamma_flag=True,
-                       lo_flag=True,
                        pwr_flag=True,
                        filter_flag=False,
                        looks=None,
@@ -621,17 +635,12 @@ def rtc_sentinel_gamma(in_file,
     logging.info("                Sentinel RTC Program - Starting")
     logging.info("===================================================================")
 
-    if res is None:
-        res = 10
-    if lo_flag:
-        res = 30
-
     browse_res = 30
     if res > browse_res:
         browse_res = res
 
     if looks is None:
-        if res == 30:
+        if isclose(res, 30.0):
             if "GRD" in in_file:
                 looks = 6
             else:
@@ -656,7 +665,7 @@ def rtc_sentinel_gamma(in_file,
     if out_name is None:
         out_name = get_product_name(in_file, orbit_file, res, gamma_flag, pwr_flag, filter_flag, match_flag)
 
-    report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag, lo_flag,
+    report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
                   pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, area, orbit_file)
 
     orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
@@ -696,48 +705,20 @@ def rtc_sentinel_gamma(in_file,
         logging.error("ERROR: Unrecognized DEM: {}".format(dem))
         sys.exit(1)
 
-    vvlist = glob.glob("{}/*/*vv*.tiff".format(in_file))
-    vhlist = glob.glob("{}/*/*vh*.tiff".format(in_file))
-    hhlist = glob.glob("{}/*/*hh*.tiff".format(in_file))
-    hvlist = glob.glob("{}/*/*hv*.tiff".format(in_file))
+    pol, cpol = get_polarizations(in_file)
+    if no_cross_pol:
+        cpol = None
 
-    cpol = None
-    pol = None
-    if vvlist:
-        logging.info("Found VV polarization - processing")
-        pol = "VV"
-        rtc_name = out_name + "_" + pol + ".tif"
-        process_pol(in_file, rtc_name, out_name, pol, res, looks,
-                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
+    rtc_name = f'{out_name}_{pol}.tif'
+    process_pol(in_file, rtc_name, out_name, pol, res, looks,
+                match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
+                browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
-        if vhlist and not no_cross_pol:
-            cpol = "VH"
-            rtc_name = out_name + "_" + cpol + ".tif"
-            logging.info("Found VH polarization - processing")
-            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
-                            gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-    if hhlist:
-        logging.info("Found HH polarization - processing")
-        pol = "HH"
-        rtc_name = out_name + "_" + pol + ".tif"
-        process_pol(in_file, rtc_name, out_name, pol, res, looks,
-                    match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
-                    browse_res, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-        if hvlist and not no_cross_pol:
-            cpol = "HV"
-            logging.info("Found HV polarization - processing")
-            rtc_name = out_name + "_" + cpol + ".tif"
-            process_2nd_pol(in_file, rtc_name, cpol, res, looks,
-                            gamma_flag, filter_flag, pwr_flag, browse_res,
-                            out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
-
-    if hhlist is None and vvlist is None:
-        logging.error(f"ERROR: Can not find VV or HH polarization in {in_file}")
-        sys.exit(1)
+    if cpol:
+        rtc_name = f'{out_name}_{cpol}.tif'
+        process_2nd_pol(in_file, rtc_name, cpol, res, looks,
+                        gamma_flag, filter_flag, pwr_flag, browse_res,
+                        out_name, dem, terms, par=par, area=area, orbit_file=orbit_file)
 
     fix_geotiff_locations()
     reproject_dir(dem_type, res, prod_dir="PRODUCT")
@@ -757,7 +738,7 @@ def rtc_sentinel_gamma(in_file,
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(out_name, lo_flag, dead_flag, match_flag, gamma_flag, roi,
+    create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
     return 'PRODUCT', out_name
@@ -770,7 +751,7 @@ def main():
         description=__doc__,
     )
     parser.add_argument('input', help='Name of input file, either .zip or .SAFE')
-    parser.add_argument("-o", "--outputResolution", type=float, help="Desired output resolution")
+    parser.add_argument("-o", "--outputResolution", type=float, default=30.0, help="Desired output resolution")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("-e", "--externalDEM", help="Specify a DEM file to use - must be in UTM projection")
@@ -784,7 +765,6 @@ def main():
     parser.add_argument("--sigma", action="store_true", help="create sigma0 instead of gamma0")
     parser.add_argument("--amp", action="store_true", help="create amplitude images instead of power")
     parser.add_argument("--smooth", action="store_true", help="smooth DEM file before terrain correction")
-    parser.add_argument("-l", action="store_true", help="create a lo-res output (30m)")
     parser.add_argument("-f", action="store_true", help="run enhanced lee filter")
     parser.add_argument("-k", "--looks", type=int,
                         help="set the number of looks to take (def:3 for SLC/6 for GRD)")
@@ -809,7 +789,6 @@ def main():
                        match_flag=args.n,
                        dead_flag=not args.fail,
                        gamma_flag=not args.sigma,
-                       lo_flag=args.l,
                        pwr_flag=not args.amp,
                        filter_flag=args.f,
                        looks=args.looks,
