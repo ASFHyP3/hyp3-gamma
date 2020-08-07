@@ -11,7 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * Files now get uploaded to S3 with a `file_type` in v2 tag indicating what the file is
 * Files no longer get a prefix based on file type in v2
-* Removed `lo_flag` from `rtc_sentinel
+* Removed `lo_flag` from `rtc_sentinel` since it duplicates the functionality of `resolution`
 
 ## [2.1.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.1.0...v2.1.1)
 
