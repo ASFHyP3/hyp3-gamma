@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...develop)
+
+### changed
+* Requires python >= 3.6
+
+### removed
+* `hyp3lib.raster_boundary2shape.raster_metadata` because it was an exact
+  duplicate of `hyp3lib.asf_time_series.rater_metadata`
 
 ## [1.4.1](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.0...v1.4.1)
 
