@@ -81,7 +81,7 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
             },
         ]
     }
-    if not key.endswith('.zip'):
+    if file_type is not 'product':
         association = 'rgb' if key.endswith('rgb.png') else 'greyscale'
         tag = {
             'Key': 'association',
