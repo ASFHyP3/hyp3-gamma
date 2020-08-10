@@ -77,10 +77,17 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
         'TagSet': [
             {
                 'Key': 'file_type',
-                'Value': file_type
-            }
+                'Value': file_type,
+            },
         ]
     }
+    if not key.endswith('.zip'):
+        association = 'rgb' if key.endswith('rgb.png') else 'greyscale'
+        tag = {
+            'Key': 'association',
+            'Value': association,
+        }
+        tag_set['TagSet'].append(tag)
     S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
 
 
