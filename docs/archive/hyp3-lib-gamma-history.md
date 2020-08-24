@@ -6,22 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...develop)
+## [1.5.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...1.5.0)
 
-### changed
+### Added
+* Documented contribution guidelines in `CONTRIBUTING.md`
+* `get_dem.get_dem` has a new `dem_type` parameter with options of `utm` (default), `latlon`, and `isce`
+
+### Changed
 * Requires python >= 3.6
+* `S1_OPOD_vec` calls to apply S1 state vectors to SLC products are now logged. Logging was already in place for GRD
+  products.
+* Configuration of the `hyp3lib.get_dem` module has seen the following changes:
+  * The module will attempt to load `~/.hyp3/get_dem.cfg`; if not found it will load `hyp3lib/etc/config/get_dem.cfg`.
+  * `get_dem.cfg` must be a space-delimited file of the form `<dem_name> <location> <epsg_code>`
+  * `<location>` may be either a local path (e.g. `/foo/bar/`) or a url prefix (e.g. `https://foo.com/bar/`).
+    S3 prefixes are no longer supported (e.g. `s3://foo/bar/`).
+  * Shapefiles describing each DEM's coverage are no longer packaged with hyp3lib.  They must now be provided at
+    `<location>/coverage/<dem_name>_coverage.shp`.
 
-### removed
-* `hyp3lib.raster_boundary2shape.raster_metadata` because it was an exact
-  duplicate of `hyp3lib.asf_time_series.rater_metadata`
+### Removed
+* Removed `hyp3lib.raster_boundary2shape.raster_metadata` because it was an exact duplicate of
+  `hyp3lib.asf_time_series.rater_metadata`
+* Removed `get_dem.get_ISCE_dem` and `get_dem.get_ll_dem`.  This functionality is now exposed via the new
+  `dem_type='isce'` and `dem_type='latlon'` options in `get_dem.get_dem`
 
 ## [1.4.1](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.0...v1.4.1)
 
-### Added:
+### Added
 * `get_orb.downloadSentinelOrbitFile`: new `orbit_types` argument to to specify a tuple of orbit types to search
   for, e.g. `('AUX_POEORB', 'AUX_RESORB')`
 
-### Changed:
+### Changed
 * `ingest_S1_granule`, `par_s1_slc_single`: errors thrown by `S1_OPOD_vec` when applying orbit files are now raised
   rather than caught and ignored
 * `get_orb.downloadSentinelOrbitFile`: failures fetching orbits are now logged as warnings and  do not include a stack
@@ -31,7 +46,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.4.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.3.0...v1.4.0)
 
-### Added:
+### Added
 * `hyp3lib.OrbitDownloadError` exception that will be raised for fetching orbit file problems
 * `hyp3lib.fetch` module with utilities for fetching thing from external endpoints
   * Provides a generic `download_file` utility for downloading files from URLs
@@ -43,10 +58,10 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `get_orb.py` entrypoint now allows you to download to a specific directory and specify the providers to use in
   order of preference
 
-### Changed:
+### Changed
 * Unrestricted `gdal` from `2.*` in `conda-env.yml` because there appears to be no GDAL 2 specific code in `hyp3lib`
 
-### Removed:
+### Removed
 * Unused `par_s1_slc_single.py` entrypoint
 * `hyp3lib.get_orb` helper functions that are unused outside of `get_orb`:
   * `getPageContentsESA`, `getOrbitFileESA`, `getPageContents` (ASF), `findOrbFile` (ASF), `getOrbFile` (ASF) have
@@ -57,7 +72,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.3.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.3...v1.3.0)
 
-### Changed:
+### Changed
 * Requires `pyproj>=2`
 * `makeAsfBrowse.py`
   * now only makes a single `.png` file at the formally `_large.png` resolution
@@ -72,31 +87,31 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `make_cog` function that was only used internally has been renamed to
     `cogify_file` to be inline with the `cogify_dir` function provided
 
-### Removed:
+### Removed
 * `get_dem.py`'s `transform_bounds` and `transform_point` functions that were
   only used internally have been removed because they are no longer relevant with
   the `pyproj` upgrade
 
-### Fixed:
+### Fixed
 * Coordinate transformations in `get_dem` now utilize the `pyproj>=2` syntax
   instead of the depreciated and broken `pyproj<2` syntax
 
 ## [1.2.3](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.2...v1.2.3)
 
-### Fixed:
+### Fixed
 * `get_dem.py` will raise an exception if it cannot determine the NoData value
   for the DEM.
 
-### Changed:
+### Changed
 * `get_dem.py` will determine the correct NoData value for `SRTMGL3` DEMs
 
 ## [1.2.2](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.1...v1.2.2)
 
-### Fixed:
+### Fixed
 * `rtc2color.py` was applying the cleanup threshold differently to amplitude and
   power data, causing a loss of blue color, which has now been fixed.
 
-### Changed:
+### Changed
 * `rtc2color.py` no longer performs calculations with the `float16` data type,
   which was selected for memory optimization, and instead uses the native `float32`
   type. Similar memory optimizations have been achieved by refactoring and
@@ -104,11 +119,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.2.1](https://github.com/ASFHyP3/hyp3-lib/compare/v1.2.0...v1.2.1)
 
-### Added:
+### Added
 * `DemError`, `ExecuteError`, and `GeometryError` (subclasses of the generic `Exception`) for
   more targeted error handling
 
-### Fixed:
+### Fixed
 * Updated the `ps2dem.py` to handle the GAMMA 2019 `create_dem_par` interface
 * Removed GIMP, REMA, and EU DEMs from the default config (Note: they are still available
   by editing the default config) due to many failures associated with these DEMs
