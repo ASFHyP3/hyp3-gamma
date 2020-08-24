@@ -10,19 +10,18 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 * Documented contribution guidelines in CONTRIBUTING.md
-* `get_dem.get_dem` has a new `dem_type` parameter with `utm` (default), `latlon`, and `isce` options
+* `get_dem.get_dem` has a new `dem_type` parameter with options of `utm` (default), `latlon`, and `isce`
 
 ### Changed
 * Requires python >= 3.6
-* `S1_OPOD_vec` calls used to apply S1 state vectors to SLC products are now logged. Logging was already in place for
-  GRD products.
+* `S1_OPOD_vec` calls to apply S1 state vectors to SLC products are now logged. Logging was already in place for GRD
+  products.
 * Configuration of the `hyp3lib.get_dem` module has seen the following changes:
-  * The module will attempt to load config from `~/.hyp3/get_dem.cfg`; if not found it will load the packaged
-    `hyp3lib/etc/config/get_dem.cfg`.  Previously, config was loaded from hyp3lib/etc/config/get_dem.py.cfg.
-  * `get_dem.cfg` is still a space-delimited file of the form `<dem_name> <location> <epsg_code>`
+  * The module will attempt to load `~/.hyp3/get_dem.cfg`; if not found it will load `hyp3lib/etc/config/get_dem.cfg`.
+  * `get_dem.cfg` must be a space-delimited file of the form `<dem_name> <location> <epsg_code>`
   * `<location>` may be either a local path (e.g. `/foo/bar/`) or a url prefix (e.g. `https://foo.com/bar/`).
     S3 prefixes are no longer supported (e.g. `s3://foo/bar/`).
-  * Shapefiles describing each DEM's coverage are no longer packaged with hyp3lib.  They are now expected to be found at
+  * Shapefiles describing each DEM's coverage are no longer packaged with hyp3lib.  They must now be provided at
     `<location>/coverage/<dem_name>_coverage.shp`.
 
 ### Removed
