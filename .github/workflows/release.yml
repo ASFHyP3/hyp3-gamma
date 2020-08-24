@@ -20,7 +20,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
           ALLOW_TAG_PREFIX: "true"
-          RELEASE_NAME_PREFIX: HyP3 RTC GAMMA
+          RELEASE_NAME_PREFIX: "HyP3 RTC GAMMA "
 
       - name: Attempt fast-forward develop from master
         run: |
