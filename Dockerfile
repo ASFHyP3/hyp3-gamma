@@ -21,12 +21,12 @@ ENV PYTHONDONTWRITEBYTECODE=true
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    build-essential bison curl flex g++ gcc gdal-bin \
-    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 libcunit1-dev \
-    libexif-dev libfftw3-dev libgdal-dev libgdal20 libgeotiff-dev libglade2-dev \
-    libglib2.0-dev libgsl-dev libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
-    libhdf5-100 libhdf5-dev libjpeg-dev liblapack-dev liblapack3 libpng-dev \
-    libproj-dev libshp-dev libtiff5-dev libxml2-dev netpbm python3-dev python3-h5py \
+    build-essential curl gcc gdal-bin \
+    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 \
+    libfftw3-dev libgdal-dev libgdal20 \
+    libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
+    libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
+    python3-dev python3-h5py \
     python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
