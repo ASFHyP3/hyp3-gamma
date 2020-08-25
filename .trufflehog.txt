@@ -1,3 +1,5 @@
 .*gitleaks.toml$
-hyp3_rtc_gamma/etc/.*.xsl
+.gitlab-ci.yml
+etc/sentinel_xml.xsl
+hyp3_rtc_gamma/etc/sentinel_xml.xsl
 .github/workflows/test-and-build.yml
