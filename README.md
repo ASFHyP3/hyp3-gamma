@@ -4,9 +4,8 @@ HyP3 plugin for radiometric terrain correction using GAMMA
 
 ## Developer Setup
 
-Ubuntu 18.0.4 is recommended for ASF MapReady support.
+Ubuntu 18.0.4 is recommended for GAMMA support.
 
-1. Install [ASF MapReady](https://github.com/asfadmin/ASF_MapReady)
 1. Install GAMMA
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
 1. Install hyp3-rtc-gamma
