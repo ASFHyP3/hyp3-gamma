@@ -14,9 +14,8 @@ dependencies:
   - wheel
   # For running
   - boto3
-  - hyp3lib>=1.4.1,<2
+  - hyp3lib>=1.5.0,<2
   - importlib_metadata
-  - lxml
   - numpy
   - pillow
   - scipy

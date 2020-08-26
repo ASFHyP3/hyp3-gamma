@@ -33,10 +33,9 @@ setup(
 
     install_requires=[
         'boto3',
-        'hyp3lib>=1.4.1,<2',
+        'hyp3lib>=1.5.0,<2',
         'hyp3proclib>=1.0.1,<2',
         'importlib_metadata',
-        'lxml',
         'numpy',
         'pillow',
         'scipy',
@@ -59,7 +58,6 @@ setup(
             'check_coreg.py = hyp3_rtc_gamma.check_coreg:main',
             'rtc_sentinel.py = hyp3_rtc_gamma.rtc_sentinel:main',
             'smooth_dem_tiles.py = hyp3_rtc_gamma.smoothem:main',
-            'xml2meta.py = hyp3_rtc_gamma.xml2meta:main',
         ]
     },
 

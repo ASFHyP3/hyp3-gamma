@@ -42,8 +42,3 @@ def test_rtc_sentinel(script_runner):
 def test_smooth_dem_tiles(script_runner):
     ret = script_runner.run('smooth_dem_tiles.py', '-h')
     assert ret.success
-
-
-def test_xml2meta(script_runner):
-    ret = script_runner.run('xml2meta.py', '-h')
-    assert ret.success
