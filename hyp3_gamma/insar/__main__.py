@@ -77,6 +77,7 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
     }
     S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
 
+
 def string_is_true(s: str) -> bool:
     return s.lower() == 'true'
 
@@ -116,12 +117,11 @@ def main_v2():
     )
     workdir = os.getcwd()
     out_name = build_output_name_pair(
-        g1, g2, workdir, f'-{args.mutilook}-int-gamma')
+        g1, g2, workdir, f'-{args.multilook}-int-gamma')
     log.info('Output name: ' + out_name)
 
     out_path = os.path.join(workdir, out_name)
     os.rename(workdir + '/PRODUCTS', out_path)
-
 
     zip_file = out_path + '.zip'
     zip_dir(out_path, zip_file)
