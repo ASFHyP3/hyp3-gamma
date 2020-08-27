@@ -76,6 +76,9 @@ def main_v2():
     g1, g2 = earlier_granule_first(args.granule1, args.granule2)
     write_list_file(granule_file, g1, g2)
 
+    with open('get_asf.cfg', 'w') as f:
+        f.write(f'[general]\nusername={args.username}\npassword={args.password}')
+
     stack_sentinel.procS1StackGAMMA(
         alooks=alooks,
         rlooks=rlooks,
