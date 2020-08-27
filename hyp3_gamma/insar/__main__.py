@@ -82,7 +82,7 @@ def main_v2():
         inc_flag=args.angle_maps,
         los_flag=args.los_displacement,
     )
-#End v2 entrypoints
+# End v2 entrypoints
 
 
 def find_color_phase_png(dir_):
