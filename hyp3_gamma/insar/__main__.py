@@ -7,7 +7,9 @@ import shutil
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
+from mimetypes import guess_type
 
+import boto3
 from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
     build_output_name_pair,
@@ -34,6 +36,9 @@ import hyp3_insar_gamma
 from hyp3_insar_gamma import stack_sentinel
 
 
+S3_CLIENT = boto3.client('s3')
+
+
 def entry():
     parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
@@ -49,6 +54,29 @@ def entry():
 
 
 # Hyp3 V2 entrypoints
+def get_content_type(filename):
+    content_type = guess_type(filename)[0]
+    if not content_type:
+        content_type = 'application/octet-stream'
+    return content_type
+
+
+def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
+    key = os.path.join(prefix, os.path.basename(path_to_file))
+    extra_args = {'ContentType': get_content_type(key)}
+
+    logging.info(f'Uploading s3://{bucket}/{key}')
+    S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
+    tag_set = {
+        'TagSet': [
+            {
+                'Key': 'file_type',
+                'Value': file_type
+            }
+        ]
+    }
+    S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
+
 def string_is_true(s: str) -> bool:
     return s.lower() == 'true'
 
@@ -86,6 +114,19 @@ def main_v2():
         inc_flag=args.angle_maps,
         los_flag=args.los_displacement,
     )
+    workdir = os.getcwd()
+    out_name = build_output_name_pair(
+        g1, g2, workdir, f'-{args.mutilook}-int-gamma')
+    log.info('Output name: ' + out_name)
+
+    out_path = os.path.join(workdir, out_name)
+
+    os.rename(workdir + '/PRODUCTS', out_name)
+
+    zip_file = out_path + '.zip'
+    zip_dir(out_path, zip_file)
+    if args.bucket:
+        upload_file_to_s3(zip_file, 'product', args.bucket, args.bucket_prefix)
 # End v2 entrypoints
 
 
