@@ -84,6 +84,7 @@ def main_v2():
     )
 #End v2 entrypoints
 
+
 def find_color_phase_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
         for file in files:
