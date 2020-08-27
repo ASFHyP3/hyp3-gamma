@@ -1,6 +1,7 @@
 """
 insar_gamma processing for HyP3
 """
+import glob
 import logging
 import os
 import shutil
@@ -30,6 +31,7 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
+from PIL import Image
 from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
@@ -76,6 +78,16 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
         ]
     }
     S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
+
+
+def create_thumbnail(input_image, size=(100, 100)):
+    filename, ext = os.path.splitext(input_image)
+    thumbnail_name = f'{filename}_thumb{ext}'
+
+    output_image = Image.open(input_image)
+    output_image.thumbnail(size)
+    output_image.save(thumbnail_name)
+    return thumbnail_name
 
 
 def string_is_true(s: str) -> bool:
@@ -127,6 +139,11 @@ def main_v2():
     zip_dir(out_path, zip_file)
     if args.bucket:
         upload_file_to_s3(zip_file, 'product', args.bucket, args.bucket_prefix)
+        browse_images = glob.glob(f'{out_path}/*.png')
+        for browse in browse_images:
+            thumbnail = create_thumbnail(browse)
+            upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
+            upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
 # End v2 entrypoints
 
 
