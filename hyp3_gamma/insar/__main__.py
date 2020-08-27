@@ -1,9 +1,11 @@
 """
 insar_gamma processing for HyP3
 """
-
+import logging
 import os
 import shutil
+import sys
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
 
 from hyp3lib.metadata import add_esa_citation
@@ -26,9 +28,61 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
+from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
+from hyp3_insar_gamma import stack_sentinel
 
+
+def entry():
+    parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '++entrypoint', choices=['hyp3_insar_gamma', 'hyp3_insar_gamma_v2'], default='hyp3_insar_gamma',
+        help='Select the HyP3 entrypoint version to use'
+    )
+    args, unknowns = parser.parse_known_args()
+
+    sys.argv = [args.entrypoint, *unknowns]
+    sys.exit(
+        load_entry_point('hyp3_insar_gamma', 'console_scripts', args.entrypoint)()
+    )
+
+
+# Hyp3 V2 entrypoints
+def string_is_true(s: str) -> bool:
+    return s.lower() == 'true'
+
+
+def main_v2():
+    parser = ArgumentParser()
+    parser.add_argument('--username', required=True)
+    parser.add_argument('--password', required=True)
+    parser.add_argument('--bucket')
+    parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--angle-maps', type=string_is_true, default=False)
+    parser.add_argument('--los-displacement', type=string_is_true, default=False)
+    # parser.add_argument('--watermask', type=string_is_true, default=False)
+    parser.add_argument('--multilook', choices=['20x4', '10x2'], default='20x4')
+    parser.add_argument('granule1')
+    parser.add_argument('granule2')
+
+    args = parser.parse_args()
+
+    alooks, rlooks = (20, 4) if args.multilook == '20x4' else (10, 2)
+
+    granule_file = 'granules.txt'
+    write_list_file(granule_file, args.granule1, args.granule2)
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    stack_sentinel.procS1StackGAMMA(
+        alooks=alooks,
+        rlooks=rlooks,
+        csvFile=granule_file,
+        inc_flag=args.angle_maps,
+        los_flag=args.los_displacement,
+    )
+#End v2 entrypoints
 
 def find_color_phase_png(dir_):
     for subdir, dirs, files in os.walk(dir_):
