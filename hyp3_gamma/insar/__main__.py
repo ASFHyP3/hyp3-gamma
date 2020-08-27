@@ -70,7 +70,7 @@ def main_v2():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    alooks, rlooks = (20, 4) if args.multilook == '20x4' else (10, 2)
+    rlooks, alooks = (20, 4) if args.multilook == '20x4' else (10, 2)
 
     granule_file = 'granules.txt'
     g1, g2 = earlier_granule_first(args.granule1, args.granule2)
