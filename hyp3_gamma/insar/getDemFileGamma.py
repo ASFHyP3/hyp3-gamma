@@ -14,7 +14,7 @@ from osgeo import gdal
 
 def getDemFileGamma(filename, use_opentopo, alooks, mask):
     # first get a DEM to check the type
-    demfile, demtype = getDemFile(filename, "tmpdem.tif", opentopoFlag=use_opentopo, utmFlag=True)
+    demfile, demtype = getDemFile(filename, "tmpdem.tif", use_opentopo=use_opentopo, in_utm=True)
     if not os.path.isfile(demfile):
         logging.error("Got no return demfile ({}) from getDemfile".format(demfile))
         sys.exit(1)
@@ -39,7 +39,7 @@ def getDemFileGamma(filename, use_opentopo, alooks, mask):
             shutil.move(tmpdem, demfile)
         else:
             # Need to pass wb mask routine a lat,lon DEM file
-            demfile, demtype = getDemFile(filename, "tmpdem.tif", opentopoFlag=use_opentopo, utmFlag=False)
+            demfile, demtype = getDemFile(filename, "tmpdem.tif", use_opentopo=use_opentopo, in_utm=False)
             tmpdem = "temp_mask_dem_{}.tif".format(os.getpid())
 
             # Apply the water body mask
