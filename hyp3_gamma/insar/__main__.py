@@ -120,8 +120,8 @@ def main_v2():
     log.info('Output name: ' + out_name)
 
     out_path = os.path.join(workdir, out_name)
+    os.rename(workdir + '/PRODUCTS', out_path)
 
-    os.rename(workdir + '/PRODUCTS', out_name)
 
     zip_file = out_path + '.zip'
     zip_dir(out_path, zip_file)
