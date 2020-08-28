@@ -10,8 +10,8 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
 from mimetypes import guess_type
 
-from PIL import Image
 import boto3
+from PIL import Image
 from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
     build_output_name_pair,
