@@ -18,7 +18,6 @@ dependencies:
   - importlib_metadata
   - numpy
   - pillow
-  - scipy
   - pip:
     # for packaging and testing
     - s3pypi
