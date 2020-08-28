@@ -1,5 +1,15 @@
+def test_insar_gamma(script_runner):
+    ret = script_runner.run('insar_gamma', '-h')
+    assert ret.success
+
+
 def test_hyp3_insar_gamma(script_runner):
     ret = script_runner.run('hyp3_insar_gamma', '-h')
+    assert ret.success
+
+
+def test_hyp3_insar_gamma_v2(script_runner):
+    ret = script_runner.run('hyp3_insar_gamma_v2', '-h')
     assert ret.success
 
 

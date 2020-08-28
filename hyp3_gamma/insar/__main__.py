@@ -1,11 +1,17 @@
 """
 insar_gamma processing for HyP3
 """
-
+import glob
+import logging
 import os
 import shutil
+import sys
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
+from mimetypes import guess_type
 
+import boto3
+from PIL import Image
 from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
     build_output_name_pair,
@@ -26,8 +32,119 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
+from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
+from hyp3_insar_gamma import stack_sentinel
+
+
+S3_CLIENT = boto3.client('s3')
+
+
+def entry():
+    parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '++entrypoint', choices=['hyp3_insar_gamma', 'hyp3_insar_gamma_v2'], default='hyp3_insar_gamma',
+        help='Select the HyP3 entrypoint version to use'
+    )
+    args, unknowns = parser.parse_known_args()
+
+    sys.argv = [args.entrypoint, *unknowns]
+    sys.exit(
+        load_entry_point('hyp3_insar_gamma', 'console_scripts', args.entrypoint)()
+    )
+
+
+# Hyp3 V2 entrypoints
+def get_content_type(filename):
+    content_type = guess_type(filename)[0]
+    if not content_type:
+        content_type = 'application/octet-stream'
+    return content_type
+
+
+def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
+    key = os.path.join(prefix, os.path.basename(path_to_file))
+    extra_args = {'ContentType': get_content_type(key)}
+
+    logging.info(f'Uploading s3://{bucket}/{key}')
+    S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
+    tag_set = {
+        'TagSet': [
+            {
+                'Key': 'file_type',
+                'Value': file_type
+            }
+        ]
+    }
+    S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
+
+
+def create_thumbnail(input_image, size=(100, 100)):
+    filename, ext = os.path.splitext(input_image)
+    thumbnail_name = f'{filename}_thumb{ext}'
+
+    output_image = Image.open(input_image)
+    output_image.thumbnail(size)
+    output_image.save(thumbnail_name)
+    return thumbnail_name
+
+
+def string_is_true(s: str) -> bool:
+    return s.lower() == 'true'
+
+
+def main_v2():
+    parser = ArgumentParser()
+    parser.add_argument('--username', required=True)
+    parser.add_argument('--password', required=True)
+    parser.add_argument('--bucket')
+    parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--angle-maps', type=string_is_true, default=False)
+    parser.add_argument('--los-displacement', type=string_is_true, default=False)
+    # parser.add_argument('--watermask', type=string_is_true, default=False)
+    parser.add_argument('--multilook', choices=['20x4', '10x2'], default='20x4')
+    parser.add_argument('granule1')
+    parser.add_argument('granule2')
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
+    rlooks, alooks = (20, 4) if args.multilook == '20x4' else (10, 2)
+
+    granule_file = 'granules.txt'
+    g1, g2 = earlier_granule_first(args.granule1, args.granule2)
+    write_list_file(granule_file, g1, g2)
+
+    with open('get_asf.cfg', 'w') as f:
+        f.write(f'[general]\nusername={args.username}\npassword={args.password}')
+
+    stack_sentinel.procS1StackGAMMA(
+        alooks=alooks,
+        rlooks=rlooks,
+        csvFile=granule_file,
+        inc_flag=args.angle_maps,
+        los_flag=args.los_displacement,
+    )
+    workdir = os.getcwd()
+    out_name = build_output_name_pair(
+        g1, g2, workdir, f'-{args.multilook}-int-gamma')
+    log.info('Output name: ' + out_name)
+
+    out_path = os.path.join(workdir, out_name)
+    os.rename(os.path.join(workdir, 'PRODUCTS'), out_path)
+
+    zip_file = out_path + '.zip'
+    zip_dir(out_path, zip_file)
+    if args.bucket:
+        upload_file_to_s3(zip_file, 'product', args.bucket, args.bucket_prefix)
+        browse_images = glob.glob(f'{out_path}/*.png')
+        for browse in browse_images:
+            thumbnail = create_thumbnail(browse)
+            upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
+            upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
+# End v2 entrypoints
 
 
 def find_color_phase_png(dir_):
