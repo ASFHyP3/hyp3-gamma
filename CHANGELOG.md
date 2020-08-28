@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.2.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.1.1...v2.1.2)
+## [2.3.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.2.0...v2.3.0)
+
+### Added
+* Added cursory developer setup instructions in `README.md`
+
+### Changed
+* Upgraded to [hyp3-lib v1.5.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#150) from v1.4.1.
+
+### Removed
+* RTC Gamma products no longer include an ISO 19115-2 .iso.xml metadata file.
+* ASF MapReady is no longer a dependency and has been removed.
+
+## [2.2.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.1.1...v2.2.0)
 
 ### Changed
 * Files now get uploaded to S3 with a `file_type` in v2 tag indicating what the file is

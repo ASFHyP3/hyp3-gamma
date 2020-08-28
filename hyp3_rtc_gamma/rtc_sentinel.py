@@ -36,9 +36,7 @@ from osgeo import gdal
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
 from hyp3_rtc_gamma.create_metadata import create_arc_xml
-from hyp3_rtc_gamma.metadata_utils import write_asf_meta
 from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
-from hyp3_rtc_gamma.xml2meta import sentinel2meta
 
 
 def fetch_orbit_file(in_file):
@@ -269,14 +267,6 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     shutil.move("tmp.tif", tif)
     createAmp(tif, nodata=0)
 
-    # Make meta files and stats
-    execute(f"asf_import -format geotiff {out_name}.ls_map.tif ls_map", uselogging=True)
-    execute("stats -overstat -overmeta ls_map", uselogging=True)
-    execute(f"asf_import -format geotiff {out_name}.inc_map.tif inc_map", uselogging=True)
-    execute("stats -overstat -overmeta -mask 0 inc_map", uselogging=True)
-    execute(f"asf_import -format geotiff image_cal_map.mli_amp.tif tc_{pol}", uselogging=True)
-    execute(f"stats -nostat -overmeta -mask 0 tc_{pol}", uselogging=True)
-
     # Make browse resolution tif file
     if res == browse_res:
         shutil.copy("image_cal_map.mli_amp.tif", "{}_{}_{}m.tif".format(out_name, pol, browse_res))
@@ -371,10 +361,6 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     else:
         gdal.Translate("{}_{}_{}m.tif".format(outfile, cpol, browse_res), "image_cal_map.mli_amp.tif", xRes=browse_res,
                        yRes=browse_res)
-
-    # Create meta files and stats
-    execute(f"asf_import -format geotiff image_cal_map.mli_amp.tif tc_{cpol}", uselogging=True)
-    execute(f"stats -nostat -overmeta -mask 0 tc_{cpol}", uselogging=True)
 
     # Move files to product directory
     out_dir = "../PRODUCT"
@@ -502,87 +488,6 @@ def add_log(log, full_log):
 
     g.write("\n")
     g.close()
-
-
-def create_iso_xml(outfile, out_name, pol, cpol, in_file, dem_type, log, gamma_ver):
-    hdf5_name = "hdf5_list.txt"
-    path = in_file
-    etc_dir = os.path.abspath(os.path.dirname(hyp3_rtc_gamma.etc.__file__))
-    shutil.copy("{}/sentinel_xml.xsl".format(etc_dir), "sentinel_xml.xsl")
-
-    out = "PRODUCT"
-
-    execute(f"xsltproc --stringparam path {path} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff"
-            f" --output out.xml sentinel_xml.xsl {path}/manifest.safe", uselogging=True)
-
-    m = sentinel2meta("out.xml")
-    write_asf_meta(m, "out.meta")
-
-    ver_file = "{}/manifest.safe".format(path)
-    ipf_ver = None
-    if os.path.exists(ver_file):
-        f = open(ver_file, "r")
-        for line in f:
-            if "IPF" in line:
-                t = line.split('"')
-                ipf_ver = t[3].strip()
-    else:
-        logging.warning("No manifest.safe file found in {}".format(path))
-
-    g = open(hdf5_name, "w")
-    g.write("[GAMMA RTC]\n")
-    g.write("granule = {}\n".format(in_file.replace(".SAFE", "")))
-    g.write("metadata = out.meta\n")
-
-    geo_dir = "geo_{}".format(pol)
-    dem_seg = "{}/area.dem".format(geo_dir)
-    dem_seg_par = "{}/area.dem_par".format(geo_dir)
-
-    g.write("oversampled dem file = {}\n".format(dem_seg))
-    g.write("oversampled dem metadata = {}\n".format(dem_seg_par))
-    g.write("original dem file = {}/{}_dem.tif\n".format(out, out_name))
-    g.write("layover shadow mask = {}/{}_ls_map.tif\n".format(out, out_name))
-    g.write("layover shadow stats = {}/ls_map.stat\n".format(geo_dir))
-    g.write("incidence angle file = {}/{}_inc_map.tif\n".format(out, out_name))
-    g.write("incidence angle metadata = {}/inc_map.meta\n".format(geo_dir))
-
-    g.write("input {} file = {}\n".format(pol, outfile))
-    g.write("terrain corrected {pol} metadata = {dir}/tc_{pol}.meta\n".format(pol=pol, dir=geo_dir))
-    g.write("terrain corrected {} file = {}/{}\n".format(pol, out, outfile))
-
-    if cpol:
-        outfile2 = outfile.replace(pol, cpol)
-        g.write("input {} file = {}\n".format(pol, outfile))
-        geo_dir2 = geo_dir.replace(pol, cpol)
-        g.write("terrain corrected {pol} metadata = {dir}/tc_{pol}.meta\n".format(pol=cpol, dir=geo_dir2))
-        g.write("terrain corrected {} file = {}/{}\n".format(cpol, out, outfile2))
-
-    g.write("initial processing log = {}\n".format(log))
-    g.write("terrain correction log = {}\n".format(log))
-    g.write("main log = {}\n".format(log))
-    g.write("mk_geo_radcal_0 log = {}/mk_geo_radcal_0.log\n".format(geo_dir))
-    g.write("mk_geo_radcal_1 log = {}/mk_geo_radcal_1.log\n".format(geo_dir))
-    g.write("mk_geo_radcal_2 log = {}/mk_geo_radcal_2.log\n".format(geo_dir))
-    g.write("mk_geo_radcal_3 log = {}/mk_geo_radcal_3.log\n".format(geo_dir))
-    g.write("coreg_check log = coreg_check.log\n")
-    g.write("mli.par file = {}.{}.mgrd.par\n".format(out_name, pol))
-    g.write("gamma version = {}\n".format(gamma_ver))
-    g.write("hyp3_rtc version = {}\n".format(hyp3_rtc_gamma.__version__))
-    g.write("ipf version = {}\n".format(ipf_ver))
-    g.write("dem source = {}\n".format(dem_type))
-    g.write("browse image = {}/{}.png\n".format(out, out_name))
-    g.write("kml overlay = {}/{}.kmz\n".format(out, out_name))
-
-    g.close()
-
-    execute(f"write_hdf5_xml {hdf5_name} {out_name}.xml", uselogging=True)
-
-    logging.info("Generating {}.iso.xml with {}/rtc_iso.xsl\n".format(out_name, etc_dir))
-
-    execute(f"xsltproc {etc_dir}/rtc_iso.xsl {out_name}.xml > {out_name}.iso.xml", uselogging=True)
-
-    shutil.copy("{}.iso.xml".format(out_name), "{}".format(out))
 
 
 def clean_prod_dir():
@@ -728,7 +633,6 @@ def rtc_sentinel_gamma(in_file,
     create_browse_images(out_name, pol, cpol, browse_res)
     rtc_name = out_name + "_" + pol + ".tif"
     gamma_ver = gamma_version()
-    create_iso_xml(rtc_name, out_name, pol, cpol, in_file, dem_type, log_file, gamma_ver)
     create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
                    dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(directory='PRODUCT')

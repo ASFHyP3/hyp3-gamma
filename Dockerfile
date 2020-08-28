@@ -21,24 +21,17 @@ ENV PYTHONDONTWRITEBYTECODE=true
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    build-essential bison curl flex g++ gcc gdal-bin \
-    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 libcunit1-dev \
-    libexif-dev libfftw3-dev libgdal-dev libgdal20 libgeotiff-dev libglade2-dev \
-    libglib2.0-dev libgsl-dev libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
-    libhdf5-100 libhdf5-dev libjpeg-dev liblapack-dev liblapack3 libpng-dev \
-    libproj-dev libshp-dev libtiff5-dev libxml2-dev netpbm python3-dev python3-h5py \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget xsltproc && \
+    build-essential curl gcc gdal-bin \
+    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 \
+    libfftw3-dev libgdal-dev libgdal20 \
+    libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
+    libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
+    netpbm python3-dev python3-h5py python3-netcdf4 \
+    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
 COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
-
-COPY ASF_MapReady-devel /usr/local/MapReady/src/
-
-RUN cd /usr/local/MapReady/src && \
-    ./configure --prefix /usr/local/MapReady && \
-    make && make install && \
-    cd /usr/local/MapReady && rm -r src/
 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
@@ -68,8 +61,6 @@ ENV DISP_HOME=$GAMMA_HOME/DISP
 ENV LAT_HOME=$GAMMA_HOME/LAT
 ENV PATH=$PATH:$MSP_HOME/bin:$ISP_HOME/bin:$DIFF_HOME/bin:$LAT_HOME/bin:$DISP_HOME/bin
 ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts
-ENV MAPREADY_HOME=/usr/local/MapReady
-ENV PATH=$PATH:$MAPREADY_HOME/bin:$MAPREADY_HOME/lib:$MAPREADY_HOME/share
 ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
