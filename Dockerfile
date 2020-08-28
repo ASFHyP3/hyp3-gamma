@@ -27,7 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
     libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
     netpbm python3-dev python3-h5py python3-netcdf4 \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
+    python3-matplotlib python3-pip tcsh unzip vim wget && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 

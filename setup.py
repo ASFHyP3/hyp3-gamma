@@ -38,7 +38,6 @@ setup(
         'importlib_metadata',
         'numpy',
         'pillow',
-        'scipy',
     ],
 
     extras_require={
