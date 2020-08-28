@@ -100,10 +100,10 @@ def main_v2():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
-    parser.add_argument('--angle-maps', type=string_is_true, default=False)
+    parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--los-displacement', type=string_is_true, default=False)
     # parser.add_argument('--watermask', type=string_is_true, default=False)
-    parser.add_argument('--multilook', choices=['20x4', '10x2'], default='20x4')
+    parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granule1')
     parser.add_argument('granule2')
     args = parser.parse_args()
@@ -111,7 +111,7 @@ def main_v2():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    rlooks, alooks = (20, 4) if args.multilook == '20x4' else (10, 2)
+    rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
     granule_file = 'granules.txt'
     g1, g2 = earlier_granule_first(args.granule1, args.granule2)
@@ -124,12 +124,12 @@ def main_v2():
         alooks=alooks,
         rlooks=rlooks,
         csvFile=granule_file,
-        inc_flag=args.angle_maps,
+        inc_flag=args.include_inc_map,
         los_flag=args.los_displacement,
     )
     workdir = os.getcwd()
     out_name = build_output_name_pair(
-        g1, g2, workdir, f'-{args.multilook}-int-gamma')
+        g1, g2, workdir, f'-{args.looks}-int-gamma')
     log.info('Output name: ' + out_name)
 
     out_path = os.path.join(workdir, out_name)
