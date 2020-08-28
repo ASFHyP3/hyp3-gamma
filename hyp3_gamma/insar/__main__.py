@@ -10,6 +10,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime
 from mimetypes import guess_type
 
+from PIL import Image
 import boto3
 from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
@@ -31,7 +32,6 @@ from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
 from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
-from PIL import Image
 from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
