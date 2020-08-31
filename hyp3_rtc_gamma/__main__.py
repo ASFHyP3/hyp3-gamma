@@ -108,10 +108,10 @@ def create_thumbnail(input_image, size=(100, 100)):
 def get_file_type(file_name):
     if file_name.endswith('.zip'):
         return 'product'
-    if file_name.endswith('_rgb.png'):
-        return 'rgb-browse'
     if file_name.endswith('_rgb_thumb.png'):
         return 'rgb-thumbnail'
+    if file_name.endswith('_rgb.png'):
+        return 'rgb-browse'
     if file_name.endswith('_thumb.png'):
         return 'amp-thumbnail'
     if file_name.endswith('.png'):
