@@ -82,7 +82,7 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
         'Key': 'myPrefix/myFile.txt',
         'Tagging': {
             'TagSet': [
-                {'Key': 'file_type', 'Value': 'unknown'}
+                {'Key': 'file_type', 'Value': 'product'}
             ]
         }
     }
@@ -118,4 +118,4 @@ def test_get_file_type():
     assert main.get_file_type('foo_thumb.png') == 'amp-thumbnail'
     assert main.get_file_type('foo_rgb.png') == 'rgb-browse'
     assert main.get_file_type('foo_rgb_thumb.png') == 'rgb-thumbnail'
-    assert main.get_file_type('foo.txt') == 'unknown'
+    assert main.get_file_type('foo.txt') == 'product'
