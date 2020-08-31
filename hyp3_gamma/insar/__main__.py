@@ -126,19 +126,16 @@ def main_v2():
         inc_flag=args.include_inc_map,
         los_flag=args.include_los_displacement,
     )
-    workdir = os.getcwd()
-    out_name = build_output_name_pair(
-        g1, g2, workdir, f'-{args.looks}-int-gamma')
-    log.info('Output name: ' + out_name)
 
-    out_path = os.path.join(workdir, out_name)
-    os.rename(os.path.join(workdir, 'PRODUCTS'), out_path)
+    product_name = build_output_name_pair(g1, g2, os.getcwd(), f'-{args.looks}-int-gamma')
+    log.info('Output product name: ' + product_name)
+    os.rename('PRODUCTS', product_name)
+    zip_file = f'{product_name}.zip'
+    zip_dir(product_name, zip_file)
 
-    zip_file = out_path + '.zip'
-    zip_dir(out_path, zip_file)
     if args.bucket:
         upload_file_to_s3(zip_file, 'product', args.bucket, args.bucket_prefix)
-        browse_images = glob.glob(f'{out_path}/*.png')
+        browse_images = glob.glob(f'{product_name}/*.png')
         for browse in browse_images:
             thumbnail = create_thumbnail(browse)
             upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
