@@ -1,5 +1,6 @@
 # HyP3 Metadata Templates
-This repository contains the metadata templates for HyP3 products.  
+
+Package for generating HyP3 products' metadata
 
 Each different processor for each process has its own set of templates, as there are significant differences in the output files and processing method depending on the processor used (i.e. GAMMA vs. S1TBX).  
 
