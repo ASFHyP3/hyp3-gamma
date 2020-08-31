@@ -101,8 +101,7 @@ def main_v2():
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
-    parser.add_argument('--los-displacement', type=string_is_true, default=False)
-    # parser.add_argument('--watermask', type=string_is_true, default=False)
+    parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granule1')
     parser.add_argument('granule2')
@@ -125,7 +124,7 @@ def main_v2():
         rlooks=rlooks,
         csvFile=granule_file,
         inc_flag=args.include_inc_map,
-        los_flag=args.los_displacement,
+        los_flag=args.include_los_displacement,
     )
     workdir = os.getcwd()
     out_name = build_output_name_pair(
