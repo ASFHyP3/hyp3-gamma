@@ -58,7 +58,7 @@ def test_upload_file_to_s3(tmp_path, s3_stubber):
         'Key': 'myFile.zip',
         'Tagging': {
             'TagSet': [
-                {'Key': 'file_type', 'Value': 'file_type'}
+                {'Key': 'file_type', 'Value': 'product'}
             ]
         }
     }
@@ -67,7 +67,7 @@ def test_upload_file_to_s3(tmp_path, s3_stubber):
 
     file_to_upload = tmp_path / 'myFile.zip'
     file_to_upload.touch()
-    main.upload_file_to_s3(str(file_to_upload), 'file_type', 'myBucket')
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket')
 
 
 def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
@@ -82,7 +82,7 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
         'Key': 'myPrefix/myFile.txt',
         'Tagging': {
             'TagSet': [
-                {'Key': 'file_type', 'Value': 'file_type'}
+                {'Key': 'file_type', 'Value': 'unknown'}
             ]
         }
     }
@@ -90,7 +90,7 @@ def test_upload_file_to_s3_with_prefix(tmp_path, s3_stubber):
     s3_stubber.add_response(method='put_object_tagging', expected_params=tag_params, service_response={})
     file_to_upload = tmp_path / 'myFile.txt'
     file_to_upload.touch()
-    main.upload_file_to_s3(str(file_to_upload), 'file_type', 'myBucket', 'myPrefix')
+    main.upload_file_to_s3(str(file_to_upload), 'myBucket', 'myPrefix')
 
 
 def test_create_thumbnail(image):
@@ -110,3 +110,12 @@ def test_create_thumbnail(image):
 
     with Image.open(thumbnail) as output_image:
         assert output_image.size == (162, 150)
+
+
+def test_get_file_type():
+    assert main.get_file_type('foo.zip') == 'product'
+    assert main.get_file_type('foo.png') == 'amp-browse'
+    assert main.get_file_type('foo_thumb.png') == 'amp-thumbnail'
+    assert main.get_file_type('foo_rgb.png') == 'rgb-browse'
+    assert main.get_file_type('foo_rgb_thumb.png') == 'rgb-thumbnail'
+    assert main.get_file_type('foo.txt') == 'unknown'
