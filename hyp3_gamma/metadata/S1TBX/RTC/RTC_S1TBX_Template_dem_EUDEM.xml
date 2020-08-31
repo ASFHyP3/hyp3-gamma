@@ -1,0 +1,175 @@
+﻿<metadata xml:lang="en">
+    <Esri>
+        <CreaDate>[DATE]</CreaDate>
+        <CreaTime>[TIME]</CreaTime>
+        <ArcGISFormat>1.0</ArcGISFormat>
+        <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+        <SyncOnce>TRUE</SyncOnce>
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+        <DataProperties>
+            <itemProps>
+                <imsContentType export="False">002</imsContentType>
+            </itemProps>
+        </DataProperties>
+        <ArcGISProfile>NAP</ArcGISProfile>
+        <ModDate>[DATE]</ModDate>
+        <ModTime>[TIME]</ModTime>
+    </Esri>
+    <dataIdInfo>
+        <idPurp>This file is the DEM used in the radiometric terrain correction process (using S1TBX software) for a granule of [TYPE] SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of [SPACING] m. To access actual [FORMAT] values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the digital elevation model used in the radiometric terrain correction process for a granule of [FULL_TYPE] ([TYPE]) Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency). The granule was RTC processed by ASF HYP3 RTC-S1TBX software version [HYP3_VER] running S1TBX release [S1TBX_VER], and the extent of the DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM data if full coverage is not available. The DEM was reprojected to [PCS], and the pixel spacing was resampled from the native DEM resolution to [SPACING] m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. This granule used [DEM] as the source DEM: the EU-DEM v1.1 at [RESA] arc second (about [RESM] m) resolution.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The EU-DEM combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to &lt;/SPAN&gt;&lt;A href="https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1"&gt;&lt;SPAN&gt;https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The actual [FORMAT] data is contained in the VV/HH (primary polarization) and/or VH/HV (cross-polarization) TIFF files included in the same downloaded folder as this file. The name of the SAR granule used to generate the files in this folder is: [GRAN_NAME]. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;/SPAN&gt;&lt;A href="http://hyp3.asf.alaska.edu"&gt;&lt;SPAN&gt;http://hyp3.asf.alaska.edu&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;&lt;SPAN&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        </idAbs>
+        <idCredit>Source DEM Data: These data are distributed by the European Environment Agency (EEA) under the framework of the Copernicus Program.</idCredit>
+        <idCitation xmlns="">
+            <date>
+                <pubDate>[DATETIME]</pubDate>
+            </date>
+            <citRespParty xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="007"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+            </citRespParty>
+        </idCitation>
+        <searchKeys>
+            <keyword>Alaska Satellite Facility</keyword>
+            <keyword>ASF</keyword>
+            <keyword>Synthetic Aperture Radar</keyword>
+            <keyword>SAR</keyword>
+            <keyword>Radiometric Terrain Correction</keyword>
+            <keyword>RTC</keyword>
+            <keyword>Digital Elevation Model</keyword>
+            <keyword>DEM</keyword>
+            <keyword>Sentinel-1</keyword>
+        </searchKeys>
+        <dataLang>
+            <languageCode value="eng"/>
+            <countryCode value="US"/>
+        </dataLang>
+        <dataChar>
+            <CharSetCd value="004"/>
+        </dataChar>
+        <resMaint xmlns="">
+            <maintFreq>
+                <MaintFreqCd value="009"/>
+            </maintFreq>
+        </resMaint>
+        <resConst>
+            <Consts xmlns="">
+                <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;Access to data is based on a principle of full, open and free access as established by the Copernicus data and information policy Regulation (EU) No 1159/2013 of 12 July 2013. This regulation establishes registration and licensing conditions for GMES/Copernicus users and can be found &lt;/SPAN&gt;&lt;A href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A32013R1159"&gt;&lt;SPAN&gt;here&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;. &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Free, full and open access to this data set is made on the conditions that:&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-align:Left; margin:1 1 1 20; text-indent:-24px; padding-left:24px;"&gt;&lt;SPAN&gt;1. When distributing or communicating Copernicus dedicated data and Copernicus service information to the public, users shall inform the public of the source of that data and information.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-align:Left; margin:1 1 1 20; text-indent:-24px; padding-left:24px;"&gt;&lt;SPAN&gt;2. Users shall make sure not to convey the impression to the public that the user's activities are officially endorsed by the Union.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-align:Left; margin:1 1 1 20; text-indent:-24px; padding-left:24px;"&gt;&lt;SPAN&gt;3. Where that data or information has been adapted or modified, the user shall clearly state this.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-align:Left; margin:1 1 1 20; text-indent:-24px; padding-left:24px;"&gt;&lt;SPAN&gt;4. The data remain the sole property of the European Union. Any information and data produced in the framework of the action shall be the sole property of the European Union. Any communication and publication by the beneficiary shall acknowledge that the data were produced “with funding by the European Union”.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+                </useLimit>
+            </Consts>
+        </resConst>
+        <envirDesc>This product was generated using ASF HYP3 RTC software version [HYP3_VER], running S1TBX release [S1TBX_VER].</envirDesc>
+        <idPoC xmlns="">
+            <rpOrgName>European Environment Agency (EEA) under the framework of the Copernicus programme</rpOrgName>
+            <role>
+                <RoleCd value="006"/>
+            </role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType="">
+                    <eMailAdd>copernicus@eea.europa.eu</eMailAdd>
+                </cntAddress>
+            </rpCntInfo>
+        </idPoC>
+        <tpCat>
+            <TopicCatCd value="006"/>
+        </tpCat>
+    </dataIdInfo>
+    <mdHrLv>
+        <ScopeCd value="005"/>
+    </mdHrLv>
+    <mdFileID>RTC_S1TBX_Template_dem_EUDEM_200325</mdFileID>
+    <mdLang>
+        <languageCode value="eng"/>
+        <countryCode value="US"/>
+    </mdLang>
+    <mdChar>
+        <CharSetCd value="004"/>
+    </mdChar>
+    <mdDateSt>[DATE]</mdDateSt>
+    <dataSetFn>
+        <OnFunctCd value="001"/>
+    </dataSetFn>
+    <mdContact xmlns="">
+        <rpOrgName>Alaska Satellite Facility</rpOrgName>
+        <role>
+            <RoleCd value="006"/>
+        </role>
+        <rpCntInfo xmlns="">
+            <cntAddress addressType="physical">
+                <delPoint>2156 Koyukuk Dr.</delPoint>
+                <city>Fairbanks</city>
+                <adminArea>Alaska</adminArea>
+                <postCode>99775-7320</postCode>
+                <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                <country>US</country>
+            </cntAddress>
+            <cntPhone>
+                <voiceNum tddtty="">907-474-5041</voiceNum>
+            </cntPhone>
+        </rpCntInfo>
+        <displayName>Alaska Satellite Facility</displayName>
+    </mdContact>
+    <dqInfo xmlns="">
+        <dqScope>
+            <scpLvl>
+                <ScopeCd value="005"/>
+            </scpLvl>
+        </dqScope>
+        <dataLineage>
+            <statement>The digital elevation model was reprojected from Lambert Aziumuthal Equal Area (ETRS89) to the WGS84 Geographic Coordinate System, and a geoid correction was applied. At the start of terrain correction, the best DEM covering the SAR image is selected, and tiles are mosaicked as necessary to cover the full extent of the image. The DEM is then converted into UTM coordinates, and used for processing.</statement>
+        </dataLineage>
+    </dqInfo>
+    <mdMaint xmlns="">
+        <maintFreq>
+            <MaintFreqCd value="009"/>
+        </maintFreq>
+    </mdMaint>
+    <refSysInfo>
+        <RefSystem dimension="horizontal"/>
+    </refSysInfo>
+    <contInfo>
+        <ImgDesc xmlns="">
+            <attDesc>elevation</attDesc>
+            <contentTyp>
+                <ContentTypCd value="001"/>
+            </contentTyp>
+            <trianInd>False</trianInd>
+            <radCalDatAv>False</radCalDatAv>
+            <camCalInAv>False</camCalInAv>
+            <filmDistInAv>False</filmDistInAv>
+            <lensDistInAv>False</lensDistInAv>
+            <covDim>
+                <Band xmlns="">
+                    <valUnit>
+                        <UOM gmlID="" type="">
+                            <unitSymbol>m</unitSymbol>
+                        </UOM>
+                    </valUnit>
+                </Band>
+            </covDim>
+        </ImgDesc>
+    </contInfo>
+    <Binary>
+        <Thumbnail>
+            <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
+        </Thumbnail>
+    </Binary>
+</metadata>
