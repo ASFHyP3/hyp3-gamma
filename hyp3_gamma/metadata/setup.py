@@ -33,6 +33,7 @@ setup(
 
     install_requires=[
         'importlib_metadata',
+        'jinja2',
     ],
 
     extras_require={

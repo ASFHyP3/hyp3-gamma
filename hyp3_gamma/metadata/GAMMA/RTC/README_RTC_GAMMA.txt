@@ -1,9 +1,9 @@
 ASF RTC Data Package (GAMMA)
 ============================
+{{ foo }}
+This folder contains radiometric terrain corrected (RTC) products and their associated files. This data was processed by the ASF DAAC using the HyP3 RTC GAMMA plugin version {{ plugin_version }} and GAMMA software release {{ gamma_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ resolution }} m.
 
-This folder contains radiometric terrain corrected (RTC) products and their associated files. This data was processed by the ASF DAAC using the HyP3 RTC GAMMA plugin version [HYP3_VER] and GAMMA software release [GAMMA_VER]. They are projected to [PCS], and the pixel spacing is [SPACING] m.
-
-Processing Date/Time: [DATE] [TIME] UTC
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
 The folder and each of its contents all share the same base name, using the following convention:
 ```
@@ -25,7 +25,7 @@ ssss:       Product ID
 ```
 
 The source granule used to generate the products contained in this folder is:
-[GRAN_NAME]
+{{ granule_name }}
 
 <!-- Consider opening this document in a Markdown editor/viewer for easier reading -->
 
@@ -36,7 +36,7 @@ Please refer to the ASF Sentinel-1 RTC User Guide for in-depth guidance on the u
 
 When using this data in a publication or presentation, we ask that you include the following acknowledgement:
 
-    RTC product processed by ASF DAAC HyP3 [YEARPROCESSED] using GAMMA software. Contains modified Copernicus Sentinel data [YEARACQUIRED], processed by ESA.
+    RTC product processed by ASF DAAC HyP3 {{ processing_date.year }} using GAMMA software. Contains modified Copernicus Sentinel data {{ granule_name[17:21] }}, processed by ESA.
 
 DOIs are also provided for citation when discussing the HyP3 software or plugins:
 * HyP3 processing environment, DOI: [10.5281/zenodo.3962581](https://doi.org/10.5281/zenodo.3962581)
@@ -68,9 +68,9 @@ See below for detailed descriptions of each of the products.
 
 GeoTIFF files are generated for each polarization available in the source granule. Each filename will include the polarization: VV or HH for primary polarization, and VH or HV for cross-polarization. To learn more about polarimetry, refer to https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry
 
-These files have been processed to output [POWERTYPE]-0 [FORMAT].
+These files have been processed to output {% if gamma_flag %}gamma-0{% else %}sigma-0{% endif %} {% if power_flag %}power{% else %}amplitude{% endif %}.
 
-[FILT] speckle filter has been applied to the RTC images. The default is to not apply a speckle filter, but the user can choose to apply a filter when ordering the RTC imagery. When the filtering option is selected, an Enhanced Lee filter is applied during RTC processing to remove speckle while preserving edges. When applied, the filter is set to a dampening factor of 1, with a box size of 7x7 pixels and [FLOOKS] looks.
+{% if filter_applied %}A{% else %}No{% endif %} speckle filter has been applied to the RTC images. The default is to not apply a speckle filter, but the user can choose to apply a filter when ordering the RTC imagery. When the filtering option is selected, an Enhanced Lee filter is applied during RTC processing to remove speckle while preserving edges. When applied, the filter is set to a dampening factor of 1, with a box size of 7x7 pixels and {{ looks * 30 }} looks.
 
 -------------
 ## 2. Browse images in grayscale and color
@@ -88,11 +88,11 @@ KMZ files are generated for use in Google Earth and other compatible application
 
 The Digital Elevation Model (DEM) layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _dem.tif
 
-The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The resolution of the source DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to [SPACING] m for use in RTC processing.
+The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The resolution of the source DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to {{ resolution }} m for use in RTC processing.
 
 The DEM sources include the National Elevation Dataset (NED) and the Shuttle Radar Topography Mission (SRTM).
 
-The source of the DEM for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters).
+The source of the DEM for this particular product is {{ dem_name }}, which has a native resolution of {{ dem_resolution }}.
 
 *Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
 
@@ -173,7 +173,7 @@ A textfile is generated during processing, which includes the parameters used an
 The basic steps in the radiometric terrain correction process are as follows:
 
 1. Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
-2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).
+2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used {{ looks }} look(s).
 3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
 4. A mapping function is created, mapping from DEM space into SAR space.
 5. By default, DEM coregistration is not used. When the DEM Matching option is selected for a custom order, the following steps will be performed. *By default the process will skip from step 4 to step 6.*
