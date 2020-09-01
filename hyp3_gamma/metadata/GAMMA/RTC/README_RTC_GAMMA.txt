@@ -68,7 +68,7 @@ See below for detailed descriptions of each of the products.
 
 GeoTIFF files are generated for each polarization available in the source granule. Each filename will include the polarization: VV or HH for primary polarization, and VH or HV for cross-polarization. To learn more about polarimetry, refer to https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry
 
-These files have been processed to output {% if gamma_flag %}gamma-0{% else %}sigma-0{% endif %} {% if power_flag %}power{% else %}amplitude{% endif %}.
+These files have been processed to output {{ radiometry }} {{ scale }}.
 
 {% if filter_applied %}A{% else %}No{% endif %} speckle filter has been applied to the RTC images. The default is to not apply a speckle filter, but the user can choose to apply a filter when ordering the RTC imagery. When the filtering option is selected, an Enhanced Lee filter is applied during RTC processing to remove speckle while preserving edges. When applied, the filter is set to a dampening factor of 1, with a box size of 7x7 pixels and {{ looks * 30 }} looks.
 

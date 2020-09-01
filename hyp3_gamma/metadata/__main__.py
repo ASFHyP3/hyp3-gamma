@@ -6,7 +6,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 def get_environment():
     env = Environment(
-        loader=PackageLoader('hyp3_metadata', 'GAMMA'),
+        loader=PackageLoader('hyp3_metadata', '.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
     return env
@@ -30,11 +30,11 @@ def get_dem_resolution(dem_name):
     return data[dem_name]
 
 
-def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution: float, gamma_flag: bool,
-                            power_flag: bool, filter_applied: bool, looks: int, projection: str, dem_name: str,
+def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution: float, radiometry: str,
+                            scale: str, filter_applied: bool, looks: int, projection: str, dem_name: str,
                             plugin_version: str, gamma_version: str, processing_date: datetime):
     payload = locals()
     payload['dem_resolution'] = get_dem_resolution(dem_name)
-    content = render_template('RTC/README_RTC_GAMMA.txt', payload)
+    content = render_template('GAMMA/RTC/README_RTC_GAMMA.txt', payload)
     with open(readme_filename, 'w') as f:
         f.write(content)
