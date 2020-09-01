@@ -20,3 +20,17 @@ def test_create_rtc_gamma_readme(tmp_path):
         processing_date=datetime.now(timezone.utc),
     )
     assert readme_filename.exists()
+
+
+def test_create_dem_xml(tmp_path, test_data_folder):
+    output_filename = tmp_path / 'readme.txt'
+    __main__.create_dem_xml(
+        output_filename=output_filename,
+        dem_filename=test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_dem.tif',
+        dem_name='SRTMGL1',
+        processing_date=datetime.now(timezone.utc),
+        plugin_version='2.3.0',
+        gamma_version='20191203',
+        granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8'
+    )
+    assert output_filename.exists()

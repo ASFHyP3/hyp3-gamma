@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 
 from jinja2 import Environment, PackageLoader, select_autoescape
+from osgeo import gdal, osr
 
 
 def get_environment():
@@ -30,6 +31,20 @@ def get_dem_resolution(dem_name):
     return data[dem_name]
 
 
+def get_projection(srs_wkt):
+    srs = osr.SpatialReference()
+    srs.ImportFromWkt(srs_wkt)
+    return srs.GetAttrValue('projcs')
+
+
+def get_granule_type(granule_name):
+    type = granule_name[7:10]
+    if type == 'SLC':
+        return 'SLC', 'Single-Look Complex'
+    if type == 'GRD':
+        return 'GRD', 'Ground Range Detected'
+
+
 def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution: float, radiometry: str,
                             scale: str, filter_applied: bool, looks: int, projection: str, dem_name: str,
                             plugin_version: str, gamma_version: str, processing_date: datetime):
@@ -37,4 +52,28 @@ def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution
     payload['dem_resolution'] = get_dem_resolution(dem_name)
     content = render_template('GAMMA/RTC/README_RTC_GAMMA.txt', payload)
     with open(readme_filename, 'w') as f:
+        f.write(content)
+
+
+def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, processing_date: datetime,
+                   plugin_version: str, gamma_version: str, granule_name: str):
+    payload = locals()
+
+    payload['dem_resolution'] = get_dem_resolution(dem_name)
+
+    payload['granule_type'], payload['granule_description'] = get_granule_type(granule_name)
+
+    if dem_filename.name[37] == 'p':  # TODO name decoding function?
+        payload['scale'] = 'power'
+    else:
+        payload['scale'] = 'amplitude'
+
+    info = gdal.Info(str(dem_filename), format='json')
+    payload['pixel_spacing'] = info['geoTransform'][1]
+    payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
+
+    payload['thumbnail_binary_string'] = b''  # TODO
+
+    content = render_template('GAMMA/RTC/RTC_GAMMA_Template_dem_SRTM.xml', payload)
+    with open(output_filename, 'w') as f:
         f.write(content)

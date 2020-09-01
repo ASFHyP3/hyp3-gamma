@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'importlib_metadata',
         'jinja2',
+        'gdal',
     ],
 
     extras_require={
