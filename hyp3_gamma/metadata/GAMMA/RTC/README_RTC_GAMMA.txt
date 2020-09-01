@@ -1,6 +1,6 @@
 ASF RTC Data Package (GAMMA)
 ============================
-{{ foo }}
+
 This folder contains radiometric terrain corrected (RTC) products and their associated files. This data was processed by the ASF DAAC using the HyP3 RTC GAMMA plugin version {{ plugin_version }} and GAMMA software release {{ gamma_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ resolution }} m.
 
 Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
