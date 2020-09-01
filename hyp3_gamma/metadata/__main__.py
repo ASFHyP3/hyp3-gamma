@@ -1,14 +1,15 @@
 from datetime import datetime
 from pathlib import Path
 
-from jinja2 import Environment, PackageLoader, select_autoescape
+from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
 from osgeo import gdal, osr
 
 
 def get_environment():
     env = Environment(
         loader=PackageLoader('hyp3_metadata', '.'),
-        autoescape=select_autoescape(['html', 'xml'])
+        autoescape=select_autoescape(['html', 'xml']),
+        undefined=StrictUndefined,
     )
     return env
 
