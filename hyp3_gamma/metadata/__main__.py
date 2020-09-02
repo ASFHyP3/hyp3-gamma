@@ -10,7 +10,7 @@ from hyp3_metadata import __version__
 def get_environment():
     env = Environment(
         loader=PackageLoader('hyp3_metadata', '.'),
-        autoescape=select_autoescape(['html', 'xml']),
+        autoescape=select_autoescape(['html.j2', 'xml.j2']),
         undefined=StrictUndefined,
         trim_blocks=True,
         lstrip_blocks=True,
@@ -107,6 +107,6 @@ def create_browse_xml(output_filename: Path, browse_filename: Path, processing_d
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
-    content = render_template(f'browse-{browse_scale}.j2', payload)
+    content = render_template(f'browse-{browse_scale}.xml.j2', payload)
     with open(output_filename, 'w') as f:
         f.write(content)
