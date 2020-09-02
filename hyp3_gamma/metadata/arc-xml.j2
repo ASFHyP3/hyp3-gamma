@@ -1,0 +1,79 @@
+<metadata xml:lang="en">
+    <Esri>
+        <CreaDate>{{ processing_date.strftime('%y%m%d') }}</CreaDate>
+        <CreaTime>{{ processing_date.strftime('%H%M%S') }}00</CreaTime>
+        <ArcGISFormat>1.0</ArcGISFormat>
+        <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+        <SyncOnce>TRUE</SyncOnce>
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+        <DataProperties>
+            <itemProps>
+                <imsContentType export="False">002</imsContentType>
+            </itemProps>
+        </DataProperties>
+        <ArcGISProfile>NAP</ArcGISProfile>
+        <ModDate>{{ processing_date.strftime('%y%m%d') }}</ModDate>
+        <ModTime>{{ processing_date.strftime('%H%M%S') }}00</ModTime>
+    </Esri>
+    {% block dataIdInfo %}{% endblock %}
+    <mdHrLv>
+        <ScopeCd value="005"/>
+    </mdHrLv>
+        <mdFileID>{{ metadata_version }}</mdFileID>
+    <mdLang>
+        <languageCode value="eng"/>
+        <countryCode value="US"/>
+    </mdLang>
+    <mdChar>
+        <CharSetCd value="004"/>
+    </mdChar>
+    <mdDateSt>{{ processing_date.strftime('%Y%m%d') }}</mdDateSt>
+    <dataSetFn>
+        <OnFunctCd value="001"/>
+    </dataSetFn>
+    <mdContact xmlns="">
+        <rpOrgName>Alaska Satellite Facility</rpOrgName>
+        <role>
+            <RoleCd value="006"/>
+        </role>
+        <rpCntInfo xmlns="">
+            <cntAddress addressType="physical">
+                <delPoint>2156 Koyukuk Dr.</delPoint>
+                <city>Fairbanks</city>
+                <adminArea>Alaska</adminArea>
+                <postCode>99775-7320</postCode>
+                <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                <country>US</country>
+            </cntAddress>
+            <cntPhone>
+                <voiceNum tddtty="">907-474-5041</voiceNum>
+            </cntPhone>
+        </rpCntInfo>
+        <displayName>Alaska Satellite Facility</displayName>
+    </mdContact>
+    <dqInfo xmlns="">
+        <dqScope>
+            <scpLvl>
+                <ScopeCd value="005"/>
+            </scpLvl>
+        </dqScope>
+        <dataLineage>
+            <statement>This data was processed by the ASF DAAC using the {{ plugin_name }} plugin version {{ plugin_version }} and GAMMA software release {{ gamma_version }}.</statement>
+        </dataLineage>
+    </dqInfo>
+    <mdMaint xmlns="">
+        <maintFreq>
+            <MaintFreqCd value="009"/>
+        </maintFreq>
+    </mdMaint>
+    {% block refSysInfo %}{% endblock %}
+    {% block contInfo %}{% endblock %}
+    <Binary>
+        <Thumbnail>
+            <Data EsriPropertyType="PictureX">{{ thumbnail_binary_string }}</Data>
+        </Thumbnail>
+    </Binary>
+</metadata>

@@ -4,6 +4,8 @@ from pathlib import Path
 from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
 from osgeo import gdal, osr
 
+from hyp3_metadata import __version__
+
 
 def get_environment():
     env = Environment(
@@ -76,5 +78,33 @@ def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, pro
     payload['thumbnail_binary_string'] = b''  # TODO
 
     content = render_template('GAMMA/RTC/RTC_GAMMA_Template_dem_SRTM.xml', payload)
+    with open(output_filename, 'w') as f:
+        f.write(content)
+
+
+def create_browse_xml(output_filename: Path, browse_filename: Path, processing_date: datetime,
+                      dem_name: str, plugin_name: str, plugin_version: str, gamma_version: str, granule_name: str):
+    payload = locals()
+    payload['metadata_version'] = __version__
+
+    payload['granule_type'], payload['granule_description'] = get_granule_type(granule_name)
+
+    if browse_filename.name[37] == 'p':  # TODO name decoding function?
+        payload['scale'] = 'power'
+    else:
+        payload['scale'] = 'amplitude'
+
+    if browse_filename.name.endswith('_rgb.png'):
+        browse_scale = 'color'
+    else:
+        browse_scale = 'greyscale'
+
+    info = gdal.Info(str(browse_filename), format='json')
+    payload['pixel_spacing'] = info['geoTransform'][1]
+    payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
+
+    payload['thumbnail_binary_string'] = b''  # TODO
+
+    content = render_template(f'browse-{browse_scale}.j2', payload)
     with open(output_filename, 'w') as f:
         f.write(content)
