@@ -12,6 +12,8 @@ def get_environment():
         loader=PackageLoader('hyp3_metadata', '.'),
         autoescape=select_autoescape(['html', 'xml']),
         undefined=StrictUndefined,
+        trim_blocks=True,
+        lstrip_blocks=True,
     )
     return env
 
