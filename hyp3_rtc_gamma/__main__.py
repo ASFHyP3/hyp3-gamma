@@ -67,12 +67,14 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
+def upload_file_to_s3(path_to_file, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
     logging.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
+
+    file_type = get_file_type(path_to_file)
     tag_set = {
         'TagSet': [
             {
@@ -101,6 +103,18 @@ def create_thumbnail(input_image, size=(100, 100)):
     output_image.thumbnail(size)
     output_image.save(thumbnail_name)
     return thumbnail_name
+
+
+def get_file_type(file_name):
+    if file_name.endswith('_rgb_thumb.png'):
+        return 'rgb-thumbnail'
+    if file_name.endswith('_rgb.png'):
+        return 'rgb-browse'
+    if file_name.endswith('_thumb.png'):
+        return 'amp-thumbnail'
+    if file_name.endswith('.png'):
+        return 'amp-browse'
+    return 'product'
 
 
 def string_is_true(s: str) -> bool:
@@ -149,12 +163,12 @@ def main_v2():
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
-        upload_file_to_s3(output_zip, 'product', args.bucket, args.bucket_prefix)
+        upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
         browse_images = glob.glob(f'{product_name}/*.png')
         for browse in browse_images:
             thumbnail = create_thumbnail(browse)
-            upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
-            upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
+            upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
+            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix)
 # end v2 functions
 
 
