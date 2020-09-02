@@ -14,6 +14,7 @@ def get_environment():
         undefined=StrictUndefined,
         trim_blocks=True,
         lstrip_blocks=True,
+        keep_trailing_newline=True,
     )
     return env
 
