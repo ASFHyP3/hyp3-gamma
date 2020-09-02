@@ -55,6 +55,8 @@ def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution
                             scale: str, filter_applied: bool, looks: int, projection: str, dem_name: str,
                             plugin_version: str, gamma_version: str, processing_date: datetime):
     payload = locals()
+    payload['metadata_version'] = __version__
+
     payload['dem_resolution'] = get_dem_resolution(dem_name)
     content = render_template('GAMMA/RTC/README_RTC_GAMMA.txt', payload)
     with open(readme_filename, 'w') as f:
@@ -62,8 +64,9 @@ def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution
 
 
 def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, processing_date: datetime,
-                   plugin_version: str, gamma_version: str, granule_name: str):
+                   plugin_name: str, plugin_version: str, gamma_version: str, granule_name: str):
     payload = locals()
+    payload['metadata_version'] = __version__
 
     payload['dem_resolution'] = get_dem_resolution(dem_name)
 
@@ -80,7 +83,7 @@ def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, pro
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
-    content = render_template('GAMMA/RTC/RTC_GAMMA_Template_dem_SRTM.xml', payload)
+    content = render_template('dem.xml.j2', payload)
     with open(output_filename, 'w') as f:
         f.write(content)
 

@@ -1,4 +1,10 @@
 {% extends 'arc.xml.j2' %}
+{% block scaleRange %}
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>500000</maxScale>
+        </scaleRange>
+{% endblock %}
 {% block dataIdInfo %}
     <dataIdInfo>
         {% block idPurp %}{% endblock %}
