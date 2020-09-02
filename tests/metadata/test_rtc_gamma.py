@@ -1,4 +1,3 @@
-from pathlib import Path
 from datetime import datetime, timezone
 
 from hyp3_metadata import __main__

@@ -43,10 +43,10 @@ def get_projection(srs_wkt):
 
 
 def get_granule_type(granule_name):
-    type = granule_name[7:10]
-    if type == 'SLC':
+    granule_type = granule_name[7:10]
+    if granule_type == 'SLC':
         return 'SLC', 'Single-Look Complex'
-    if type == 'GRD':
+    if granule_type == 'GRD':
         return 'GRD', 'Ground Range Detected'
 
 
