@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
+from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
 
 from hyp3_metadata import __version__
