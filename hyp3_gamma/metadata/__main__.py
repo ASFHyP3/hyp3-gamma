@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 from pathlib import Path
 
@@ -65,67 +66,76 @@ def get_granule_type(granule_name):
         return 'GRD', 'Ground Range Detected'
 
 
-def create_rtc_gamma_readme(readme_filename: Path, granule_name: str, resolution: float, radiometry: str,
-                            scale: str, filter_applied: bool, looks: int, projection: str, dem_name: str,
-                            plugin_version: str, gamma_version: str, processing_date: datetime):
+def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
+                     resolution: float, radiometry: str, scale: str, filter_applied: bool, looks: int,  # TODO parse arguments on this line from product dir
+                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str):
     payload = locals()
     payload['metadata_version'] = __version__
-
-    payload['dem_resolution'] = get_dem_resolution(dem_name)
-    content = render_template('GAMMA/RTC/README_RTC_GAMMA.txt', payload)
-    with open(readme_filename, 'w') as f:
-        f.write(content)
-
-
-def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, processing_date: datetime,
-                   plugin_name: str, plugin_version: str, gamma_version: str, granule_name: str):
-    payload = locals()
-    payload['metadata_version'] = __version__
-
-    payload['dem_resolution'] = get_dem_resolution(dem_name)
 
     payload['granule_type'], payload['granule_description'] = get_granule_type(granule_name)
 
-    if dem_filename.name[37] == 'p':  # TODO name decoding function?
+    payload['dem_resolution'] = get_dem_resolution(dem_name)
+    if product_dir.name[37] == 'p':  # TODO name decoding function?
         payload['scale'] = 'power'
     else:
         payload['scale'] = 'amplitude'
 
-    info = gdal.Info(str(dem_filename), format='json')
+    return payload
+
+
+def create_readme(payload: dict):
+    payload = copy.deepcopy(payload)
+    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'  # FIXME: use product(s)?
+
+    info = gdal.Info(str(reference_file), format='json')
+    payload['pixel_spacing'] = info['geoTransform'][1]
+    payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
+
+    content = render_template(f'readme.md.txt.j2', payload)
+    output_file = payload['product_dir'] / f'{payload["product_dir"].name}.README.md.txt'
+    with open(output_file, 'w') as f:
+        f.write(content)
+
+    return output_file
+
+
+def create_dem_xml(payload: dict):
+    payload = copy.deepcopy(payload)
+    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_dem.tif'
+
+    info = gdal.Info(str(reference_file), format='json')
     payload['pixel_spacing'] = info['geoTransform'][1]
     payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
-    dem_template_id = get_dem_template_id(dem_name)
+    dem_template_id = get_dem_template_id(payload['dem_name'])
     content = render_template(f'dem-{dem_template_id}.xml.j2', payload)
-    with open(output_filename, 'w') as f:
+    output_file = reference_file.parent / f'{reference_file.name}.xml'
+    with open(output_file, 'w') as f:
         f.write(content)
 
+    return output_file
 
-def create_browse_xml(output_filename: Path, browse_filename: Path, processing_date: datetime,
-                      dem_name: str, plugin_name: str, plugin_version: str, gamma_version: str, granule_name: str):
-    payload = locals()
-    payload['metadata_version'] = __version__
 
-    payload['granule_type'], payload['granule_description'] = get_granule_type(granule_name)
+def create_browse_xml(payload: dict):
+    payload = copy.deepcopy(payload)
+    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'
 
-    if browse_filename.name[37] == 'p':  # TODO name decoding function?
-        payload['scale'] = 'power'
-    else:
-        payload['scale'] = 'amplitude'
-
-    if browse_filename.name.endswith('_rgb.png'):
+    if reference_file.name.endswith('_rgb.png'):
         browse_scale = 'color'
     else:
         browse_scale = 'greyscale'
 
-    info = gdal.Info(str(browse_filename), format='json')
+    info = gdal.Info(str(reference_file), format='json')
     payload['pixel_spacing'] = info['geoTransform'][1]
     payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
     content = render_template(f'browse-{browse_scale}.xml.j2', payload)
-    with open(output_filename, 'w') as f:
+    output_file = reference_file.parent / f'{reference_file.name}.xml'
+    with open(output_file, 'w') as f:
         f.write(content)
+
+    return output_file
