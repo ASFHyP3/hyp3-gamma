@@ -103,9 +103,12 @@ def main_v2():
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
-    parser.add_argument('granule1')
-    parser.add_argument('granule2')
+    parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
+
+    args.granules = [item for sublist in args.granules for item in sublist]
+    if len(args.granules) != 2:
+        parser.error('Must provide exactly two granules')
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
@@ -113,7 +116,7 @@ def main_v2():
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
     granule_file = 'granules.txt'
-    g1, g2 = earlier_granule_first(args.granule1, args.granule2)
+    g1, g2 = earlier_granule_first(args.granules[0], args.granules[1])
     write_list_file(granule_file, g1, g2)
 
     with open('get_asf.cfg', 'w') as f:
