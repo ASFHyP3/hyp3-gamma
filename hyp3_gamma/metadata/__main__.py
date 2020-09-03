@@ -26,7 +26,7 @@ def render_template(template: str, payload: dict):
     return rendered
 
 
-def get_dem_resolution(dem_name):
+def get_dem_resolution(dem_name: str):
     data = {
         'NED13': '1/3 arc seconds (about 10 meters)',
         'NED1': '1 arc second (about 30 meters)',
@@ -35,6 +35,20 @@ def get_dem_resolution(dem_name):
         'SRTMGL3': '3 arc seconds (about 90 meters)',
     }
     return data[dem_name]
+
+
+def get_dem_template_id(dem_name: str):
+    if dem_name.startswith('EU'):
+        return 'eu'
+    if dem_name.startswith('GIMP'):
+        return 'gimp'
+    if dem_name.startswith('NED'):
+        return 'ned'
+    if dem_name.startswith('REMA'):
+        return 'rema'
+    if dem_name.startswith('SRTM'):
+        return 'srtm'
+    raise NotImplementedError(f'Unkown DEM: {dem_name}')
 
 
 def get_projection(srs_wkt):
@@ -83,7 +97,8 @@ def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, pro
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
-    content = render_template(f'dem-{dem_name}.xml.j2', payload)
+    dem_template_id = get_dem_template_id(dem_name)
+    content = render_template(f'dem-{dem_template_id}.xml.j2', payload)
     with open(output_filename, 'w') as f:
         f.write(content)
 
