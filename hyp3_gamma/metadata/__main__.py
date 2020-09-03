@@ -83,7 +83,7 @@ def create_dem_xml(output_filename: Path, dem_filename: Path, dem_name: str, pro
 
     payload['thumbnail_binary_string'] = b''  # TODO
 
-    content = render_template('dem.xml.j2', payload)
+    content = render_template(f'dem-{dem_name}.xml.j2', payload)
     with open(output_filename, 'w') as f:
         f.write(content)
 
