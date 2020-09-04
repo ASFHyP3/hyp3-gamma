@@ -1,4 +1,4 @@
-{% extends 'dem.xml.j2' %}
+{% extends 'dem/dem.xml.j2' %}
 {% block dataIdInfo %}
     <dataIdInfo>
         <idPurp>This file is the DEM used in the radiometric terrain correction process (using GAMMA software) for a granule of {{ granule_type }} SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of {{ pixel_spacing|int }} m. To access actual {{ scale }} values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>

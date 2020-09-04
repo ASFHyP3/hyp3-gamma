@@ -67,7 +67,7 @@ def get_granule_type(granule_name) -> Tuple[str, str]:
         return 'GRD', 'Ground Range Detected'
 
 
-# FIXME: in hyp3_rtc_gamma.rtc_sentinel as well
+# FIXME: in hyp3_rtc_gamma.rtc_sentinel as well -- move to hyp3lib?
 def get_polarizations(product_polarization):
     mapping = {
         'SH': ('HH',),
@@ -137,7 +137,7 @@ def create_dem_xml(payload: dict) -> Path:
 
     dem_template_id = get_dem_template_id(payload['dem_name'])
 
-    return create(payload, f'dem-{dem_template_id}.xml.j2', reference_file)
+    return create(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
 def create_browse_xml(payload: dict) -> Path:
@@ -149,7 +149,7 @@ def create_browse_xml(payload: dict) -> Path:
     else:
         browse_scale = 'greyscale'
 
-    return create(payload, f'browse-{browse_scale}.xml.j2', reference_file)
+    return create(payload, f'browse/browse-{browse_scale}.xml.j2', reference_file)
 
 
 def create_inc_map_xml(payload: dict) -> Path:
