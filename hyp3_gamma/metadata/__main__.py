@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
@@ -67,6 +67,17 @@ def get_granule_type(granule_name) -> Tuple[str, str]:
         return 'GRD', 'Ground Range Detected'
 
 
+# FIXME: in hyp3_rtc_gamma.rtc_sentinel as well
+def get_polarizations(product_polarization):
+    mapping = {
+        'SH': ('HH',),
+        'SV': ('VV',),
+        'DH': ('HH', 'HV'),
+        'DV': ('VV', 'VH'),
+    }
+    return mapping[product_polarization]
+
+
 def decode_product(product_dir: Path) -> dict:
     product_parts = product_dir.name.split('_')
     user_options = product_parts[-2]
@@ -78,6 +89,7 @@ def decode_product(product_dir: Path) -> dict:
             'filter_applied': False if user_options[3] == 'n' else True,
             'clipped': False if user_options[4] == 'e' else True,
             'matching': False if user_options[5] == 'd' else True,
+            'polarizations': product_parts[-5][:2],
             }
 
 
@@ -102,6 +114,21 @@ def create_readme(payload: dict) -> Path:
 
     return create(payload, f'readme.md.txt.j2', reference_file, out_ext='README.md.txt',
                   strip_ext=True, thumbnail=False)
+
+
+def create_product_xmls(payload: dict) -> List[Path]:
+    payload = copy.deepcopy(payload)
+
+    output_files = []
+    for pol in get_polarizations(payload['polarizations']):
+        payload['pol'] = pol
+        reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{pol}.tif'
+
+        output_files.append(
+            create(payload, 'product.xml.j2', reference_file)
+        )
+
+    return output_files
 
 
 def create_dem_xml(payload: dict) -> Path:
