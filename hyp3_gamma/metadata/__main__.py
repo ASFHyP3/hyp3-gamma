@@ -1,7 +1,7 @@
 import copy
 from datetime import datetime
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
@@ -112,7 +112,7 @@ def create_readme(payload: dict) -> Path:
 
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'  # FIXME: use product(s)?
 
-    return create(payload, f'readme.md.txt.j2', reference_file, out_ext='README.md.txt',
+    return create(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt',
                   strip_ext=True, thumbnail=False)
 
 
