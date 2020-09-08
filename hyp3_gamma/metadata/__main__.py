@@ -4,7 +4,7 @@ from base64 import b64encode
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
@@ -57,14 +57,20 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
 
 
 def get_dem_resolution(dem_name: str) -> str:
-    data = {
-        'NED13': '1/3 arc seconds (about 10 meters)',
-        'NED1': '1 arc second (about 30 meters)',
-        'NED2': '2 arc seconds (about 60 meters)',
-        'SRTMGL1': '1 arc second (about 30 meters)',
-        'SRTMGL3': '3 arc seconds (about 90 meters)',
-    }
-    return data[dem_name]
+    try:
+        data = {
+            'EU_DEM_V11': '1 arc second (about 30 meters)',
+            'GIMP': '1 arc second (about 30 meters)',
+            'NED13': '1/3 arc seconds (about 10 meters)',
+            'NED1': '1 arc second (about 30 meters)',
+            'NED2': '2 arc seconds (about 60 meters)',
+            'REMA': '1 arc second (about 30 meters)',
+            'SRTMGL1': '1 arc second (about 30 meters)',
+            'SRTMGL3': '3 arc seconds (about 90 meters)',
+        }
+        return data[dem_name]
+    except KeyError:
+        raise NotImplementedError(f'Unknown resolution for DEM: {dem_name}')
 
 
 def get_dem_template_id(dem_name: str) -> str:
@@ -87,12 +93,13 @@ def get_projection(srs_wkt) -> str:
     return srs.GetAttrValue('projcs')
 
 
-def get_granule_type(granule_name) -> Tuple[str, str]:
+def get_granule_type(granule_name) -> Dict[str, str]:
     granule_type = granule_name[7:10]
     if granule_type == 'SLC':
-        return 'SLC', 'Single-Look Complex'
+        return {'granule_type': 'SLC', 'granule_description': 'Single-Look Complex'}
     if granule_type == 'GRD':
-        return 'GRD', 'Ground Range Detected'
+        return {'granule_type': 'GRD', 'granule_description': 'Ground Range Detected'}
+    raise NotImplementedError(f'Unknown granule type: {granule_name}')
 
 
 # FIXME: in hyp3_rtc_gamma.rtc_sentinel as well -- move to hyp3lib?
@@ -110,15 +117,16 @@ def decode_product(product_dir: Path) -> dict:
     product_parts = product_dir.name.split('_')
     user_options = product_parts[-2]
 
-    return {'resolution': int(product_parts[-4][-2:]),
-            'radiometry': 'gamma-0' if user_options[0] == 'g' else 'sigma-0',
-            'scale': 'power' if user_options[1] == 'p' else 'amplitude',
-            'masked': False if user_options[2] == 'u' else True,
-            'filter_applied': False if user_options[3] == 'n' else True,
-            'clipped': False if user_options[4] == 'e' else True,
-            'matching': False if user_options[5] == 'd' else True,
-            'polarizations': product_parts[-5][:2],
-            }
+    return {
+        'resolution': int(product_parts[-4][-2:]),
+        'radiometry': 'gamma-0' if user_options[0] == 'g' else 'sigma-0',
+        'scale': 'power' if user_options[1] == 'p' else 'amplitude',
+        'masked': False if user_options[2] == 'u' else True,
+        'filter_applied': False if user_options[3] == 'n' else True,
+        'clipped': False if user_options[4] == 'e' else True,
+        'matching': False if user_options[5] == 'd' else True,
+        'polarizations': product_parts[-5][:2],
+    }
 
 
 def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
@@ -143,7 +151,7 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
 
     payload.update(decode_product(product_dir))
 
-    payload['granule_type'], payload['granule_description'] = get_granule_type(granule_name)
+    payload.update(get_granule_type(granule_name))
 
     payload['dem_resolution'] = get_dem_resolution(dem_name)
 
@@ -155,7 +163,7 @@ def create_readme(payload: dict) -> Path:
 
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'  # FIXME: use product(s)?
 
-    return create(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True)
+    return create_metadata_file(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True)
 
 
 def create_product_xmls(payload: dict) -> List[Path]:
@@ -167,7 +175,7 @@ def create_product_xmls(payload: dict) -> List[Path]:
         reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{pol}.tif'
 
         output_files.append(
-            create(payload, 'product.xml.j2', reference_file)
+            create_metadata_file(payload, 'product.xml.j2', reference_file)
         )
 
     return output_files
@@ -179,7 +187,7 @@ def create_dem_xml(payload: dict) -> Path:
 
     dem_template_id = get_dem_template_id(payload['dem_name'])
 
-    return create(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
+    return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
 def create_browse_xml(payload: dict) -> Path:
@@ -191,23 +199,23 @@ def create_browse_xml(payload: dict) -> Path:
     else:
         browse_scale = 'greyscale'
 
-    return create(payload, f'browse/browse-{browse_scale}.xml.j2', reference_file)
+    return create_metadata_file(payload, f'browse/browse-{browse_scale}.xml.j2', reference_file)
 
 
 def create_inc_map_xml(payload: dict) -> Path:
     payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_inc_map.tif'
-    return create(payload, 'inc_map.xml.j2', reference_file)
+    return create_metadata_file(payload, 'inc_map.xml.j2', reference_file)
 
 
 def create_ls_map_xml(payload: dict) -> Path:
     payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_ls_map.tif'
-    return create(payload, 'ls_map.xml.j2', reference_file)
+    return create_metadata_file(payload, 'ls_map.xml.j2', reference_file)
 
 
-def create(payload: dict, template: str, reference_file: Path = None, out_ext: str = 'xml',
-           strip_ext: bool = False) -> Path:
+def create_metadata_file(payload: dict, template: str, reference_file: Path = None, out_ext: str = 'xml',
+                         strip_ext: bool = False) -> Path:
     if reference_file:
         info = gdal.Info(str(reference_file), format='json')
         payload['pixel_spacing'] = info['geoTransform'][1]
