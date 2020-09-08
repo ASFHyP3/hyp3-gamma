@@ -125,7 +125,7 @@ def test_exact_rtc_gamma_ls_map(test_data_folder):
 
 def test_rtc_gamma_all_files(test_data_folder):
     product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
-    files = __main__.get_rtc_metadata_files(
+    files = __main__.create_metadata_file_set(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
         dem_name='SRTMGL1',

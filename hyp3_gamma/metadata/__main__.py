@@ -28,7 +28,7 @@ def render_template(template: str, payload: dict) -> str:
     return rendered
 
 
-def get_rtc_metadata_files(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
+def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
                            looks: int, plugin_name: str, plugin_version: str, processor_name: str,
                            processor_version: str) -> List[Path]:
     payload = marshal_metadata(
