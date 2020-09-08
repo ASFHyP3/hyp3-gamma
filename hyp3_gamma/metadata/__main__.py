@@ -5,9 +5,9 @@ from io import BytesIO
 from pathlib import Path
 from typing import List, Tuple
 
+from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
-from PIL import Image
 
 from hyp3_metadata import __version__
 
