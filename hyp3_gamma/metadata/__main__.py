@@ -120,7 +120,7 @@ def decode_product(product_dir: Path) -> dict:
             }
 
 
-def get_thumbnail_binary_string(reference_file: Path, size=(200, 200)) -> bytes:
+def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
     browse_file = reference_file.with_suffix('.png')
     if not browse_file.exists():
         return b''
