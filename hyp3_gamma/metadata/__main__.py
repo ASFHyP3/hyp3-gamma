@@ -43,8 +43,8 @@ def get_rtc_metadata_files(product_dir: Path, granule_name: str, dem_name: str, 
         processor_version=processor_version,
     )
     files = []
+    files.extend(create_product_xmls(payload))
     files.append(create_readme(payload))
-    files.append(create_product_xmls(payload))
     files.append(create_dem_xml(payload))
     files.append(create_browse_xml(payload))
     files.append(create_inc_map_xml(payload))
