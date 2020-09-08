@@ -122,6 +122,7 @@ def test_exact_rtc_gamma_ls_map(test_data_folder):
 
     assert output_file.exists()
 
+
 def test_rtc_gamma_all_files(test_data_folder):
     product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
     files = __main__.get_rtc_metadata_files(
