@@ -1,7 +1,7 @@
 <metadata xml:lang="en">
     <Esri>
-        <CreaDate>{{ processing_date.strftime('%Y%m%d') }}</CreaDate>
-        <CreaTime>{{ processing_date.strftime('%H%M%S') }}00</CreaTime>
+        <CreaDate>[DATE]</CreaDate>
+        <CreaTime>[TIME]</CreaTime>
         <ArcGISFormat>1.0</ArcGISFormat>
         <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
         <SyncOnce>TRUE</SyncOnce>
@@ -15,17 +15,17 @@
             </itemProps>
         </DataProperties>
         <ArcGISProfile>NAP</ArcGISProfile>
-        <ModDate>{{ processing_date.strftime('%Y%m%d') }}</ModDate>
-        <ModTime>{{ processing_date.strftime('%H%M%S') }}00</ModTime>
+        <ModDate>[DATE]</ModDate>
+        <ModTime>[TIME]</ModTime>
     </Esri>
     <dataIdInfo>
-        <idPurp>This file is the DEM used in the radiometric terrain correction process (using GAMMA software) for a granule of {{ granule_type }} SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of {{ pixel_spacing|int }} m. To access actual {{ scale }} values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>
-        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the digital elevation model used in the radiometric terrain correction process for a granule of {{ granule_description }} ({{ granule_type }}) Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency). The granule was RTC processed by ASF HYP3 RTC software version {{ plugin_version }} running GAMMA release {{ gamma_version }}, and the extent of the DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM data if full coverage is not available. The DEM was reprojected to {{ projection }}, and the pixel spacing was resampled from the native DEM resolution to {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. This granule used {{ dem_name }} as the source DEM: the Shuttle Radar Topography Mission at {{ dem_resolution }} resolution.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Shuttle Radar Topography Mission (SRTM) was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to &lt;/SPAN&gt;&lt;A href="https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects"&gt;&lt;SPAN&gt;https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The actual {{ scale }} data is contained in the VV/HH (primary polarization) and/or VH/HV (cross-polarization) TIFF files included in the same downloaded folder as this file. The name of the SAR granule used to generate the files in this folder is: {{ granule_name }}. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;/SPAN&gt;&lt;A href="http://hyp3.asf.alaska.edu"&gt;&lt;SPAN&gt;http://hyp3.asf.alaska.edu&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;&lt;SPAN&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        <idPurp>This file is the DEM used in the radiometric terrain correction process (using GAMMA software) for a granule of [TYPE] SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of [SPACING] m. To access actual [FORMAT] values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the digital elevation model used in the radiometric terrain correction process for a granule of [FULL_TYPE] ([TYPE]) Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency). The granule was RTC processed by ASF HYP3 RTC software version [HYP3_VER] running GAMMA release [GAMMA_VER], and the extent of the DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM data if full coverage is not available. The DEM was reprojected to [PCS], and the pixel spacing was resampled from the native DEM resolution to [SPACING] m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. This granule used [DEM] as the source DEM: the Shuttle Radar Topography Mission at [RESA] arc second (about [RESM] m) resolution.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Shuttle Radar Topography Mission (SRTM) was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to &lt;/SPAN&gt;&lt;A href="https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects"&gt;&lt;SPAN&gt;https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The actual [FORMAT] data is contained in the VV/HH (primary polarization) and/or VH/HV (cross-polarization) TIFF files included in the same downloaded folder as this file. The name of the SAR granule used to generate the files in this folder is: [GRAN_NAME]. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;/SPAN&gt;&lt;A href="http://hyp3.asf.alaska.edu"&gt;&lt;SPAN&gt;http://hyp3.asf.alaska.edu&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;&lt;SPAN&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
         </idAbs>
         <idCredit>Source DEM Data: These data are distributed by the Land Processes Distributed Active Archive Center (LP DAAC), located at USGS/EROS, Sioux Falls, SD. http://lpdaac.usgs.gov</idCredit>
         <idCitation xmlns="">
             <date>
-                <pubDate>{{ processing_date.isoformat(timespec='seconds') }}</pubDate>
+                <pubDate>[DATETIME]</pubDate>
             </date>
             <citRespParty xmlns="">
                 <rpOrgName>Alaska Satellite Facility</rpOrgName>
@@ -95,7 +95,7 @@
                 <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;There are no restrictions on the use of data received from the U.S. Geological Survey's Earth Resources Observation and Science (EROS) Center or NASA's Land Processes Distributed Active Archive Center (LP DAAC), unless expressly identified prior to or at the time of receipt.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;</useLimit>
             </Consts>
         </resConst>
-        <envirDesc>This product was generated using ASF HYP3 RTC software version {{ plugin_version }}, running GAMMA release {{ gamma_version }}.</envirDesc>
+        <envirDesc>This product was generated using ASF HYP3 RTC software version [HYP3_VER], running GAMMA release [GAMMA_VER].</envirDesc>
         <tpCat>
             <TopicCatCd value="006"/>
         </tpCat>
@@ -111,7 +111,7 @@
     <mdChar>
         <CharSetCd value="004"/>
     </mdChar>
-    <mdDateSt>{{ processing_date.strftime('%Y%m%d') }}</mdDateSt>
+    <mdDateSt>[DATE]</mdDateSt>
     <dataSetFn>
         <OnFunctCd value="001"/>
     </dataSetFn>
@@ -177,7 +177,7 @@
     </contInfo>
     <Binary>
         <Thumbnail>
-            <Data EsriPropertyType="PictureX">{{ thumbnail_binary_string }}</Data>
+            <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
         </Thumbnail>
     </Binary>
 </metadata>
