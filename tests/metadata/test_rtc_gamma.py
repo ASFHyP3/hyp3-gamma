@@ -139,3 +139,29 @@ def test_rtc_gamma_all_files(test_data_folder):
 
     for f in files:
         assert f.exists()
+
+
+def test_thumbnail_no_such_reference_file(test_data_folder):
+    reference_file = test_data_folder / 'no_such_file'
+    assert __main__.get_thumbnail_binary_string(reference_file) == b''
+
+
+def test_thumbnail_reference_file_is_browse(test_data_folder):
+    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+    reference_file = test_data_folder / basename / f'{basename}.png'
+    binary_string = __main__.get_thumbnail_binary_string(reference_file)
+    assert len(binary_string) == 844
+
+
+def test_thumbnail_reference_file_is_pol(test_data_folder):
+    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+    reference_file = test_data_folder / basename / f'{basename}_VV.png'
+    binary_string = __main__.get_thumbnail_binary_string(reference_file)
+    assert len(binary_string) == 844
+
+
+def test_thumbnail_reference_file_is_dem(test_data_folder):
+    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+    reference_file = test_data_folder / basename / f'{basename}_dem.tif'
+    binary_string = __main__.get_thumbnail_binary_string(reference_file)
+    assert len(binary_string) == 844

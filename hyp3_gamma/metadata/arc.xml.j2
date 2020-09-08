@@ -51,9 +51,11 @@
     </mdMaint>
     {% block refSysInfo %}{% endblock %}
     {% block contInfo %}{% endblock %}
+    {% if thumbnail_binary_string %}
     <Binary>
         <Thumbnail>
             <Data EsriPropertyType="PictureX">{{ thumbnail_binary_string }}</Data>
         </Thumbnail>
     </Binary>
+    {% endif %}
 </metadata>

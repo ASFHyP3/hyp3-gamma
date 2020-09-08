@@ -1,8 +1,12 @@
 import copy
+import re
+from base64 import b64encode
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import List, Tuple
 
+from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
 
@@ -29,8 +33,8 @@ def render_template(template: str, payload: dict) -> str:
 
 
 def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
-                           looks: int, plugin_name: str, plugin_version: str, processor_name: str,
-                           processor_version: str) -> List[Path]:
+                             looks: int, plugin_name: str, plugin_version: str, processor_name: str,
+                             processor_version: str) -> List[Path]:
     payload = marshal_metadata(
         product_dir=product_dir,
         granule_name=granule_name,
@@ -117,6 +121,21 @@ def decode_product(product_dir: Path) -> dict:
             }
 
 
+def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
+    browse_file = reference_file.with_suffix('.png')
+    browse_file = Path(re.sub(r'_(VV|VH|HH|HV)\.png', '.png', str(browse_file)))
+    if not browse_file.exists():
+        return b''
+
+    image = Image.open(browse_file)
+    image = image.convert('RGB')
+    image.thumbnail(size)
+
+    data = BytesIO()
+    image.save(data, format='JPEG')
+    return b64encode(data.getvalue())
+
+
 def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
                      plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
     payload = locals()
@@ -136,8 +155,7 @@ def create_readme(payload: dict) -> Path:
 
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'  # FIXME: use product(s)?
 
-    return create(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt',
-                  strip_ext=True, thumbnail=False)
+    return create(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True)
 
 
 def create_product_xmls(payload: dict) -> List[Path]:
@@ -189,14 +207,13 @@ def create_ls_map_xml(payload: dict) -> Path:
 
 
 def create(payload: dict, template: str, reference_file: Path = None, out_ext: str = 'xml',
-           strip_ext: bool = False, thumbnail: bool = True) -> Path:
+           strip_ext: bool = False) -> Path:
     if reference_file:
         info = gdal.Info(str(reference_file), format='json')
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
-    if reference_file and thumbnail:
-        payload['thumbnail_binary_string'] = b''  # TODO
+    payload['thumbnail_binary_string'] = get_thumbnail_binary_string(reference_file)
 
     content = render_template(template, payload)
     out_name = reference_file.name if not strip_ext else reference_file.stem
