@@ -28,6 +28,30 @@ def render_template(template: str, payload: dict) -> str:
     return rendered
 
 
+def get_rtc_metadata_files(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
+                           looks: int, plugin_name: str, plugin_version: str, processor_name: str,
+                           processor_version: str) -> List[Path]:
+    payload = marshal_metadata(
+        product_dir=product_dir,
+        granule_name=granule_name,
+        dem_name=dem_name,
+        processing_date=processing_date.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
+        looks=looks,
+        plugin_name=plugin_name,
+        plugin_version=plugin_version,
+        processor_name=processor_name,
+        processor_version=processor_version,
+    )
+    files = []
+    files.append(create_readme(payload))
+    files.append(create_product_xmls(payload))
+    files.append(create_dem_xml(payload))
+    files.append(create_browse_xml(payload))
+    files.append(create_inc_map_xml(payload))
+    files.append(create_ls_map_xml(payload))
+    return files
+
+
 def get_dem_resolution(dem_name: str) -> str:
     data = {
         'NED13': '1/3 arc seconds (about 10 meters)',
