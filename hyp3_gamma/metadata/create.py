@@ -4,13 +4,13 @@ from base64 import b64encode
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import gdal, osr
 
-from hyp3_metadata import __version__
+import hyp3_metadata
 
 
 def get_environment() -> Environment:
@@ -147,7 +147,7 @@ def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (2
 def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
                      plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
     payload = locals()
-    payload['metadata_version'] = __version__
+    payload['metadata_version'] = hyp3_metadata.__version__
 
     payload.update(decode_product(product_dir))
 
