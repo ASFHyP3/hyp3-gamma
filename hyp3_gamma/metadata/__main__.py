@@ -120,8 +120,12 @@ def decode_product(product_dir: Path) -> dict:
             }
 
 
-def get_thumbnail_binary_string(input_file: Path, size=(200, 200)) -> bytes:
-    image = Image.open(input_file)
+def get_thumbnail_binary_string(reference_file: Path, size=(200, 200)) -> bytes:
+    browse_file = reference_file.with_suffix('.png')
+    if not browse_file.exists():
+        return b''
+
+    image = Image.open(browse_file)
     image = image.convert('RGB')
     image.thumbnail(size)
 
@@ -207,11 +211,7 @@ def create(payload: dict, template: str, reference_file: Path = None, out_ext: s
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
-    browse_file = reference_file.with_suffix('.png')
-    if browse_file.exists():
-        payload['thumbnail_binary_string'] = get_thumbnail_binary_string(browse_file)
-    else:
-        payload['thumbnail_binary_string'] = None
+    payload['thumbnail_binary_string'] = get_thumbnail_binary_string(reference_file)
 
     content = render_template(template, payload)
     out_name = reference_file.name if not strip_ext else reference_file.stem
