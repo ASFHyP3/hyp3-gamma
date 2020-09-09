@@ -145,16 +145,14 @@ def main_v2():
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
-    output_folder, product_name = rtc_sentinel_gamma(
-                                      in_file=granule_zip_file,
-                                      res=args.resolution,
-                                      match_flag=args.dem_matching,
-                                      pwr_flag=(args.scale == 'power'),
-                                      gamma_flag=(args.radiometry == 'gamma0'),
-                                      filter_flag=args.speckle_filter,
-                                  )
-
-    os.rename(output_folder, product_name)
+    product_name = rtc_sentinel_gamma(
+                        in_file=granule_zip_file,
+                        res=args.resolution,
+                        match_flag=args.dem_matching,
+                        pwr_flag=(args.scale == 'power'),
+                        gamma_flag=(args.radiometry == 'gamma0'),
+                        filter_flag=args.speckle_filter,
+                    )
 
     if not args.include_dem:
         find_and_remove(product_name, '*_dem.tif*')
@@ -216,11 +214,7 @@ def process_rtc_gamma(cfg, n):
             'gamma_flag': extra_arg_is(cfg, 'gamma0', 'yes'),
             'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
         }
-        product_dir, product_name = rtc_sentinel_gamma(**args)
-
-        logging.info(f'Renaming {product_dir} to {product_name}')
-        os.rename(product_dir, product_name)
-        product_dir = product_name
+        product_dir = rtc_sentinel_gamma(**args)
 
         if extra_arg_is(cfg, 'include_dem', 'no'):
             find_and_remove(product_dir, '*_dem.tif*')
