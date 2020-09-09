@@ -7,7 +7,9 @@ import os
 import shutil
 import sys
 import zipfile
+from datetime import datetime, timezone
 from math import isclose
+from pathlib import Path
 from secrets import token_hex
 
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
@@ -31,6 +33,7 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
+from hyp3_metadata import create_metadata_file_set
 from osgeo import gdal
 
 import hyp3_rtc_gamma
@@ -563,8 +566,6 @@ def rtc_sentinel_gamma(in_file,
             z.extractall()
         in_file = in_file.replace('.zip', '.SAFE')
 
-    input_type = in_file[7:10]
-
     orbit_file = fetch_orbit_file(in_file)
 
     if out_name is None:
@@ -631,11 +632,20 @@ def rtc_sentinel_gamma(in_file,
     if cpol:
         reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
     create_browse_images(out_name, pol, cpol, browse_res)
-    rtc_name = out_name + "_" + pol + ".tif"
-    gamma_ver = gamma_version()
-    create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
-                   dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
     cogify_dir(directory='PRODUCT')
+
+    create_metadata_file_set(
+        product_dir=Path('PRODUCT'),
+        granule_name=in_file.replace('.SAFE', ''),
+        dem_name=dem_type,
+        processing_date=datetime.now(timezone.utc),
+        looks=looks,
+        plugin_name='HyP3 RTC Gamma',
+        plugin_version=hyp3_rtc_gamma.__version__,
+        processor_name='GAMMA',
+        processor_version=gamma_version(),
+    )
+
     clean_prod_dir()
     perform_sanity_checks()
     logging.info("===================================================================")
