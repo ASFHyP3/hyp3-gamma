@@ -156,6 +156,10 @@ def test_thumbnail_reference_file_is_pol(test_data_folder):
     binary_string = create.get_thumbnail_binary_string(reference_file)
     assert len(binary_string) == 844
 
+    reference_file = test_data_folder / 'rtc_VH.png'
+    binary_string = create.get_thumbnail_binary_string(reference_file)
+    assert len(binary_string) == 844
+
 
 def test_thumbnail_reference_file_is_dem(test_data_folder):
     reference_file = test_data_folder / 'rtc_dem.tif'
