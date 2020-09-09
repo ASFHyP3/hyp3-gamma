@@ -38,7 +38,6 @@ from osgeo import gdal
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
-from hyp3_rtc_gamma.create_metadata import create_arc_xml
 from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 
 
