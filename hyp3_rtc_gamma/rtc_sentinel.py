@@ -95,9 +95,9 @@ def get_polarizations(in_file):
     return polarizations
 
 
-def perform_sanity_checks():
-    logging.info("Performing sanity checks on output PRODUCTs")
-    tif_list = glob.glob("PRODUCT/*.tif")
+def perform_sanity_checks(product_dir):
+    logging.info(f"Performing sanity checks on output PRODUCTs in {product_dir}")
+    tif_list = glob.glob(f"{product_dir}/*.tif")
     for myfile in tif_list:
         if "VV" in myfile or "HH" in myfile or "VH" in myfile or "HV" in myfile:
             # Check that the main polarization file is on a 30 meter posting
@@ -426,11 +426,9 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     os.chdir("..")
 
 
-def create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
+def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par):
-    out = "PRODUCT"
-    logname = "{}/{}.log".format(out, out_name)
     logging.info("Creating log file: {}".format(logname))
 
     f = open(logname, "w")
@@ -492,21 +490,10 @@ def add_log(log, full_log):
     g.close()
 
 
-def clean_prod_dir():
-    os.chdir("PRODUCT")
-    for myfile in glob.glob("*ls_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*ls_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*kmz"):
-        os.remove(myfile)
-    os.chdir("..")
+def clean_prod_dir(product_dir):
+    for pattern in ['*ls_map*png*', '*ls_map*kmz', '*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
+        for myfile in glob.glob(f'{product_dir}/{pattern}'):
+            os.remove(myfile)
 
 
 def configure_log_file():
@@ -631,10 +618,13 @@ def rtc_sentinel_gamma(in_file,
     if cpol:
         reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
     create_browse_images(out_name, pol, cpol, browse_res)
-    cogify_dir(directory='PRODUCT')
 
+    logging.info(f'Renaming PRODUCT directory to {out_name}')
+    os.rename('PRODUCT', out_name)
+
+    cogify_dir(directory=out_name)
     create_metadata_file_set(
-        product_dir=Path('PRODUCT'),
+        product_dir=Path(out_name),
         granule_name=in_file.replace('.SAFE', ''),
         dem_name=dem_type,
         processing_date=datetime.now(timezone.utc),
@@ -644,17 +634,17 @@ def rtc_sentinel_gamma(in_file,
         processor_name='GAMMA',
         processor_version=gamma_version(),
     )
+    clean_prod_dir(out_name)
+    perform_sanity_checks(out_name)
 
-    clean_prod_dir()
-    perform_sanity_checks()
     logging.info("===================================================================")
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
+    create_consolidated_log(f'{out_name}/{out_name}.log', out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
-    return 'PRODUCT', out_name
+    return out_name
 
 
 def main():
