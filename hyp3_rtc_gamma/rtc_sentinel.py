@@ -96,7 +96,7 @@ def get_polarizations(in_file):
 
 
 def perform_sanity_checks(product_dir):
-    logging.info("Performing sanity checks on output PRODUCTs in {product_dir}")
+    logging.info(f"Performing sanity checks on output PRODUCTs in {product_dir}")
     tif_list = glob.glob(f"{product_dir}/*.tif")
     for myfile in tif_list:
         if "VV" in myfile or "HH" in myfile or "VH" in myfile or "HV" in myfile:
