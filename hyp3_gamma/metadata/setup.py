@@ -33,6 +33,9 @@ setup(
 
     install_requires=[
         'importlib_metadata',
+        'jinja2',
+        'gdal',
+        'pillow',
     ],
 
     extras_require={
