@@ -12,6 +12,7 @@ from math import isclose
 from pathlib import Path
 from secrets import token_hex
 
+from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
@@ -33,7 +34,6 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
-from hyp3_metadata import create_metadata_file_set
 from osgeo import gdal
 
 import hyp3_rtc_gamma
@@ -639,7 +639,7 @@ def rtc_sentinel_gamma(in_file,
         dem_name=dem_type,
         processing_date=datetime.now(timezone.utc),
         looks=looks,
-        plugin_name='HyP3 RTC Gamma',
+        plugin_name=hyp3_rtc_gamma.__name__,
         plugin_version=hyp3_rtc_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
