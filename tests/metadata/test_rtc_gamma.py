@@ -37,7 +37,8 @@ def test_rtc_gamma_product(product_dir):
     output_file_list = create.create_product_xmls(payload)
     assert output_file_list == [
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VV.tif.xml',
-        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VH.tif.xml']
+        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VH.tif.xml',
+    ]
     for output_file in output_file_list:
         assert output_file.exists()
 
