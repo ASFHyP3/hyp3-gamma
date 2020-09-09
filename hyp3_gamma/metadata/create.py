@@ -113,8 +113,8 @@ def get_polarizations(product_polarization):
     return mapping[product_polarization]
 
 
-def decode_product(product_dir: Path) -> dict:
-    product_parts = product_dir.name.split('_')
+def decode_product(product_name: str) -> dict:
+    product_parts = product_name.split('_')
     user_options = product_parts[-2]
 
     return {
@@ -149,7 +149,7 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
     payload = locals()
     payload['metadata_version'] = hyp3_metadata.__version__
 
-    payload.update(decode_product(product_dir))
+    payload.update(decode_product(product_dir.name))
 
     payload.update(get_granule_type(granule_name))
 
