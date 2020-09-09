@@ -21,7 +21,6 @@ def test_create_rtc_gamma_readme(product_dir):
     assert output_file.exists()
 
 
-# FIXME: use tmp_path
 def test_exact_rtc_gamma_product(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
@@ -41,7 +40,6 @@ def test_exact_rtc_gamma_product(product_dir):
         assert output_file.exists()
 
 
-# FIXME: use tmp_path
 def test_create_dem_xml(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
@@ -60,7 +58,6 @@ def test_create_dem_xml(product_dir):
     assert output_file.exists()
 
 
-# FIXME: use tmp_path
 def test_create_greyscale_browse_xml(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
@@ -79,7 +76,6 @@ def test_create_greyscale_browse_xml(product_dir):
     assert output_file.exists()
 
 
-# FIXME: use tmp_path
 def test_exact_rtc_gamma_inc_map(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
@@ -98,7 +94,6 @@ def test_exact_rtc_gamma_inc_map(product_dir):
     assert output_file.exists()
 
 
-# FIXME: use tmp_path
 def test_exact_rtc_gamma_ls_map(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
