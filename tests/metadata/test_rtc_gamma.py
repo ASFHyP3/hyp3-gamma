@@ -157,3 +157,29 @@ def test_thumbnail_reference_file_is_dem(test_data_folder):
     reference_file = test_data_folder / 'rtc_dem.tif'
     binary_string = create.get_thumbnail_binary_string(reference_file)
     assert len(binary_string) == 844
+
+
+def test_decode_product():
+    name = 'S1A_IW_20150621T120220_SVP_RTC10_G_sauned_F8E2'
+    assert create.decode_product(name) == {
+        'resolution': 10,
+        'radiometry': 'sigma-0',
+        'scale': 'amplitude',
+        'masked': False,
+        'filter_applied': False,
+        'clipped': False,
+        'matching': False,
+        'polarizations': ('VV',),
+    }
+
+    name = 'S1B_IW_20150621T120220_DHR_RTC30_G_gpwfcm_F8E2'
+    assert create.decode_product(name) == {
+        'resolution': 30,
+        'radiometry': 'gamma-0',
+        'scale': 'power',
+        'masked': True,
+        'filter_applied': True,
+        'clipped': True,
+        'matching': True,
+        'polarizations': ('HH', 'HV'),
+    }
