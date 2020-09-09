@@ -3,9 +3,7 @@ from datetime import datetime
 from hyp3_metadata import create
 
 
-# FIXME: use tmp_path
-def test_create_rtc_gamma_readme(tmp_path, test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_create_rtc_gamma_readme(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -24,8 +22,7 @@ def test_create_rtc_gamma_readme(tmp_path, test_data_folder):
 
 
 # FIXME: use tmp_path
-def test_exact_rtc_gamma_product(test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_exact_rtc_gamma_product(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -45,8 +42,7 @@ def test_exact_rtc_gamma_product(test_data_folder):
 
 
 # FIXME: use tmp_path
-def test_create_dem_xml(tmp_path, test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_create_dem_xml(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -65,8 +61,7 @@ def test_create_dem_xml(tmp_path, test_data_folder):
 
 
 # FIXME: use tmp_path
-def test_create_greyscale_browse_xml(tmp_path, test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_create_greyscale_browse_xml(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -85,8 +80,7 @@ def test_create_greyscale_browse_xml(tmp_path, test_data_folder):
 
 
 # FIXME: use tmp_path
-def test_exact_rtc_gamma_inc_map(test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_exact_rtc_gamma_inc_map(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -105,8 +99,7 @@ def test_exact_rtc_gamma_inc_map(test_data_folder):
 
 
 # FIXME: use tmp_path
-def test_exact_rtc_gamma_ls_map(test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_exact_rtc_gamma_ls_map(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -124,8 +117,7 @@ def test_exact_rtc_gamma_ls_map(test_data_folder):
     assert output_file.exists()
 
 
-def test_rtc_gamma_all_files(test_data_folder):
-    product_dir = test_data_folder / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
+def test_rtc_gamma_all_files(product_dir):
     files = create.create_metadata_file_set(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -155,21 +147,18 @@ def test_thumbnail_no_such_reference_file(test_data_folder):
 
 
 def test_thumbnail_reference_file_is_browse(test_data_folder):
-    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
-    reference_file = test_data_folder / basename / f'{basename}.png'
+    reference_file = test_data_folder / 'rtc.png'
     binary_string = create.get_thumbnail_binary_string(reference_file)
     assert len(binary_string) == 844
 
 
 def test_thumbnail_reference_file_is_pol(test_data_folder):
-    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
-    reference_file = test_data_folder / basename / f'{basename}_VV.png'
+    reference_file = test_data_folder / 'rtc_VV.png'
     binary_string = create.get_thumbnail_binary_string(reference_file)
     assert len(binary_string) == 844
 
 
 def test_thumbnail_reference_file_is_dem(test_data_folder):
-    basename = 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2'
-    reference_file = test_data_folder / basename / f'{basename}_dem.tif'
+    reference_file = test_data_folder / 'rtc_dem.tif'
     binary_string = create.get_thumbnail_binary_string(reference_file)
     assert len(binary_string) == 844
