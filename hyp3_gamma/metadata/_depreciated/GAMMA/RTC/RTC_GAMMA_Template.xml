@@ -1,0 +1,203 @@
+<metadata xml:lang="en">
+    <Esri>
+        <CreaDate>[DATE]</CreaDate>
+        <CreaTime>[TIME]</CreaTime>
+        <ArcGISFormat>1.0</ArcGISFormat>
+        <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+        <SyncOnce>TRUE</SyncOnce>
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+        <DataProperties>
+            <itemProps>
+                <imsContentType export="False">002</imsContentType>
+            </itemProps>
+        </DataProperties>
+        <ArcGISProfile>NAP</ArcGISProfile>
+        <ModDate>[DATE]</ModDate>
+        <ModTime>[TIME]</ModTime>
+    </Esri>
+    <dataIdInfo>
+        <idPurp>This file is a Radiometric Terrain Corrected (RTC) granule of [TYPE] SAR data from the Sentinel-1 mission, processed using GAMMA software. Cell values indicate [POL] [POWERTYPE]-0 [FORMAT], and pixel spacing is [SPACING] m.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This Radiometric Terrain Corrected (RTC) product is derived from a [FULL_TYPE] ([TYPE]) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using ASF HYP3 RTC software version [HYP3_VER] running GAMMA release [GAMMA_VER]. It is provided in [PCS] coordinates and is corrected for terrain using a Digital Elevation Model (DEM). The DEM used to generate this product is [DEM] (about [RESM] m resolution). &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: [DATE] [TIME] UTC&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;In the filename, VV or HH indicates the co-polarized dataset, while VH or HV indicates cross-polarization. To learn more about polarimetry, refer to &lt;/SPAN&gt;&lt;A href="https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry"&gt;&lt;SPAN&gt;https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The name of the granule used to generate this TIFF file is: [GRAN_NAME]. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The side-looking geometry of SAR imagery leads to geometric and radiometric distortions, causing foreshortening, layover, shadowing, and radiometric variations due to terrain slope. Radiometric terrain correction converts unprocessed SAR data into geocoded tiff images with values directly relating to physical properties, alleviating the inherent SAR distortions. The process improves backscatter estimates and provides geolocation information, so images can be used as input for applications such as the monitoring of deforestation, land-cover classification, and delineation of wet snow-covered areas.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Cell values indicate [POL] [POWERTYPE] nought [FORMAT], and pixel spacing is [SPACING] m. Because of the range of [FORMAT] values, the images may appear very dark when first displayed. This will be more pronounced when the image is in power scale than when it is in amplitude scale. Consider setting the layer symbology to Stretched - Standard Deviations (choose a number (n) that works best for your particular dataset; the ArcGIS default of n: 2.5 will improve the display, but other values may give a better visualization).&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;This product was processed using [LOOKS] look(s). Multi-looking is the process of coherently averaging together pixels of an image. The overall effect of multi-looking is to reduce the noise level, thus reducing speckle, at the cost of decreased resolution. Multi-looking is not applied for 10-m products. &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;[FILT] speckle filter has been applied to this image. The default is to not apply a speckle filter, but the user can choose to apply a filter when ordering the RTC imagery. When the filtering option is selected, an Enhanced Lee filter is applied during RTC processing to remove speckle while preserving edges. When applied, the filter is set to a dampening factor of 1, with a box size of 7x7 pixels and [FLOOKS] looks. &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;You may wish to explore the filtering options available in ArcGIS rather than ordering imagery with a filter already applied. There are many options for different speckle filter functions to be applied on the fly (including the filter settings listed above) using the Image Analysis window. To learn more about speckle filtering options, refer to &lt;/SPAN&gt;&lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm"&gt;&lt;SPAN&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;, and to learn how apply a function (such as a speckle filter) to a raster, refer to &lt;/SPAN&gt;&lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm"&gt;&lt;SPAN&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;/SPAN&gt;&lt;A href="http://hyp3.asf.alaska.edu"&gt;&lt;SPAN&gt;http://hyp3.asf.alaska.edu&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;&lt;SPAN&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/"&gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        </idAbs>
+        <idCredit>RTC product processed by ASF DAAC HyP3 [YEARPROCESSED] using GAMMA software. Contains modified Copernicus Sentinel data [YEARACQUIRED], processed by ESA.</idCredit>
+        <idCitation xmlns="">
+            <date>
+                <pubDate>[DATETIME]</pubDate>
+            </date>
+            <citRespParty xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="007"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+            </citRespParty>
+        </idCitation>
+        <searchKeys>
+            <keyword>Alaska Satellite Facility</keyword>
+            <keyword>ASF</keyword>
+            <keyword>Synthetic Aperture Radar</keyword>
+            <keyword>SAR</keyword>
+            <keyword>Radiometric Terrain Correction</keyword>
+            <keyword>RTC</keyword>
+            <keyword>Sentinel-1</keyword>
+        </searchKeys>
+        <dataLang>
+            <languageCode value="eng"/>
+            <countryCode value="US"/>
+        </dataLang>
+        <dataChar>
+            <CharSetCd value="004"/>
+        </dataChar>
+        <idPoC xmlns="">
+            <rpOrgName>Alaska Satellite Facility</rpOrgName>
+            <role>
+                <RoleCd value="010"/>
+            </role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType="physical">
+                    <delPoint>2156 Koyukuk Dr.</delPoint>
+                    <city>Fairbanks</city>
+                    <adminArea>Alaska</adminArea>
+                    <postCode>99775-7320</postCode>
+                    <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                    <country>US</country>
+                </cntAddress>
+                <cntPhone>
+                    <voiceNum tddtty="">907-474-5041</voiceNum>
+                </cntPhone>
+            </rpCntInfo>
+            <displayName>Alaska Satellite Facility</displayName>
+        </idPoC>
+        <resMaint xmlns="">
+            <maintFreq>
+                <MaintFreqCd value="009"/>
+            </maintFreq>
+            <maintCont xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="002"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+                <displayName>Alaska Satellite Facility</displayName>
+            </maintCont>
+        </resMaint>
+        <resConst>
+            <Consts xmlns="">
+                <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;There are no restrictions on the use of this data, but it must be cited as listed in the credits.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;</useLimit>
+            </Consts>
+        </resConst>
+        <envirDesc>This product was generated using ASF HYP3 RTC software version [HYP3_VER], running GAMMA release [GAMMA_VER].</envirDesc>
+        <tpCat>
+            <TopicCatCd value="008"/>
+        </tpCat>
+    </dataIdInfo>
+    <mdHrLv>
+        <ScopeCd value="005"/>
+    </mdHrLv>
+    <mdFileID>RTC_GAMMA_Template_200731</mdFileID>
+    <mdLang>
+        <languageCode value="eng"/>
+        <countryCode value="US"/>
+    </mdLang>
+    <mdChar>
+        <CharSetCd value="004"/>
+    </mdChar>
+    <mdDateSt>[DATE]</mdDateSt>
+    <dataSetFn>
+        <OnFunctCd value="001"/>
+    </dataSetFn>
+    <mdContact xmlns="">
+        <rpOrgName>Alaska Satellite Facility</rpOrgName>
+        <role>
+            <RoleCd value="006"/>
+        </role>
+        <rpCntInfo xmlns="">
+            <cntAddress addressType="physical">
+                <delPoint>2156 Koyukuk Dr.</delPoint>
+                <city>Fairbanks</city>
+                <adminArea>Alaska</adminArea>
+                <postCode>99775-7320</postCode>
+                <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                <country>US</country>
+            </cntAddress>
+            <cntPhone>
+                <voiceNum tddtty="">907-474-5041</voiceNum>
+            </cntPhone>
+        </rpCntInfo>
+        <displayName>Alaska Satellite Facility</displayName>
+    </mdContact>
+    <dqInfo xmlns="">
+        <dqScope>
+            <scpLvl>
+                <ScopeCd value="005"/>
+            </scpLvl>
+        </dqScope>
+        <dataLineage>
+            <statement>&lt;DIV STYLE="text-align:Left; margin:1 1 1 20; text-indent:-24px; padding-left:24px;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P STYLE="text-indent:-44px"&gt;&lt;SPAN&gt;Steps in Radiometric Terrain Correction of Sentinel-1 Data:&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;1.  Data granule is ingested into the format required by GAMMA software - calibration is done during this step.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;2.  If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 10-m products default to one look). This product used [LOOKS] look(s).&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;3.  A DEM is extracted from the ASF DEM heap covering the granule to be corrected. This product used the [DEM] DEM, at about [RESM] m native resolution.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;4.  A mapping function is created, mapping from DEM space into SAR space.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;5.  By default, DEM coregistration is not used. When the DEM Matching option is selected for a custom order, the following steps will be performed. By default the process will skip from step 4 to step 6.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-indent:24px"&gt;&lt;SPAN&gt;i.  A simulated SAR image is created.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-indent:24px"&gt;&lt;SPAN&gt;ii.  The simulated SAR image and the real SAR image are coregistered.&lt;/SPAN&gt;&lt;/P&gt;&lt;P STYLE="text-indent:24px"&gt;&lt;SPAN&gt;iii.  The mapping function is updated with the coregistration information.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;6.  The SAR image is radiometrically corrected using a pixel integration approach to remove radiometric distortions in foreshortening or layover areas.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;7.  The inversion of the mapping function is used to terrain correct and geocode the radiometrically corrected SAR image.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;8.  Post processing creates GeoTIFF, PNG, KMZ, and metadata files.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+            </statement>
+        </dataLineage>
+    </dqInfo>
+    <mdMaint xmlns="">
+        <maintFreq>
+            <MaintFreqCd value="009"/>
+        </maintFreq>
+    </mdMaint>
+    <contInfo>
+        <ImgDesc xmlns="">
+            <attDesc>[POL] [POWERTYPE]-0 [FORMAT]</attDesc>
+            <trianInd>False</trianInd>
+            <radCalDatAv>False</radCalDatAv>
+            <camCalInAv>False</camCalInAv>
+            <filmDistInAv>False</filmDistInAv>
+            <lensDistInAv>False</lensDistInAv>
+            <contentTyp>
+                <ContentTypCd value="001"/>
+            </contentTyp>
+            <covDim>
+                <Band xmlns="">
+                    <seqID>
+                        <aName>C-band</aName>
+                        <attributeType>
+                            <aName>SAR</aName>
+                        </attributeType>
+                    </seqID>
+                </Band>
+            </covDim>
+        </ImgDesc>
+    </contInfo>
+    <refSysInfo>
+        <RefSystem dimension="horizontal"/>
+    </refSysInfo>
+    <Binary>
+        <Thumbnail>
+            <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
+        </Thumbnail>
+    </Binary>
+</metadata>

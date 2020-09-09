@@ -1,5 +1,6 @@
 # HyP3 Metadata Templates
-This repository contains the metadata templates for HyP3 products.  
+
+Package for generating HyP3 products' metadata
 
 Each different processor for each process has its own set of templates, as there are significant differences in the output files and processing method depending on the processor used (i.e. GAMMA vs. S1TBX).  
 
@@ -20,7 +21,7 @@ In Editor > Code Style > XML > Other:
 2. Set the "Keep blank lines" option to 0  
 3. **Set the Wrap attributes to "Do not wrap" and remove checks from wrapping and spaces settings**
 
-![](SettingsImages/Editor_CodeStyle_XML_Other.JPG)  
+![](docs/imgs/Editor_CodeStyle_XML_Other.JPG)
 
 **_Change the soft wrap settings:_**  
 
@@ -28,7 +29,7 @@ For ease of viewing when editing, in the Editor > General settings, scroll down 
 1. Check the soft wrap files option, and add ; *.xml to the list of file types  
 2. Check the option to Use original line's indent for wrapped parts, and set the additional shift if desired
 
-![](SettingsImages/Editor_General_SoftWraps.JPG)  
+![](docs/imgs/Editor_General_SoftWraps.JPG)
 
 
 **************
@@ -40,7 +41,7 @@ If you have text breaks that are NOT formatted in the html tags, another option 
 1. In Editor > Code Style > XML > Tabs and Indents, set the Indent and Continuation Indent values to 0 and click OK
 2. With the XML file open, select Reformat Code from the Code menu to remove the tab-based indentations.
 
-![](SettingsImages/Editor_CodeStyle_XML_TabsIndents.JPG)  
+![](docs/imgs/Editor_CodeStyle_XML_TabsIndents.JPG)
 
 If you use this approach frequently, you may want to create different schemes in the Editor > Code Style > XML settings. For example, save an Edit scheme, which keeps the indentation settings (i.e. Indent: 4, Continuation Indent: 8), and a Write scheme, which sets both to 0. Note that the line break settings in the hard wrap section become more important when using the return character approach.
 
