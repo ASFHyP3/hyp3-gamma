@@ -14,7 +14,7 @@ def test_data_folder():
 
 @pytest.fixture(scope='session')
 def product_dir(tmp_path_factory):
-    prod = tmp_path_factory.mktemp('S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2', numbered=False)
+    prod = tmp_path_factory.mktemp('S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2', numbered=False)
     product_files = glob(str(_HERE / 'data' / 'rtc*'))
     for f in product_files:
         shutil.copy(f, prod / f'{Path(f).name.replace("rtc", prod.name)}')
