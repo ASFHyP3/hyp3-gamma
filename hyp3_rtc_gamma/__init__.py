@@ -3,8 +3,6 @@
 # FIXME: Python 3.8+ this should be `from importlib.metadata...`
 from importlib_metadata import PackageNotFoundError, version
 
-from hyp3_rtc_gamma import etc
-
 
 try:
     __version__ = version(__name__)
@@ -15,4 +13,4 @@ except PackageNotFoundError:
           'Or, to just get the version number use:\n'
           '   python setup.py --version')
 
-__all__ = ['__version__', 'etc']
+__all__ = ['__version__']
