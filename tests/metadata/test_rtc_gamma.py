@@ -19,7 +19,7 @@ def test_create_rtc_gamma_readme(tmp_path, test_data_folder):
     )
 
     output_file = create.create_readme(payload)
-
+    assert output_file == product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2.README.md.txt'
     assert output_file.exists()
 
 
@@ -39,6 +39,7 @@ def test_exact_rtc_gamma_product(test_data_folder):
     )
 
     output_file_list = create.create_product_xmls(payload)
+    assert output_file_list == [product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_VV.tif.xml']
     for output_file in output_file_list:
         assert output_file.exists()
 
@@ -59,7 +60,7 @@ def test_create_dem_xml(tmp_path, test_data_folder):
     )
 
     output_file = create.create_dem_xml(payload)
-
+    assert output_file == product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_dem.tif.xml'
     assert output_file.exists()
 
 
@@ -79,7 +80,7 @@ def test_create_greyscale_browse_xml(tmp_path, test_data_folder):
     )
 
     output_file = create.create_browse_xml(payload)
-
+    assert output_file == product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2.png.xml'
     assert output_file.exists()
 
 
@@ -99,7 +100,7 @@ def test_exact_rtc_gamma_inc_map(test_data_folder):
     )
 
     output_file = create.create_inc_map_xml(payload)
-
+    assert output_file == product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_inc_map.tif.xml'
     assert output_file.exists()
 
 
@@ -119,7 +120,7 @@ def test_exact_rtc_gamma_ls_map(test_data_folder):
     )
 
     output_file = create.create_ls_map_xml(payload)
-
+    assert output_file == product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_ls_map.tif.xml'
     assert output_file.exists()
 
 
@@ -136,7 +137,14 @@ def test_rtc_gamma_all_files(test_data_folder):
         processor_name='GAMMA',
         processor_version='20191203',
     )
-
+    assert files == [
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_VV.tif.xml',
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2.README.md.txt',
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_dem.tif.xml',
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2.png.xml',
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_inc_map.tif.xml',
+        product_dir / 'S1A_IW_20150621T120220_SVP_RTC10_G_saufem_F8E2_ls_map.tif.xml',
+    ]
     for f in files:
         assert f.exists()
 
