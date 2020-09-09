@@ -129,9 +129,13 @@ def decode_product(product_name: str) -> dict:
     }
 
 
+def strip_polarization(file_name: str) -> str:
+    return re.sub(r'_(VV|VH|HH|HV)', '', file_name)
+
+
 def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
     browse_file = reference_file.with_suffix('.png')
-    browse_file = Path(re.sub(r'_(VV|VH|HH|HV)\.png', '.png', str(browse_file)))
+    browse_file = browse_file.parent / strip_polarization(browse_file.name)
     if not browse_file.exists():
         return b''
 
@@ -161,9 +165,11 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
 def create_readme(payload: dict) -> Path:
     payload = copy.deepcopy(payload)
 
-    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'  # FIXME: use product(s)?
+    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{payload["polarizations"][0]}.tif'
 
-    return create_metadata_file(payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True)
+    return create_metadata_file(
+        payload, 'readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True, strip_pol=True
+    )
 
 
 def create_product_xmls(payload: dict) -> List[Path]:
@@ -215,7 +221,7 @@ def create_ls_map_xml(payload: dict) -> Path:
 
 
 def create_metadata_file(payload: dict, template: str, reference_file: Path = None, out_ext: str = 'xml',
-                         strip_ext: bool = False) -> Path:
+                         strip_ext: bool = False, strip_pol: bool = False) -> Path:
     if reference_file:
         info = gdal.Info(str(reference_file), format='json')
         payload['pixel_spacing'] = info['geoTransform'][1]
@@ -225,6 +231,8 @@ def create_metadata_file(payload: dict, template: str, reference_file: Path = No
 
     content = render_template(template, payload)
     out_name = reference_file.name if not strip_ext else reference_file.stem
+    if strip_pol:
+        out_name = strip_polarization(out_name)
     output_file = reference_file.parent / f'{out_name}.{out_ext}'
     with open(output_file, 'w') as f:
         f.write(content)
