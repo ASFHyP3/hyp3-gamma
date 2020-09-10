@@ -61,7 +61,7 @@ def test_create_dem_xml(product_dir):
     assert output_file.exists()
 
 
-def test_create_greyscale_browse_xml(product_dir):
+def test_create_browse_xmls(product_dir):
     payload = create.marshal_metadata(
         product_dir=product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
@@ -74,9 +74,13 @@ def test_create_greyscale_browse_xml(product_dir):
         processor_version='20191203',
     )
 
-    output_file = create.create_browse_xml(payload)
-    assert output_file == product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2.png.xml'
-    assert output_file.exists()
+    output_files = create.create_browse_xmls(payload)
+    assert output_files == [
+        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2.png.xml',
+        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_rgb.png.xml',
+    ]
+    for file in output_files:
+        assert file.exists()
 
 
 def test_rtc_gamma_inc_map(product_dir):
@@ -130,9 +134,10 @@ def test_rtc_gamma_all_files(product_dir):
     assert files == [
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VV.tif.xml',
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VH.tif.xml',
+        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2.png.xml',
+        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_rgb.png.xml',
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2.README.md.txt',
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_dem.tif.xml',
-        product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2.png.xml',
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_inc_map.tif.xml',
         product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_ls_map.tif.xml',
     ]

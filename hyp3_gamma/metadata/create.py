@@ -48,11 +48,13 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
     )
     files = []
     files.extend(create_product_xmls(payload))
+    files.extend(create_browse_xmls(payload))
+
     files.append(create_readme(payload))
     files.append(create_dem_xml(payload))
-    files.append(create_browse_xml(payload))
     files.append(create_inc_map_xml(payload))
     files.append(create_ls_map_xml(payload))
+
     return files
 
 
@@ -196,16 +198,21 @@ def create_dem_xml(payload: dict) -> Path:
     return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
-def create_browse_xml(payload: dict) -> Path:
+def create_browse_xmls(payload: dict) -> List[Path]:
     payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'
 
-    if reference_file.name.endswith('_rgb.png'):
-        browse_scale = 'color'
-    else:
-        browse_scale = 'greyscale'
+    output_files = [
+        create_metadata_file(payload, 'browse/browse-greyscale.xml.j2', reference_file),
+    ]
 
-    return create_metadata_file(payload, f'browse/browse-{browse_scale}.xml.j2', reference_file)
+    rgb_file = payload['product_dir'] / f'{payload["product_dir"].name}_rgb.png'
+    if rgb_file.exists():
+        output_files.append(
+            create_metadata_file(payload, 'browse/browse-color.xml.j2', rgb_file)
+        )
+
+    return output_files
 
 
 def create_inc_map_xml(payload: dict) -> Path:
