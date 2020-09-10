@@ -40,7 +40,7 @@
         </dqScope>
         {% block dataLineage %}
         <dataLineage>
-            <statement>This data was processed by ASF DAAC HYP3 using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</statement>
+            <statement>This data was processed by ASF DAAC HyP3 using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</statement>
         </dataLineage>
         {% endblock %}
     </dqInfo>
@@ -51,10 +51,10 @@
     </mdMaint>
     {% block refSysInfo %}{% endblock %}
     {% block contInfo %}{% endblock %}
-    {% if thumbnail_binary_string %}
+    {% if thumbnail_encoded_string %}
     <Binary>
         <Thumbnail>
-            <Data EsriPropertyType="PictureX">{{ thumbnail_binary_string }}</Data>
+            <Data EsriPropertyType="PictureX">{{ thumbnail_encoded_string }}</Data>
         </Thumbnail>
     </Binary>
     {% endif %}
