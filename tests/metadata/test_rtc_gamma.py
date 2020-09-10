@@ -142,29 +142,29 @@ def test_rtc_gamma_all_files(product_dir):
 
 def test_thumbnail_no_such_reference_file(test_data_folder):
     reference_file = test_data_folder / 'no_such_file'
-    assert create.get_thumbnail_binary_string(reference_file) == b''
+    assert create.get_thumbnail_encoded_string(reference_file) == ''
 
 
 def test_thumbnail_reference_file_is_browse(test_data_folder):
     reference_file = test_data_folder / 'rtc.png'
-    binary_string = create.get_thumbnail_binary_string(reference_file)
-    assert len(binary_string) == 844
+    encoded_string = create.get_thumbnail_encoded_string(reference_file)
+    assert len(encoded_string) == 844
 
 
 def test_thumbnail_reference_file_is_pol(test_data_folder):
     reference_file = test_data_folder / 'rtc_VV.png'
-    binary_string = create.get_thumbnail_binary_string(reference_file)
-    assert len(binary_string) == 844
+    encoded_string = create.get_thumbnail_encoded_string(reference_file)
+    assert len(encoded_string) == 844
 
     reference_file = test_data_folder / 'rtc_VH.png'
-    binary_string = create.get_thumbnail_binary_string(reference_file)
-    assert len(binary_string) == 844
+    encoded_string = create.get_thumbnail_encoded_string(reference_file)
+    assert len(encoded_string) == 844
 
 
 def test_thumbnail_reference_file_is_dem(test_data_folder):
     reference_file = test_data_folder / 'rtc_dem.tif'
-    binary_string = create.get_thumbnail_binary_string(reference_file)
-    assert len(binary_string) == 844
+    encoded_string = create.get_thumbnail_encoded_string(reference_file)
+    assert len(encoded_string) == 844
 
 
 def test_decode_product():

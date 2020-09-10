@@ -133,11 +133,11 @@ def strip_polarization(file_name: str) -> str:
     return re.sub(r'_(VV|VH|HH|HV)', '', file_name)
 
 
-def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
+def get_thumbnail_encoded_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> str:
     browse_file = reference_file.with_suffix('.png')
     browse_file = browse_file.parent / strip_polarization(browse_file.name)
     if not browse_file.exists():
-        return b''
+        return ''
 
     image = Image.open(browse_file)
     image = image.convert('RGB')
@@ -145,7 +145,7 @@ def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (2
 
     data = BytesIO()
     image.save(data, format='JPEG')
-    return b64encode(data.getvalue())
+    return b64encode(data.getvalue()).decode()
 
 
 def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
@@ -227,7 +227,7 @@ def create_metadata_file(payload: dict, template: str, reference_file: Path = No
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
-    payload['thumbnail_binary_string'] = get_thumbnail_binary_string(reference_file)
+    payload['thumbnail_encoded_string'] = get_thumbnail_encoded_string(reference_file)
 
     content = render_template(template, payload)
     out_name = reference_file.name if not strip_ext else reference_file.stem
