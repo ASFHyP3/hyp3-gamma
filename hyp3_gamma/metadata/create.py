@@ -39,7 +39,7 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
         product_dir=product_dir,
         granule_name=granule_name,
         dem_name=dem_name,
-        processing_date=processing_date.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
+        processing_date=processing_date,
         looks=looks,
         plugin_name=plugin_name,
         plugin_version=plugin_version,
