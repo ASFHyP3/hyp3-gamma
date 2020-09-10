@@ -48,11 +48,13 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
     )
     files = []
     files.extend(create_product_xmls(payload))
+    files.extend(create_browse_xmls(payload))
+
     files.append(create_readme(payload))
     files.append(create_dem_xml(payload))
-    files.append(create_browse_xml(payload))
     files.append(create_inc_map_xml(payload))
     files.append(create_ls_map_xml(payload))
+
     return files
 
 
@@ -133,11 +135,11 @@ def strip_polarization(file_name: str) -> str:
     return re.sub(r'_(VV|VH|HH|HV)', '', file_name)
 
 
-def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> bytes:
+def get_thumbnail_encoded_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> str:
     browse_file = reference_file.with_suffix('.png')
     browse_file = browse_file.parent / strip_polarization(browse_file.name)
     if not browse_file.exists():
-        return b''
+        return ''
 
     image = Image.open(browse_file)
     image = image.convert('RGB')
@@ -145,7 +147,7 @@ def get_thumbnail_binary_string(reference_file: Path, size: Tuple[int, int] = (2
 
     data = BytesIO()
     image.save(data, format='JPEG')
-    return b64encode(data.getvalue())
+    return b64encode(data.getvalue()).decode()
 
 
 def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
@@ -196,16 +198,21 @@ def create_dem_xml(payload: dict) -> Path:
     return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
-def create_browse_xml(payload: dict) -> Path:
+def create_browse_xmls(payload: dict) -> List[Path]:
     payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'
 
-    if reference_file.name.endswith('_rgb.png'):
-        browse_scale = 'color'
-    else:
-        browse_scale = 'greyscale'
+    output_files = [
+        create_metadata_file(payload, 'browse/browse-greyscale.xml.j2', reference_file),
+    ]
 
-    return create_metadata_file(payload, f'browse/browse-{browse_scale}.xml.j2', reference_file)
+    rgb_file = payload['product_dir'] / f'{payload["product_dir"].name}_rgb.png'
+    if rgb_file.exists():
+        output_files.append(
+            create_metadata_file(payload, 'browse/browse-color.xml.j2', rgb_file)
+        )
+
+    return output_files
 
 
 def create_inc_map_xml(payload: dict) -> Path:
@@ -227,7 +234,7 @@ def create_metadata_file(payload: dict, template: str, reference_file: Path = No
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
 
-    payload['thumbnail_binary_string'] = get_thumbnail_binary_string(reference_file)
+    payload['thumbnail_encoded_string'] = get_thumbnail_encoded_string(reference_file)
 
     content = render_template(template, payload)
     out_name = reference_file.name if not strip_ext else reference_file.stem
