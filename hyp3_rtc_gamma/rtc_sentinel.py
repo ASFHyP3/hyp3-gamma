@@ -409,10 +409,6 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     makeAsfBrowse(sigmafile, outfile)
     os.remove(sigmafile)
 
-    infile = "{}_ls_map.tif".format(out_name)
-    outfile = "{}_ls_map".format(out_name)
-    makeAsfBrowse(infile, outfile)
-
     infile = "{}_dem.tif".format(out_name)
     outfile = "{}_dem".format(out_name)
     sigmafile = infile.replace(".tif", "_sigma.tif")
@@ -491,7 +487,7 @@ def add_log(log, full_log):
 
 
 def clean_prod_dir(product_dir):
-    for pattern in ['*ls_map*png*', '*ls_map*kmz', '*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
         for myfile in glob.glob(f'{product_dir}/{pattern}'):
             os.remove(myfile)
 
