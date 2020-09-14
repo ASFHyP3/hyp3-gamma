@@ -7,9 +7,12 @@ import os
 import shutil
 import sys
 import zipfile
+from datetime import datetime, timezone
 from math import isclose
+from pathlib import Path
 from secrets import token_hex
 
+from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.area2point import fix_geotiff_locations
@@ -35,7 +38,6 @@ from osgeo import gdal
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
-from hyp3_rtc_gamma.create_metadata import create_arc_xml
 from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 
 
@@ -93,9 +95,9 @@ def get_polarizations(in_file):
     return polarizations
 
 
-def perform_sanity_checks():
-    logging.info("Performing sanity checks on output PRODUCTs")
-    tif_list = glob.glob("PRODUCT/*.tif")
+def perform_sanity_checks(product_dir):
+    logging.info(f"Performing sanity checks on output PRODUCTs in {product_dir}")
+    tif_list = glob.glob(f"{product_dir}/*.tif")
     for myfile in tif_list:
         if "VV" in myfile or "HH" in myfile or "VH" in myfile or "HV" in myfile:
             # Check that the main polarization file is on a 30 meter posting
@@ -407,10 +409,6 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     makeAsfBrowse(sigmafile, outfile)
     os.remove(sigmafile)
 
-    infile = "{}_ls_map.tif".format(out_name)
-    outfile = "{}_ls_map".format(out_name)
-    makeAsfBrowse(infile, outfile)
-
     infile = "{}_dem.tif".format(out_name)
     outfile = "{}_dem".format(out_name)
     sigmafile = infile.replace(".tif", "_sigma.tif")
@@ -424,11 +422,9 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     os.chdir("..")
 
 
-def create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
+def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par):
-    out = "PRODUCT"
-    logname = "{}/{}.log".format(out, out_name)
     logging.info("Creating log file: {}".format(logname))
 
     f = open(logname, "w")
@@ -490,21 +486,10 @@ def add_log(log, full_log):
     g.close()
 
 
-def clean_prod_dir():
-    os.chdir("PRODUCT")
-    for myfile in glob.glob("*ls_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*ls_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*inc_map*kmz"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*png*"):
-        os.remove(myfile)
-    for myfile in glob.glob("*dem*kmz"):
-        os.remove(myfile)
-    os.chdir("..")
+def clean_prod_dir(product_dir):
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
+        for myfile in glob.glob(f'{product_dir}/{pattern}'):
+            os.remove(myfile)
 
 
 def configure_log_file():
@@ -562,8 +547,6 @@ def rtc_sentinel_gamma(in_file,
         with zipfile.ZipFile(in_file, 'r') as z:
             z.extractall()
         in_file = in_file.replace('.zip', '.SAFE')
-
-    input_type = in_file[7:10]
 
     orbit_file = fetch_orbit_file(in_file)
 
@@ -631,21 +614,33 @@ def rtc_sentinel_gamma(in_file,
     if cpol:
         reproject_dir(dem_type, res, prod_dir="geo_{}".format(cpol))
     create_browse_images(out_name, pol, cpol, browse_res)
-    rtc_name = out_name + "_" + pol + ".tif"
-    gamma_ver = gamma_version()
-    create_arc_xml(in_file, out_name, input_type, gamma_flag, pwr_flag, filter_flag, looks, pol, cpol,
-                   dem_type, res, hyp3_rtc_gamma.__version__, gamma_ver, rtc_name)
-    cogify_dir(directory='PRODUCT')
-    clean_prod_dir()
-    perform_sanity_checks()
+
+    logging.info(f'Renaming PRODUCT directory to {out_name}')
+    os.rename('PRODUCT', out_name)
+
+    cogify_dir(directory=out_name)
+    create_metadata_file_set(
+        product_dir=Path(out_name),
+        granule_name=in_file.replace('.SAFE', ''),
+        dem_name=dem_type,
+        processing_date=datetime.now(timezone.utc),
+        looks=looks,
+        plugin_name=hyp3_rtc_gamma.__name__,
+        plugin_version=hyp3_rtc_gamma.__version__,
+        processor_name='GAMMA',
+        processor_version=gamma_version(),
+    )
+    clean_prod_dir(out_name)
+    perform_sanity_checks(out_name)
+
     logging.info("===================================================================")
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(out_name, dead_flag, match_flag, gamma_flag, roi,
+    create_consolidated_log(f'{out_name}/{out_name}.log', out_name, dead_flag, match_flag, gamma_flag, roi,
                             shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
                             no_cross_pol, par)
-    return 'PRODUCT', out_name
+    return out_name
 
 
 def main():

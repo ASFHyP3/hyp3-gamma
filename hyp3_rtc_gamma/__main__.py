@@ -67,12 +67,14 @@ def get_content_type(filename):
     return content_type
 
 
-def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
+def upload_file_to_s3(path_to_file, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
     logging.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
+
+    file_type = get_file_type(path_to_file)
     tag_set = {
         'TagSet': [
             {
@@ -103,6 +105,18 @@ def create_thumbnail(input_image, size=(100, 100)):
     return thumbnail_name
 
 
+def get_file_type(file_name):
+    if file_name.endswith('_rgb_thumb.png'):
+        return 'rgb-thumbnail'
+    if file_name.endswith('_rgb.png'):
+        return 'rgb-browse'
+    if file_name.endswith('_thumb.png'):
+        return 'amp-thumbnail'
+    if file_name.endswith('.png'):
+        return 'amp-browse'
+    return 'product'
+
+
 def string_is_true(s: str) -> bool:
     return s.lower() == 'true'
 
@@ -131,16 +145,14 @@ def main_v2():
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url, chunk_size=5242880)
 
-    output_folder, product_name = rtc_sentinel_gamma(
-                                      in_file=granule_zip_file,
-                                      res=args.resolution,
-                                      match_flag=args.dem_matching,
-                                      pwr_flag=(args.scale == 'power'),
-                                      gamma_flag=(args.radiometry == 'gamma0'),
-                                      filter_flag=args.speckle_filter,
-                                  )
-
-    os.rename(output_folder, product_name)
+    product_name = rtc_sentinel_gamma(
+                        in_file=granule_zip_file,
+                        res=args.resolution,
+                        match_flag=args.dem_matching,
+                        pwr_flag=(args.scale == 'power'),
+                        gamma_flag=(args.radiometry == 'gamma0'),
+                        filter_flag=args.speckle_filter,
+                    )
 
     if not args.include_dem:
         find_and_remove(product_name, '*_dem.tif*')
@@ -149,12 +161,12 @@ def main_v2():
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
-        upload_file_to_s3(output_zip, 'product', args.bucket, args.bucket_prefix)
+        upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
         browse_images = glob.glob(f'{product_name}/*.png')
         for browse in browse_images:
             thumbnail = create_thumbnail(browse)
-            upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
-            upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
+            upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
+            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix)
 # end v2 functions
 
 
@@ -202,11 +214,7 @@ def process_rtc_gamma(cfg, n):
             'gamma_flag': extra_arg_is(cfg, 'gamma0', 'yes'),
             'filter_flag': extra_arg_is(cfg, 'filter', 'yes'),
         }
-        product_dir, product_name = rtc_sentinel_gamma(**args)
-
-        logging.info(f'Renaming {product_dir} to {product_name}')
-        os.rename(product_dir, product_name)
-        product_dir = product_name
+        product_dir = rtc_sentinel_gamma(**args)
 
         if extra_arg_is(cfg, 'include_dem', 'no'):
             find_and_remove(product_dir, '*_dem.tif*')
