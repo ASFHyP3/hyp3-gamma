@@ -114,7 +114,8 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
         logging.info("Starting iterative coregistration with look up table")
         for n in range(1, iterations + 1):
             coregister_data(
-                n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, reference, secondary, lt, rlooks, alooks, iterations
+                n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
+                reference, secondary, lt, rlooks, alooks, iterations
             )
     elif step == 3:
         logging.info("Starting single interation coregistration with look up table")
