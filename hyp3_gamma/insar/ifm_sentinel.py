@@ -10,7 +10,6 @@ import sys
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
-from hyp3lib.system import gamma_version
 from lxml import etree
 
 import hyp3_insar_gamma.etc
@@ -51,11 +50,11 @@ def getBursts(mydir, name):
     return time, total_bursts
 
 
-def getSelectBursts(masterDir, slaveDir, time):
+def getSelectBursts(reference_dir, secondary_dir, time):
     logging.info("Finding selected bursts at times {}, {}, {} for length {}".format(time[0], time[1], time[2], time[3]))
-    burst_tab1 = "%s_burst_tab" % masterDir[17:25]
+    burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
 
-    burst_tab2 = "%s_burst_tab" % slaveDir[17:25]
+    burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
     size = float(time[3])
     xml_cnt = 0
     start1 = 0
@@ -63,8 +62,8 @@ def getSelectBursts(masterDir, slaveDir, time):
     with open(burst_tab1, "w") as f1:
         with open(burst_tab2, "w") as f2:
             for name in ['001.xml', '002.xml', '003.xml']:
-                time1, total_bursts1 = getBursts(masterDir, name)
-                time2, total_bursts2 = getBursts(slaveDir, name)
+                time1, total_bursts1 = getBursts(reference_dir, name)
+                time2, total_bursts2 = getBursts(secondary_dir, name)
                 cnt = 1
                 start1 = 0
                 found1 = 0
@@ -96,17 +95,17 @@ def getSelectBursts(masterDir, slaveDir, time):
     return burst_tab1, burst_tab2
 
 
-def getBurstOverlaps(masterDir, slaveDir):
+def getBurstOverlaps(reference_dir, secondary_dir):
     logging.info("Calculating burst overlaps; in directory {}".format(os.getcwd()))
-    burst_tab1 = "%s_burst_tab" % masterDir[17:25]
-    burst_tab2 = "%s_burst_tab" % slaveDir[17:25]
+    burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
+    burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
 
     with open(burst_tab1, "w") as f1:
         with open(burst_tab2, "w") as f2:
             for name in ['001.xml', '002.xml', '003.xml']:
-                time1, total_bursts1 = getBursts(masterDir, name)
+                time1, total_bursts1 = getBursts(reference_dir, name)
                 logging.info("total_bursts1, time1 {} {}".format(total_bursts1, time1))
-                time2, total_bursts2 = getBursts(slaveDir, name)
+                time2, total_bursts2 = getBursts(secondary_dir, name)
                 logging.info("total_bursts2, time2 {} {}".format(total_bursts2, time2))
                 cnt = 1
                 start1 = 0
@@ -169,31 +168,8 @@ def getFileType(myfile):
     return file_type, pol
 
 
-def makeHDF5List(master, slave, outdir, output, dem_source, logname):
-    gamma_ver = gamma_version()
-    with open("hdf5.txt", "w") as f:
-        f.write("[Gamma DInSar]\n")
-        f.write("granule = s1_vertical_displacement\n")
-        f.write("data = Sentinel-1\n")
-        f.write("master metadata = {}.xml\n".format(master))
-        f.write("slave metadata = {}.xml\n".format(slave))
-        f.write("amplitude master = {}.mli.geo.tif\n".format(os.path.join(outdir, master)))
-        f.write("amplitude slave = {}.mli.geo.tif\n".format(os.path.join(outdir, slave)))
-        f.write("digital elevation model = {}.dem.tif\n".format(os.path.join(outdir, output)))
-        f.write("simulated phase = {}.sim_unw.geo.tif\n".format(os.path.join(outdir, output)))
-        f.write("filtered interferogram = {}.diff0.man.adf.bmp.geo.tif\n".format(os.path.join(outdir, output)))
-        f.write("filtered coherence = {}.adf.cc.geo.tif\n".format(os.path.join(outdir, output)))
-        f.write("unwrapped phase = {}.adf.unw.geo.tif\n".format(os.path.join(outdir, output)))
-        f.write("vertical displacement = {}.vert.disp.geo.tif\n".format(os.path.join(outdir, output)))
-        f.write("mli.par file = {}.mli.par\n".format(os.path.join(outdir, master)))
-        f.write("gamma version = {}\n".format(gamma_ver))
-        f.write("dem source = {}\n".format(dem_source))
-        f.write("main log = {}\n".format(logname))
-        f.write("processing log = processing.log\n")
-
-
-def move_output_files(outdir, output, master, prod_dir, long_output, los_flag, inc_flag, look_flag):
-    inName = "{}.mli.geo.tif".format(os.path.join(outdir, master))
+def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag, inc_flag, look_flag):
+    inName = "{}.mli.geo.tif".format(os.path.join(outdir, reference))
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
@@ -243,7 +219,7 @@ def move_output_files(outdir, output, master, prod_dir, long_output, los_flag, i
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
+def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
                  inc_flag=False, look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None):
     global proc_log
 
@@ -251,24 +227,24 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     logging.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
     wrk = os.getcwd()
-    masterDate = masterFile[17:32]
-    masterDateShort = masterFile[17:25]
-    slaveDate = slaveFile[17:32]
-    slaveDateShort = slaveFile[17:25]
-    igramName = "{}_{}".format(masterDate, slaveDate)
+    reference_date = reference_file[17:32]
+    reference_date_short = reference_file[17:25]
+    secondary_date = secondary_file[17:32]
+    secondary_date_short = secondary_file[17:25]
+    igramName = "{}_{}".format(reference_date, secondary_date)
     logname = "{}.log".format(outdir)
     log = open(logname, "w")
     proc_log = open("processing.log", "w")
     process_log("starting processing")
 
-    if "IW_SLC__" not in masterFile:
-        logging.error("ERROR: Master file {} is not of type IW_SLC!".format(masterFile))
+    if "IW_SLC__" not in reference_file:
+        logging.error("ERROR: Reference file {} is not of type IW_SLC!".format(reference_file))
         sys.exit(1)
-    if "IW_SLC__" not in slaveFile:
-        logging.error("ERROR: Slave file {} is not of type IW_SLC!".format(slaveFile))
+    if "IW_SLC__" not in secondary_file:
+        logging.error("ERROR: Secondary file {} is not of type IW_SLC!".format(secondary_file))
         sys.exit(1)
 
-    file_type, pol = getFileType(masterFile)
+    file_type, pol = getFileType(reference_file)
 
     if cp_flag:
         if file_type == "SDV":
@@ -288,7 +264,7 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     #  Fetch the DEM file
     process_log("Getting a DEM file")
     if dem is None:
-        dem, dem_source = getDemFileGamma(masterFile, ot_flag, alooks, True)
+        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, True)
         logging.info("Got dem of type {}".format(dem_source))
     else:
         logging.debug("Value of DEM is {}".format(dem))
@@ -301,38 +277,38 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
 
     # Figure out which bursts overlap between the two swaths
     if time is None:
-        (burst_tab1, burst_tab2) = getBurstOverlaps(masterFile, slaveFile)
+        (burst_tab1, burst_tab2) = getBurstOverlaps(reference_file, secondary_file)
     else:
-        (burst_tab1, burst_tab2) = getSelectBursts(masterFile, slaveFile, time)
+        (burst_tab1, burst_tab2) = getSelectBursts(reference_file, secondary_file, time)
 
     logging.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
-    shutil.move(burst_tab1, masterDateShort)
-    shutil.move(burst_tab2, slaveDateShort)
+    shutil.move(burst_tab1, reference_date_short)
+    shutil.move(burst_tab2, secondary_date_short)
 
     # Mosaic the swaths together and copy SLCs over
     process_log("Starting SLC_copy_S1_fullSW.py")
-    master = masterDateShort
-    slave = slaveDateShort
+    reference = reference_date_short
+    secondary = secondary_date_short
 
     path = os.path.join(wrk, outdir)
-    os.chdir(master)
-    SLC_copy_S1_fullSW(path, master, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
+    os.chdir(reference)
+    SLC_copy_S1_fullSW(path, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
     os.chdir("..")
-    os.chdir(slave)
-    SLC_copy_S1_fullSW(path, slave, "SLC_TAB", burst_tab2, mode=2, raml=rlooks, azml=alooks)
+    os.chdir(secondary)
+    SLC_copy_S1_fullSW(path, secondary, "SLC_TAB", burst_tab2, mode=2, raml=rlooks, azml=alooks)
     os.chdir("..")
     os.chdir(outdir)
 
     # Interferogram creation, matching, refinement
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 0")
     hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=0)
+    interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=0)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 1")
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, step=1)
+    interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, step=1)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=2)
+    interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=2)
 
     g = open("offsetfit3.log")
     offset = 1.0
@@ -345,46 +321,44 @@ def gammaProcess(masterFile, slaveFile, outdir, dem=None, dem_source=None, rlook
     else:
         logging.info("Found azimuth offset of {}!".format(offset))
 
-    output = masterDateShort + "_" + slaveDateShort
+    output = reference_date_short + "_" + secondary_date_short
 
     process_log("Starting s1_coreg_overlap")
     execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True, logfile=log)
 
     process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
-    interf_pwr_s1_lt_tops_proc(master, slave, hgt, rlooks=rlooks, alooks=alooks, step=3)
+    interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, step=3)
 
     # Perform phase unwrapping and geocoding of results
     process_log("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(master, slave, step="man", rlooks=rlooks, alooks=alooks)
+    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
 
     #  Generate metadata
     process_log("Collecting metadata and output files")
 
-    execute(f"base_init {master}.slc.par {slave}.slc.par - - base > baseline.log",
+    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log",
             uselogging=True, logfile=log)
     os.chdir(wrk)
 
     etc_dir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
     shutil.copy(os.path.join(etc_dir, "sentinel_xml.xsl"), ".")
 
-    execute(f"xsltproc --stringparam path {masterFile} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {master}.xml"
-            f" sentinel_xml.xsl {masterFile}/manifest.safe", uselogging=True, logfile=log)
+    execute(f"xsltproc --stringparam path {reference_file} --stringparam timestamp timestring"
+            f" --stringparam file_size 1000 --stringparam server stuff --output {reference}.xml"
+            f" sentinel_xml.xsl {reference_file}/manifest.safe", uselogging=True, logfile=log)
 
-    execute(f"xsltproc --stringparam path {slaveFile} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {slave}.xml"
-            f" sentinel_xml.xsl {slaveFile}/manifest.safe", uselogging=True, logfile=log)
-
-    makeHDF5List(master, slave, outdir, output, dem_source, logname)
+    execute(f"xsltproc --stringparam path {secondary_file} --stringparam timestamp timestring"
+            f" --stringparam file_size 1000 --stringparam server stuff --output {secondary}.xml"
+            f" sentinel_xml.xsl {secondary_file}/manifest.safe", uselogging=True, logfile=log)
 
     # Move the outputs to the PRODUCT directory
     prod_dir = "PRODUCT"
     if not os.path.exists(prod_dir):
         os.mkdir("PRODUCT")
-    move_output_files(outdir, output, master, prod_dir, igramName, los_flag, inc_flag, look_flag)
+    move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, inc_flag, look_flag)
 
-    create_readme_file(masterFile, slaveFile, igramName, int(alooks) * 20, dem_source, pol)
+    create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
     process_log("Done!!!")
     logging.info("Done!!!")
@@ -396,8 +370,8 @@ def main():
         prog='ifm_sentinel.py',
         description=__doc__,
     )
-    parser.add_argument("master", help="Master input file")
-    parser.add_argument("slave", help="Slave input file")
+    parser.add_argument("reference", help="Reference input file")
+    parser.add_argument("secondary", help="Secondary input file")
     parser.add_argument("output", help="Output igram directory")
     parser.add_argument("-d", "--dem",
                         help="Input DEM file to use, otherwise calculate a bounding box (e.g. big for big.dem/big.par)")
@@ -418,7 +392,7 @@ def main():
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
-    gammaProcess(args.master, args.slave, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
+    gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
                  inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t)
 
 

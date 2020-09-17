@@ -11,8 +11,8 @@ Processing Date/Time: [DATE] [TIME] UTC
 
 The product folder is named using the following convention:
 S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh-pp-qqqqqq-rrd-ssxs-int-ccccc  
-x:      	Sentinel-1 Mission (A or B) of reference (master) granule  
-y:      	Sentinel-1 Mission (A or B) of secondary (slave) granule  
+x:      	Sentinel-1 Mission (A or B) of reference granule  
+y:      	Sentinel-1 Mission (A or B) of secondary granule  
 aaaaaaaa: 	Start Date of Acquisition (YYYYMMDD) of reference granule  
 bbbbbb:   	Start Time of Acquisition (HHMMSS) of reference granule  
 gggggggg: 	Start Date of Acquisition (YYYYMMDD) of secondary granule  
@@ -106,7 +106,7 @@ The coherence map is tagged with _corr.tif
 ----------------
 ## 6. Amplitude Image
 
-The amplitude GeoTIFF indicates the calibrated radiometric backscatter from the reference (master) granule in sigma-nought power. The image is terrain corrected using a geometric correction, but not radiometrically corrected. For more informative amplitude data, order Radiometric Terrain Corrected (RTC) products for your area of interest.
+The amplitude GeoTIFF indicates the calibrated radiometric backscatter from the reference granule in sigma-nought power. The image is terrain corrected using a geometric correction, but not radiometrically corrected. For more informative amplitude data, order Radiometric Terrain Corrected (RTC) products for your area of interest.
 
 The amplitude image is tagged with _amp.tif
 

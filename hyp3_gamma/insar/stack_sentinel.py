@@ -33,12 +33,12 @@ def makeDirAndLinks(name1, name2, file1, file2, dem):
 def makeParameterFile(mydir, alooks, rlooks, dem_source):
     res = 20 * int(alooks)
 
-    master_date = mydir[:15]
-    slave_date = mydir[17:]
+    reference_date = mydir[:15]
+    secondary_date = mydir[17:]
 
-    logging.info("In directory {} looking for file with date {}".format(os.getcwd(), master_date))
-    master_file = glob.glob("*%s*.SAFE" % master_date)[0]
-    slave_file = glob.glob("*%s*.SAFE" % slave_date)[0]
+    logging.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
+    reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
+    secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
 
     with open("IFM/baseline.log", "r") as f:
         for line in f:
@@ -49,7 +49,7 @@ def makeParameterFile(mydir, alooks, rlooks, dem_source):
                 baseline = float(s[1])
 
     back = os.getcwd()
-    os.chdir(os.path.join(master_file, "annotation"))
+    os.chdir(os.path.join(reference_file, "annotation"))
 
     utctime = None
     for myfile in os.listdir("."):
@@ -66,7 +66,7 @@ def makeParameterFile(mydir, alooks, rlooks, dem_source):
     os.chdir(back)
 
     heading = None
-    name = "IFM/" + master_date[:8] + ".mli.par"
+    name = "IFM/" + reference_date[:8] + ".mli.par"
     with open(name, "r") as f:
         for line in f:
             if "heading" in line:
@@ -75,14 +75,14 @@ def makeParameterFile(mydir, alooks, rlooks, dem_source):
                 s = re.split(r'\s+', t[1])
                 heading = float(s[1])
 
-    master_file = master_file.replace(".SAFE", "")
-    slave_file = slave_file.replace(".SAFE", "")
+    reference_file = reference_file.replace(".SAFE", "")
+    secondary_file = secondary_file.replace(".SAFE", "")
 
     os.chdir("PRODUCT")
     name = "%s.txt" % mydir
     with open(name, 'w') as f:
-        f.write('Master Granule: %s\n' % master_file)
-        f.write('Slave Granule: %s\n' % slave_file)
+        f.write('Reference Granule: %s\n' % reference_file)
+        f.write('Secondary Granule: %s\n' % secondary_file)
         f.write('Baseline: %s\n' % baseline)
         f.write('UTCtime: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
@@ -164,18 +164,18 @@ def procS1StackGAMMA(alooks=4, rlooks=20, csvFile=None, dem=None, use_opentopo=N
                 logging.info("Processing directory %s" % mydir)
                 os.chdir(mydir)
 
-                master = mydir.split("_")[0]
-                slave = mydir.split("_")[1]
+                reference = mydir.split("_")[0]
+                secondary = mydir.split("_")[1]
 
-                masterFile = None
-                slaveFile = None
+                reference_file = None
+                secondary_file = None
                 for myfile in glob.glob("*.SAFE"):
-                    if master in myfile:
-                        masterFile = myfile
-                    if slave in myfile:
-                        slaveFile = myfile
+                    if reference in myfile:
+                        reference_file = myfile
+                    if secondary in myfile:
+                        secondary_file = myfile
 
-                gammaProcess(masterFile, slaveFile, "IFM", dem=dem, dem_source=dem_source, rlooks=rlooks,
+                gammaProcess(reference_file, secondary_file, "IFM", dem=dem, dem_source=dem_source, rlooks=rlooks,
                              alooks=alooks, inc_flag=inc_flag, look_flag=look_flag, los_flag=los_flag,
                              time=time)
 
