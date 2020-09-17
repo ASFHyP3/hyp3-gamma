@@ -16,15 +16,15 @@ def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname}", uselogging=True)
 
 
-def unwrapping_geocoding(master, slave, step="man", rlooks=10, alooks=2, trimode=0,
+def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6):
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
-    ifgname = "{}_{}".format(master, slave)
+    ifgname = "{}_{}".format(reference, secondary)
     offit = "{}.off.it".format(ifgname)
-    mmli = master + ".mli"
-    smli = slave + ".mli"
+    mmli = reference + ".mli"
+    smli = secondary + ".mli"
 
     if not os.path.isfile(dempar):
         logging.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -132,8 +132,8 @@ def main():
         prog='unwrapping_geocoding.py',
         description=__doc__,
     )
-    parser.add_argument("master", help='Master scene identifier')
-    parser.add_argument("slave", help='Slave scene identifier')
+    parser.add_argument("reference", help='Reference scene identifier')
+    parser.add_argument("secondary", help='Secondary scene identifier')
     parser.add_argument("-s", "--step", default='man', help='Level of interferogram for unwrapping (def=man)')
     parser.add_argument("-r", "--rlooks", default=10, help="Number of range looks (def=10)")
     parser.add_argument("-a", "--alooks", default=2, help="Number of azimuth looks (def=2)")
@@ -151,7 +151,7 @@ def main():
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
-    unwrapping_geocoding(args.master, args.slave, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
+    unwrapping_geocoding(args.reference, args.secondary, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
                          trimode=args.tri, npatr=args.npatr, npata=args.npata, alpha=args.alpha)
 
 
