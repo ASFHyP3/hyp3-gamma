@@ -57,7 +57,7 @@ def entry():
 
 
 # Hyp3 V2 entrypoints
-def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spacing=30, masked=False):
+def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spacing=30.0, masked=False):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
 
@@ -80,11 +80,11 @@ def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spac
     else:
         orb = 'O'
 
-    d = 'w' if masked else 'u'
+    mask = 'w' if masked else 'u'
 
     product_id = token_hex(2).upper()
 
-    product_name = f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{spacing}_G_{d}eF_{product_id}'
+    product_name = f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{spacing}_G_{mask}eF_{product_id}'
     return product_name
 
 
