@@ -40,7 +40,7 @@
         </dqScope>
         {% block dataLineage %}
         <dataLineage>
-            <statement>This data was processed by ASF DAAC HyP3 using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</statement>
+            <statement>This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</statement>
         </dataLineage>
         {% endblock %}
     </dqInfo>
