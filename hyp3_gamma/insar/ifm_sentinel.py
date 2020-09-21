@@ -12,7 +12,6 @@ from hyp3lib.execute import execute
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from lxml import etree
 
-import hyp3_insar_gamma.etc
 from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
 from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
 from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
@@ -340,17 +339,6 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log",
             uselogging=True, logfile=log)
     os.chdir(wrk)
-
-    etc_dir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
-    shutil.copy(os.path.join(etc_dir, "sentinel_xml.xsl"), ".")
-
-    execute(f"xsltproc --stringparam path {reference_file} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {reference}.xml"
-            f" sentinel_xml.xsl {reference_file}/manifest.safe", uselogging=True, logfile=log)
-
-    execute(f"xsltproc --stringparam path {secondary_file} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {secondary}.xml"
-            f" sentinel_xml.xsl {secondary_file}/manifest.safe", uselogging=True, logfile=log)
 
     # Move the outputs to the PRODUCT directory
     prod_dir = "PRODUCT"
