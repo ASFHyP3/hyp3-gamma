@@ -12,7 +12,6 @@ from mimetypes import guess_type
 
 import boto3
 from PIL import Image
-from hyp3lib.metadata import add_esa_citation
 from hyp3proclib import (
     build_output_name_pair,
     earlier_granule_first,
@@ -279,7 +278,6 @@ def hyp3_process(cfg, n):
             log.debug('Renaming ' + product + ' to ' + out_path)
             os.rename(product, out_path)
 
-            add_esa_citation(g1, out_path)
             zip_dir(out_path, zip_file)
 
             browse_img = find_color_phase_png(out_path)
