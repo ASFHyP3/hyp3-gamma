@@ -11,15 +11,15 @@ Processing Date/Time: [DATE] [TIME] UTC
 
 The product folder is named using the following convention:
 S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh_pponnn_INTzz_G_def_ssss
-x:      	Sentinel-1 Mission (A or B) of reference granule
-y:      	Sentinel-1 Mission (A or B) of secondary granule
-aaaaaaaa: 	Start Date of Acquisition (YYYYMMDD) of reference granule
-bbbbbb:   	Start Time of Acquisition (HHMMSS) of reference granule
-gggggggg: 	Start Date of Acquisition (YYYYMMDD) of secondary granule
-hhhhhh:   	Start Time of Acquisition (HHMMSS) of secondary granule
-pp:      	Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV: Dual VV+VH)
-o:      	Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
-nnn:      	Time separation in days between reference and secondary granules
+x:          Sentinel-1 Mission (A or B) of reference granule
+y:          Sentinel-1 Mission (A or B) of secondary granule
+aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
+bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
+gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
+hhhhhh:     Start Time of Acquisition (HHMMSS) of secondary granule
+pp:         Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV: Dual VV+VH)
+o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
+nnn:        Time separation in days between reference and secondary granules
 zz:         Pixel Spacing in meters
 d:          Unmasked (u) or Water Masked (w)
 e:          Entire Area (e) or Clipped Area (c)
@@ -159,35 +159,35 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 ## Ingest ##
 
- - par_s1_slc		 # Read in SLC information
- - S1_OPOD_vec		 # Update state vectors with precision state vectors
+ - par_s1_slc    # Read in SLC information
+ - S1_OPOD_vec   # Update state vectors with precision state vectors
 
 ## Interferogram creation/matching/refinement ##
 
 ### Initial Step
 
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - rdc_trans		 # Derive lookup table for SLC/MLI co-registration (considering terrain heights)
- - phase_sim_orb	 # Simulate unwrapped interferometric phase using DEM height and deformation rate using orbit state vectors
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - rdc_trans       # Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+ - phase_sim_orb   # Simulate unwrapped interferometric phase using DEM height and deformation rate using orbit state vectors
 
 ### Create Interferogram
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
 
 ### Iterate Offset Calculations
 
  *Repeat three times:*
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
- - offset_add		 # Add range and azimuth offset polynomial coefficients
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - offset_add      # Add range and azimuth offset polynomial coefficients
 
 ### Check for Convergence
 
@@ -195,33 +195,33 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 ### Perform Enhanced Spectral Diversity Refinement
 
- - S1_coreg_overlap	 # Determine co-registration offset based on the burst overlap
+ - S1_coreg_overlap   # Determine co-registration offset based on the burst overlap
 
 ### Perform Final Matching
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
 
 ## Unwrapping and Geocoding ##
 
 ### Unwrapping
 
- - adf			 # Adaptive spectral filtering for complex interferograms
- - rasmph_pwr		 # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
- - rascc		 # Generate 8-bit raster graphics image of correlation coefficient
- - rascc_mask		 # Generate phase unwrapping validity mask using correlation and intensity
- - mcf			 # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
- - rasrmg		 # Generate 8-bit raster graphics image from unwrapped phase and intensity data
- - dispmap		 # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
- - dispmap		 # Conversion of unwrapped differential phase to displacement map (m) - Vertical
+ - adf          # Adaptive spectral filtering for complex interferograms
+ - rasmph_pwr   # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
+ - rascc        # Generate 8-bit raster graphics image of correlation coefficient
+ - rascc_mask   # Generate phase unwrapping validity mask using correlation and intensity
+ - mcf          # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
+ - rasrmg       # Generate 8-bit raster graphics image from unwrapped phase and intensity data
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Vertical
 
 ### Post-Processing
 
- - geocode_back		 # Geocoding of image data using lookup table values
- - data2geotiff		 # Convert geocoded data with DEM parameter file to GeoTIFF format
+ - geocode_back   # Geocoding of image data using lookup table values
+ - data2geotiff   # Convert geocoded data with DEM parameter file to GeoTIFF format
 
 *************
 # DEMs #
