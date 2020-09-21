@@ -38,7 +38,6 @@ from pkg_resources import load_entry_point
 import hyp3_insar_gamma
 from hyp3_insar_gamma import stack_sentinel
 
-
 S3_CLIENT = boto3.client('s3')
 
 
@@ -83,8 +82,7 @@ def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spac
 
     product_id = token_hex(2).upper()
 
-    product_name = f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_{product_id}'
-    return product_name
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_{product_id}'
 
 
 def get_content_type(filename):
