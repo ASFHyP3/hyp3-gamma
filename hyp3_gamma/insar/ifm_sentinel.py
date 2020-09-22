@@ -219,7 +219,7 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
 
 
 def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
-                 inc_flag=False, look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None):
+                 inc_flag=False, look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None, mask=False):
     global proc_log
 
     logging.info("\n\nSentinel1A differential interferogram creation program\n")
@@ -263,7 +263,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Fetch the DEM file
     process_log("Getting a DEM file")
     if dem is None:
-        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, True)
+        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, mask)
         logging.info("Got dem of type {}".format(dem_source))
     else:
         logging.debug("Value of DEM is {}".format(dem))

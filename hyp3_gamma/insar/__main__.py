@@ -9,9 +9,11 @@ import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from mimetypes import guess_type
 from shutil import make_archive
+from zipfile import ZipFile
 
 import boto3
 from PIL import Image
+from hyp3lib.fetch import download_file
 from hyp3proclib import (
     build_output_name_pair,
     earlier_granule_first,
@@ -27,9 +29,11 @@ from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
-from hyp3_insar_gamma.stack_sentinel import procS1StackGAMMA
+from hyp3_insar_gamma.ifm_sentinel import gammaProcess
 
 
+SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
+EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
 
 
@@ -48,6 +52,33 @@ def entry():
 
 
 # Hyp3 V2 entrypoints
+def write_netrc_file(username, password):
+    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
+    if os.path.isfile(netrc_file):
+        logging.warning(f'Using existing .netrc file: {netrc_file}')
+    else:
+        with open(netrc_file, 'w') as f:
+            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
+
+
+def get_download_url(granule):
+    mission = granule[0] + granule[2]
+    product_type = granule[7:10]
+    if product_type == 'GRD':
+        product_type += '_' + granule[10] + granule[14]
+    url = f'{SENTINEL_DISTRIBUTION_URL}/{product_type}/{mission}/{granule}.zip'
+    return url
+
+
+def get_granule(granule):
+    download_url = get_download_url(granule)
+    zip_file = download_file(download_url)
+    with ZipFile(zip_file) as z:
+        z.extractall()
+    os.remove(zip_file)
+    return f'{granule}.SAFE'
+
+
 def get_content_type(filename):
     content_type = guess_type(filename)[0]
     if not content_type:
@@ -92,7 +123,7 @@ def main_v2():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
-    parser.add_argument('--include-inc-map', type=string_is_true, default=False)
+    parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
@@ -105,26 +136,27 @@ def main_v2():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
+    write_netrc_file(args.username, args.password)
+
+    g1, g2 = earlier_granule_first(args.granules[0], args.granules[1])
+    reference_granule = get_granule(g1)
+    secondary_granule = get_granule(g2)
+
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
-    granule_file = 'granules.txt'
-    g1, g2 = earlier_granule_first(args.granules[0], args.granules[1])
-    write_list_file(granule_file, g1, g2)
-
-    with open('get_asf.cfg', 'w') as f:
-        f.write(f'[general]\nusername={args.username}\npassword={args.password}')
-
-    procS1StackGAMMA(
+    gammaProcess(
+        reference_file=reference_granule,
+        secondary_file=secondary_granule,
+        outdir='.',
         alooks=alooks,
         rlooks=rlooks,
-        csvFile=granule_file,
-        inc_flag=args.include_inc_map,
+        look_flag=args.include_look_vectors,
         los_flag=args.include_los_displacement,
     )
 
     product_name = build_output_name_pair(g1, g2, os.getcwd(), f'-{args.looks}-int-gamma')
     log.info('Output product name: ' + product_name)
-    os.rename('PRODUCTS', product_name)
+    os.rename('PRODUCT', product_name)
     zip_file = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 
     if args.bucket:
@@ -148,44 +180,31 @@ def find_color_phase_png(dir_):
     return None
 
 
-def write_list_file(list_file, g1, g2):
-    with open(list_file, 'w') as f:
-        f.write(g1 + '\n')
-        f.write(g2 + '\n')
-
-
-def find_product(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for d in dirs:
-            if d == "PRODUCTS":
-                return os.path.join(subdir, d)
-
-    return None
-
-
 def hyp3_process(cfg, n):
     try:
         log.info(f'Processing GAMMA InSAR pair "{cfg["sub_name"]}" for "{cfg["username"]}"')
-        g1, g2 = earlier_granule_first(cfg['granule'], cfg['other_granules'][0])
 
-        list_file = 'list.csv'
-        write_list_file(list_file, g1, g2)
+        g1, g2 = earlier_granule_first(cfg['granule'], cfg['other_granules'][0])
+        reference_granule = get_granule(g1)
+        secondary_granule = get_granule(g2)
 
         rlooks, alooks = (10, 2) if extra_arg_is(cfg, 'looks', '10x2') else (20, 4)
 
-        procS1StackGAMMA(
+        gammaProcess(
+            reference_file=reference_granule,
+            secondary_file=secondary_granule,
+            outdir='.',
             alooks=alooks,
             rlooks=rlooks,
-            csvFile=list_file,
             look_flag=extra_arg_is(cfg, 'include_look', 'yes'),
             los_flag=extra_arg_is(cfg, 'include_los_disp', 'yes'),
             mask=extra_arg_is(cfg, 'water_mask', 'yes'),
         )
 
-        out_name = build_output_name_pair(g1, g2, '.', f'{rlooks}x{alooks}{cfg["suffix"]}')
+        out_name = build_output_name_pair(g1, g2, '.', f'-{rlooks}x{alooks}{cfg["suffix"]}')
         log.info(f'Output name: {out_name}')
 
-        product_dir = 'PRODUCTS'
+        product_dir = 'PRODUCT'
         log.debug(f'Renaming {product_dir} to {out_name}')
         os.rename(product_dir, out_name)
 
