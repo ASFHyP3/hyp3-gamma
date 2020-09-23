@@ -178,14 +178,6 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
 
-    # This code uses the filered coherence output from adf command:
-    #
-    #    inName = "{}.adf.cc.geo.tif".format(os.path.join(outdir,output))
-    #    outName = "{}_corr.tif".format(os.path.join(prod_dir,long_output))
-    #    if os.path.isfile(inName):
-    #        shutil.copy(inName,outName)
-    #
-
     inName = "{}.vert.disp.geo.org.tif".format(os.path.join(outdir, output))
     outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
