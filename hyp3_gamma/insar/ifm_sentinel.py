@@ -212,7 +212,7 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def makeParameterFile(mydir, alooks, rlooks, dem_source):
+def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -222,7 +222,7 @@ def makeParameterFile(mydir, alooks, rlooks, dem_source):
     reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
     secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
 
-    with open("IFM/baseline.log", "r") as f:
+    with open(os.path.join(ifm_dir, "baseline.log")) as f:
         for line in f:
             if "estimated baseline perpendicular component" in line:
                 # FIXME: RE is overly complicated here. this is two simple string splits
@@ -248,7 +248,7 @@ def makeParameterFile(mydir, alooks, rlooks, dem_source):
     os.chdir(back)
 
     heading = None
-    name = "IFM/" + reference_date[:8] + ".mli.par"
+    name = os.path.join(ifm_dir, f'{reference_date[:8]}.mli.par')
     with open(name, "r") as f:
         for line in f:
             if "heading" in line:
@@ -412,7 +412,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True, logfile=log)
-    makeParameterFile(igramName, alooks, rlooks, dem_source)
+    make_parameter_file(igramName, alooks, rlooks, dem_source, '.')
 
     process_log("Done!!!")
     logging.info("Done!!!")
