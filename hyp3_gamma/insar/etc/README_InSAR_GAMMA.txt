@@ -21,7 +21,7 @@ pp:         Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV:
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 nnn:        Time separation in days between reference and secondary granules
 zz:         Pixel Spacing in meters
-u:          Software Package Used: GAMMA (G), ISCE (I), S1TBX (S), GMT5SAR (M), or autoRIFT (A)
+u:          Software Package Used: GAMMA (G)
 d:          Unmasked (u) or Water Masked (w)
 e:          Entire Area (e) or Clipped Area (c)
 f:          Swath Number: 1, 2, 3, or Full (F)
