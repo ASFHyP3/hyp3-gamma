@@ -412,7 +412,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True, logfile=log)
-    makeParameterFile(prod_dir, alooks, rlooks, dem_source)
+    makeParameterFile(igramName, alooks, rlooks, dem_source)
 
     process_log("Done!!!")
     logging.info("Done!!!")
