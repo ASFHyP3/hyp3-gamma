@@ -16,6 +16,7 @@ from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
 from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
 from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_insar_gamma.par_s1_slc import par_s1_slc
+from hyp3_insar_gamma.stack_sentinel import makeParameterFile
 from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
 
 # FIXME: refactor to eliminate globals
@@ -336,8 +337,6 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Generate metadata
     process_log("Collecting metadata and output files")
 
-    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log",
-            uselogging=True, logfile=log)
     os.chdir(wrk)
 
     # Move the outputs to the PRODUCT directory
@@ -347,6 +346,9 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, inc_flag, look_flag)
 
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
+
+    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True, logfile=log)
+    makeParameterFile(prod_dir, alooks, rlooks, dem_source)
 
     process_log("Done!!!")
     logging.info("Done!!!")
