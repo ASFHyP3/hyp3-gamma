@@ -219,8 +219,8 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
-                 inc_flag=False, look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None, mask=False):
+def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
+                 look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None, mask=False):
     global proc_log
 
     logging.info("\n\nSentinel1A differential interferogram creation program\n")
@@ -374,6 +374,8 @@ def main():
     parser.add_argument("-c", action="store_true", help="cross pol processing - either hv or vh (default hh or vv)")
     parser.add_argument("-t", nargs=4, type=float, metavar=('t1', 't2', 't3', 'length'),
                         help="Start processing at time for length bursts")
+    parser.add_argument("-m", "--mask", action="store_true",
+                        help="Apply water body mask to DEM file prior to processing")
     args = parser.parse_args()
 
     logFile = "ifm_sentinel_log.txt"
@@ -383,7 +385,8 @@ def main():
     logging.info("Starting run")
 
     gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t)
+                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t,
+                 mask=args.mask)
 
 
 if __name__ == "__main__":
