@@ -56,7 +56,15 @@ def entry():
 
 
 # Hyp3 V2 entrypoints
-def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spacing=80, masked=False):
+def least_precise_orbit_of(orbits):
+    if any([orb == None for orb in orbits]):
+        return 'O'
+    if any(['RESORB' in orb for orb in orbits]):
+        return 'R'
+    return 'P'
+
+
+def get_product_name(reference_name, secondary_name, reference_orbit=None, secondary_orbit=None, pixel_spacing=80, masked=False):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
 
@@ -69,14 +77,7 @@ def get_product_name(reference_name, secondary_name, orbit_file=None, pixel_spac
 
     pol = reference_name[14:16]
 
-    if orbit_file is None:
-        orb = 'O'
-    elif 'POEORB' in orbit_file:
-        orb = 'P'
-    elif 'RESORB' in orbit_file:
-        orb = 'R'
-    else:
-        orb = 'O'
+    orb = least_precise_orbit_of([reference_orbit, secondary_orbit])
 
     mask = 'w' if masked else 'u'
 
