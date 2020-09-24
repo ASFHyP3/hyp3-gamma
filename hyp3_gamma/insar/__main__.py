@@ -17,7 +17,7 @@ from hyp3proclib import (
     earlier_granule_first,
 )
 
-from hyp3_insar_gamma.ifm_sentinel import gammaProcess
+from hyp3_insar_gamma.ifm_sentinel import gamma_process
 
 log = logging.getLogger(__name__)
 SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
@@ -117,7 +117,7 @@ def main():
 
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
-    gammaProcess(
+    gamma_process(
         reference_file=reference_granule,
         secondary_file=secondary_granule,
         outdir='.',

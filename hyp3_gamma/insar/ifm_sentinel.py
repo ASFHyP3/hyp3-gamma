@@ -273,8 +273,8 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     os.chdir("..")
 
 
-def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
-                 look_flag=False, los_flag=False, cp_flag=False, time=None):
+def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
+                  look_flag=False, los_flag=False, cp_flag=False, time=None):
 
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
     log.info("Creating output interferogram in directory {}\n\n".format(outdir))
@@ -426,8 +426,8 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
+    gamma_process(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
+                  inc_flag=args.i, look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
 
 
 if __name__ == "__main__":
