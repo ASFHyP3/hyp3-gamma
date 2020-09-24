@@ -7,6 +7,8 @@ import os
 import re
 import shutil
 import sys
+from datetime import datetime
+from secrets import token_hex
 
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
@@ -114,6 +116,32 @@ def getFileType(myfile):
     return file_type, pol
 
 
+def least_precise_orbit_of(orbits):
+    if any([orb is None for orb in orbits]):
+        return 'O'
+    if any(['RESORB' in orb for orb in orbits]):
+        return 'R'
+    return 'P'
+
+
+def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80):
+    plat1 = reference_name[2]
+    plat2 = secondary_name[2]
+
+    datetime1 = reference_name[17:32]
+    datetime2 = secondary_name[17:32]
+
+    ref_datetime = datetime.strptime(datetime1, '%Y%m%dT%H%M%S')
+    sec_datetime = datetime.strptime(datetime2, '%Y%m%dT%H%M%S')
+    days = abs((ref_datetime - sec_datetime).days)
+
+    pol = reference_name[14:16]
+    orb = least_precise_orbit_of(orbit_files)
+    product_id = token_hex(2).upper()
+
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
+
+
 def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
@@ -152,7 +180,7 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def make_parameter_file(mydir, alooks, rlooks, dem_source):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -200,9 +228,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     reference_file = reference_file.replace(".SAFE", "")
     secondary_file = secondary_file.replace(".SAFE", "")
 
-    os.chdir("PRODUCT")
-    name = "%s.txt" % mydir
-    with open(name, 'w') as f:
+    with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
         f.write('Baseline: %s\n' % baseline)
@@ -220,7 +246,6 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
         f.write('Unwrapping type: mcf\n')
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
-    os.chdir("..")
 
 
 def gamma_process(reference_file, secondary_file, rlooks=10, alooks=2, look_flag=False, los_flag=False):
@@ -245,7 +270,7 @@ def gamma_process(reference_file, secondary_file, rlooks=10, alooks=2, look_flag
 
     #  Ingest the data files into gamma format
     log.info("Starting par_s1_slc.py")
-    par_s1_slc(pol)
+    orbit_files = par_s1_slc(pol)
 
     #  Fetch the DEM file
     log.info("Getting a DEM file")
@@ -311,18 +336,20 @@ def gamma_process(reference_file, secondary_file, rlooks=10, alooks=2, look_flag
 
     os.chdir(wrk)
 
-    # Move the outputs to the PRODUCT directory
-    prod_dir = "PRODUCT"
-    if not os.path.exists(prod_dir):
-        os.mkdir("PRODUCT")
-    move_output_files(output, reference, prod_dir, igramName, los_flag, look_flag)
+    # Move the outputs to the product directory
+    pixel_spacing = int(alooks) * 20
+    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
+    os.mkdir(product_name)
+    move_output_files(output, reference, product_name, product_name, los_flag, look_flag)
 
-    create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
+    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing,
+                       dem_source)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
-    make_parameter_file(igramName, alooks, rlooks, dem_source)
+    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
 
     log.info("Done!!!")
+    return product_name
 
 
 def main():
