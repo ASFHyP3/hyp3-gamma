@@ -4,9 +4,7 @@ insar_gamma processing for HyP3
 import glob
 import logging
 import os
-import shutil
-import sys
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from argparse import ArgumentParser
 from mimetypes import guess_type
 from shutil import make_archive
 from zipfile import ZipFile
@@ -17,18 +15,8 @@ from hyp3lib.fetch import download_file
 from hyp3proclib import (
     build_output_name_pair,
     earlier_granule_first,
-    extra_arg_is,
-    failure,
-    success,
-    upload_product,
 )
-from hyp3proclib.db import get_db_connection
-from hyp3proclib.file_system import cleanup_workdir
-from hyp3proclib.logger import log
-from hyp3proclib.proc_base import Processor
-from pkg_resources import load_entry_point
 
-import hyp3_insar_gamma
 from hyp3_insar_gamma.ifm_sentinel import gammaProcess
 
 
@@ -37,21 +25,6 @@ EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
 
 
-def entry():
-    parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '++entrypoint', choices=['hyp3_insar_gamma', 'hyp3_insar_gamma_v2'], default='hyp3_insar_gamma',
-        help='Select the HyP3 entrypoint version to use'
-    )
-    args, unknowns = parser.parse_known_args()
-
-    sys.argv = [args.entrypoint, *unknowns]
-    sys.exit(
-        load_entry_point('hyp3_insar_gamma', 'console_scripts', args.entrypoint)()
-    )
-
-
-# Hyp3 V2 entrypoints
 def write_netrc_file(username, password):
     netrc_file = os.path.join(os.environ['HOME'], '.netrc')
     if os.path.isfile(netrc_file):
@@ -117,7 +90,7 @@ def string_is_true(s: str) -> bool:
     return s.lower() == 'true'
 
 
-def main_v2():
+def main():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
     parser.add_argument('--password', required=True)
@@ -155,7 +128,7 @@ def main_v2():
     )
 
     product_name = build_output_name_pair(g1, g2, os.getcwd(), f'-{args.looks}-int-gamma')
-    log.info('Output product name: ' + product_name)
+    logging.info('Output product name: ' + product_name)
     os.rename('PRODUCT', product_name)
     zip_file = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 
@@ -166,80 +139,6 @@ def main_v2():
             thumbnail = create_thumbnail(browse)
             upload_file_to_s3(browse, 'browse', args.bucket, args.bucket_prefix)
             upload_file_to_s3(thumbnail, 'thumbnail', args.bucket, args.bucket_prefix)
-# End v2 entrypoints
-
-
-def find_color_phase_png(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for file in files:
-            filepath = os.path.join(subdir, file)
-            if filepath.endswith("color_phase.png"):
-                log.info('Browse image: ' + filepath)
-                return filepath
-
-    return None
-
-
-def hyp3_process(cfg, n):
-    try:
-        log.info(f'Processing GAMMA InSAR pair "{cfg["sub_name"]}" for "{cfg["username"]}"')
-
-        g1, g2 = earlier_granule_first(cfg['granule'], cfg['other_granules'][0])
-        reference_granule = get_granule(g1)
-        secondary_granule = get_granule(g2)
-
-        rlooks, alooks = (10, 2) if extra_arg_is(cfg, 'looks', '10x2') else (20, 4)
-
-        gammaProcess(
-            reference_file=reference_granule,
-            secondary_file=secondary_granule,
-            outdir='.',
-            alooks=alooks,
-            rlooks=rlooks,
-            look_flag=extra_arg_is(cfg, 'include_look', 'yes'),
-            los_flag=extra_arg_is(cfg, 'include_los_disp', 'yes'),
-            mask=extra_arg_is(cfg, 'water_mask', 'yes'),
-        )
-
-        out_name = build_output_name_pair(g1, g2, '.', f'-{rlooks}x{alooks}{cfg["suffix"]}')
-        log.info(f'Output name: {out_name}')
-
-        product_dir = 'PRODUCT'
-        log.debug(f'Renaming {product_dir} to {out_name}')
-        os.rename(product_dir, out_name)
-
-        zip_file = make_archive(base_name=out_name, format='zip', base_dir=out_name)
-
-        browse_img = find_color_phase_png(out_name)
-        new_browse_img_name = f'{out_name}.browse.png'
-        shutil.copy(browse_img, new_browse_img_name)
-
-        cfg['attachment'] = new_browse_img_name
-        cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-        cfg['email_text'] = ' '
-
-        with get_db_connection('hyp3-db') as conn:
-            upload_product(zip_file, cfg, conn)
-            success(conn, cfg)
-
-    except Exception as e:
-        log.exception('Processing failed')
-        log.info('Notifying user')
-        failure(cfg, str(e))
-
-    cleanup_workdir(cfg)
-
-    log.info('Done')
-
-
-def main():
-    """
-    Main entrypoint for hyp3_insar_gamma
-    """
-    processor = Processor(
-        'insar_gamma', hyp3_process, sci_version=hyp3_insar_gamma.__version__
-    )
-    processor.run()
 
 
 if __name__ == '__main__':
