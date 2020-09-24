@@ -7,26 +7,20 @@ import os
 import shutil
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from datetime import datetime
 from mimetypes import guess_type
+from shutil import make_archive
+from zipfile import ZipFile
 
 import boto3
 from PIL import Image
-from hyp3lib.metadata import add_esa_citation
+from hyp3lib.fetch import download_file
 from hyp3proclib import (
     build_output_name_pair,
     earlier_granule_first,
-    execute,
     extra_arg_is,
     failure,
-    get_extra_arg,
-    get_looks,
-    process,
-    record_metrics,
     success,
-    unzip,
     upload_product,
-    zip_dir
 )
 from hyp3proclib.db import get_db_connection
 from hyp3proclib.file_system import cleanup_workdir
@@ -35,9 +29,11 @@ from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
 import hyp3_insar_gamma
-from hyp3_insar_gamma import stack_sentinel
+from hyp3_insar_gamma.ifm_sentinel import gammaProcess
 
 
+SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
+EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
 
 
@@ -56,6 +52,33 @@ def entry():
 
 
 # Hyp3 V2 entrypoints
+def write_netrc_file(username, password):
+    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
+    if os.path.isfile(netrc_file):
+        logging.warning(f'Using existing .netrc file: {netrc_file}')
+    else:
+        with open(netrc_file, 'w') as f:
+            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
+
+
+def get_download_url(granule):
+    mission = granule[0] + granule[2]
+    product_type = granule[7:10]
+    if product_type == 'GRD':
+        product_type += '_' + granule[10] + granule[14]
+    url = f'{SENTINEL_DISTRIBUTION_URL}/{product_type}/{mission}/{granule}.zip'
+    return url
+
+
+def get_granule(granule):
+    download_url = get_download_url(granule)
+    zip_file = download_file(download_url)
+    with ZipFile(zip_file) as z:
+        z.extractall()
+    os.remove(zip_file)
+    return f'{granule}.SAFE'
+
+
 def get_content_type(filename):
     content_type = guess_type(filename)[0]
     if not content_type:
@@ -100,7 +123,7 @@ def main_v2():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
-    parser.add_argument('--include-inc-map', type=string_is_true, default=False)
+    parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
@@ -113,28 +136,28 @@ def main_v2():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
+    write_netrc_file(args.username, args.password)
+
+    g1, g2 = earlier_granule_first(args.granules[0], args.granules[1])
+    reference_granule = get_granule(g1)
+    secondary_granule = get_granule(g2)
+
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
-    granule_file = 'granules.txt'
-    g1, g2 = earlier_granule_first(args.granules[0], args.granules[1])
-    write_list_file(granule_file, g1, g2)
-
-    with open('get_asf.cfg', 'w') as f:
-        f.write(f'[general]\nusername={args.username}\npassword={args.password}')
-
-    stack_sentinel.procS1StackGAMMA(
+    gammaProcess(
+        reference_file=reference_granule,
+        secondary_file=secondary_granule,
+        outdir='.',
         alooks=alooks,
         rlooks=rlooks,
-        csvFile=granule_file,
-        inc_flag=args.include_inc_map,
+        look_flag=args.include_look_vectors,
         los_flag=args.include_los_displacement,
     )
 
     product_name = build_output_name_pair(g1, g2, os.getcwd(), f'-{args.looks}-int-gamma')
     log.info('Output product name: ' + product_name)
-    os.rename('PRODUCTS', product_name)
-    zip_file = f'{product_name}.zip'
-    zip_dir(product_name, zip_file)
+    os.rename('PRODUCT', product_name)
+    zip_file = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 
     if args.bucket:
         upload_file_to_s3(zip_file, 'product', args.bucket, args.bucket_prefix)
@@ -157,147 +180,47 @@ def find_color_phase_png(dir_):
     return None
 
 
-def download_palsar(cfg, granule):
-    full_subdir = cfg['workdir']
-    unzipped_dir = os.path.join(full_subdir, granule + '-L1.0')
-    zip_file = os.path.join(full_subdir, granule + '-L1.0.zip')
-
-    if not os.path.isdir(full_subdir):
-        os.mkdir(full_subdir)
-    os.chdir(full_subdir)
-
-    if os.path.isdir(unzipped_dir):
-        log.info('Unzipped directory already exists, skipping download')
-        return
-
-    log.info('Downloading {0} with get_asf.py'.format(granule))
-
-    execute(cfg, 'get_asf.py --l0 --dir=' + full_subdir + ' ' + granule)
-
-    if not os.path.isfile(zip_file):
-        raise Exception('Could not find expected download file: ' + zip_file)
-    else:
-        log.info('Download complete')
-        log.info('Unzipping ' + zip_file)
-
-        unzip(zip_file, full_subdir)
-        if not os.path.isdir(unzipped_dir):
-            raise Exception(
-                'Failed to unzip, unzipped directory not found: ' + unzipped_dir)
-        else:
-            log.info('Unzip completed.')
-
-    log.info("Ready: " + unzipped_dir)
-    return granule + '-L1.0'
-
-
-def write_list_file(list_file, g1, g2):
-    with open(list_file, 'w') as f:
-        f.write(g1 + '\n')
-        f.write(g2 + '\n')
-
-
-def find_product(dir_):
-    for subdir, dirs, files in os.walk(dir_):
-        for d in dirs:
-            if d == "PRODUCTS":
-                return os.path.join(subdir, d)
-
-    return None
-
-
 def hyp3_process(cfg, n):
-    cfg['PALSAR'] = False
     try:
-        log.info('Processing GAMMA InSAR pair "{0}" for "{1}"'.format(cfg['sub_name'], cfg['username']))
-        g1, g2 = earlier_granule_first(
-            cfg['granule'], cfg['other_granules'][0])
+        log.info(f'Processing GAMMA InSAR pair "{cfg["sub_name"]}" for "{cfg["username"]}"')
 
-        if cfg['PALSAR']:
-            u1 = download_palsar(cfg, g1)
-            u2 = download_palsar(cfg, g2)
+        g1, g2 = earlier_granule_first(cfg['granule'], cfg['other_granules'][0])
+        reference_granule = get_granule(g1)
+        secondary_granule = get_granule(g2)
 
-            process(cfg, 'processAlosPair', [u1, u2])
-            cfg["email_text"] = ""
+        rlooks, alooks = (10, 2) if extra_arg_is(cfg, 'looks', '10x2') else (20, 4)
 
-        else:
-            list_file = 'list.csv'
-            write_list_file(os.path.join(cfg['workdir'], list_file), g1, g2)
+        gammaProcess(
+            reference_file=reference_granule,
+            secondary_file=secondary_granule,
+            outdir='.',
+            alooks=alooks,
+            rlooks=rlooks,
+            look_flag=extra_arg_is(cfg, 'include_look', 'yes'),
+            los_flag=extra_arg_is(cfg, 'include_los_disp', 'yes'),
+            mask=extra_arg_is(cfg, 'water_mask', 'yes'),
+        )
 
-            d1 = g1[17:25]
-            d2 = g2[17:25]
-            delta = (datetime.strptime(d2, '%Y%m%d') -
-                     datetime.strptime(d1, '%Y%m%d')).days
+        out_name = build_output_name_pair(g1, g2, '.', f'-{rlooks}x{alooks}{cfg["suffix"]}')
+        log.info(f'Output name: {out_name}')
 
-            ifm_dir = d1 + '_' + d2
-            cfg['ifm'] = ifm_dir
-            log.debug('IFM dir is: ' + ifm_dir)
+        product_dir = 'PRODUCT'
+        log.debug(f'Renaming {product_dir} to {out_name}')
+        os.rename(product_dir, out_name)
 
-            sd1 = d1[0:4] + '-' + d1[4:6] + '-' + d1[6:8]
-            sd2 = d2[0:4] + '-' + d2[4:6] + '-' + d2[6:8]
-            cfg["email_text"] = "This is a {0}-day InSAR pair from {1} to {2}.".format(
-                delta, sd1, sd2)
+        zip_file = make_archive(base_name=out_name, format='zip', base_dir=out_name)
 
-            rlooks = 20
-            alooks = 4
+        browse_img = find_color_phase_png(out_name)
+        new_browse_img_name = f'{out_name}.browse.png'
+        shutil.copy(browse_img, new_browse_img_name)
 
-            if extra_arg_is(cfg, 'looks', '10x2'):
-                rlooks = 10
-                alooks = 2
+        cfg['attachment'] = new_browse_img_name
+        cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
+        cfg['email_text'] = ' '
 
-            args = ["--rlooks", str(rlooks), "--alooks",
-                    str(alooks), "-f", list_file]
-
-            if get_extra_arg(cfg, 'include_look', 'yes') == 'yes':
-                args.extend(["-l"])
-            if get_extra_arg(cfg, 'include_los_disp', 'no') == 'yes':
-                args.extend(["-s"])
-            if get_extra_arg(cfg, 'water_mask', 'no') == 'yes':
-                args.extend(["-m"])
-
-            process(cfg, 'procS1StackGAMMA.py', args)
-
-        product = find_product(cfg['workdir'])
-        if product is None:
-            log.info('PRODUCT directory not found!')
-            log.error('Processing failed')
-            raise Exception("Processing failed: PRODUCT directory not found")
-        else:
-            looks = get_looks(product)
-            out_name = build_output_name_pair(
-                g1, g2, cfg['workdir'], looks + cfg['suffix'])
-            log.info('Output name: ' + out_name)
-
-            out_path = os.path.join(cfg['workdir'], out_name)
-            zip_file = out_path + '.zip'
-            if os.path.isdir(out_path):
-                shutil.rmtree(out_path)
-            if os.path.isfile(zip_file):
-                os.unlink(zip_file)
-            cfg['out_path'] = out_path
-
-            log.debug('Renaming ' + product + ' to ' + out_path)
-            os.rename(product, out_path)
-
-            add_esa_citation(g1, out_path)
-            zip_dir(out_path, zip_file)
-
-            browse_img = find_color_phase_png(out_path)
-            new_browse_img_name = out_path + '.browse.png'
-            shutil.copy(browse_img, new_browse_img_name)
-
-            cfg['attachment'] = new_browse_img_name
-            cfg['final_product_size'] = [os.stat(zip_file).st_size, ]
-            cfg['original_product_size'] = 0
-
-            with get_db_connection('hyp3-db') as conn:
-                record_metrics(cfg, conn)
-                if 'lag' in cfg and len(str(cfg['lag'])) > 0:
-                    cfg['email_text'] += f"\nYou are receiving this product {cfg['lag']} after it was acquired."
-
-                upload_product(zip_file, cfg, conn,
-                               browse_path=new_browse_img_name)
-                success(conn, cfg)
+        with get_db_connection('hyp3-db') as conn:
+            upload_product(zip_file, cfg, conn)
+            success(conn, cfg)
 
     except Exception as e:
         log.exception('Processing failed')
