@@ -284,7 +284,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
 
 
 def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
-                 look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None, mask=False):
+                 look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None):
     global proc_log
 
     logging.info("\n\nSentinel1A differential interferogram creation program\n")
@@ -328,7 +328,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Fetch the DEM file
     process_log("Getting a DEM file")
     if dem is None:
-        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, mask)
+        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks)
         logging.info("Got dem of type {}".format(dem_source))
     else:
         logging.debug("Value of DEM is {}".format(dem))
@@ -438,8 +438,6 @@ def main():
     parser.add_argument("-c", action="store_true", help="cross pol processing - either hv or vh (default hh or vv)")
     parser.add_argument("-t", nargs=4, type=float, metavar=('t1', 't2', 't3', 'length'),
                         help="Start processing at time for length bursts")
-    parser.add_argument("-m", "--mask", action="store_true",
-                        help="Apply water body mask to DEM file prior to processing")
     args = parser.parse_args()
 
     logFile = "ifm_sentinel_log.txt"
@@ -449,8 +447,7 @@ def main():
     logging.info("Starting run")
 
     gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t,
-                 mask=args.mask)
+                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t)
 
 
 if __name__ == "__main__":
