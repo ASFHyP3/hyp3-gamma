@@ -13,11 +13,6 @@ def test_interf_pwr_s1_lt_tops_proc(script_runner):
     assert ret.success
 
 
-def test_par_s1_slc(script_runner):
-    ret = script_runner.run('par_s1_slc.py', '-h')
-    assert ret.success
-
-
 def test_unwrapping_geocoding(script_runner):
     ret = script_runner.run('unwrapping_geocoding.py', '-h')
     assert ret.success
