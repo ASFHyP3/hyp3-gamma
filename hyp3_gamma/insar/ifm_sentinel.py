@@ -159,7 +159,7 @@ def getFileType(myfile):
     return file_type, pol
 
 
-def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag, inc_flag, look_flag):
+def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag, look_flag):
     inName = "{}.mli.geo.tif".format(os.path.join(outdir, reference))
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -180,11 +180,6 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
     if los_flag:
         inName = "{}.los.disp.geo.org.tif".format(os.path.join(outdir, output))
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
-        shutil.copy(inName, outName)
-
-    if inc_flag:
-        inName = "{}.inc.tif".format(os.path.join(outdir, output))
-        outName = "{}_inc.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if look_flag:
@@ -274,7 +269,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
 
 
 def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
-                  inc_flag=False, look_flag=False, los_flag=False, cp_flag=False, time=None):
+                  look_flag=False, los_flag=False, cp_flag=False, time=None):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
     log.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
@@ -391,7 +386,7 @@ def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=N
     prod_dir = "PRODUCT"
     if not os.path.exists(prod_dir):
         os.mkdir("PRODUCT")
-    move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, inc_flag, look_flag)
+    move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, look_flag)
 
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
@@ -414,7 +409,6 @@ def main():
                         help="Input DEM file to use, otherwise calculate a bounding box (e.g. big for big.dem/big.par)")
     parser.add_argument("-r", "--rlooks", default=20, help="Number of range looks (def=20)")
     parser.add_argument("-a", "--alooks", default=4, help="Number of azimuth looks (def=4)")
-    parser.add_argument("-i", action="store_true", help="Create incidence angle file")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-c", action="store_true", help="cross pol processing - either hv or vh (default hh or vv)")
@@ -426,7 +420,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     gamma_process(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                  inc_flag=args.i, look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
+                  look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
 
 
 if __name__ == "__main__":
