@@ -19,7 +19,7 @@ from hyp3proclib import (
 
 from hyp3_insar_gamma.ifm_sentinel import gammaProcess
 
-
+log = logging.getLogger(__name__)
 SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
 EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
 S3_CLIENT = boto3.client('s3')
@@ -28,7 +28,7 @@ S3_CLIENT = boto3.client('s3')
 def write_netrc_file(username, password):
     netrc_file = os.path.join(os.environ['HOME'], '.netrc')
     if os.path.isfile(netrc_file):
-        logging.warning(f'Using existing .netrc file: {netrc_file}')
+        log.warning(f'Using existing .netrc file: {netrc_file}')
     else:
         with open(netrc_file, 'w') as f:
             f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
@@ -63,7 +63,7 @@ def upload_file_to_s3(path_to_file, file_type, bucket, prefix=''):
     key = os.path.join(prefix, os.path.basename(path_to_file))
     extra_args = {'ContentType': get_content_type(key)}
 
-    logging.info(f'Uploading s3://{bucket}/{key}')
+    log.info(f'Uploading s3://{bucket}/{key}')
     S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
     tag_set = {
         'TagSet': [
@@ -128,7 +128,7 @@ def main():
     )
 
     product_name = build_output_name_pair(g1, g2, os.getcwd(), f'-{args.looks}-int-gamma')
-    logging.info('Output product name: ' + product_name)
+    log.info('Output product name: ' + product_name)
     os.rename('PRODUCT', product_name)
     zip_file = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 

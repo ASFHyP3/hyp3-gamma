@@ -1,7 +1,6 @@
 """Process Sentinel-1 data into interferograms using GAMMA"""
 
 import argparse
-import datetime
 import glob
 import logging
 import os
@@ -20,16 +19,7 @@ from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_pr
 from hyp3_insar_gamma.par_s1_slc import par_s1_slc
 from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
 
-# FIXME: refactor to eliminate globals
-global lasttime
-global log
-global proc_log
-
-
-def process_log(msg):
-    global proc_log
-    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    proc_log.write("{} - {}\n".format(time, msg))
+log = logging.getLogger(__name__)
 
 
 def getBursts(mydir, name):
@@ -52,7 +42,7 @@ def getBursts(mydir, name):
 
 
 def getSelectBursts(reference_dir, secondary_dir, time):
-    logging.info("Finding selected bursts at times {}, {}, {} for length {}".format(time[0], time[1], time[2], time[3]))
+    log.info("Finding selected bursts at times {}, {}, {} for length {}".format(time[0], time[1], time[2], time[3]))
     burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
 
     burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
@@ -70,7 +60,7 @@ def getSelectBursts(reference_dir, secondary_dir, time):
                 found1 = 0
                 for x in time1:
                     if abs(float(x) - float(time[xml_cnt])) < 0.20:
-                        logging.info("Found selected burst at {}".format(cnt))
+                        log.info("Found selected burst at {}".format(cnt))
                         found1 = 1
                         start1 = cnt
                     cnt += 1
@@ -79,13 +69,13 @@ def getSelectBursts(reference_dir, secondary_dir, time):
                 found2 = 0
                 for x in time2:
                     if abs(float(x) - float(time[xml_cnt])) < 0.20:
-                        logging.info("Found selected burst at {}".format(cnt))
+                        log.info("Found selected burst at {}".format(cnt))
                         found2 = 1
                         start2 = cnt
                     cnt += 1
 
                 if not found1 or not found2:
-                    logging.error("ERROR: Unable to find bursts at selected time")
+                    log.error("ERROR: Unable to find bursts at selected time")
                     sys.exit(1)
 
                 f1.write("%s %s\n" % (start1, start1 + size - 1))
@@ -97,7 +87,7 @@ def getSelectBursts(reference_dir, secondary_dir, time):
 
 
 def getBurstOverlaps(reference_dir, secondary_dir):
-    logging.info("Calculating burst overlaps; in directory {}".format(os.getcwd()))
+    log.info("Calculating burst overlaps; in directory {}".format(os.getcwd()))
     burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
     burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
 
@@ -105,9 +95,9 @@ def getBurstOverlaps(reference_dir, secondary_dir):
         with open(burst_tab2, "w") as f2:
             for name in ['001.xml', '002.xml', '003.xml']:
                 time1, total_bursts1 = getBursts(reference_dir, name)
-                logging.info("total_bursts1, time1 {} {}".format(total_bursts1, time1))
+                log.info("total_bursts1, time1 {} {}".format(total_bursts1, time1))
                 time2, total_bursts2 = getBursts(secondary_dir, name)
-                logging.info("total_bursts2, time2 {} {}".format(total_bursts2, time2))
+                log.info("total_bursts2, time2 {} {}".format(total_bursts2, time2))
                 cnt = 1
                 start1 = 0
                 start2 = 0
@@ -115,7 +105,7 @@ def getBurstOverlaps(reference_dir, secondary_dir):
                 x = time1[0]
                 for y in time2:
                     if abs(x - y) < 0.20:
-                        logging.info("Found burst match at 1 %s" % cnt)
+                        log.info("Found burst match at 1 %s" % cnt)
                         found = 1
                         start1 = 1
                         start2 = cnt
@@ -126,7 +116,7 @@ def getBurstOverlaps(reference_dir, secondary_dir):
                     cnt = 1
                     for x in time1:
                         if abs(x - y) < 0.20:
-                            logging.info("Found burst match at %s 1" % cnt)
+                            log.info("Found burst match at %s 1" % cnt)
                             start1 = cnt
                             start2 = 1
                         cnt += 1
@@ -135,7 +125,7 @@ def getBurstOverlaps(reference_dir, secondary_dir):
                     size1 = total_bursts1 - start1 + 1
                     size2 = total_bursts2 - start2 + 1
                 except Exception:
-                    logging.error("ERROR: Unable to find burst overlap")
+                    log.error("ERROR: Unable to find burst overlap")
                     sys.exit(2)
 
                 if size1 > size2:
@@ -218,7 +208,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
     reference_date = mydir[:15]
     secondary_date = mydir[17:]
 
-    logging.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
+    log.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
     reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
     secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
 
@@ -239,11 +229,11 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
             root = etree.parse(myfile)
             for coord in root.iter('productFirstLineUtcTime'):
                 utc = coord.text
-                logging.info("Found utc time {}".format(utc))
+                log.info("Found utc time {}".format(utc))
                 t = utc.split("T")
-                logging.info("{}".format(t))
+                log.info("{}".format(t))
                 s = t[1].split(":")
-                logging.info("{}".format(s))
+                log.info("{}".format(s))
                 utctime = ((int(s[0]) * 60 + int(s[1])) * 60) + float(s[2])
     os.chdir(back)
 
@@ -285,10 +275,9 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
 
 def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
                  look_flag=False, los_flag=False, cp_flag=False, time=None):
-    global proc_log
 
-    logging.info("\n\nSentinel1A differential interferogram creation program\n")
-    logging.info("Creating output interferogram in directory {}\n\n".format(outdir))
+    log.info("\n\nSentinel-1 differential interferogram creation program\n")
+    log.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
     wrk = os.getcwd()
     reference_date = reference_file[17:32]
@@ -296,16 +285,12 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     secondary_date = secondary_file[17:32]
     secondary_date_short = secondary_file[17:25]
     igramName = "{}_{}".format(reference_date, secondary_date)
-    logname = "{}.log".format(outdir)
-    log = open(logname, "w")
-    proc_log = open("processing.log", "w")
-    process_log("starting processing")
 
     if "IW_SLC__" not in reference_file:
-        logging.error("ERROR: Reference file {} is not of type IW_SLC!".format(reference_file))
+        log.error("ERROR: Reference file {} is not of type IW_SLC!".format(reference_file))
         sys.exit(1)
     if "IW_SLC__" not in secondary_file:
-        logging.error("ERROR: Secondary file {} is not of type IW_SLC!".format(secondary_file))
+        log.error("ERROR: Secondary file {} is not of type IW_SLC!".format(secondary_file))
         sys.exit(1)
 
     file_type, pol = getFileType(reference_file)
@@ -316,25 +301,25 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
         elif file_type == "SDH":
             pol = "hv"
         else:
-            logging.info("Flag type mismatch -- processing {}".format(pol))
-        logging.info("Setting pol to {}".format(pol))
+            log.info("Flag type mismatch -- processing {}".format(pol))
+        log.info("Setting pol to {}".format(pol))
 
-    logging.info("Processing the {} polarization".format(pol))
+    log.info("Processing the {} polarization".format(pol))
 
     #  Ingest the data files into gamma format
-    process_log("Starting par_s1_slc.py")
+    log.info("Starting par_s1_slc.py")
     par_s1_slc(pol)
 
     #  Fetch the DEM file
-    process_log("Getting a DEM file")
+    log.info("Getting a DEM file")
     if dem is None:
         dem, dem_source = get_dem_file_gamma(reference_file, alooks)
-        logging.info("Got dem of type {}".format(dem_source))
+        log.info("Got dem of type {}".format(dem_source))
     else:
-        logging.debug("Value of DEM is {}".format(dem))
+        log.debug("Value of DEM is {}".format(dem))
         if dem_source is None:
             dem_source = "UNKNOWN"
-        logging.info("Found dem type of {}".format(dem_source))
+        log.info("Found dem type of {}".format(dem_source))
 
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
@@ -345,12 +330,12 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     else:
         (burst_tab1, burst_tab2) = getSelectBursts(reference_file, secondary_file, time)
 
-    logging.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
+    log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
     shutil.move(burst_tab1, reference_date_short)
     shutil.move(burst_tab2, secondary_date_short)
 
     # Mosaic the swaths together and copy SLCs over
-    process_log("Starting SLC_copy_S1_fullSW.py")
+    log.info("Starting SLC_copy_S1_fullSW.py")
     reference = reference_date_short
     secondary = secondary_date_short
 
@@ -364,14 +349,14 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     os.chdir(outdir)
 
     # Interferogram creation, matching, refinement
-    process_log("Starting interf_pwr_s1_lt_tops_proc.py 0")
+    log.info("Starting interf_pwr_s1_lt_tops_proc.py 0")
     hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=0)
 
-    process_log("Starting interf_pwr_s1_lt_tops_proc.py 1")
+    log.info("Starting interf_pwr_s1_lt_tops_proc.py 1")
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, step=1)
 
-    process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
+    log.info("Starting interf_pwr_s1_lt_tops_proc.py 2")
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=2)
 
     g = open("offsetfit3.log")
@@ -380,26 +365,26 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
         if "final azimuth offset poly. coeff.:" in line:
             offset = line.split(":")[1]
     if float(offset) > 0.02:
-        logging.error("ERROR: Found azimuth offset of {}!".format(offset))
+        log.error("ERROR: Found azimuth offset of {}!".format(offset))
         sys.exit(1)
     else:
-        logging.info("Found azimuth offset of {}!".format(offset))
+        log.info("Found azimuth offset of {}!".format(offset))
 
     output = reference_date_short + "_" + secondary_date_short
 
-    process_log("Starting s1_coreg_overlap")
+    log.info("Starting s1_coreg_overlap")
     execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
-            uselogging=True, logfile=log)
+            uselogging=True)
 
-    process_log("Starting interf_pwr_s1_lt_tops_proc.py 2")
+    log.info("Starting interf_pwr_s1_lt_tops_proc.py 2")
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, step=3)
 
     # Perform phase unwrapping and geocoding of results
-    process_log("Starting phase unwrapping and geocoding")
+    log.info("Starting phase unwrapping and geocoding")
     unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
 
     #  Generate metadata
-    process_log("Collecting metadata and output files")
+    log.info("Collecting metadata and output files")
 
     os.chdir(wrk)
 
@@ -411,11 +396,10 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
 
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
-    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True, logfile=log)
+    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, alooks, rlooks, dem_source, '.')
 
-    process_log("Done!!!")
-    logging.info("Done!!!")
+    log.info("Done!!!")
 
 
 def main():
@@ -439,11 +423,8 @@ def main():
                         help="Start processing at time for length bursts")
     args = parser.parse_args()
 
-    logFile = "ifm_sentinel_log.txt"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
 
     gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
                  inc_flag=args.i, look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
