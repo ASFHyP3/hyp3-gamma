@@ -1,6 +1,5 @@
-"""
-insar_gamma processing for HyP3
-"""
+"""insar_gamma processing for HyP3"""
+
 import glob
 import logging
 import os
