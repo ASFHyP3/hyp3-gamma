@@ -8,6 +8,8 @@ from hyp3lib.system import gamma_version
 import hyp3_insar_gamma.etc
 from hyp3_insar_gamma import __version__
 
+log = logging.getLogger(__name__)
+
 
 def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
     looks = pixelSize / 20
@@ -56,7 +58,7 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType, pol):
         resa = 1
         resm = 30
     else:
-        logging.error("Unrecognized DEM type: {}".format(demType))
+        log.error("Unrecognized DEM type: {}".format(demType))
         sys.exit(1)
 
     with open("README.txt", "w") as g:

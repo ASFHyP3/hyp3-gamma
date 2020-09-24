@@ -12,6 +12,8 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 
+log = logging.getLogger(__name__)
+
 
 def make_cmd(val, acqdate, path, pol=None):
     """make the par_S1_SLC gamma commands"""
@@ -40,32 +42,32 @@ def par_s1_slc(pol=None):
     for myfile in os.listdir("."):
         if ".zip" in myfile:
             if not os.path.exists(myfile.replace(".zip", ".SAFE")):
-                logging.info("Unzipping file {}".format(myfile))
+                log.info("Unzipping file {}".format(myfile))
                 zip_ref = zipfile.ZipFile(myfile, 'r')
                 zip_ref.extractall(".")
                 zip_ref.close()
 
     for myfile in os.listdir("."):
         if ".SAFE" in myfile:
-            logging.info("Procesing directory {}".format(myfile))
+            log.info("Procesing directory {}".format(myfile))
             mytype = myfile[13:16]
-            logging.info("Found image type {}".format(mytype))
+            log.info("Found image type {}".format(mytype))
 
             single_pol = None
             if "SSH" in mytype or "SSV" in mytype:
-                logging.info("Found single pol file")
+                log.info("Found single pol file")
                 single_pol = 1
             elif "SDV" in mytype:
-                logging.info("Found multi-pol file")
+                log.info("Found multi-pol file")
                 single_pol = 0
                 if "hv" in pol or "hh" in pol:
-                    logging.error("ERROR: no {} polarization exists in a {} file".format(pol, mytype))
+                    log.error("ERROR: no {} polarization exists in a {} file".format(pol, mytype))
                     sys.exit(1)
             elif "SDH" in mytype:
-                logging.info("Found multi-pol file")
+                log.info("Found multi-pol file")
                 single_pol = 0
                 if "vh" in pol or "vv" in pol:
-                    logging.error("ERROR: no {} polarization exists in a {} file".format(pol, mytype))
+                    log.error("ERROR: no {} polarization exists in a {} file".format(pol, mytype))
                     sys.exit(1)
 
             folder = myfile.replace(".SAFE", "")
@@ -75,9 +77,9 @@ def par_s1_slc(pol=None):
             if not os.path.exists(path):
                 os.mkdir(path)
 
-            logging.info("Folder is {}".format(folder))
-            logging.info("Long date is {}".format(datelong))
-            logging.info("Acquisition date is {}".format(acqdate))
+            log.info("Folder is {}".format(folder))
+            log.info("Long date is {}".format(datelong))
+            log.info("Acquisition date is {}".format(acqdate))
 
             os.chdir("{}.SAFE".format(folder))
 
@@ -92,14 +94,14 @@ def par_s1_slc(pol=None):
 
             os.chdir(path)
 
-            logging.info("Getting precision orbit for file {}".format(myfile))
+            log.info("Getting precision orbit for file {}".format(myfile))
             try:
                 _ = downloadSentinelOrbitFile(myfile)
                 execute(f"S1_OPOD_vec {acqdate}_001.slc.par *.EOF")
                 execute(f"S1_OPOD_vec {acqdate}_002.slc.par *.EOF")
                 execute(f"S1_OPOD_vec {acqdate}_003.slc.par *.EOF")
             except OrbitDownloadError:
-                logging.warning('Unable to fetch precision state vectors... continuing')
+                log.warning('Unable to fetch precision state vectors... continuing')
 
             slc = glob.glob("*_00*.slc")
             slc.sort()
@@ -126,11 +128,8 @@ def main():
     parser.add_argument('pol', nargs='?', default='vv', help='name of polarization to process (default vv)')
     args = parser.parse_args()
 
-    logFile = "par_s1_slc_log.txt"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
 
     par_s1_slc(args.pol)
 
