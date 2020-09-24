@@ -2,8 +2,10 @@
 
 import argparse
 import datetime
+import glob
 import logging
 import os
+import re
 import shutil
 import sys
 
@@ -12,7 +14,6 @@ from hyp3lib.execute import execute
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from lxml import etree
 
-import hyp3_insar_gamma.etc
 from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
 from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
 from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
@@ -178,14 +179,6 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
 
-    # This code uses the filered coherence output from adf command:
-    #
-    #    inName = "{}.adf.cc.geo.tif".format(os.path.join(outdir,output))
-    #    outName = "{}_corr.tif".format(os.path.join(prod_dir,long_output))
-    #    if os.path.isfile(inName):
-    #        shutil.copy(inName,outName)
-    #
-
     inName = "{}.vert.disp.geo.org.tif".format(os.path.join(outdir, output))
     outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -219,8 +212,79 @@ def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
-                 inc_flag=False, look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None):
+def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
+    res = 20 * int(alooks)
+
+    reference_date = mydir[:15]
+    secondary_date = mydir[17:]
+
+    logging.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
+    reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
+    secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
+
+    with open(os.path.join(ifm_dir, "baseline.log")) as f:
+        for line in f:
+            if "estimated baseline perpendicular component" in line:
+                # FIXME: RE is overly complicated here. this is two simple string splits
+                t = re.split(":", line)
+                s = re.split(r'\s+', t[1])
+                baseline = float(s[1])
+
+    back = os.getcwd()
+    os.chdir(os.path.join(reference_file, "annotation"))
+
+    utctime = None
+    for myfile in os.listdir("."):
+        if "001.xml" in myfile:
+            root = etree.parse(myfile)
+            for coord in root.iter('productFirstLineUtcTime'):
+                utc = coord.text
+                logging.info("Found utc time {}".format(utc))
+                t = utc.split("T")
+                logging.info("{}".format(t))
+                s = t[1].split(":")
+                logging.info("{}".format(s))
+                utctime = ((int(s[0]) * 60 + int(s[1])) * 60) + float(s[2])
+    os.chdir(back)
+
+    heading = None
+    name = os.path.join(ifm_dir, f'{reference_date[:8]}.mli.par')
+    with open(name, "r") as f:
+        for line in f:
+            if "heading" in line:
+                t = re.split(":", line)
+                # FIXME: RE is overly complicated here. this is two simple string splits
+                s = re.split(r'\s+', t[1])
+                heading = float(s[1])
+
+    reference_file = reference_file.replace(".SAFE", "")
+    secondary_file = secondary_file.replace(".SAFE", "")
+
+    os.chdir("PRODUCT")
+    name = "%s.txt" % mydir
+    with open(name, 'w') as f:
+        f.write('Reference Granule: %s\n' % reference_file)
+        f.write('Secondary Granule: %s\n' % secondary_file)
+        f.write('Baseline: %s\n' % baseline)
+        f.write('UTCtime: %s\n' % utctime)
+        f.write('Heading: %s\n' % heading)
+        f.write('Range looks: %s\n' % rlooks)
+        f.write('Azimuth looks: %s\n' % alooks)
+        f.write('INSAR phase filter:  adf\n')
+        f.write('Phase filter parameter: 0.6\n')
+        f.write('Resolution of output (m): %s\n' % res)
+        f.write('Range bandpass filter: no\n')
+        f.write('Azimuth bandpass filter: no\n')
+        f.write('DEM source: %s\n' % dem_source)
+        f.write('DEM resolution (m): %s\n' % (res * 2))
+        f.write('Unwrapping type: mcf\n')
+        f.write('Unwrapping threshold: none\n')
+        f.write('Speckle filtering: off\n')
+    os.chdir("..")
+
+
+def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
+                 look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None, mask=False):
     global proc_log
 
     logging.info("\n\nSentinel1A differential interferogram creation program\n")
@@ -264,7 +328,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Fetch the DEM file
     process_log("Getting a DEM file")
     if dem is None:
-        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, True)
+        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks, mask)
         logging.info("Got dem of type {}".format(dem_source))
     else:
         logging.debug("Value of DEM is {}".format(dem))
@@ -337,20 +401,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Generate metadata
     process_log("Collecting metadata and output files")
 
-    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log",
-            uselogging=True, logfile=log)
     os.chdir(wrk)
-
-    etc_dir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
-    shutil.copy(os.path.join(etc_dir, "sentinel_xml.xsl"), ".")
-
-    execute(f"xsltproc --stringparam path {reference_file} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {reference}.xml"
-            f" sentinel_xml.xsl {reference_file}/manifest.safe", uselogging=True, logfile=log)
-
-    execute(f"xsltproc --stringparam path {secondary_file} --stringparam timestamp timestring"
-            f" --stringparam file_size 1000 --stringparam server stuff --output {secondary}.xml"
-            f" sentinel_xml.xsl {secondary_file}/manifest.safe", uselogging=True, logfile=log)
 
     # Move the outputs to the PRODUCT directory
     prod_dir = "PRODUCT"
@@ -359,6 +410,9 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, inc_flag, look_flag)
 
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
+
+    execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True, logfile=log)
+    make_parameter_file(igramName, alooks, rlooks, dem_source, '.')
 
     process_log("Done!!!")
     logging.info("Done!!!")
@@ -384,6 +438,8 @@ def main():
     parser.add_argument("-c", action="store_true", help="cross pol processing - either hv or vh (default hh or vv)")
     parser.add_argument("-t", nargs=4, type=float, metavar=('t1', 't2', 't3', 'length'),
                         help="Start processing at time for length bursts")
+    parser.add_argument("-m", "--mask", action="store_true",
+                        help="Apply water body mask to DEM file prior to processing")
     args = parser.parse_args()
 
     logFile = "ifm_sentinel_log.txt"
@@ -393,7 +449,8 @@ def main():
     logging.info("Starting run")
 
     gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t)
+                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t,
+                 mask=args.mask)
 
 
 if __name__ == "__main__":

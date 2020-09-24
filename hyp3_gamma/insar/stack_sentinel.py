@@ -4,14 +4,12 @@ import argparse
 import glob
 import logging
 import os
-import re
 import shutil
 
 from hyp3lib import file_subroutines
-from lxml import etree
 
 from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
-from hyp3_insar_gamma.ifm_sentinel import gammaProcess
+from hyp3_insar_gamma.ifm_sentinel import gammaProcess, make_parameter_file
 
 
 def makeDirAndLinks(name1, name2, file1, file2, dem):
@@ -28,77 +26,6 @@ def makeDirAndLinks(name1, name2, file1, file2, dem):
     if not os.path.exists("%s.par" % dem):
         os.symlink("../%s.par" % dem, "%s.par" % dem)
     os.chdir('..')
-
-
-def makeParameterFile(mydir, alooks, rlooks, dem_source):
-    res = 20 * int(alooks)
-
-    reference_date = mydir[:15]
-    secondary_date = mydir[17:]
-
-    logging.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
-    reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
-    secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
-
-    with open("IFM/baseline.log", "r") as f:
-        for line in f:
-            if "estimated baseline perpendicular component" in line:
-                # FIXME: RE is overly complicated here. this is two simple string splits
-                t = re.split(":", line)
-                s = re.split(r'\s+', t[1])
-                baseline = float(s[1])
-
-    back = os.getcwd()
-    os.chdir(os.path.join(reference_file, "annotation"))
-
-    utctime = None
-    for myfile in os.listdir("."):
-        if "001.xml" in myfile:
-            root = etree.parse(myfile)
-            for coord in root.iter('productFirstLineUtcTime'):
-                utc = coord.text
-                logging.info("Found utc time {}".format(utc))
-                t = utc.split("T")
-                logging.info("{}".format(t))
-                s = t[1].split(":")
-                logging.info("{}".format(s))
-                utctime = ((int(s[0]) * 60 + int(s[1])) * 60) + float(s[2])
-    os.chdir(back)
-
-    heading = None
-    name = "IFM/" + reference_date[:8] + ".mli.par"
-    with open(name, "r") as f:
-        for line in f:
-            if "heading" in line:
-                t = re.split(":", line)
-                # FIXME: RE is overly complicated here. this is two simple string splits
-                s = re.split(r'\s+', t[1])
-                heading = float(s[1])
-
-    reference_file = reference_file.replace(".SAFE", "")
-    secondary_file = secondary_file.replace(".SAFE", "")
-
-    os.chdir("PRODUCT")
-    name = "%s.txt" % mydir
-    with open(name, 'w') as f:
-        f.write('Reference Granule: %s\n' % reference_file)
-        f.write('Secondary Granule: %s\n' % secondary_file)
-        f.write('Baseline: %s\n' % baseline)
-        f.write('UTCtime: %s\n' % utctime)
-        f.write('Heading: %s\n' % heading)
-        f.write('Range looks: %s\n' % rlooks)
-        f.write('Azimuth looks: %s\n' % alooks)
-        f.write('INSAR phase filter:  adf\n')
-        f.write('Phase filter parameter: 0.6\n')
-        f.write('Resolution of output (m): %s\n' % res)
-        f.write('Range bandpass filter: no\n')
-        f.write('Azimuth bandpass filter: no\n')
-        f.write('DEM source: %s\n' % dem_source)
-        f.write('DEM resolution (m): %s\n' % (res * 2))
-        f.write('Unwrapping type: mcf\n')
-        f.write('Unwrapping threshold: none\n')
-        f.write('Speckle filtering: off\n')
-    os.chdir("..")
 
 
 def procS1StackGAMMA(alooks=4, rlooks=20, csvFile=None, dem=None, use_opentopo=None,
@@ -179,7 +106,7 @@ def procS1StackGAMMA(alooks=4, rlooks=20, csvFile=None, dem=None, use_opentopo=N
                              alooks=alooks, inc_flag=inc_flag, look_flag=look_flag, los_flag=los_flag,
                              time=time)
 
-                makeParameterFile(mydir, alooks, rlooks, dem_source)
+                make_parameter_file(mydir, alooks, rlooks, dem_source)
 
                 os.chdir("..")
 
