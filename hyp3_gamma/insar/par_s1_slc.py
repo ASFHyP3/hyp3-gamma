@@ -47,6 +47,7 @@ def par_s1_slc(pol=None):
                 zip_ref.extractall(".")
                 zip_ref.close()
 
+    orbit_files = []
     for myfile in os.listdir("."):
         if ".SAFE" in myfile:
             log.info("Procesing directory {}".format(myfile))
@@ -96,12 +97,14 @@ def par_s1_slc(pol=None):
 
             log.info("Getting precision orbit for file {}".format(myfile))
             try:
-                _ = downloadSentinelOrbitFile(myfile)
+                orbit_file = downloadSentinelOrbitFile(myfile)
                 execute(f"S1_OPOD_vec {acqdate}_001.slc.par *.EOF")
                 execute(f"S1_OPOD_vec {acqdate}_002.slc.par *.EOF")
                 execute(f"S1_OPOD_vec {acqdate}_003.slc.par *.EOF")
+                orbit_files.append(orbit_file)
             except OrbitDownloadError:
                 log.warning('Unable to fetch precision state vectors... continuing')
+                orbit_files.append(None)
 
             slc = glob.glob("*_00*.slc")
             slc.sort()
@@ -117,6 +120,7 @@ def par_s1_slc(pol=None):
             width = getParameter("{}_003.slc.par".format(acqdate), "range_samples")
             execute("rasSLC {}_003.slc {} 1 0 50 10".format(acqdate, width))
             os.chdir(wrk)
+    return orbit_files
 
 
 def main():
