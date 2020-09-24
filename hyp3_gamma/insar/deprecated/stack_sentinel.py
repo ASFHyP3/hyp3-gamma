@@ -9,7 +9,7 @@ import shutil
 from hyp3lib import file_subroutines
 
 from hyp3_insar_gamma.getDemFileGamma import get_dem_file_gamma
-from hyp3_insar_gamma.ifm_sentinel import gammaProcess, make_parameter_file
+from hyp3_insar_gamma.ifm_sentinel import gamma_process, make_parameter_file
 
 
 def makeDirAndLinks(name1, name2, file1, file2, dem):
@@ -102,9 +102,9 @@ def procS1StackGAMMA(alooks=4, rlooks=20, csvFile=None, dem=None, use_opentopo=N
                     if secondary in myfile:
                         secondary_file = myfile
 
-                gammaProcess(reference_file, secondary_file, "IFM", dem=dem, dem_source=dem_source, rlooks=rlooks,
-                             alooks=alooks, inc_flag=inc_flag, look_flag=look_flag, los_flag=los_flag,
-                             time=time)
+                gamma_process(reference_file, secondary_file, "IFM", dem=dem, dem_source=dem_source, rlooks=rlooks,
+                              alooks=alooks, inc_flag=inc_flag, look_flag=look_flag, los_flag=los_flag,
+                              time=time)
 
                 make_parameter_file(mydir, alooks, rlooks, dem_source)
 
