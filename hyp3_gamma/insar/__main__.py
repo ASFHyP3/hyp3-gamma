@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 from mimetypes import guess_type
 from shutil import make_archive
 from zipfile import ZipFile
+from secrets import token_hex
 
 import boto3
 from PIL import Image
@@ -49,6 +50,37 @@ def get_granule(granule):
         z.extractall()
     os.remove(zip_file)
     return f'{granule}.SAFE'
+
+
+def least_precise_orbit_of(orbits):
+    if any([orb is None for orb in orbits]):
+        return 'O'
+    if any(['RESORB' in orb for orb in orbits]):
+        return 'R'
+    return 'P'
+
+
+def get_product_name(reference_name, secondary_name, reference_orbit=None, secondary_orbit=None, pixel_spacing=80,
+                     masked=False):
+    plat1 = reference_name[2]
+    plat2 = secondary_name[2]
+
+    datetime1 = reference_name[17:32]
+    datetime2 = secondary_name[17:32]
+
+    ref_datetime = datetime.strptime(datetime1, '%Y%m%dT%H%M%S')
+    sec_datetime = datetime.strptime(datetime2, '%Y%m%dT%H%M%S')
+    days = abs((ref_datetime - sec_datetime).days)
+
+    pol = reference_name[14:16]
+
+    orb = least_precise_orbit_of([reference_orbit, secondary_orbit])
+
+    mask = 'w' if masked else 'u'
+
+    product_id = token_hex(2).upper()
+
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_{product_id}'
 
 
 def get_content_type(filename):

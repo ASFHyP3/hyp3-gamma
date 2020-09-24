@@ -10,26 +10,27 @@ The source granules for this InSAR product are:
 Processing Date/Time: [DATE] [TIME] UTC
 
 The product folder is named using the following convention:
-S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh-pp-qqqqqq-rrd-ssxs-int-ccccc  
-x:      	Sentinel-1 Mission (A or B) of reference granule  
-y:      	Sentinel-1 Mission (A or B) of secondary granule  
-aaaaaaaa: 	Start Date of Acquisition (YYYYMMDD) of reference granule  
-bbbbbb:   	Start Time of Acquisition (HHMMSS) of reference granule  
-gggggggg: 	Start Date of Acquisition (YYYYMMDD) of secondary granule  
-hhhhhh:   	Start Time of Acquisition (HHMMSS) of secondary granule  
-pp:      	Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV: Dual VV+VH)  
-qqqqqq: 	Orbit ephemerides file type (POEORB: Precise, RESORB: Restituted, ORBPRE: Predicted)  
-rrd:      	Time separation in days (d) between reference and secondary granules  
-ssxs:     	Multilooking applied prior to generating interferogram (azimuth looks x range looks)  
-int:      	Interferogram  
-ccccc:    	Software used for Processing (GAMMA, ISCE, GMT5SAR, S1TBX)  
-
-** Note that the individual files within the folder are named with the Acquisition Date/Time for each of the two granules, but do not include any of the other tags listed above. **
+S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh_pponnn_INTzz_u_def_ssss
+x:          Sentinel-1 Mission (A or B) of reference granule
+y:          Sentinel-1 Mission (A or B) of secondary granule
+aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
+bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
+gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
+hhhhhh:     Start Time of Acquisition (HHMMSS) of secondary granule
+pp:         Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV: Dual VV+VH)
+o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
+nnn:        Time separation in days between reference and secondary granules
+zz:         Pixel Spacing in meters
+u:          Software Package Used: GAMMA (G)
+d:          Unmasked (u) or Water Masked (w)
+e:          Entire Area (e) or Clipped Area (c)
+f:          Swath Number: 1, 2, 3, or Full (F)
+ssss:       Product ID
 
 ----------------
-Interferometric SAR (InSAR) uses the phase differences from repeat passes over the same area to identify regions where the distance between the sensor and the earth's surface has changed. This allows for the detection and quantification of deformation or movement.  
+Interferometric SAR (InSAR) uses the phase differences from repeat passes over the same area to identify regions where the distance between the sensor and the earth's surface has changed. This allows for the detection and quantification of deformation or movement.
 
-Note that the imaging surface will vary depending on the sensor wavelength. Because Sentinel-1 is a C-band sensor, the waves will not penetrate very deeply into vegetation. The imagery likely represents the top of the canopy in densely vegetated areas rather than the actual terrain. In addition, vegetated areas tend to have low coherence, because plants can grow or move from one acquisition to the next. Use caution when generating interferograms for areas with extensive/dense vegetation cover.  
+Note that the imaging surface will vary depending on the sensor wavelength. Because Sentinel-1 is a C-band sensor, the waves will not penetrate very deeply into vegetation. The imagery likely represents the top of the canopy in densely vegetated areas rather than the actual terrain. In addition, vegetated areas tend to have low coherence, because plants can grow or move from one acquisition to the next. Use caution when generating interferograms for areas with extensive/dense vegetation cover.
 
 A digital elevation model is required for processing InSAR, and ASF uses the best publicly-available DEM with full coverage of the processing area. The source of the DEM used for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters). Scroll to the bottom of this file (after the description of InSAR Processing) to read more about the DEMs used by ASF.
 
@@ -159,35 +160,35 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 ## Ingest ##
 
- - par_s1_slc		 # Read in SLC information
- - S1_OPOD_vec		 # Update state vectors with precision state vectors
+ - par_s1_slc    # Read in SLC information
+ - S1_OPOD_vec   # Update state vectors with precision state vectors
 
 ## Interferogram creation/matching/refinement ##
 
 ### Initial Step
 
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - rdc_trans		 # Derive lookup table for SLC/MLI co-registration (considering terrain heights)
- - phase_sim_orb	 # Simulate unwrapped interferometric phase using DEM height and deformation rate using orbit state vectors
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - rdc_trans       # Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+ - phase_sim_orb   # Simulate unwrapped interferometric phase using DEM height and deformation rate using orbit state vectors
 
 ### Create Interferogram
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
 
 ### Iterate Offset Calculations
 
  *Repeat three times:*
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
- - offset_add		 # Add range and azimuth offset polynomial coefficients
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - offset_add      # Add range and azimuth offset polynomial coefficients
 
 ### Check for Convergence
 
@@ -195,44 +196,44 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 ### Perform Enhanced Spectral Diversity Refinement
 
- - S1_coreg_overlap	 # Determine co-registration offset based on the burst overlap
+ - S1_coreg_overlap   # Determine co-registration offset based on the burst overlap
 
 ### Perform Final Matching
 
  - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
- - create_offset	 # Create and update ISP offset and interferogram parameter files
- - offset_pwr		 # Offset estimation between SLC images using intensity cross-correlation
- - offset_fit		 # Range and azimuth offset polynomial estimation
- - SLC_diff_intf	 # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
 
 ## Unwrapping and Geocoding ##
 
 ### Unwrapping
 
- - adf			 # Adaptive spectral filtering for complex interferograms
- - rasmph_pwr		 # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
- - rascc		 # Generate 8-bit raster graphics image of correlation coefficient
- - rascc_mask		 # Generate phase unwrapping validity mask using correlation and intensity
- - mcf			 # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
- - rasrmg		 # Generate 8-bit raster graphics image from unwrapped phase and intensity data
- - dispmap		 # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
- - dispmap		 # Conversion of unwrapped differential phase to displacement map (m) - Vertical
+ - adf          # Adaptive spectral filtering for complex interferograms
+ - rasmph_pwr   # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
+ - rascc        # Generate 8-bit raster graphics image of correlation coefficient
+ - rascc_mask   # Generate phase unwrapping validity mask using correlation and intensity
+ - mcf          # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
+ - rasrmg       # Generate 8-bit raster graphics image from unwrapped phase and intensity data
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Vertical
 
 ### Post-Processing
 
- - geocode_back		 # Geocoding of image data using lookup table values
- - data2geotiff		 # Convert geocoded data with DEM parameter file to GeoTIFF format
+ - geocode_back   # Geocoding of image data using lookup table values
+ - data2geotiff   # Convert geocoded data with DEM parameter file to GeoTIFF format
 
 *************
 # DEMs #
 
 ASF uses publicly-available Digital Elevation Models for processing SAR data. The DEM used will vary by granule location; the best available DEM with full coverage of the granule extent will be used for processing any given granule. The source DEMs include the National Elevation Dataset (NED), the Shuttle Radar Topography Mission (SRTM), the Copernicus Land Monitoring Service EU-DEM (EUDEM), the Greenland Ice sheet Mapping Project DEM (GIMP), and the Reference Elevation Model of Antarctica DSM (REMA).
 
-The NED provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.  
+The NED provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.
 
-The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.  
+The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
 
-The EUDEM combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.  
+The EUDEM combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.
 
 The GIMP DEM was constructed by combining ASTER and SPOT 5 DEMs over the ice sheet periphery and margin with AVHRR photoclinometry for the interior and far north, and calibrating the data to approximate mean ICESat/GLAS elevations from 2003 to 2009. For more information and to access the full GIMP dataset, refer to https://nsidc.org/data/nsidc-0645.
 
@@ -250,9 +251,9 @@ Additional information about Sentinel-1 data, imagery, tools and applications is
 https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1
 
 *************
-For assistance, contact the Alaska Satellite Facility:  
-uso@asf.alaska.edu  
-907-474-5041  
+For assistance, contact the Alaska Satellite Facility:
+uso@asf.alaska.edu
+907-474-5041
 
 -------------
 Revised 2020-03-11
