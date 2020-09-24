@@ -76,4 +76,3 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType):
                 line = line.replace("[HYP3_VER]", "{}".format(__version__))
                 line = line.replace("[GAMMA_VER]", "{}".format(gamma_ver))
                 g.write("{}".format(line))
-
