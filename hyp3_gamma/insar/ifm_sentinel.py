@@ -246,7 +246,6 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Unwrapping type: mcf\n')
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
-    os.chdir("..")
 
 
 def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlooks=10, alooks=2,
@@ -273,8 +272,6 @@ def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlo
     #  Ingest the data files into gamma format
     log.info("Starting par_s1_slc.py")
     orbit_files = par_s1_slc(pol)
-
-    product_name = get_product_name(reference_file, secondary_file, orbit_files, int(alooks)*20)
 
     #  Fetch the DEM file
     log.info("Getting a DEM file")
@@ -346,11 +343,14 @@ def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlo
 
     os.chdir(wrk)
 
-    # Move the outputs to the PRODUCT directory
+    # Move the outputs to the product directory
+    pixel_spacing = int(alooks) * 20
+    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, los_flag, look_flag)
 
-    create_readme_file(reference_file, secondary_file, product_name, int(alooks) * 20, dem_source, pol)
+    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing,
+                       dem_source)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
