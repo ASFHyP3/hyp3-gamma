@@ -119,7 +119,6 @@ def main():
     gamma_process(
         reference_file=reference_granule,
         secondary_file=secondary_granule,
-        outdir='.',
         alooks=alooks,
         rlooks=rlooks,
         look_flag=args.include_look_vectors,

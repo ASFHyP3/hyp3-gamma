@@ -114,41 +114,41 @@ def getFileType(myfile):
     return file_type, pol
 
 
-def move_output_files(outdir, output, reference, prod_dir, long_output, los_flag, look_flag):
-    inName = "{}.mli.geo.tif".format(os.path.join(outdir, reference))
+def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag):
+    inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    inName = "{}.cc.geo.tif".format(os.path.join(outdir, output))
+    inName = "{}.cc.geo.tif".format(output)
     outName = "{}_corr.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
 
-    inName = "{}.vert.disp.geo.org.tif".format(os.path.join(outdir, output))
+    inName = "{}.vert.disp.geo.org.tif".format(output)
     outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    inName = "{}.adf.unw.geo.tif".format(os.path.join(outdir, output))
+    inName = "{}.adf.unw.geo.tif".format(output)
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
     if los_flag:
-        inName = "{}.los.disp.geo.org.tif".format(os.path.join(outdir, output))
+        inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if look_flag:
-        inName = "{}.lv_theta.tif".format(os.path.join(outdir, output))
+        inName = "{}.lv_theta.tif".format(output)
         outName = "{}_lv_theta.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
-        inName = "{}.lv_phi.tif".format(os.path.join(outdir, output))
+        inName = "{}.lv_phi.tif".format(output)
         outName = "{}_lv_phi.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    makeAsfBrowse("{}.diff0.man.adf.bmp.geo.tif".format(os.path.join(outdir, output)),
+    makeAsfBrowse("{}.diff0.man.adf.bmp.geo.tif".format(output),
                   "{}_color_phase".format(os.path.join(prod_dir, long_output)))
 
-    makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(os.path.join(outdir, output)),
+    makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(output),
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
@@ -223,10 +223,9 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     os.chdir("..")
 
 
-def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
+def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlooks=10, alooks=2,
                   look_flag=False, los_flag=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
-    log.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
     wrk = os.getcwd()
     reference_date = reference_file[17:32]
@@ -260,9 +259,6 @@ def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=N
             dem_source = "UNKNOWN"
         log.info("Found dem type of {}".format(dem_source))
 
-    if not os.path.isdir(outdir):
-        os.mkdir(outdir)
-
     # Figure out which bursts overlap between the two swaths
     burst_tab1, burst_tab2 = getBurstOverlaps(reference_file, secondary_file)
 
@@ -275,14 +271,12 @@ def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=N
     reference = reference_date_short
     secondary = secondary_date_short
 
-    path = os.path.join(wrk, outdir)
     os.chdir(reference)
-    SLC_copy_S1_fullSW(path, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
+    SLC_copy_S1_fullSW(wrk, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
     os.chdir("..")
     os.chdir(secondary)
-    SLC_copy_S1_fullSW(path, secondary, "SLC_TAB", burst_tab2, mode=2, raml=rlooks, azml=alooks)
+    SLC_copy_S1_fullSW(wrk, secondary, "SLC_TAB", burst_tab2, mode=2, raml=rlooks, azml=alooks)
     os.chdir("..")
-    os.chdir(outdir)
 
     # Interferogram creation, matching, refinement
     log.info("Starting interf_pwr_s1_lt_tops_proc.py 0")
@@ -328,7 +322,7 @@ def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=N
     prod_dir = "PRODUCT"
     if not os.path.exists(prod_dir):
         os.mkdir("PRODUCT")
-    move_output_files(outdir, output, reference, prod_dir, igramName, los_flag, look_flag)
+    move_output_files(output, reference, prod_dir, igramName, los_flag, look_flag)
 
     create_readme_file(reference_file, secondary_file, igramName, int(alooks) * 20, dem_source, pol)
 
@@ -346,7 +340,6 @@ def main():
     )
     parser.add_argument("reference", help="Reference input file")
     parser.add_argument("secondary", help="Secondary input file")
-    parser.add_argument("output", help="Output igram directory")
     parser.add_argument("-d", "--dem",
                         help="Input DEM file to use, otherwise calculate a bounding box (e.g. big for big.dem/big.par)")
     parser.add_argument("-r", "--rlooks", default=20, help="Number of range looks (def=20)")
@@ -358,7 +351,7 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    gamma_process(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
+    gamma_process(args.reference, args.secondary, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
                   look_flag=args.l, los_flag=args.s)
 
 
