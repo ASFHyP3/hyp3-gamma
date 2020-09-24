@@ -40,7 +40,6 @@ def test_get_product_name():
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1BA_20200918T073646_20200906T073646_DHR012_INT40_G_ueF_[0-9A-F]{4}$', name)
 
-
     payload = {
         'reference_name': 'S1A_IW_SLC__1SSV_20150101T230038_20150101T230114_003984_004CC1_0481',
         'secondary_name': 'S1B_IW_SLC__1SDV_20200924T005722_20200924T005750_023510_02CA91_4873',
