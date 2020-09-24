@@ -8,7 +8,7 @@ import shutil
 
 from hyp3lib import file_subroutines
 
-from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
+from hyp3_insar_gamma.getDemFileGamma import get_dem_file_gamma
 from hyp3_insar_gamma.ifm_sentinel import gammaProcess, make_parameter_file
 
 
@@ -56,7 +56,7 @@ def procS1StackGAMMA(alooks=4, rlooks=20, csvFile=None, dem=None, use_opentopo=N
 
     # If no DEM is given, determine one from first file
     if dem is None:
-        dem, dem_source = getDemFileGamma(filenames[0], use_opentopo, alooks, mask)
+        dem, dem_source = get_dem_file_gamma(filenames[0], use_opentopo, alooks, mask)
     else:
         dem_source = "UNKNOWN"
 
