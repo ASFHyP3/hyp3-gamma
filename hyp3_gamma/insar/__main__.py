@@ -42,6 +42,7 @@ def get_download_url(granule):
 def get_granule(granule):
     download_url = get_download_url(granule)
     zip_file = download_file(download_url)
+    log.info(f'Unzipping {zip_file}')
     with ZipFile(zip_file) as z:
         z.extractall()
     os.remove(zip_file)
