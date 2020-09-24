@@ -15,7 +15,7 @@ from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from lxml import etree
 
 from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
-from hyp3_insar_gamma.getDemFileGamma import getDemFileGamma
+from hyp3_insar_gamma.getDemFileGamma import get_dem_file_gamma
 from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_insar_gamma.par_s1_slc import par_s1_slc
 from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
@@ -284,7 +284,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source, ifm_dir='IFM'):
 
 
 def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
-                 look_flag=False, los_flag=False, ot_flag=False, cp_flag=False, time=None):
+                 look_flag=False, los_flag=False, cp_flag=False, time=None):
     global proc_log
 
     logging.info("\n\nSentinel1A differential interferogram creation program\n")
@@ -328,7 +328,7 @@ def gammaProcess(reference_file, secondary_file, outdir, dem=None, dem_source=No
     #  Fetch the DEM file
     process_log("Getting a DEM file")
     if dem is None:
-        dem, dem_source = getDemFileGamma(reference_file, ot_flag, alooks)
+        dem, dem_source = get_dem_file_gamma(reference_file, alooks)
         logging.info("Got dem of type {}".format(dem_source))
     else:
         logging.debug("Value of DEM is {}".format(dem))
@@ -434,7 +434,6 @@ def main():
     parser.add_argument("-i", action="store_true", help="Create incidence angle file")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
-    parser.add_argument("-o", action="store_true", help="Use opentopo to get the DEM file instead of get_dem")
     parser.add_argument("-c", action="store_true", help="cross pol processing - either hv or vh (default hh or vv)")
     parser.add_argument("-t", nargs=4, type=float, metavar=('t1', 't2', 't3', 'length'),
                         help="Start processing at time for length bursts")
@@ -447,7 +446,7 @@ def main():
     logging.info("Starting run")
 
     gammaProcess(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, ot_flag=args.o, cp_flag=args.c, time=args.t)
+                 inc_flag=args.i, look_flag=args.l, los_flag=args.s, cp_flag=args.c, time=args.t)
 
 
 if __name__ == "__main__":
