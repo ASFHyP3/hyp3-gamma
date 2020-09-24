@@ -238,7 +238,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     os.chdir(back)
 
     heading = None
-    name =f'{reference_date[:8]}.mli.par'
+    name = f'{reference_date[:8]}.mli.par'
     with open(name, "r") as f:
         for line in f:
             if "heading" in line:
