@@ -223,8 +223,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     os.chdir("..")
 
 
-def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlooks=10, alooks=2,
-                  look_flag=False, los_flag=False):
+def gamma_process(reference_file, secondary_file, rlooks=10, alooks=2, look_flag=False, los_flag=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -250,14 +249,8 @@ def gamma_process(reference_file, secondary_file, dem=None, dem_source=None, rlo
 
     #  Fetch the DEM file
     log.info("Getting a DEM file")
-    if dem is None:
-        dem, dem_source = get_dem_file_gamma(reference_file, alooks)
-        log.info("Got dem of type {}".format(dem_source))
-    else:
-        log.debug("Value of DEM is {}".format(dem))
-        if dem_source is None:
-            dem_source = "UNKNOWN"
-        log.info("Found dem type of {}".format(dem_source))
+    dem, dem_source = get_dem_file_gamma(reference_file, alooks)
+    log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
     burst_tab1, burst_tab2 = getBurstOverlaps(reference_file, secondary_file)
@@ -340,8 +333,6 @@ def main():
     )
     parser.add_argument("reference", help="Reference input file")
     parser.add_argument("secondary", help="Secondary input file")
-    parser.add_argument("-d", "--dem",
-                        help="Input DEM file to use, otherwise calculate a bounding box (e.g. big for big.dem/big.par)")
     parser.add_argument("-r", "--rlooks", default=20, help="Number of range looks (def=20)")
     parser.add_argument("-a", "--alooks", default=4, help="Number of azimuth looks (def=4)")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
@@ -351,8 +342,8 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    gamma_process(args.reference, args.secondary, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                  look_flag=args.l, los_flag=args.s)
+    gamma_process(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
+                  los_flag=args.s)
 
 
 if __name__ == "__main__":
