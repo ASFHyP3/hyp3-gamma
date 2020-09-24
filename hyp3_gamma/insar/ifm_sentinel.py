@@ -273,9 +273,8 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
     os.chdir("..")
 
 
-def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2, inc_flag=False,
-                  look_flag=False, los_flag=False, cp_flag=False, time=None):
-
+def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
+                  inc_flag=False, look_flag=False, los_flag=False, cp_flag=False, time=None):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
     log.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
