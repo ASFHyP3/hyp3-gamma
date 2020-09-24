@@ -41,51 +41,6 @@ def getBursts(mydir, name):
     return time, total_bursts
 
 
-def getSelectBursts(reference_dir, secondary_dir, time):
-    log.info("Finding selected bursts at times {}, {}, {} for length {}".format(time[0], time[1], time[2], time[3]))
-    burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
-
-    burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
-    size = float(time[3])
-    xml_cnt = 0
-    start1 = 0
-    start2 = 0
-    with open(burst_tab1, "w") as f1:
-        with open(burst_tab2, "w") as f2:
-            for name in ['001.xml', '002.xml', '003.xml']:
-                time1, total_bursts1 = getBursts(reference_dir, name)
-                time2, total_bursts2 = getBursts(secondary_dir, name)
-                cnt = 1
-                start1 = 0
-                found1 = 0
-                for x in time1:
-                    if abs(float(x) - float(time[xml_cnt])) < 0.20:
-                        log.info("Found selected burst at {}".format(cnt))
-                        found1 = 1
-                        start1 = cnt
-                    cnt += 1
-                cnt = 1
-                start2 = 0
-                found2 = 0
-                for x in time2:
-                    if abs(float(x) - float(time[xml_cnt])) < 0.20:
-                        log.info("Found selected burst at {}".format(cnt))
-                        found2 = 1
-                        start2 = cnt
-                    cnt += 1
-
-                if not found1 or not found2:
-                    log.error("ERROR: Unable to find bursts at selected time")
-                    sys.exit(1)
-
-                f1.write("%s %s\n" % (start1, start1 + size - 1))
-                f2.write("%s %s\n" % (start2, start2 + size - 1))
-
-                xml_cnt += 1
-
-    return burst_tab1, burst_tab2
-
-
 def getBurstOverlaps(reference_dir, secondary_dir):
     log.info("Calculating burst overlaps; in directory {}".format(os.getcwd()))
     burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
@@ -269,7 +224,7 @@ def make_parameter_file(mydir, alooks, rlooks, dem_source):
 
 
 def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=None, rlooks=10, alooks=2,
-                  look_flag=False, los_flag=False, time=None):
+                  look_flag=False, los_flag=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
     log.info("Creating output interferogram in directory {}\n\n".format(outdir))
 
@@ -309,10 +264,7 @@ def gamma_process(reference_file, secondary_file, outdir, dem=None, dem_source=N
         os.mkdir(outdir)
 
     # Figure out which bursts overlap between the two swaths
-    if time is None:
-        (burst_tab1, burst_tab2) = getBurstOverlaps(reference_file, secondary_file)
-    else:
-        (burst_tab1, burst_tab2) = getSelectBursts(reference_file, secondary_file, time)
+    burst_tab1, burst_tab2 = getBurstOverlaps(reference_file, secondary_file)
 
     log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
     shutil.move(burst_tab1, reference_date_short)
@@ -401,15 +353,13 @@ def main():
     parser.add_argument("-a", "--alooks", default=4, help="Number of azimuth looks (def=4)")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
-    parser.add_argument("-t", nargs=4, type=float, metavar=('t1', 't2', 't3', 'length'),
-                        help="Start processing at time for length bursts")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     gamma_process(args.reference, args.secondary, args.output, dem=args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                  look_flag=args.l, los_flag=args.s, time=args.t)
+                  look_flag=args.l, los_flag=args.s)
 
 
 if __name__ == "__main__":
