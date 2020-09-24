@@ -135,11 +135,12 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     sec_datetime = datetime.strptime(datetime2, '%Y%m%dT%H%M%S')
     days = abs((ref_datetime - sec_datetime).days)
 
-    pol = reference_name[14:16]
+    pol1 = reference_name[15:16]
+    pol2 = secondary_name[15:16]
     orb = least_precise_orbit_of(orbit_files)
     product_id = token_hex(2).upper()
 
-    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
 def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag):

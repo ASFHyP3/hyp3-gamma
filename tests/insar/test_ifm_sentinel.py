@@ -26,7 +26,7 @@ def test_get_product_name():
         'pixel_spacing': 80,
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1AA_20160527T014319_20160714T014322_SVP049_INT80_G_ueF_[0-9A-F]{4}$', name)
+    assert match(r'S1AA_20160527T014319_20160714T014322_VVP049_INT80_G_ueF_[0-9A-F]{4}$', name)
 
     payload = {
         'reference_name': 'S1B_IW_SLC__1SDH_20200918T073646_20200918T073716_023426_02C7FC_6374',
@@ -38,7 +38,7 @@ def test_get_product_name():
         'pixel_spacing': 40
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1BA_20200918T073646_20200906T073646_DHR012_INT40_G_ueF_[0-9A-F]{4}$', name)
+    assert match(r'S1BA_20200918T073646_20200906T073646_HHR012_INT40_G_ueF_[0-9A-F]{4}$', name)
 
     payload = {
         'reference_name': 'S1A_IW_SLC__1SSV_20150101T230038_20150101T230114_003984_004CC1_0481',
@@ -50,4 +50,4 @@ def test_get_product_name():
         'pixel_spacing': 40
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1AB_20150101T230038_20200924T005722_SVO2093_INT40_G_ueF_[0-9A-F]{4}$', name)
+    assert match(r'S1AB_20150101T230038_20200924T005722_VVO2093_INT40_G_ueF_[0-9A-F]{4}$', name)

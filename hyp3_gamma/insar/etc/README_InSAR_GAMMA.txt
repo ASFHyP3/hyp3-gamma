@@ -17,7 +17,7 @@ aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
 bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
 gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
 hhhhhh:     Start Time of Acquisition (HHMMSS) of secondary granule
-pp:         Polarization Type (SH: Single HH, SV: Single VV, DH: Dual HH+HV, DV: Dual VV+VH)
+pp:         Polarization Type: Vertical (VV) or Horizontal (HH)
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 nnn:        Time separation in days between reference and secondary granules
 zz:         Pixel Spacing in meters
