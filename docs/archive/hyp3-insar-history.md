@@ -12,6 +12,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * HyP3v1 water mask (beta) option will again mask out water based on 
   [GSHHG f](http://www.soest.hawaii.edu/wessel/gshhg/) shapes, buffered 3000m 
   (seaward) from the coastline
+* Upgraded to hyp3-lib v1.6.0 from v1.5.0
 
 ## [2.1.1](https://github.com/ASFHyP3/hyp3-insar-gamma/compare/v2.1.0...v2.1.1)
 
