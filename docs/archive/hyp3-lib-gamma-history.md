@@ -6,7 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...1.5.0)
+## [1.6.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.5.0...v1.6.0)
+
+### Added
+* Methodology [documentation of our RGB Decomposition](https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md) images created from dual-pol RTC products
+* Helper functions for HyP3v2 entrypoints
+  * `hyp3lib.aws` for working with AWS
+  * `hyp3lib.fetch.write_credentials_to_netrc_file` to write a set of credentials to a `~/.netrc` file
+  * `hyp3lib.image` for working with images
+  * `hyp3lib.scene` for working with Sentinel-1 scenes
+  * `hyp3lib.util` for small utility functions
+* `hyp3lib.system.isce_version` to attempt to determine the ISCE version installed
+
+
+### Fixed
+* `hyp3lib.apply_wb_mask` now pulls the base masks from AWS instead of a local directory for portability
+
+### Changed
+* Water mask "creation" functions have been merged to `hyp3lib.apply_wb_mask.get_water_mask`. These are
+  internal helper functions and not expected to impact users
+
+## [1.5.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...v1.5.0)
 
 ### Added
 * Documented contribution guidelines in `CONTRIBUTING.md`
