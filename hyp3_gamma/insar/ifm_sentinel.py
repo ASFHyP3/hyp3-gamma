@@ -10,6 +10,7 @@ import sys
 from datetime import datetime
 from secrets import token_hex
 
+from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
@@ -103,7 +104,7 @@ def get_copol(granule_name):
         return 'vv'
     if polarization in ['SH', 'DH']:
         return 'hh'
-    raise ValueError(f'Cannot determine co-polarization of granule {granule_name}')
+    raise GranuleError(f'Cannot determine co-polarization of granule {granule_name}')
 
 
 def least_precise_orbit_of(orbits):
@@ -250,11 +251,9 @@ def gamma_process(reference_file, secondary_file, rlooks=20, alooks=4, look_flag
     igramName = "{}_{}".format(reference_date, secondary_date)
 
     if "IW_SLC__" not in reference_file:
-        log.error("ERROR: Reference file {} is not of type IW_SLC!".format(reference_file))
-        sys.exit(1)
+        raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
     if "IW_SLC__" not in secondary_file:
-        log.error("ERROR: Secondary file {} is not of type IW_SLC!".format(secondary_file))
-        sys.exit(1)
+        raise GranuleError(f'Secondary file {secondary_file} is not of type IW_SLC!')
 
     pol = get_copol(reference_file)
     log.info("Processing the {} polarization".format(pol))
