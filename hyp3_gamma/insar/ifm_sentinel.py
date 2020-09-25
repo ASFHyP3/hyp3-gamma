@@ -25,7 +25,7 @@ from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
 log = logging.getLogger(__name__)
 
 
-def getBursts(mydir, name):
+def get_bursts(mydir, name):
     back = os.getcwd()
     os.chdir(os.path.join(mydir, "annotation"))
 
@@ -44,7 +44,7 @@ def getBursts(mydir, name):
     return time, total_bursts
 
 
-def getBurstOverlaps(reference_dir, secondary_dir):
+def get_burst_overlaps(reference_dir, secondary_dir):
     log.info("Calculating burst overlaps; in directory {}".format(os.getcwd()))
     burst_tab1 = "%s_burst_tab" % reference_dir[17:25]
     burst_tab2 = "%s_burst_tab" % secondary_dir[17:25]
@@ -52,9 +52,9 @@ def getBurstOverlaps(reference_dir, secondary_dir):
     with open(burst_tab1, "w") as f1:
         with open(burst_tab2, "w") as f2:
             for name in ['001.xml', '002.xml', '003.xml']:
-                time1, total_bursts1 = getBursts(reference_dir, name)
+                time1, total_bursts1 = get_bursts(reference_dir, name)
                 log.info("total_bursts1, time1 {} {}".format(total_bursts1, time1))
-                time2, total_bursts2 = getBursts(secondary_dir, name)
+                time2, total_bursts2 = get_bursts(secondary_dir, name)
                 log.info("total_bursts2, time2 {} {}".format(total_bursts2, time2))
                 cnt = 1
                 start1 = 0
@@ -97,24 +97,13 @@ def getBurstOverlaps(reference_dir, secondary_dir):
     return burst_tab1, burst_tab2
 
 
-def getFileType(myfile):
-    if "SDV" in myfile:
-        file_type = "SDV"
-        pol = "vv"
-    elif "SDH" in myfile:
-        file_type = "SDH"
-        pol = "hh"
-    elif "SSV" in myfile:
-        file_type = "SSV"
-        pol = "vv"
-    elif "SSH" in myfile:
-        file_type = "SSH"
-        pol = "hh"
-    else:
-        file_type = None
-        pol = None
-
-    return file_type, pol
+def get_copol(granule_name):
+    polarization = granule_name[14:16]
+    if polarization in ['SV', 'DV']:
+        return 'vv'
+    if polarization in ['SH', 'DH']:
+        return 'hh'
+    raise ValueError(f'Cannot determine co-polarization of granule {granule_name}')
 
 
 def least_precise_orbit_of(orbits):
@@ -267,7 +256,7 @@ def gamma_process(reference_file, secondary_file, rlooks=20, alooks=4, look_flag
         log.error("ERROR: Secondary file {} is not of type IW_SLC!".format(secondary_file))
         sys.exit(1)
 
-    file_type, pol = getFileType(reference_file)
+    pol = get_copol(reference_file)
     log.info("Processing the {} polarization".format(pol))
 
     #  Ingest the data files into gamma format
@@ -284,7 +273,7 @@ def gamma_process(reference_file, secondary_file, rlooks=20, alooks=4, look_flag
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
-    burst_tab1, burst_tab2 = getBurstOverlaps(reference_file, secondary_file)
+    burst_tab1, burst_tab2 = get_burst_overlaps(reference_file, secondary_file)
 
     log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
     shutil.move(burst_tab1, reference_date_short)
