@@ -23,7 +23,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `hyp3lib.apply_wb_mask` now pulls the base masks from AWS instead of a local directory for portability
 
 ### Changed
-* Water mask "creation" functions has been merged to `hyp3lib.apply_wb_mask.get_water_mask`. These are
+* Water mask "creation" functions have been merged to `hyp3lib.apply_wb_mask.get_water_mask`. These are
   internal helper functions and not expected to impact users
 
 ## [1.5.0](https://github.com/ASFHyP3/hyp3-lib/compare/v1.4.1...v1.5.0)
