@@ -12,7 +12,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Methodology [documentation of our RGB Decomposition](https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md) images created from dual-pol RTC products
 * Helper functions for HyP3v2 entrypoints
   * `hyp3lib.aws` for working with AWS
-  * `hyp3lib.fetc.write_credentials_to_netrc_file` to write a set of credentials to a `~/.netrc` file
+  * `hyp3lib.fetch.write_credentials_to_netrc_file` to write a set of credentials to a `~/.netrc` file
   * `hyp3lib.image` for working with images
   * `hyp3lib.scene` for working with Sentinel-1 scenes
   * `hyp3lib.util` for small utility functions
