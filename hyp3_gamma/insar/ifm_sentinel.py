@@ -275,7 +275,7 @@ def gamma_process(reference_file, secondary_file, rlooks=20, alooks=4, look_flag
     orbit_files = []
     for granule in (reference_file, secondary_file):
         orbit_file, _ = downloadSentinelOrbitFile(granule)
-        par_s1_slc_single(granule, pol, orbit_file)
+        par_s1_slc_single(granule, pol, os.path.abspath(orbit_file))
         orbit_files.append(orbit_file)
 
     #  Fetch the DEM file
