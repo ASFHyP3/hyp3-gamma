@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2](https://github.com/ASFHyP3/hyp3-insar-gamma/compare/v2.1.1...v2.1.2)
+
+### Fixed
+* HyP3v1 water mask (beta) option will again mask out water based on 
+  [GSHHG f](http://www.soest.hawaii.edu/wessel/gshhg/) shapes, buffered 3000m 
+  (seaward) from the coastline
+
 ## [2.1.1](https://github.com/ASFHyP3/hyp3-insar-gamma/compare/v2.1.0...v2.1.1)
 
 ### Changed
