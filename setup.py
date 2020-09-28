@@ -32,13 +32,11 @@ setup(
     python_requires='~=3.6',
 
     install_requires=[
-        'boto3',
-        'hyp3lib>=1.5.0,<2',
+        'hyp3lib>=1.6.0,<2',
         'hyp3proclib>=1.0.1,<2',
         'hyp3_metadata>=0.1.2,<1',
         'importlib_metadata',
         'numpy',
-        'pillow',
     ],
 
     extras_require={
