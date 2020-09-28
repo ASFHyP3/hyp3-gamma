@@ -7,13 +7,15 @@ import os
 import re
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
-from mimetypes import guess_type
+from pathlib import Path
 from shutil import make_archive
 
-import boto3
-from PIL import Image
 from hyp3lib import GranuleError
-from hyp3lib.fetch import download_file
+from hyp3lib.aws import upload_file_to_s3
+from hyp3lib.fetch import download_file, write_credentials_to_netrc_file
+from hyp3lib.image import create_thumbnail
+from hyp3lib.scene import get_download_url
+from hyp3lib.util import string_is_true
 from hyp3proclib import (
     extra_arg_is,
     failure,
@@ -29,11 +31,6 @@ from pkg_resources import load_entry_point
 
 import hyp3_rtc_gamma
 from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
-
-# v2 constants
-SENTINEL_DISTRIBUTION_URL = 'https://d2jcx4uuy4zbnt.cloudfront.net'
-EARTHDATA_LOGIN_DOMAIN = 'urs.earthdata.nasa.gov'
-S3_CLIENT = boto3.client('s3')
 
 
 def entry():
@@ -51,76 +48,6 @@ def entry():
 
 
 # v2 functions
-def write_netrc_file(username, password):
-    netrc_file = os.path.join(os.environ['HOME'], '.netrc')
-    if os.path.isfile(netrc_file):
-        logging.warning(f'Using existing .netrc file: {netrc_file}')
-    else:
-        with open(netrc_file, 'w') as f:
-            f.write(f'machine {EARTHDATA_LOGIN_DOMAIN} login {username} password {password}')
-
-
-def get_content_type(filename):
-    content_type = guess_type(filename)[0]
-    if not content_type:
-        content_type = 'application/octet-stream'
-    return content_type
-
-
-def upload_file_to_s3(path_to_file, bucket, prefix=''):
-    key = os.path.join(prefix, os.path.basename(path_to_file))
-    extra_args = {'ContentType': get_content_type(key)}
-
-    logging.info(f'Uploading s3://{bucket}/{key}')
-    S3_CLIENT.upload_file(path_to_file, bucket, key, extra_args)
-
-    file_type = get_file_type(path_to_file)
-    tag_set = {
-        'TagSet': [
-            {
-                'Key': 'file_type',
-                'Value': file_type
-            }
-        ]
-    }
-    S3_CLIENT.put_object_tagging(Bucket=bucket, Key=key, Tagging=tag_set)
-
-
-def get_download_url(granule):
-    mission = granule[0] + granule[2]
-    product_type = granule[7:10]
-    if product_type == 'GRD':
-        product_type += '_' + granule[10] + granule[14]
-    url = f'{SENTINEL_DISTRIBUTION_URL}/{product_type}/{mission}/{granule}.zip'
-    return url
-
-
-def create_thumbnail(input_image, size=(100, 100)):
-    filename, ext = os.path.splitext(input_image)
-    thumbnail_name = f'{filename}_thumb{ext}'
-
-    output_image = Image.open(input_image)
-    output_image.thumbnail(size)
-    output_image.save(thumbnail_name)
-    return thumbnail_name
-
-
-def get_file_type(file_name):
-    if file_name.endswith('_rgb_thumb.png'):
-        return 'rgb-thumbnail'
-    if file_name.endswith('_rgb.png'):
-        return 'rgb-browse'
-    if file_name.endswith('_thumb.png'):
-        return 'amp-thumbnail'
-    if file_name.endswith('.png'):
-        return 'amp-browse'
-    return 'product'
-
-
-def string_is_true(s: str) -> bool:
-    return s.lower() == 'true'
-
-
 def main_v2():
     parser = ArgumentParser()
     parser.add_argument('--username', required=True)
@@ -140,7 +67,7 @@ def main_v2():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_netrc_file(args.username, args.password)
+    write_credentials_to_netrc_file(args.username, args.password)
 
     granule_url = get_download_url(args.granule)
     granule_zip_file = download_file(granule_url, chunk_size=5242880)
@@ -161,8 +88,8 @@ def main_v2():
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
-        upload_file_to_s3(output_zip, args.bucket, args.bucket_prefix)
-        browse_images = glob.glob(f'{product_name}/*.png')
+        upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
+        browse_images = Path(product_name).glob('*.png')
         for browse in browse_images:
             thumbnail = create_thumbnail(browse)
             upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
