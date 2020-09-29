@@ -10,6 +10,8 @@ import sys
 import numpy as np
 from hyp3lib.getParameter import getParameter
 
+from hyp3_gamma import __version__
+
 
 class CoregistrationError(Exception):
     """Error to raise when coregistration fails"""
@@ -170,6 +172,7 @@ def main():
         prog='check_coreg.py',
         description=__doc__,
     )
+    parser.add_argument('--version', action='version', version=f'hyp3_gamma {__version__}')
     parser.add_argument('input', help='Name of input SAR file')
     parser.add_argument('post', type=float, help='Posting of the SAR image')
     parser.add_argument('-o', '--max_offset', type=float, default=50,

@@ -649,6 +649,7 @@ def main():
         prog='rtc_sentinel.py',
         description=__doc__,
     )
+    parser.add_argument('--version', action='version', version=f'hyp3_gamma {hyp3_gamma.__version__}')
     parser.add_argument('input', help='Name of input file, either .zip or .SAFE')
     parser.add_argument("-o", "--outputResolution", type=float, default=30.0, help="Desired output resolution")
 

@@ -27,5 +27,4 @@ dependencies:
     # For running
     - --trusted-host hyp3-pypi.s3-website-us-east-1.amazonaws.com
       --extra-index-url http://hyp3-pypi.s3-website-us-east-1.amazonaws.com
-    - hyp3proclib>=1.0.1,<2
     - hyp3_metadata>=0.1.2,<1

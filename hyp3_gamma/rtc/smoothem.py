@@ -8,6 +8,8 @@ from hyp3lib import saa_func_lib as saa
 from hyp3lib.ps2dem import ps2dem
 from osgeo import gdal
 
+from hyp3_gamma import __version__
+
 
 def smooth_dem_tiles(demdir, build=True):
     os.chdir(demdir)
@@ -69,6 +71,7 @@ def smooth_dem_tiles(demdir, build=True):
 def main():
     parser = argparse.ArgumentParser(prog="smooth_dem_tiles.py",
                                      description="Smooth REMA DEM tiles using fill_gaps")
+    parser.add_argument('--version', action='version', version=f'hyp3_gamma {__version__}')
     parser.add_argument("dir", help="Directory containing REMA DEMs to smooth")
     parser.add_argument("-n", help="Don't create full_area.dem output", action="store_false")
     args = parser.parse_args()

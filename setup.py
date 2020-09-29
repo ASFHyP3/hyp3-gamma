@@ -31,7 +31,6 @@ setup(
 
     install_requires=[
         'hyp3lib>=1.6.0,<2',
-        'hyp3proclib>=1.0.1,<2',
         'hyp3_metadata>=0.1.2,<1',
         'importlib_metadata',
         'numpy',
@@ -48,9 +47,8 @@ setup(
     packages=find_packages(),
 
     entry_points={'console_scripts': [
-            'rtc_gamma = hyp3_gamma.rtc.__main__:entry',
-            'hyp3_rtc_gamma = hyp3_gamma.rtc.__main__:main',
-            'hyp3_rtc_gamma_v2 = hyp3_gamma.rtc.__main__:main_v2',
+            'hyp3_gamma = hyp3_gamma.__main__:entry',
+            'rtc =  hyp3_gamma.__main__:rtc',
             'check_coreg.py = hyp3_gamma.rtc.check_coreg:main',
             'rtc_sentinel.py = hyp3_gamma.rtc.rtc_sentinel:main',
             'smooth_dem_tiles.py = hyp3_gamma.rtc.smoothem:main',
