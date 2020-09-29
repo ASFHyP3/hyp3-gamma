@@ -2,13 +2,13 @@ FROM ubuntu:18.04
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
-LABEL org.opencontainers.image.title="HyP3 RTC GAMMA"
-LABEL org.opencontainers.image.description="HyP3 plugin for radiometric terrain correction using GAMMA"
+LABEL org.opencontainers.image.title="HyP3 GAMMA"
+LABEL org.opencontainers.image.description="HyP3 plugin for processing SAR data with GAMMA"
 LABEL org.opencontainers.image.vendor="Alaska Satellite Facility"
 LABEL org.opencontainers.image.authors="ASF APD/Tools Team <uaf-asf-apd@alaska.edu>"
 LABEL org.opencontainers.image.licenses="BSD-3-Clause"
-LABEL org.opencontainers.image.url="https://github.com/ASFHyP3/hyp3-rtc-gamma"
-LABEL org.opencontainers.image.source="https://github.com/ASFHyP3/hyp3-rtc-gamma"
+LABEL org.opencontainers.image.url="https://github.com/ASFHyP3/hyp3-gamma"
+LABEL org.opencontainers.image.source="https://github.com/ASFHyP3/hyp3-gamma"
 # LABEL org.opencontainers.image.documentation=""
 
 # Dynamic lables to define at build time via `docker build --label`
@@ -40,7 +40,7 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
 ARG S3_PYPI_HOST
 ARG SDIST_SPEC
 
-RUN python3 -m pip install --no-cache-dir hyp3_rtc_gamma${SDIST_SPEC} \
+RUN python3 -m pip install --no-cache-dir hyp3_gamma${SDIST_SPEC} \
     --trusted-host "${S3_PYPI_HOST}" \
     --extra-index-url "http://${S3_PYPI_HOST}"
 
@@ -65,5 +65,5 @@ ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
 
-ENTRYPOINT ["/usr/local/bin/rtc_gamma"]
+ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]

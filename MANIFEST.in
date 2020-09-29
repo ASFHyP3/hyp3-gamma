@@ -1,6 +1,6 @@
 include LICENSE
 include README.md
 
-graft hyp3_rtc_gamma
+graft hyp3_gamma
 
 global-exclude *.py[cod] __pycache__ *.so

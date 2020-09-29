@@ -1,19 +1,17 @@
-import os
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
-_HERE = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(_HERE, 'README.md'), 'r') as f:
-    long_desc = f.read()
+readme = Path(__file__).parent / 'README.md'
 
 setup(
-    name='hyp3_rtc_gamma',
+    name='hyp3_gamma',
     use_scm_version=True,
-    description='HyP3 plugin for radiometric terrain correction using GAMMA',
-    long_description=long_desc,
+    description='HyP3 plugin for processing SAR data with GAMMA',
+    long_description=readme.read_text(),
     long_description_content_type='text/markdown',
 
-    url='https://github.com/ASFHyP3/hyp3-rtc-gamma',
+    url='https://github.com/ASFHyP3/hyp3-gamma',
 
     author='ASF APD/Tools Team',
     author_email='uaf-asf-apd@alaska.edu',
