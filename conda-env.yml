@@ -6,12 +6,16 @@ dependencies:
   - python=3.7
   - pip
   # For packaging, and testing
-  - pytest
-  - pytest-console-scripts
-  - pytest-cov
+  - flake8
+  - flake8-import-order
+  - flake8-blind-except
+  - flake8-builtins
   - setuptools
   - setuptools_scm
   - wheel
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
   # For running
   - hyp3lib>=1.6.0,<2
   - importlib_metadata

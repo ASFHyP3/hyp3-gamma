@@ -1,6 +1,6 @@
 # HyP3 GAMMA
 
-HyP3 plugin for radiometric terrain correction using GAMMA
+HyP3 plugin for processing SAR data with GAMMA
 
 ## Developer Setup
 
