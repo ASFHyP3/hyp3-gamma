@@ -29,8 +29,8 @@ from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
-import hyp3_rtc_gamma
-from hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
+from hyp3_gamma import hyp3_rtc_gamma
+from hyp3_gamma.hyp3_rtc_gamma import rtc_sentinel_gamma
 
 
 def entry():
