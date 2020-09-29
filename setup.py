@@ -48,12 +48,12 @@ setup(
     packages=find_packages(),
 
     entry_points={'console_scripts': [
-            'rtc_gamma = hyp3_gamma.hyp3_rtc_gamma.__main__:entry',
-            'hyp3_rtc_gamma = hyp3_gamma.hyp3_rtc_gamma.__main__:main',
-            'hyp3_rtc_gamma_v2 = hyp3_gamma.hyp3_rtc_gamma.__main__:main_v2',
-            'check_coreg.py = hyp3_gamma.hyp3_rtc_gamma.check_coreg:main',
-            'rtc_sentinel.py = hyp3_gamma.hyp3_rtc_gamma.rtc_sentinel:main',
-            'smooth_dem_tiles.py = hyp3_gamma.hyp3_rtc_gamma.smoothem:main',
+            'rtc_gamma = hyp3_gamma.rtc.__main__:entry',
+            'hyp3_rtc_gamma = hyp3_gamma.rtc.__main__:main',
+            'hyp3_rtc_gamma_v2 = hyp3_gamma.rtc.__main__:main_v2',
+            'check_coreg.py = hyp3_gamma.rtc.check_coreg:main',
+            'rtc_sentinel.py = hyp3_gamma.rtc.rtc_sentinel:main',
+            'smooth_dem_tiles.py = hyp3_gamma.rtc.smoothem:main',
         ]
     },
 

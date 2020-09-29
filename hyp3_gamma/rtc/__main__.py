@@ -29,8 +29,8 @@ from hyp3proclib.logger import log
 from hyp3proclib.proc_base import Processor
 from pkg_resources import load_entry_point
 
-from hyp3_gamma import hyp3_rtc_gamma
-from hyp3_gamma.hyp3_rtc_gamma import rtc_sentinel_gamma
+import hyp3_gamma
+from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 
 
 def entry():
@@ -174,7 +174,7 @@ def main():
     log.propagate = False
 
     processor = Processor(
-        'rtc_gamma', process_rtc_gamma, sci_version=hyp3_rtc_gamma.__version__
+        'rtc_gamma', process_rtc_gamma, sci_version=hyp3_gamma.__version__
     )
     processor.run()
 
