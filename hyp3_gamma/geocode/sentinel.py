@@ -1,4 +1,4 @@
-"""Geocode a sentinel-1 granule using Gamma software"""
+"""Create a geocoded image from a Sentinel-1 scene"""
 
 import argparse
 import datetime
@@ -20,7 +20,8 @@ from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_arc_thumb import pngtothumb
 
-import hyp3_geocode
+from hyp3_gamma import __version__
+from hyp3_gamma import geocode
 
 
 def create_dem_par(basename, data_type, pixel_size, lat_max, lat_min, lon_max, lon_min, post):
@@ -133,7 +134,7 @@ def process_pol(pol, type_, infile, outfile, pixel_size, height, make_tab_flag=T
 
 def create_xml_files(infile, outfile, height, type_, gamma0_flag, pixel_size):
     """Create XML metadata files"""
-    cfgdir = os.path.abspath(os.path.join(os.path.dirname(hyp3_geocode.__file__), "etc"))
+    cfgdir = os.path.abspath(os.path.join(os.path.dirname(geocode.__file__), "etc"))
     back = os.getcwd()
     os.chdir("PRODUCT")
     now = datetime.datetime.now()
@@ -317,6 +318,7 @@ def main():
         prog='geocode_sentinel.py',
         description=__doc__,
     )
+    parser.add_argument('--version', action='version', version=f'hyp3_gamma {__version__}')
     parser.add_argument("infile",
                         help="Input zip file or SAFE directory")
     parser.add_argument("outfile",
@@ -331,8 +333,6 @@ def main():
                         help="Make output gamma0 instead of sigma0")
     parser.add_argument("-o", "--offset",
                         help="Optional offset file to use during geocoding")
-    parser.add_argument('--version', action='version',
-                        version='%(prog)s {}'.format(hyp3_geocode.__version__))
     args = parser.parse_args()
 
     log_file = "{}_{}_log.txt".format(args.outfile, os.getpid())
