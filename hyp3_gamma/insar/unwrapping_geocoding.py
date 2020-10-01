@@ -7,6 +7,8 @@ import os
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
+log = logging.getLogger(__name__)
+
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
@@ -27,13 +29,13 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     smli = secondary + ".mli"
 
     if not os.path.isfile(dempar):
-        logging.error("ERROR: Unable to find dem par file {}".format(dempar))
+        log.error("ERROR: Unable to find dem par file {}".format(dempar))
 
     if not os.path.isfile(lt):
-        logging.error("ERROR: Unable to find look up table file {}".format(lt))
+        log.error("ERROR: Unable to find look up table file {}".format(lt))
 
     if not os.path.isfile(offit):
-        logging.error("ERROR: Unable to find offset file {}".format(offit))
+        log.error("ERROR: Unable to find offset file {}".format(offit))
 
     width = getParameter(offit, "interferogram_width")
     mwidth = getParameter(mmli + ".par", "range_samples")
@@ -43,11 +45,11 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     ifgf = "{}.diff0.{}".format(ifgname, step)
 
-    logging.info("{} will be used for unwrapping and geocoding".format(ifgf))
+    log.info("{} will be used for unwrapping and geocoding".format(ifgf))
 
-    logging.info("-------------------------------------------------")
-    logging.info("            Start unwrapping")
-    logging.info("-------------------------------------------------")
+    log.info("-------------------------------------------------")
+    log.info("            Start unwrapping")
+    log.info("-------------------------------------------------")
 
     execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
@@ -79,13 +81,13 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
-    logging.info("-------------------------------------------------")
-    logging.info("            End unwrapping")
-    logging.info("-------------------------------------------------")
+    log.info("-------------------------------------------------")
+    log.info("            End unwrapping")
+    log.info("-------------------------------------------------")
 
-    logging.info("-------------------------------------------------")
-    logging.info("            Start geocoding")
-    logging.info("-------------------------------------------------")
+    log.info("-------------------------------------------------")
+    log.info("            Start geocoding")
+    log.info("-------------------------------------------------")
 
     geocode_back(mmli, mmli + ".geo", mwidth, lt, demw, demn, 0)
     geocode_back(smli, smli + ".geo", swidth, lt, demw, demn, 0)
@@ -121,9 +123,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
 
-    logging.info("-------------------------------------------------")
-    logging.info("            End geocoding")
-    logging.info("-------------------------------------------------")
+    log.info("-------------------------------------------------")
+    log.info("            End geocoding")
+    log.info("-------------------------------------------------")
 
 
 def main():
@@ -145,11 +147,8 @@ def main():
     parser.add_argument("--npata", default=1, help="Number of patches in azimuth (def=1)")
     args = parser.parse_args()
 
-    logFile = "unwrapping_geocoding_log.txt"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
 
     unwrapping_geocoding(args.reference, args.secondary, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
                          trimode=args.tri, npatr=args.npatr, npata=args.npata, alpha=args.alpha)

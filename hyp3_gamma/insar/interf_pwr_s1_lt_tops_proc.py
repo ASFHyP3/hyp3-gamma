@@ -9,6 +9,8 @@ import sys
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
+log = logging.getLogger(__name__)
+
 
 def create_slc2r_tab(SLC2tab, SLC2Rtab):
     if os.path.isfile(SLC2Rtab):
@@ -94,11 +96,11 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
 
     if step == 0:
         if not os.path.isfile(dem):
-            logging.info("Currently in directory {}".format(os.getcwd()))
-            logging.error("ERROR: Input DEM file {} can't be found!".format(dem))
+            log.info("Currently in directory {}".format(os.getcwd()))
+            log.error("ERROR: Input DEM file {} can't be found!".format(dem))
             sys.exit(1)
-        logging.info("Input DEM file {} found".format(dem))
-        logging.info("Preparing initial look up table and sim_unw file")
+        log.info("Input DEM file {} found".format(dem))
+        log.info("Preparing initial look up table and sim_unw file")
         execute(f"create_offset {mpar} {spar} {off} 1 {rlooks} {alooks} 0", uselogging=True)
 
         execute(f"rdc_trans {mmli} {dem} {smli} {lt}", uselogging=True)
@@ -106,25 +108,25 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
         execute(f"phase_sim_orb {mpar} {spar} {off} {dem} {ifgname}.sim_unw {mpar} -", uselogging=True)
 
     elif step == 1:
-        logging.info("Starting initial coregistration with look up table")
+        log.info("Starting initial coregistration with look up table")
         coregister_data(
             0, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, reference, secondary, lt, rlooks, alooks, iterations
         )
     elif step == 2:
-        logging.info("Starting iterative coregistration with look up table")
+        log.info("Starting iterative coregistration with look up table")
         for n in range(1, iterations + 1):
             coregister_data(
                 n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
                 reference, secondary, lt, rlooks, alooks, iterations
             )
     elif step == 3:
-        logging.info("Starting single interation coregistration with look up table")
+        log.info("Starting single interation coregistration with look up table")
         coregister_data(
             iterations + 1, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
             reference, secondary, lt, rlooks, alooks, iterations
         )
     else:
-        logging.error("ERROR: Unrecognized step {}; must be from 0 - 2".format(step))
+        log.error("ERROR: Unrecognized step {}; must be from 0 - 2".format(step))
         sys.exit(1)
 
 
@@ -146,11 +148,8 @@ def main():
                              '1) Initial co-registration with DEM; 2) iteration coregistration')
     args = parser.parse_args()
 
-    logFile = "interf_pwr_s1_tops_proc_log.txt"
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
 
     interf_pwr_s1_lt_tops_proc(args.reference, args.secondary, args.dem, rlooks=args.rlooks, alooks=args.alooks,
                                iterations=args.iter, step=args.step)
