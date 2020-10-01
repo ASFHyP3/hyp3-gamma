@@ -75,7 +75,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 USER 0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bzip2 ca-certificates fonts-liberation git locales libgl1-mesa-glx && \
+    bzip2 ca-certificates fonts-liberation git inkscape \
+    libgl1-mesa-glx libsm6 libxext-dev libxrender1 lmodern locales \
+    netcat texlive-xetex texlive-fonts-recommended texlive-plain-generic tzdata && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
