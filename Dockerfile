@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 AS production
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -67,3 +67,64 @@ WORKDIR /home/conda/
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
+
+FROM production AS prototype
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+USER 0
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bzip2 ca-certificates fonts-liberation git locales libgl1-mesa-glx && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen && \
+    sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc
+
+ENV LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8
+
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    /bin/bash Miniconda3-latest-Linux-x86_64.sh -f -b -p /opt/conda && \
+    rm Miniconda3-latest-Linux-x86_64.sh && \
+    . /opt/conda/etc/profile.d/conda.sh && \
+    conda config --system --prepend channels conda-forge && \
+    conda config --system --set auto_update_conda false && \
+    conda config --system --set show_channel_urls true && \
+    conda config --system --set channel_priority strict && \
+    conda update --all --quiet --yes && \
+    chown -R conda:conda /opt && \
+    conda clean -afy && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/conda/.profile && \
+    echo "conda activate base" >> /home/conda/.profile
+
+COPY --chown=conda:conda /etc/start-jupyter.sh /usr/local/bin/
+COPY --chown=conda:conda /etc/jupyter_notebook_config.py /etc/jupyter/
+
+ARG CONDA_GID=1000
+ARG CONDA_UID=1000
+
+USER ${CONDA_UID}
+
+COPY conda-env.yml /home/conda/conda-env.yml
+
+RUN conda env create -f conda-env.yml && \
+    rm conda-env.yml && \
+    conda clean -afy && \
+    conda activate hyp3-gamma && \
+    sed -i 's/conda activate base/conda activate hyp3-gamma/g' /home/conda/.profile
+
+RUN conda install --quiet --yes \
+    jupyterlab notebook nodejs tini && \
+    conda clean --all -f -y && \
+    npm cache clean --force && \
+    jupyter notebook --generate-config && \
+    rm -rf /opt/conda/share/jupyter/lab/staging && \
+    rm -rf /home/conda/.cache/yarn
+
+EXPOSE 8888
+
+ENTRYPOINT ["/usr/local/bin/start-jupyter.sh"]
+CMD ["lab"]

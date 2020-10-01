@@ -156,7 +156,7 @@ jobs:
           export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
           echo "Building ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_}"
           docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
-          docker build --no-cache \
+          docker build --target production \
                 -t ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
                 --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}" \
                 --label org.opencontainers.image.version="${SDIST_VERSION}" \
