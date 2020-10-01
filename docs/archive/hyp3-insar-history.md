@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/) 
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/ASFHyP3/hyp3-insar-gamma/compare/v2.1.2...v2.2.0)
+
+**HyP3 v1 is no longer supported as of this release.**
+
+### Added
+* Added a `--include-look-vectors` option to `insar_gamma` to include the look vector theta and phi files in the output product package 
+
+### Changed
+* Implemented a new product naming scheme, detailed in the `_README.md.txt` file included with each product.
+
+### Removed
+* Removed the `--include-inc-map` option from `insar_gamma`.
+* The following parameters have been removed from `ifm_sentinel.py`:
+  * `output` Output igram directory
+  * `--dem` Input DEM file to use
+  * `-i` Create incidence angle file
+  * `-o` Use opentopo to get the DEM file instead of get_dem
+  * `-c` cross pol processing - either hv or vh (default hh or vv)
+  * `-t` Start processing at time for length bursts
+  * `-m` Apply water body mask to DEM file prior to processing
+* The following package entrypoints have been removed:
+  * `procS1StackGAMMA.py`: Generating pair-wise interferograms from a list of input scenes is no longer supported.
+  * `par_s1_slc.py`: This script has been replaced in favor of `hyp3lib.par_s1_slc_single.`
+  * `hyp3_insar_gamma`, `hyp3_insar_gamma_v2`: Support for HyP3 v1 has been removed.  HyP3 processing is now invoked directly via `insar_gamma`.
+
 ## [2.1.2](https://github.com/ASFHyP3/hyp3-insar-gamma/compare/v2.1.1...v2.1.2)
 
 ### Fixed
