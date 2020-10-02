@@ -1,4 +1,4 @@
-from hyp3_insar_gamma import __main__ as main
+from hyp3_gamma import __main__ as main
 
 
 def test_earlier_granule_first():

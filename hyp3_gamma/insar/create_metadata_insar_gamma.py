@@ -5,8 +5,8 @@ import sys
 
 from hyp3lib.system import gamma_version
 
-import hyp3_insar_gamma.etc
-from hyp3_insar_gamma import __version__
+from hyp3_gamma import __version__
+from hyp3_gamma import insar
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType):
     looks = pixelSize / 20
     txtlooks = "{}x{}".format(looks * 5, looks)
 
-    etcdir = os.path.abspath(os.path.dirname(hyp3_insar_gamma.etc.__file__))
+    etcdir = os.path.abspath(os.path.dirname(insar.etc.__file__))
 
     now = datetime.datetime.now()
     date = now.strftime("%Y%m%d")

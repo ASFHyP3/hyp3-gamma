@@ -18,10 +18,10 @@ from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
 
-from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
-from hyp3_insar_gamma.getDemFileGamma import get_dem_file_gamma
-from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
-from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.insar.create_metadata_insar_gamma import create_readme_file
+from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
+from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
+from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 
 log = logging.getLogger(__name__)
 
