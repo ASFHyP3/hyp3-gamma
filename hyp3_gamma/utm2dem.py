@@ -4,25 +4,24 @@ import argparse
 import os
 
 import numpy as np
-from osgeo import gdal, osr, gdalconst
-
-import hyp3lib.saa_func_lib as saa
+from hyp3lib import saa_func_lib as saa
 from hyp3lib.execute import execute
+from osgeo import gdal, gdalconst, osr
 
 
-def utm2dem(inDem,outDem,demPar,dataType="float"):
+def utm2dem(inDem, outDem, demPar, dataType="float"):
     demParIn = "dem_par.in"
     dataType = dataType.lower()
     basename = os.path.basename(inDem)
     logname = basename + "_utm_dem.log"
-    log = open(logname,"w")
+    log = open(logname, "w")
 
     print("UTM DEM in GEOTIFF format: {}".format(inDem))
     print("output DEM: {}".format(outDem))
     print("output DEM parameter file: {}".format(demPar))
     print("log file: {}".format(logname))
 
-    (x,y,trans,proj,data) = saa.read_gdal_file(saa.open_gdal_file(inDem))
+    (x, y, trans, proj, data) = saa.read_gdal_file(saa.open_gdal_file(inDem))
 
     xsize = x
     ysize = y
@@ -31,18 +30,18 @@ def utm2dem(inDem,outDem,demPar,dataType="float"):
     pix_east = trans[1]
     pix_north = trans[5]
 
-    ds=gdal.Open(inDem)
-    prj=ds.GetProjection()
+    ds = gdal.Open(inDem)
+    prj = ds.GetProjection()
     s = prj.split("[")
     for t in s:
         if "false_northing" in t:
-             u = t.split('"')
-             v = u[2].split(",")
-             w = v[1].split("]")
-             false_north = w[0]
+            u = t.split('"')
+            v = u[2].split(",")
+            w = v[1].split("]")
+            false_north = w[0]
     print("found false_north {}".format(false_north))
 
-    srs=osr.SpatialReference(wkt=prj)
+    srs = osr.SpatialReference(wkt=prj)
     string = srs.GetAttrValue('projcs')
     t = string.split(" ")
     zone = t[5]
@@ -67,8 +66,8 @@ def utm2dem(inDem,outDem,demPar,dataType="float"):
     pix_size = pix_east
     print("approximate DEM latitude pixel spacing (m): {}".format(pix_size))
 
-    # Create the input file for create_dem_par    
-    f = open(demParIn,"w")
+    # Create the input file for create_dem_par
+    f = open(demParIn, "w")
     f.write("UTM\n")
     f.write("WGS84\n")
     f.write("1\n")
@@ -83,31 +82,31 @@ def utm2dem(inDem,outDem,demPar,dataType="float"):
     f.write("1.0\n")
     f.write("{}\n".format(xsize))
     f.write("{}\n".format(ysize))
-    f.write("{} {}\n".format(pix_north,pix_east))
-    f.write("{} {}\n".format(north,east))
+    f.write("{} {}\n".format(pix_north, pix_east))
+    f.write("{} {}\n".format(north, east))
     f.close()
 
     # Create a new dem par file
-    if os.path.isfile(demPar): 
+    if os.path.isfile(demPar):
         os.remove(demPar)
-    execute("create_dem_par {} < {}".format(demPar,demParIn),logfile=log)
+    execute("create_dem_par {} < {}".format(demPar, demParIn), logfile=log)
 
     # Replace 0 with 1; Replace anything <= -32767 with 0; byteswap
-    data[data==0] = 1
-    data[data<=-32767] = 0
+    data[data == 0] = 1
+    data[data <= -32767] = 0
     data = data.byteswap()
 
     # Convert to ENVI (binary) format
     tmptif = "temporary_dem_file.tif"
     if "float" in dataType:
-        saa.write_gdal_file_float(tmptif,trans,proj,data.astype(np.float32))
+        saa.write_gdal_file_float(tmptif, trans, proj, data.astype(np.float32))
     elif "int16" in dataType:
-        saa.write_gdal_file(tmptif,trans,proj,data)
-    gdal.Translate(outDem,tmptif,format="ENVI")
+        saa.write_gdal_file(tmptif, trans, proj, data)
+    gdal.Translate(outDem, tmptif, format="ENVI")
     os.remove(tmptif)
     os.remove(outDem + ".aux.xml")
     filename, file_extension = os.path.splitext(outDem)
-    os.remove(outDem.replace(file_extension,".hdr"))
+    os.remove(outDem.replace(file_extension, ".hdr"))
 
 
 def main():

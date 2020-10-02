@@ -36,9 +36,9 @@ from hyp3_gamma.area2point import fix_geotiff_locations
 from hyp3_gamma.getParameter import getParameter
 from hyp3_gamma.ingest_S1_granule import ingest_S1_granule
 from hyp3_gamma.ps2dem import ps2dem
-from hyp3_gamma.utm2dem import utm2dem
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
 from hyp3_gamma.rtc.smoothem import smooth_dem_tiles
+from hyp3_gamma.utm2dem import utm2dem
 
 
 def fetch_orbit_file(in_file):

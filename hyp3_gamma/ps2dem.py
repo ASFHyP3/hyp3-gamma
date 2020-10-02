@@ -8,11 +8,10 @@ from pathlib import Path
 from typing import Union
 
 import numpy as np
-from osgeo import gdal, osr
-
-import hyp3lib.saa_func_lib as saa
+from hyp3lib import saa_func_lib as saa
 from hyp3lib.execute import execute
 from hyp3lib.system import gamma_version
+from osgeo import gdal, osr
 
 
 def ps2dem(in_dem: Union[str, Path], out_dem: str, dem_par: str):
