@@ -109,7 +109,7 @@ jobs:
           PR_QUERY='.data.repository.commit.associatedPullRequests.edges[0].node.title'
           TAG_MSG=$(jq --raw-output "${PR_QUERY}"  pr.json)
 
-          bump2version --current-version $(git describe --abbrev=0) \
+          bump2version --current-version $(git describe --abbrev=0 --match "v*") \
               --tag --tag-message "${TAG_MSG}" "${BUMP_PART}"
 
           git push --tags
