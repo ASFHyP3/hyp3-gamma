@@ -31,8 +31,8 @@ def test_smooth_dem_tiles(script_runner):
 
 
 def test_geocode(script_runner):
-     ret = script_runner.run('geocode', '-h')
-     assert ret.success
+    ret = script_runner.run('geocode', '-h')
+    assert ret.success
 
 
 def test_geocode_not_implemented(script_runner):
@@ -57,7 +57,7 @@ def test_insar(script_runner):
     assert ret.success
 
 
-def test_hyp3_gamma_rtc_passthrough(script_runner):
+def test_hyp3_gamma_insar_passthrough(script_runner):
     ret = script_runner.run('hyp3_gamma', 'insar', '--help')
     assert ret.success
     assert 'insar' in ret.stdout
