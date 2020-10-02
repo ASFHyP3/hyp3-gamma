@@ -2,8 +2,9 @@ import logging
 import os
 
 from hyp3lib.getDemFor import getDemFile
-from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
+
+from hyp3_gamma.utm2dem import utm2dem
 
 log = logging.getLogger(__name__)
 

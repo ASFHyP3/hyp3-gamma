@@ -5,13 +5,14 @@ from __future__ import print_function, absolute_import, division, unicode_litera
 import logging
 import argparse
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 import os
 import shutil
 
+from hyp3_gamma.getParameter import getParameter
+
 
 def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None,raml=10,azml=2):
-    
+
     logging.info("Using range looks {}".format(raml))
     logging.info("Using azimuth looks {}".format(azml))
     logging.info("Operating in mode {}".format(mode))
@@ -19,7 +20,7 @@ def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None
 
     if not os.path.isfile(tabin):
         logging.error("ERROR: Can't find tab file {} in {}".format(tabin,os.getcwd()))
-    f = open(tabin,"r")    
+    f = open(tabin,"r")
     g = open("TAB_swFULL","w")
     for line in f:
         s = line.split()
@@ -41,7 +42,7 @@ def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None
       SLC=slcname,RL=raml,AL=azml)
     execute(cmd,uselogging=True)
 
-    width = getParameter("{}.slc.par".format(slcname),"range_samples")    
+    width = getParameter("{}.slc.par".format(slcname),"range_samples")
     cmd = "rasSLC {}.slc {} 1 0 50 10".format(slcname,width)
     execute(cmd,uselogging=True)
 
@@ -50,16 +51,16 @@ def SLC_copy_S1_fullSW(path,slcname,tabin,burst_tab,mode=2,dem=None,dempath=None
 
     mode = int(mode)
     if mode == 1:
-    
+
         logging.info("currently in {}".format(os.getcwd()))
         logging.info("creating directory DEM")
-    
+
         if not os.path.exists("DEM"):
             os.mkdir("DEM")
         os.chdir("DEM")
         mliwidth = getParameter("../{}.mli.par".format(slcname),"range_samples")
         mlinline = getParameter("../{}.mli.par".format(slcname),"azimuth_lines")
-   
+
         cmd = "GC_map_mod ../{SLC}.mli.par  - {DP}/{DEM}.par {DP}/{DEM}.dem 2 2 demseg.par demseg ../{SLC}.mli  MAP2RDC inc pix ls_map 1 1".format(SLC=slcname,DEM=dem,DP=dempath)
         execute(cmd,uselogging=True)
 
@@ -91,8 +92,8 @@ def main():
     parser.add_argument('mode',help='1 = master image, 2 = slave image')
     parser.add_argument('-d','--dem',help='Name of DEM file',dest="dem")
     parser.add_argument('-p','--path',help='Path to DEM file',dest="path")
-    parser.add_argument('-rl','--rangelooks',default='10',help='Number of range looks',dest="rl") 
-    parser.add_argument('-al','--azimuthlooks',default='2',help='Number of range looks',dest="al") 
+    parser.add_argument('-rl','--rangelooks',default='10',help='Number of range looks',dest="rl")
+    parser.add_argument('-al','--azimuthlooks',default='2',help='Number of range looks',dest="al")
     args = parser.parse_args()
 
     if not os.path.exists(args.slcTab):

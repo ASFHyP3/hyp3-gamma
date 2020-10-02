@@ -11,16 +11,16 @@ from datetime import datetime
 from secrets import token_hex
 
 from hyp3lib import GranuleError
-from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
-from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
 
+from hyp3_gamma.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3_gamma.insar.create_metadata_insar_gamma import create_readme_file
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
+from hyp3_gamma.par_s1_slc_single import par_s1_slc_single
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 
 log = logging.getLogger(__name__)

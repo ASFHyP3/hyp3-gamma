@@ -5,10 +5,10 @@ import os
 import sys
 
 from hyp3lib import saa_func_lib as saa
-from hyp3lib.ps2dem import ps2dem
 from osgeo import gdal
 
 from hyp3_gamma import __version__
+from hyp3_gamma.ps2dem import ps2dem
 
 
 def smooth_dem_tiles(demdir, build=True):

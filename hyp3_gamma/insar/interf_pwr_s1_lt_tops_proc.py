@@ -7,7 +7,9 @@ import shutil
 import sys
 
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
+
+from hyp3_gamma.getParameter import getParameter
+
 
 log = logging.getLogger(__name__)
 

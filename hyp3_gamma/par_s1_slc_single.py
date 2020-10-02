@@ -4,13 +4,14 @@ import os
 
 from hyp3lib import OrbitDownloadError
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
+
+from hyp3_gamma.getParameter import getParameter
 
 
 def make_cmd(swath, acquisition_date, out_dir, pol=None):
     """Assemble the par_S1_SLC gamma commands
-    
+
     Args:
         swath: Swath to process
         acquisition_date: The acquisition date of the SLC imagery
@@ -27,10 +28,10 @@ def make_cmd(swath, acquisition_date, out_dir, pol=None):
         n = glob.glob(f'annotation/s1*-iw{swath}*{pol}*')[0]
         o = glob.glob(f'annotation/calibration/calibration-s1*-iw{swath}*{pol}*')[0]
         p = glob.glob(f'annotation/calibration/noise-s1*-iw{swath}*{pol}*')[0]
-    
+
     cmd = f'par_S1_SLC {m} {n} {o} {p} {out_dir}/{acquisition_date}_00{swath}.slc.par ' \
           f'{out_dir}/{acquisition_date}_00{swath}.slc {out_dir}/{acquisition_date}_00{swath}.tops_par'
-    
+
     return cmd
 
 

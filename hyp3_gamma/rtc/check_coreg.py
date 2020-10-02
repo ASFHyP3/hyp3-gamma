@@ -8,9 +8,9 @@ import re
 import sys
 
 import numpy as np
-from hyp3lib.getParameter import getParameter
 
 from hyp3_gamma import __version__
+from hyp3_gamma.getParameter import getParameter
 
 
 class CoregistrationError(Exception):

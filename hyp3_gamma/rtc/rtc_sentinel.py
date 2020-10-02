@@ -15,28 +15,28 @@ from secrets import token_hex
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
-from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.asf_geometry import reproject2grid
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.copy_metadata import copy_metadata
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getDemFor import getDemFile
-from hyp3lib.getParameter import getParameter
 from hyp3lib.get_bb_from_shape import get_bb_from_shape
 from hyp3lib.get_dem import get_dem
 from hyp3lib.get_orb import downloadSentinelOrbitFile
-from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
-from hyp3lib.ps2dem import ps2dem
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
 import hyp3_gamma
+from hyp3_gamma.area2point import fix_geotiff_locations
+from hyp3_gamma.getParameter import getParameter
+from hyp3_gamma.ingest_S1_granule import ingest_S1_granule
+from hyp3_gamma.ps2dem import ps2dem
+from hyp3_gamma.utm2dem import utm2dem
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
 from hyp3_gamma.rtc.smoothem import smooth_dem_tiles
 

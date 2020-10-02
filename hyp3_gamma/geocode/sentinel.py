@@ -14,14 +14,14 @@ from hyp3lib.asf_geometry import geometry_geo2proj
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 from hyp3lib.getSubSwath import get_bounding_box_file
-from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_arc_thumb import pngtothumb
 
 from hyp3_gamma import __version__
 from hyp3_gamma import geocode
+from hyp3_gamma.getParameter import getParameter
+from hyp3_gamma.ingest_S1_granule import ingest_S1_granule
 
 
 def create_dem_par(basename, data_type, pixel_size, lat_max, lat_min, lon_max, lon_min, post):
