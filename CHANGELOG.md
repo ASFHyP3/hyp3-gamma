@@ -17,7 +17,7 @@ have been merged into a single hyp3-gamma plugin, as represented here.
 
 ### Added
 * A unified HyP3v2 entrypoint, `hyp3_gamma`, which will run any of the available science processes
-* A Jupter (lab or notebook) prototyping environment to the plugin's `Dockerfile` which is created by
+* A Jupyter (lab or notebook) prototyping environment to the plugin's `Dockerfile` which is created by
   either targeting the prototype environment (with a `--target prototype` docker build argument) *or by default*.
   HyP3 production containers are built with `--target production` and do not include the prototyping environment.
 
