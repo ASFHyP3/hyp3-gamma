@@ -1,6 +1,5 @@
 """Convert a polar stereo GeoTIFF DEM into GAMMA's internal format"""
 
-import argparse
 import logging
 import os
 import warnings

@@ -1,6 +1,5 @@
 """re-process S1 SLC imagery into gamma format SLCs"""
 
-import argparse
 import logging
 import os
 import shutil

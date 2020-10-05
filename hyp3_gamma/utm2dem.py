@@ -1,6 +1,5 @@
 """Convert a geotiff DEM into GAMMA internal format"""
 
-import argparse
 import os
 
 import numpy as np
