@@ -293,7 +293,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     if area:
         shutil.move("{}.flat.tif".format(out_name), "{}/{}_flat_{}.tif".format(out_dir, out_name, pol))
 
-    os.chdir("../..")
+    os.chdir("..")
 
 
 def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_flag, pwr_flag, browse_res,
@@ -419,7 +419,7 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     raster_boundary2shape(out_name + "_" + pol + ".tif", None, out_name + "_shape.shp", use_closing=False,
                           pixel_shift=True, fill_holes=True)
 
-    os.chdir("../..")
+    os.chdir("..")
 
 
 def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag, roi,
