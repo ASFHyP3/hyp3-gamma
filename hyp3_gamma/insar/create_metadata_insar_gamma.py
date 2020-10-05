@@ -3,10 +3,10 @@ import logging
 import os
 import sys
 
-from hyp3lib.system import gamma_version
-
 from hyp3_gamma import __version__
 from hyp3_gamma import insar
+from hyp3_gamma.util import gamma_version
+
 
 log = logging.getLogger(__name__)
 

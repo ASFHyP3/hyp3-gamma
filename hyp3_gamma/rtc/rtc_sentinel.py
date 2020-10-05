@@ -28,7 +28,6 @@ from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
-from hyp3lib.system import gamma_version
 from osgeo import gdal
 
 import hyp3_gamma
@@ -38,6 +37,7 @@ from hyp3_gamma.ingest_S1_granule import ingest_S1_granule
 from hyp3_gamma.ps2dem import ps2dem
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
 from hyp3_gamma.rtc.smoothem import smooth_dem_tiles
+from hyp3_gamma.util import gamma_version
 from hyp3_gamma.utm2dem import utm2dem
 
 
