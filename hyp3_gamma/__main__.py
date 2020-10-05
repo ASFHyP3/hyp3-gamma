@@ -39,20 +39,6 @@ def entry():
     )
 
 
-def find_png(product_dir):
-    pattern = os.path.join(product_dir, '*.png')
-    png_files = glob.glob(pattern)
-
-    for png_file in png_files:
-        if 'rgb' in png_file:
-            return png_file
-
-    if png_files:
-        return png_files[0]
-
-    return None
-
-
 def find_and_remove(directory, file_pattern):
     pattern = os.path.join(directory, file_pattern)
     for filename in glob.glob(pattern):
