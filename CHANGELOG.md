@@ -16,9 +16,10 @@ and the GAMMA specific functionality of hyp3lib [v1.6.0](https://github.com/ASFH
 have been merged into a single hyp3-gamma plugin, as represented here.
 
 ### Added
-* `hyp3-rtc-gamma` has been moved inside `hyp3_gamma.irtc`
-* `hyp3-inar-gamma` has been moved inside `hyp3_gamma.insar`
-* `hyp3-geocode` has been moved inside `hyp3_gamma.geocode`
+* A `hyp3_gamma` python package containing the sub-packages
+  * `hyp3_gamma.rtc` which was formerly `hyp3_rtc_gamma`
+  * `hyp3_gamma.insar`  which was formerly `hyp3_insar_gamma`
+  * `hyp3_gamma.geocode` which was formerly `hyp3_geocode`
 * A unified HyP3v2 entrypoint, `hyp3_gamma`, which will run any of the available science processes
 * A Jupyter (lab or notebook) prototyping environment to the plugin's `Dockerfile` which is created by
   either targeting the prototype environment (with a `--target prototype` docker build argument) *or by default*.
