@@ -136,31 +136,3 @@ def ps2dem(in_dem: Union[str, Path], out_dem: str, dem_par: str):
     os.remove(out_dem + ".aux.xml")
     filename, file_extension = os.path.splitext(out_dem)
     os.remove(out_dem.replace(file_extension, ".hdr"))
-
-
-def main():
-    """Main entrypoint"""
-
-    parser = argparse.ArgumentParser(
-        prog=os.path.basename(__file__),
-        description=__doc__,
-    )
-    parser.add_argument('ps_dem', help='name of GeoTIFF file (input)')
-    parser.add_argument('dem', help='DEM data (output)')
-    parser.add_argument('dempar', help='Gamma DEM parameter file (output)')
-
-    log_file = "{}_{}_log.txt".format("ps2dem", os.getpid())
-    logging.basicConfig(filename=log_file, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
-    args = parser.parse_args()
-
-    if not os.path.exists(args.ps_dem):
-        parser.error(f'GeoTIFF file {args.ps_dem} does not exist!')
-
-    ps2dem(args.ps_dem, args.dem, args.dempar)
-
-
-if __name__ == '__main__':
-    main()

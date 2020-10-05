@@ -107,26 +107,3 @@ def utm2dem(inDem, outDem, demPar, dataType="float"):
     os.remove(outDem + ".aux.xml")
     filename, file_extension = os.path.splitext(outDem)
     os.remove(outDem.replace(file_extension, ".hdr"))
-
-
-def main():
-    """Main entrypoint"""
-
-    parser = argparse.ArgumentParser(
-        prog=os.path.basename(__file__),
-        description=__doc__,
-    )
-    parser.add_argument('utm_dem', help='name of GeoTIFF file (input)')
-    parser.add_argument('dem', help='DEM data (output)')
-    parser.add_argument('dempar', help='Gamma DEM parameter file (output)')
-    parser.add_argument('-t', '--dataType', help='Desired output data type (float or int16)', default='float')
-    args = parser.parse_args()
-
-    if not os.path.exists(args.utm_dem):
-        parser.error(f'GeoTIFF file {args.utm_dem} does not exist!')
-
-    utm2dem(args.utm_dem, args.dem, args.dempar, args.dataType)
-
-
-if __name__ == '__main__':
-    main()
