@@ -1,6 +1,5 @@
 """Sentinel-1 SLC data and DEM coregistration process"""
 
-import argparse
 import logging
 import os
 import shutil
@@ -130,32 +129,3 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
     else:
         log.error("ERROR: Unrecognized step {}; must be from 0 - 2".format(step))
         sys.exit(1)
-
-
-def main():
-    """Main entrypoint"""
-    parser = argparse.ArgumentParser(
-        prog='INTERF_PWR_S1_LT_TOPS_Proc.py',
-        description=__doc__,
-    )
-
-    parser.add_argument("reference", help='Reference scene identifier')
-    parser.add_argument("secondary", help='Secondary scene identifier')
-    parser.add_argument("dem", help='Dem file in SAR coordinates (e.g. ./DEM/HGT_SAR_10_2)')
-    parser.add_argument("-r", "--rlooks", type=int, default=10, help="Number of range looks (def=10)")
-    parser.add_argument("-a", "--alooks", type=int, default=2, help="Number of azimuth looks (def=2)")
-    parser.add_argument("-i", "--iter", type=int, default=5, help='Number of coregistration iterations (def=5)')
-    parser.add_argument("-s", "--step", type=int, default=0,
-                        help='Procesing step: 0) Prepare LUT and SIM_UNW; '
-                             '1) Initial co-registration with DEM; 2) iteration coregistration')
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-
-    interf_pwr_s1_lt_tops_proc(args.reference, args.secondary, args.dem, rlooks=args.rlooks, alooks=args.alooks,
-                               iterations=args.iter, step=args.step)
-
-
-if __name__ == "__main__":
-    main()

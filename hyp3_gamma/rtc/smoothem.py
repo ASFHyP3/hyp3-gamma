@@ -1,4 +1,3 @@
-import argparse
 import glob
 import logging
 import os
@@ -7,7 +6,6 @@ import sys
 from hyp3lib import saa_func_lib as saa
 from osgeo import gdal
 
-from hyp3_gamma import __version__
 from hyp3_gamma.ps2dem import ps2dem
 
 
@@ -66,24 +64,3 @@ def smooth_dem_tiles(demdir, build=True):
 
         logging.info("Finished creating output")
         return "full_area.dem", "full_area.dem.par"
-
-
-def main():
-    parser = argparse.ArgumentParser(prog="smooth_dem_tiles.py",
-                                     description="Smooth REMA DEM tiles using fill_gaps")
-    parser.add_argument('--version', action='version', version=f'hyp3_gamma {__version__}')
-    parser.add_argument("dir", help="Directory containing REMA DEMs to smooth")
-    parser.add_argument("-n", help="Don't create full_area.dem output", action="store_false")
-    args = parser.parse_args()
-
-    logFile = "smooth_dem_tiles_{}.log".format(os.getpid())
-    logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
-    logging.info("Starting run")
-
-    smooth_dem_tiles(args.dir, build=args.n)
-
-
-if __name__ == "__main__":
-    main()

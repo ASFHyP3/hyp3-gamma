@@ -1,6 +1,5 @@
 """Unwrap and geocode Sentinel-1 INSAR products from GAMMA"""
 
-import argparse
 import logging
 import os
 
@@ -127,33 +126,3 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
-
-
-def main():
-    """Main entrypoint"""
-    parser = argparse.ArgumentParser(
-        prog='unwrapping_geocoding.py',
-        description=__doc__,
-    )
-    parser.add_argument("reference", help='Reference scene identifier')
-    parser.add_argument("secondary", help='Secondary scene identifier')
-    parser.add_argument("-s", "--step", default='man', help='Level of interferogram for unwrapping (def=man)')
-    parser.add_argument("-r", "--rlooks", default=10, help="Number of range looks (def=10)")
-    parser.add_argument("-a", "--alooks", default=2, help="Number of azimuth looks (def=2)")
-    parser.add_argument("-t", "--tri", default=0,
-                        help="Triangulation method for mcf unwrapper: "
-                             "0) filled traingular mesh (default); 1) Delaunay triangulation")
-    parser.add_argument("--alpha", default=0.6, type=float, help="adf filter alpha value (def=0.6)")
-    parser.add_argument("--npatr", default=1, help="Number of patches in range (def=1)")
-    parser.add_argument("--npata", default=1, help="Number of patches in azimuth (def=1)")
-    args = parser.parse_args()
-
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-
-    unwrapping_geocoding(args.reference, args.secondary, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
-                         trimode=args.tri, npatr=args.npatr, npata=args.npata, alpha=args.alpha)
-
-
-if __name__ == "__main__":
-    main()

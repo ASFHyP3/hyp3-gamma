@@ -1,15 +1,12 @@
 """Checks results of Gamma RTC coregistration process"""
 
-import argparse
 import glob
 import logging
 import os
 import re
-import sys
 
 import numpy as np
 
-from hyp3_gamma import __version__
 from hyp3_gamma.getParameter import getParameter
 
 
@@ -164,33 +161,3 @@ def check_coreg(sar_file, post, max_offset=50, max_error=2):
             raise CoregistrationError("offset too large, using dead reckoning")
 
         logging.info("Granule passed coregistration")
-
-
-def main():
-    """Main entrypoint"""
-    parser = argparse.ArgumentParser(
-        prog='check_coreg.py',
-        description=__doc__,
-    )
-    parser.add_argument('--version', action='version', version=f'hyp3_gamma {__version__}')
-    parser.add_argument('input', help='Name of input SAR file')
-    parser.add_argument('post', type=float, help='Posting of the SAR image')
-    parser.add_argument('-o', '--max_offset', type=float, default=50,
-                        help='Set the maximum allowable max_offset (meters)')
-    parser.add_argument('-e', '--max_error', type=int, default=2,
-                        help='Set the maximum allowable standard deviation of max_offset fit (pixels)')
-    args = parser.parse_args()
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        stream=sys.stdout
-    )
-    logging.info("Starting run")
-
-    check_coreg(args.input, args.post, args.max_offset, args.max_error)
-
-
-if __name__ == "__main__":
-    main()
