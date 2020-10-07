@@ -47,7 +47,7 @@ setup(
     packages=find_packages(),
 
     entry_points={'console_scripts': [
-        'hyp3_gamma = hyp3_gamma.__main__:entry',
+        'hyp3_gamma = hyp3_gamma.__main__:main',
         'rtc = hyp3_gamma.__main__:rtc',
         'rtc_sentinel.py = hyp3_gamma.rtc.rtc_sentinel:main',
         'geocode = hyp3_gamma.__main__:geocode',

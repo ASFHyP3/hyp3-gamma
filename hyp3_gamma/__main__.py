@@ -24,7 +24,7 @@ from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 log = logging.getLogger(__name__)
 
 
-def entry():
+def main():
     parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('++version', action='version', version=f'hyp3_gamma {__version__}')
     parser.add_argument(
@@ -165,17 +165,6 @@ def insar():
             thumbnail = create_thumbnail(browse)
             upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
             upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix)
-
-
-def main():
-    """
-    Main entrypoint for hyp3_gamma
-    """
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-    log.propagate = False
-
-    entry()
 
 
 if __name__ == '__main__':
