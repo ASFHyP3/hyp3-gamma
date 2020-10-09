@@ -13,7 +13,7 @@ dependencies:
   - setuptools_scm
   - wheel
   # For running
-  - hyp3lib>=1.6.0,<2
+  - hyp3lib>=1.6.1,<2
   - importlib_metadata
   - numpy
   - pip:

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.2...v2.3.3)
+
+### Changed
+- Upgraded to hyp3lib [v1.6.1](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#161) from v1.6.0
+
 ## [2.3.2](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.1...v2.3.2)
 
 ### Changed
