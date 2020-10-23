@@ -363,13 +363,14 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
 
 
 def create_area_map(data_in, lookup_table, mli_par, dem_par, output_name):
-    logging.info('Creating area map: {output_name}')
+    logging.info(f'Creating area map: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
     width_out = getParameter(dem_par, 'width')
     nlines_out = getParameter(dem_par, 'nlines')
 
     with NamedTemporaryFile() as temp_file:
-        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2', uselogging=True)
+        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2',
+                uselogging=True)
         execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}', uselogging=True)
 
 
@@ -594,7 +595,8 @@ def rtc_sentinel_gamma(in_file,
                 browse_res, dem, terms, par=par, orbit_file=orbit_file)
 
     if include_area_map:
-        create_area_map(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par', f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area_map.tif')
+        create_area_map(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
+                        f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area_map.tif')
 
     if cpol:
         rtc_name = f'{out_name}_{cpol}.tif'
