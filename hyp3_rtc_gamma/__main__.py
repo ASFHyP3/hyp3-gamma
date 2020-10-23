@@ -61,6 +61,7 @@ def main_v2():
     parser.add_argument('--dem-matching', type=string_is_true, default=False)
     parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
+    parser.add_argument('--include-area-map', type=string_is_true, default=False)
     parser.add_argument('granule')
     args = parser.parse_args()
 
@@ -79,6 +80,7 @@ def main_v2():
                         pwr_flag=(args.scale == 'power'),
                         gamma_flag=(args.radiometry == 'gamma0'),
                         filter_flag=args.speckle_filter,
+                        include_area_map=args.include_area_map,
                     )
 
     if not args.include_dem:
