@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from math import isclose
 from pathlib import Path
 from secrets import token_hex
+from tempfile import NamedTemporaryFile
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
@@ -361,13 +362,14 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     os.chdir(home_dir)
 
 
-def create_area_map(mli_par, dem_seg_par, input_pix, input_map, output_name):
-    mli_width = getParameter(mli_par, 'range_samples')
-    dem_width = getParameter(dem_seg_par, 'width')
-    dem_lines = getParameter(dem_seg_par, 'nlines')
+def create_area_map(mli_par, dem_par, data_in, lookup_table, output_name):
+    width_in = getParameter(mli_par, 'range_samples')
+    width_out = getParameter(dem_par, 'width')
+    nlines_out = getParameter(dem_par, 'nlines')
 
-    execute(f'geocode_back {input_pix} {mli_width} {input_map} area_map.pix {dem_width} {dem_lines} 2 0', uselogging=True)
-    execute(f'data2geotiff {dem_seg_par} area_map.pix 2 {output_name}', uselogging=True)
+    with NamedTemporaryFile() as temp_file:
+        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2', uselogging=True)
+        execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}', uselogging=True)
 
 
 def create_browse_images(out_name, pol, cpol, browse_res):
