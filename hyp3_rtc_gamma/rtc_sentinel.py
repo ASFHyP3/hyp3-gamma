@@ -668,7 +668,8 @@ def main():
     parser.add_argument('--output', help='base name of the output files')
     parser.add_argument("--par", help="Stack processing - use specified offset file and don't match")
     parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
-    parser.add_argument("-a", "--include-scattering-area", action="store_true", help="Include a geotiff of scattering area in the output package")
+    parser.add_argument("-a", "--include-scattering-area", action="store_true",
+                        help="Include a geotiff of scattering area in the output package")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
