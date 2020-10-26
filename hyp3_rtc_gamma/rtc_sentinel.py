@@ -156,7 +156,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
 
 
 def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_area_map, orbit_file):
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_scattering_area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
     logging.info("    Output name                       : {}".format(out_name))
@@ -177,7 +177,7 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
         logging.info("    Offset file                       : {}".format(par))
     logging.info("    Process crosspol                  : {}".format(not no_cross_pol))
     logging.info("    Smooth DEM tiles                  : {}".format(smooth))
-    logging.info("    Include Area Map                  : {}".format(include_area_map))
+    logging.info("    Include Scattering Area           : {}".format(include_scattering_area))
     logging.info("    Orbit File                        : {}".format(orbit_file))
 
 
@@ -362,8 +362,8 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     os.chdir(home_dir)
 
 
-def create_area_map(data_in, lookup_table, mli_par, dem_par, output_name):
-    logging.info(f'Creating area map: {output_name}')
+def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
+    logging.info(f'Creating scattering area geotiff: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
     width_out = getParameter(dem_par, 'width')
     nlines_out = getParameter(dem_par, 'nlines')
@@ -509,7 +509,7 @@ def rtc_sentinel_gamma(in_file,
                        par=None,
                        no_cross_pol=False,
                        smooth=False,
-                       include_area_map=False):
+                       include_scattering_area=False):
 
     log_file = configure_log_file()
 
@@ -546,7 +546,7 @@ def rtc_sentinel_gamma(in_file,
         out_name = get_product_name(in_file, orbit_file, res, gamma_flag, pwr_flag, filter_flag, match_flag)
 
     report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_area_map, orbit_file)
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_scattering_area, orbit_file)
 
     orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
 
@@ -594,9 +594,9 @@ def rtc_sentinel_gamma(in_file,
                 match_flag, dead_flag, gamma_flag, filter_flag, pwr_flag,
                 browse_res, dem, terms, par=par, orbit_file=orbit_file)
 
-    if include_area_map:
-        create_area_map(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
-                        f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area_map.tif')
+    if include_scattering_area:
+        create_area_geotiff(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
+                            f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area_map.tif')
 
     if cpol:
         rtc_name = f'{out_name}_{cpol}.tif'
@@ -668,7 +668,7 @@ def main():
     parser.add_argument('--output', help='base name of the output files')
     parser.add_argument("--par", help="Stack processing - use specified offset file and don't match")
     parser.add_argument("--nocrosspol", action="store_true", help="Do not process the cross pol image")
-    parser.add_argument("-a", "--include-area-map", action="store_true", help="Include area map in output package")
+    parser.add_argument("-a", "--include-scattering-area", action="store_true", help="Include a geotiff of scattering area in the output package")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -691,7 +691,7 @@ def main():
                        par=args.par,
                        no_cross_pol=args.nocrosspol,
                        smooth=args.smooth,
-                       include_area_map=args.include_area_map)
+                       include_scattering_area=args.include_scattering_area)
 
 
 if __name__ == "__main__":
