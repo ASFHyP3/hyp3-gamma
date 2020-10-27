@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+* A new `--include-scattering-area` option has been added to `rtc_sentinel.py` and `hyp3_rtc_gamma_v2` to include a geotiff of scattering area in the product package.  This supports creation of composites of RTC images using Local Resolution Weighting per Small (2012) https://doi.org/10.1109/IGARSS.2012.6350465.
+
+### Removed
+* `rtc_sentinel.py` no longer creates a flattened backscatter image
+
 ## [2.3.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.3...v2.3.4)
 
 ### Changed
