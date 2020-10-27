@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [unreleased]
 
 ### Added
-* A new `--include-scattering-area` option has been added to `rtc_sentinel.py` and `hyp3_rtc_gamma_v2` to include a geotiff of scattering area in the product package.  This supports creation of composites of RTC images using Local Resolution Weighting per https://ieeexplore.ieee.org/document/6350465.
+* A new `--include-scattering-area` option has been added to `rtc_sentinel.py` and `hyp3_rtc_gamma_v2` to include a geotiff of scattering area in the product package.  This supports creation of composites of RTC images using Local Resolution Weighting per Small (2012) https://doi.org/10.1109/IGARSS.2012.6350465.
 
 ### Removed
 * `rtc_sentinel.py` no longer creates a flattened backscatter image
