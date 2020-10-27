@@ -596,7 +596,7 @@ def rtc_sentinel_gamma(in_file,
 
     if include_scattering_area:
         create_area_geotiff(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
-                            f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area_map.tif')
+                            f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area.tif')
 
     if cpol:
         rtc_name = f'{out_name}_{cpol}.tif'
