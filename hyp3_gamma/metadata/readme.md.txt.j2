@@ -57,9 +57,8 @@ The files generated in this process include:
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 5. A layover-shadow mask
 6. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
-7. An xml file in ISO 19115-2 format, describing all of the products
-8. A shapefile indicating the data and raster extents
-9. Log file
+7. A shapefile indicating the data and raster extents
+8. Log file
 
 See below for detailed descriptions of each of the products.
 
@@ -153,17 +152,12 @@ ArcGIS users should take care not to edit the xml files directly, or to change f
 Users who do not use ArcGIS to interact with the data may still find the information included in the individual xml files very useful, although the xml tag system makes it look cluttered in a text editor or browser window.
 
 -------------
-## 7. General metadata xml file in ISO 19115-2 format
-
-The iso.xml file contains general information about the processing of this product and the resulting files, compliant with ISO 19115-2 standards.
-
--------------
-## 8. Shapefile
+## 7. Shapefile
 
 The shapefile (comprised of the four files tagged with _shape) contains a polygon indicating the extent of actual data (pixels with values other than NoData).
 
 -------------
-## 9. Log file
+## 8. Log file
 
 A textfile is generated during processing, which includes the parameters used and step-by-step processing history for the product. It has a .log extension.
 
