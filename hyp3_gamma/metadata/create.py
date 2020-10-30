@@ -1,6 +1,6 @@
-import copy
 import re
 from base64 import b64encode
+from copy import deepcopy
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -173,8 +173,6 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
 
 
 def create_readme(payload: dict) -> Path:
-    payload = copy.deepcopy(payload)
-
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{payload["polarizations"][0]}.tif'
 
     return create_metadata_file(
@@ -183,7 +181,7 @@ def create_readme(payload: dict) -> Path:
 
 
 def create_product_xmls(payload: dict) -> List[Path]:
-    payload = copy.deepcopy(payload)
+    payload = deepcopy(payload)
 
     output_files = []
     for pol in payload['polarizations']:
@@ -198,7 +196,6 @@ def create_product_xmls(payload: dict) -> List[Path]:
 
 
 def create_dem_xml(payload: dict) -> Path:
-    payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_dem.tif'
 
     dem_template_id = get_dem_template_id(payload['dem_name'])
@@ -207,7 +204,6 @@ def create_dem_xml(payload: dict) -> Path:
 
 
 def create_browse_xmls(payload: dict) -> List[Path]:
-    payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}.png'
 
     output_files = [
@@ -224,19 +220,16 @@ def create_browse_xmls(payload: dict) -> List[Path]:
 
 
 def create_inc_map_xml(payload: dict) -> Path:
-    payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_inc_map.tif'
     return create_metadata_file(payload, 'inc_map.xml.j2', reference_file)
 
 
 def create_ls_map_xml(payload: dict) -> Path:
-    payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_ls_map.tif'
     return create_metadata_file(payload, 'ls_map.xml.j2', reference_file)
 
 
 def create_area_xml(payload: dict) -> Path:
-    payload = copy.deepcopy(payload)
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_area.tif'
     return create_metadata_file(payload, 'area.xml.j2', reference_file)
 
@@ -246,6 +239,7 @@ def create_metadata_file(payload: dict, template: str, reference_file: Path, out
     if not reference_file.exists():
         return None
 
+    payload = deepcopy(payload)
     info = gdal.Info(str(reference_file), format='json')
     payload['pixel_spacing'] = info['geoTransform'][1]
     payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
