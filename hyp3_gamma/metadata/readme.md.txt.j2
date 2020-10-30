@@ -55,10 +55,11 @@ The files generated in this process include:
 2. Browse images (PNG and KMZ format) in grayscale and color (when dual-pol is available)
 3. A copy of the DEM used to correct the data (included in standard products; you can choose to omit this layer when custom ordering imagery)
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
-5. A layover-shadow mask
-6. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
-7. A shapefile indicating the data and raster extents
-8. Log file
+5. A local scattering area map (included in standard products; you can choose to omit this layer when custom ordering imagery)
+6. A layover-shadow mask
+7. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
+8. A shapefile indicating the data and raster extents
+9. Log file
 
 See below for detailed descriptions of each of the products.
 
@@ -109,7 +110,14 @@ The incidence angle map is included with standard products, but is optional when
 This map records the incidence angle for each pixel in the RTC image. The incidence angle is the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians.
 
 -------------
-## 5. Layover-shadow mask
+## 5. Scattering area map
+
+The scattering area map is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _area.tif
+
+This map records the scattering area for each pixel in the RTC image. The scattering area is calculated based on the effectively illuminated terrain surface using a digital elevation model, expressed in TODO.
+
+-------------
+## 6. Layover-shadow mask
 
 The layover/shadow mask indicates which pixels in the RTC image have been affected by layover and shadow. This layer is tagged with _ls_map.tif
 
@@ -143,7 +151,7 @@ _There are 17 possible different pixel values, indicating the layover, shadow, a
 31 Affected by shadow and layover; look angle < slope and opposite slope angle
 
 -------------
-## 6. ArcGIS-compatible xml metadata files
+## 7. ArcGIS-compatible xml metadata files
 
 Each raster in this folder has an associated xml file. It is named with the same filename as the raster, but also includes a .xml extension. When any of the rasters are viewed in ArcGIS, the associated xml file is recognized by the software, and the contents will display in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro) for that raster. Once the file is viewed in ArcGIS, the software will update the xml file to include metadata inherent to the raster (geographic extent, raster format, etc.) along with the descriptive metadata included in the original xml file.
 
@@ -152,12 +160,12 @@ ArcGIS users should take care not to edit the xml files directly, or to change f
 Users who do not use ArcGIS to interact with the data may still find the information included in the individual xml files very useful, although the xml tag system makes it look cluttered in a text editor or browser window.
 
 -------------
-## 7. Shapefile
+## 8. Shapefile
 
 The shapefile (comprised of the four files tagged with _shape) contains a polygon indicating the extent of actual data (pixels with values other than NoData).
 
 -------------
-## 8. Log file
+## 9. Log file
 
 A textfile is generated during processing, which includes the parameters used and step-by-step processing history for the product. It has a .log extension.
 
@@ -187,7 +195,7 @@ More information about the mission is available at:
 https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1
 
 Additional information about Sentinel-1 data, imagery, tools and applications is available at:
- https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
 
 *************
 For assistance, contact the Alaska Satellite Facility:
