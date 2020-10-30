@@ -4,7 +4,7 @@ from base64 import b64encode
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
@@ -241,7 +241,7 @@ def create_area_xml(payload: dict) -> Path:
     return create_metadata_file(payload, 'area.xml.j2', reference_file)
 
 
-def create_metadata_file(payload: dict, template: str, reference_file: Path , out_ext: str = 'xml',
+def create_metadata_file(payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
                          strip_ext: bool = False, strip_pol: bool = False) -> Optional[Path]:
     if not reference_file.exists():
         return None
