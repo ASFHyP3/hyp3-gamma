@@ -7,7 +7,7 @@ Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
 The folder and each of its contents all share the same base name, using the following convention:
 ```
-S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_G_defklm_ssss
+S1x_yy_aaaaaaaaTbbbbbb_ppo_RTCzz_u_defklm_ssss
 x:          Sentinel-1 Mission (A or B)
 yy:         Beam Mode
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
@@ -15,6 +15,7 @@ bbbbbb:     Start Time of Acquisition (HHMMSS)
 pp:         Polarization
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 zz:         Terrain Correction Resolution
+u:          Software Package Used: GAMMA (G)
 d:          Gamma-0 (g) or Sigma-0 (s) Output
 e:          Power (p) or Amplitude (a) Output
 f:          Unmasked (u) or Water Masked (w)
@@ -114,7 +115,7 @@ This map records the incidence angle for each pixel in the RTC image. The incide
 
 The scattering area map is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _area.tif
 
-This map records the scattering area for each pixel in the RTC image. The scattering area is calculated based on the effectively illuminated terrain surface using a digital elevation model, expressed in TODO.
+This map records the scattering area for each pixel in the RTC image. The scattering area is calculated based on the effectively illuminated terrain surface using a digital elevation model, expressed in square meters.
 
 -------------
 ## 6. Layover-shadow mask
