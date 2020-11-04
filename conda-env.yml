@@ -25,7 +25,3 @@ dependencies:
     # for packaging and testing
     - s3pypi
     - safety
-    # For running
-    - --trusted-host hyp3-pypi.s3-website-us-east-1.amazonaws.com
-      --extra-index-url http://hyp3-pypi.s3-website-us-east-1.amazonaws.com
-    - hyp3proclib>=1.0.1,<2
