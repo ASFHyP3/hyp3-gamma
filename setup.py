@@ -1,16 +1,14 @@
-import os
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
-_HERE = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(_HERE, 'README.md'), 'r') as f:
-    long_desc = f.read()
+readme = Path(__file__).parent / 'README.md'
 
 setup(
     name='hyp3_rtc_gamma',
     use_scm_version=True,
     description='HyP3 plugin for radiometric terrain correction using GAMMA',
-    long_description=long_desc,
+    long_description=readme.read_text(),
     long_description_content_type='text/markdown',
 
     url='https://github.com/ASFHyP3/hyp3-rtc-gamma',
@@ -33,7 +31,6 @@ setup(
 
     install_requires=[
         'hyp3lib>=1.6.2,<2',
-        'hyp3proclib>=1.0.1,<2',
         'hyp3_metadata>=0.1.3,<1',
         'importlib_metadata',
         'numpy',
@@ -50,9 +47,8 @@ setup(
     packages=find_packages(),
 
     entry_points={'console_scripts': [
-            'rtc_gamma = hyp3_rtc_gamma.__main__:entry',
-            'hyp3_rtc_gamma = hyp3_rtc_gamma.__main__:main',
-            'hyp3_rtc_gamma_v2 = hyp3_rtc_gamma.__main__:main_v2',
+            'rtc_gamma = hyp3_rtc_gamma.__main__:main',
+            'hyp3_rtc_gamma_v2 = hyp3_rtc_gamma.__main__:rtc',
             'check_coreg.py = hyp3_rtc_gamma.check_coreg:main',
             'rtc_sentinel.py = hyp3_rtc_gamma.rtc_sentinel:main',
             'smooth_dem_tiles.py = hyp3_rtc_gamma.smoothem:main',
