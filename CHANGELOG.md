@@ -17,6 +17,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 * `rtc_sentinel.py` no longer creates a flattened backscatter image
 
+### Fixed
+* `rtc_sentinel.py` now runs successfuly when `--nocrosspol` is specified ([#179](https://github.com/ASFHyP3/hyp3-rtc-gamma/issues/179))
+
 ## [2.3.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.3...v2.3.4)
 
 ### Changed
