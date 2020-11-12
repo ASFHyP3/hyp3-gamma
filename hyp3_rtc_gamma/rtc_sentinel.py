@@ -483,7 +483,7 @@ def add_log(log, full_log):
 
 
 def clean_prod_dir(product_dir):
-    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png']:
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png*', '*area*kmz']:
         for myfile in glob.glob(f'{product_dir}/{pattern}'):
             os.remove(myfile)
 
