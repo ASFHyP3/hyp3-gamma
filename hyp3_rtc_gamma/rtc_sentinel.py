@@ -408,6 +408,11 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     makeAsfBrowse(sigmafile, outfile)
     os.remove(sigmafile)
 
+    infile = "{}_area.tif".format(out_name)
+    outfile = "{}_area".format(out_name)
+    makeAsfBrowse(infile, outfile)
+    os.remove(sigmafile)
+
     raster_boundary2shape(out_name + "_" + pol + ".tif", None, out_name + "_shape.shp", use_closing=False,
                           pixel_shift=True, fill_holes=True)
 
@@ -479,7 +484,7 @@ def add_log(log, full_log):
 
 
 def clean_prod_dir(product_dir):
-    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png']:
         for myfile in glob.glob(f'{product_dir}/{pattern}'):
             os.remove(myfile)
 
