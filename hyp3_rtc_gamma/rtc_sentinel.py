@@ -410,7 +410,10 @@ def create_browse_images(out_name, pol, cpol, browse_res):
 
     infile = "{}_area.tif".format(out_name)
     outfile = "{}_area".format(out_name)
+    sigmafile = infile.replace(".tif", "_sigma.tif")
+    byteSigmaScale(infile, sigmafile)
     makeAsfBrowse(infile, outfile)
+    os.remove(sigmafile)
 
     raster_boundary2shape(out_name + "_" + pol + ".tif", None, out_name + "_shape.shp", use_closing=False,
                           pixel_shift=True, fill_holes=True)
