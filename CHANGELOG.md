@@ -16,7 +16,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of RTC images using Local Resolution Weighting per Small (2012) https://doi.org/10.1109/IGARSS.2012.6350465.
 
 ### Changed
-* Upgraded to hyp3_metadata [v0.1.3](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#013) from v0.1.2
+* Upgraded to hyp3_metadata [v0.1.4](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#014) from v0.1.2
 
 ### Removed
 * `rtc_sentinel.py` no longer creates a flattened backscatter image.
