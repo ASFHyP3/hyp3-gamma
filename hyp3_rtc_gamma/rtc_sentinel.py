@@ -204,21 +204,21 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
     logging.info("Running RTC process... initializing")
     geo_dir = "geo_{}".format(pol)
-    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+    execute(f"mk_geo_radcal2 {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
             f" {geo_dir}/area.dem_par {geo_dir} image {res} 0 {options}", uselogging=True)
 
     if match_flag and not par:
         fail = False
         logging.info("Running RTC process... coarse matching")
         try:
-            execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+            execute(f"mk_geo_radcal2 {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
                     f" {geo_dir}/area.dem_par {geo_dir} image {res} 1 {options}", uselogging=True)
         except ExecuteError:
             logging.warning("WARNING: Determination of the initial offset failed, skipping initial offset")
 
         logging.info("Running RTC process... fine matching")
         try:
-            execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+            execute(f"mk_geo_radcal2 {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
                     f" {geo_dir}/area.dem_par {geo_dir} image {res} 2 {options}", uselogging=True)
         except ExecuteError:
             if not dead_flag:
@@ -243,7 +243,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     logging.info("Running RTC process... finalizing")
     if par:
         shutil.copy(par, "{}/image.diff_par".format(geo_dir))
-    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
+    execute(f"mk_geo_radcal2 {mgrd} {mgrd}.par {dem} {dem}.par {geo_dir}/area.dem"
             f" {geo_dir}/area.dem_par {geo_dir} image {res} 3 {options}", uselogging=True)
 
     os.chdir(geo_dir)
@@ -328,7 +328,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
     if par:
         shutil.copy(par, "{}/image.diff_par".format(geo_dir))
 
-    execute(f"mk_geo_radcal {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem"
+    execute(f"mk_geo_radcal2 {mgrd} {mgrd}.par {dem} {dem}.par {mdir}/area.dem"
             f" {mdir}/area.dem_par {geo_dir} image {res} 3 {options}", uselogging=True)
 
     os.chdir(geo_dir)
@@ -595,7 +595,7 @@ def rtc_sentinel_gamma(in_file,
                 browse_res, dem, terms, par=par, orbit_file=orbit_file)
 
     if include_scattering_area:
-        create_area_geotiff(f'geo_{pol}/image_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
+        create_area_geotiff(f'geo_{pol}/image_gamma0_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
                             f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area.tif')
 
     if cpol:
