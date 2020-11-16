@@ -393,10 +393,11 @@ def create_browse_images(out_name, pol, cpol, browse_res):
 
     for file_type in ['inc_map', 'dem', 'area']:
         tif = f'{out_dir}/{out_name}_{file_type}.tif'
-        outfile = f'{out_dir}/{out_name}_{file_type}'
-        with NamedTemporaryFile() as rescaled_tif:
-            byteSigmaScale(tif, rescaled_tif.name)
-            makeAsfBrowse(rescaled_tif.name, outfile)
+        if os.path.exists(tif):
+            outfile = f'{out_dir}/{out_name}_{file_type}'
+            with NamedTemporaryFile() as rescaled_tif:
+                byteSigmaScale(tif, rescaled_tif.name)
+                makeAsfBrowse(rescaled_tif.name, outfile)
 
     pol_tif = f'{out_dir}/{out_name}_{pol}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
