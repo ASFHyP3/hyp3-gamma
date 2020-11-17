@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.4...v2.4.0)
+
+**HyP3 v1 is no longer supported as of this release.**
+
+### Added
+* A new `--include-scattering-area` option has been added to `rtc_sentinel.py` and `hyp3_rtc_gamma_v2`
+  to include a geotiff of scattering area in the product package.  This supports creation of composites
+  of RTC images using Local Resolution Weighting per Small (2012) https://doi.org/10.1109/IGARSS.2012.6350465.
+
+### Changed
+* Upgraded to hyp3_metadata [v0.1.4](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#014) from v0.1.2
+
+### Removed
+* `rtc_sentinel.py` no longer creates a flattened backscatter image.
+* The `hyp3_rtc_gamma` package entrypoint and HyP3 v1 support has been removed.
+* `rtc_gamma` package entrypoint will now pass arguments to the `hyp3_rtc_gamma_v2` entrypoint by default.
+
+### Fixed
+* `rtc_sentinel.py` now runs successfully when `--nocrosspol` is specified ([#179](https://github.com/ASFHyP3/hyp3-rtc-gamma/issues/179))
+
 ## [2.3.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.3...v2.3.4)
 
 ### Changed
@@ -92,7 +112,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 * The v2 entrypoint will now upload browse images and thumnail images in addition to the zip file.
-* Upgrade to [hyp3-lib 1.3.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#130).  In particular, geotiff products no longer include overviews.
+* Upgrade to [hyp3-lib 1.3.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#130).
+  In particular, geotiff products no longer include overviews.
 * Eliminated seprate "low-res" (1024x) and "high-res" (2048x) browse image resolutions in favor of a single 2048x image.
 
 ## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
@@ -106,11 +127,15 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [2.0.2](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.1...v2.0.2)
 
 ### Changed
-* The v2 entrypoint will now make up to three retry attempts if it fails to download the input granule from the ASF archive.
-* Changed the name of the product README file to `<product_name>.README.txt`, e.g. `S1A_IW_RT30_20170708T161200_G_gpn.README.txt`
-* Calls to mk_geo_radcal will no longer include the `-j do not use layover-shadow map in the calculation of pixel_area` flag.  The layover-shadow map will now be consistently applied to all products.
+* The v2 entrypoint will now make up to three retry attempts if it fails to download the input 
+  granule from the ASF archive.
+* Changed the name of the product README file to `<product_name>.README.txt`,
+  e.g. `S1A_IW_RT30_20170708T161200_G_gpn.README.txt`
+* Calls to mk_geo_radcal will no longer include the `-j do not use layover-shadow map in the calculation of pixel_area`
+  flag.  The layover-shadow map will now be consistently applied to all products.
 * Upgraded to [hyp3-lib v1.2.2](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#v122)
-* Removed custom blank_bad_data.py from mk_geo_radcal processing.  Border pixels for older GRD products are now cleaned using the default `make_edge` setting of `par_S1_GRD`.
+* Removed custom blank_bad_data.py from mk_geo_radcal processing.  Border pixels for older GRD products
+  are now cleaned using the default `make_edge` setting of `par_S1_GRD`.
 
 ## [2.0.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.0...v2.0.1)
 

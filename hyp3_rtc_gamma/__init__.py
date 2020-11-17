@@ -9,7 +9,7 @@ try:
 except PackageNotFoundError:
     print('package is not installed!\n'
           'Install in editable/develop mode via (from the top of this repo):\n'
-          '   pip install -e .\n'
+          '   python -m pip install -e .[develop]\n'
           'Or, to just get the version number use:\n'
           '   python setup.py --version')
 
