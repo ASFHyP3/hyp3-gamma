@@ -200,7 +200,7 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
 
     options = "-n {} -q ".format(terms)
     if gamma_flag:
-        options += "-c 1" 
+        options += "-c 1"
     else:
         options += "-c 0"
 
@@ -312,7 +312,7 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
 
     options = "-n {} -q ".format(terms)
     if gamma_flag:
-        options += "-c 1" 
+        options += "-c 1"
     else:
         options += "-c 0"
 
@@ -589,8 +589,10 @@ def rtc_sentinel_gamma(in_file,
                 browse_res, dem, terms, par=par, orbit_file=orbit_file)
 
     if include_scattering_area:
-        create_area_geotiff(f'geo_{pol}/image_gamma0.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
-                            f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area.tif')
+        create_area_geotiff(
+            f'geo_{pol}/image_gamma0.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
+            f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area.tif'
+        )
 
     if cpol:
         rtc_name = f'{out_name}_{cpol}.tif'
