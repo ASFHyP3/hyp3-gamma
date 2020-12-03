@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.4.0...v2.4.1)
+
+### Changed
+* `rtc_sentinel.py` now uses GAMMA's updated `mk_geo_radcal2` instead of `mk_geo_radcal`
+  to remove no-data values in lakes and rivers
+
 ## [2.4.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.4...v2.4.0)
 
 **HyP3 v1 is no longer supported as of this release.**
