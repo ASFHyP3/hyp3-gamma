@@ -11,6 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * `rtc_sentinel.py` now uses GAMMA's updated `mk_geo_radcal2` instead of `mk_geo_radcal`
   to remove no-data values in lakes and rivers
+* Upgraded to hyp3lib [v1.6.3](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#163) from v1.6.2
 
 ## [2.4.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.4...v2.4.0)
 
