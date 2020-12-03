@@ -198,9 +198,11 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
         execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
-    options = "-p -n {} -q -c ".format(terms)
+    options = "-n {} -q ".format(terms)
     if gamma_flag:
-        options += "-g "
+        options += "-c 1" 
+    else:
+        options += "-c 0"
 
     logging.info("Running RTC process... initializing")
     geo_dir = "geo_{}".format(pol)
@@ -249,8 +251,8 @@ def process_pol(in_file, rtc_name, out_name, pol, res, look_fact, match_flag, de
     os.chdir(geo_dir)
 
     # Make Geotiff Files
-    execute(f"data2geotiff area.dem_par image_0.ls_map 5 {out_name}.ls_map.tif", uselogging=True)
-    execute(f"data2geotiff area.dem_par image_0.inc_map 2 {out_name}.inc_map.tif", uselogging=True)
+    execute(f"data2geotiff area.dem_par image.ls_map 5 {out_name}.ls_map.tif", uselogging=True)
+    execute(f"data2geotiff area.dem_par image.inc_map 2 {out_name}.inc_map.tif", uselogging=True)
     execute("data2geotiff area.dem_par area.dem 2 outdem.tif", uselogging=True)
 
     gdal.Translate("{}.dem.tif".format(out_name), "outdem.tif", outputType=gdal.GDT_Int16)
@@ -308,9 +310,11 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
         execute(f"enh_lee {mgrd} temp.mgrd {width} {el_looks} 1 7 7", uselogging=True)
         shutil.move("temp.mgrd", mgrd)
 
-    options = "-p -n {} -q -c ".format(terms)
+    options = "-n {} -q ".format(terms)
     if gamma_flag:
-        options += "-g "
+        options += "-c 1" 
+    else:
+        options += "-c 0"
 
     home_dir = os.getcwd()
     geo_dir = "geo_{}".format(cpol)
@@ -320,9 +324,9 @@ def process_2nd_pol(in_file, rtc_name, cpol, res, look_fact, gamma_flag, filter_
 
     shutil.copy("geo_{}/image.diff_par".format(mpol), "{}".format(geo_dir))
     os.symlink("../geo_{}/image_0.map_to_rdc".format(mpol), "{}/image_0.map_to_rdc".format(geo_dir))
-    os.symlink("../geo_{}/image_0.ls_map".format(mpol), "{}/image_0.ls_map".format(geo_dir))
-    os.symlink("../geo_{}/image_0.inc_map".format(mpol), "{}/image_0.inc_map".format(geo_dir))
-    os.symlink("../geo_{}/image_0.sim".format(mpol), "{}/image_0.sim".format(geo_dir))
+    os.symlink("../geo_{}/image.ls_map".format(mpol), "{}/image.ls_map".format(geo_dir))
+    os.symlink("../geo_{}/image.inc_map".format(mpol), "{}/image.inc_map".format(geo_dir))
+    os.symlink("../geo_{}/image_gamma0.pix".format(mpol), "{}/image_gamma0.pix".format(geo_dir))
     os.symlink("../geo_{}/area.dem_par".format(mpol), "{}/area.dem_par".format(geo_dir))
 
     if par:
@@ -375,43 +379,33 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
 
 
 def create_browse_images(out_name, pol, cpol, browse_res):
-    ampfile = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
+    out_dir = 'PRODUCT'
+    pol_amp_tif = f'geo_{pol}/{out_name}_{pol}_{browse_res}m.tif'
+
     if cpol:
-        ampfile2 = "geo_{pol}/{name}_{pol}_{res}m.tif".format(pol=cpol, name=out_name, res=browse_res)
+        cpol_amp_tif = f'geo_{cpol}/{out_name}_{cpol}_{browse_res}m.tif'
         threshold = -24
-        outfile = "{}_rgb.tif".format(out_name)
-        rtc2color(ampfile, ampfile2, threshold, outfile, amp=True, cleanup=True)
-        colorname = "PRODUCT/{}_rgb".format(out_name)
-        makeAsfBrowse(outfile, colorname)
+        outfile = f'{out_dir}/{out_name}_rgb'
+        with NamedTemporaryFile() as rgb_tif:
+            rtc2color(pol_amp_tif, cpol_amp_tif, threshold, rgb_tif.name, amp=True, cleanup=True)
+            makeAsfBrowse(rgb_tif.name, outfile)
 
-    os.chdir("geo_{}".format(pol))
-    outdir = "../PRODUCT"
-    outfile = "{}/{}".format(outdir, out_name)
-    ampfile = "{name}_{pol}_{res}m.tif".format(pol=pol, name=out_name, res=browse_res)
-    sigmafile = ampfile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(ampfile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
+    outfile = f'{out_dir}/{out_name}'
+    with NamedTemporaryFile() as rescaled_tif:
+        byteSigmaScale(pol_amp_tif, rescaled_tif.name)
+        makeAsfBrowse(rescaled_tif.name, outfile)
 
-    os.chdir("../PRODUCT")
+    for file_type in ['inc_map', 'dem', 'area']:
+        tif = f'{out_dir}/{out_name}_{file_type}.tif'
+        if os.path.exists(tif):
+            outfile = f'{out_dir}/{out_name}_{file_type}'
+            with NamedTemporaryFile() as rescaled_tif:
+                byteSigmaScale(tif, rescaled_tif.name)
+                makeAsfBrowse(rescaled_tif.name, outfile)
 
-    infile = "{}_inc_map.tif".format(out_name)
-    outfile = "{}_inc_map".format(out_name)
-    sigmafile = infile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(infile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
-    os.remove(sigmafile)
-
-    infile = "{}_dem.tif".format(out_name)
-    outfile = "{}_dem".format(out_name)
-    sigmafile = infile.replace(".tif", "_sigma.tif")
-    byteSigmaScale(infile, sigmafile)
-    makeAsfBrowse(sigmafile, outfile)
-    os.remove(sigmafile)
-
-    raster_boundary2shape(out_name + "_" + pol + ".tif", None, out_name + "_shape.shp", use_closing=False,
-                          pixel_shift=True, fill_holes=True)
-
-    os.chdir("..")
+    pol_tif = f'{out_dir}/{out_name}_{pol}.tif'
+    shapefile = f'{out_dir}/{out_name}_shape.shp'
+    raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
 def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag, roi,
@@ -479,7 +473,7 @@ def add_log(log, full_log):
 
 
 def clean_prod_dir(product_dir):
-    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz']:
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png*', '*area*kmz']:
         for myfile in glob.glob(f'{product_dir}/{pattern}'):
             os.remove(myfile)
 
@@ -595,7 +589,7 @@ def rtc_sentinel_gamma(in_file,
                 browse_res, dem, terms, par=par, orbit_file=orbit_file)
 
     if include_scattering_area:
-        create_area_geotiff(f'geo_{pol}/image_gamma0_1.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
+        create_area_geotiff(f'geo_{pol}/image_gamma0.pix', f'geo_{pol}/image_1.map_to_rdc', f'{out_name}.{pol}.mgrd.par',
                             f'geo_{pol}/{dem}_par', f'PRODUCT/{out_name}_area.tif')
 
     if cpol:
