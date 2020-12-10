@@ -37,9 +37,9 @@ from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
-import hyp3_rtc_gamma
-from hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
-from hyp3_rtc_gamma.smoothem import smooth_dem_tiles
+import hyp3_gamma
+from hyp3_gamma.hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
+from hyp3_gamma.hyp3_rtc_gamma.smoothem import smooth_dem_tiles
 
 
 def fetch_orbit_file(in_file):
@@ -617,8 +617,8 @@ def rtc_sentinel_gamma(in_file,
         dem_name=dem_type,
         processing_date=datetime.now(timezone.utc),
         looks=looks,
-        plugin_name=hyp3_rtc_gamma.__name__,
-        plugin_version=hyp3_rtc_gamma.__version__,
+        plugin_name=hyp3_gamma.__name__,
+        plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
     )
