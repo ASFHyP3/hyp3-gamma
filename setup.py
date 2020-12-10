@@ -5,13 +5,13 @@ from setuptools import find_packages, setup
 readme = Path(__file__).parent / 'README.md'
 
 setup(
-    name='hyp3_rtc_gamma',
+    name='hyp3_gamma',
     use_scm_version=True,
-    description='HyP3 plugin for radiometric terrain correction using GAMMA',
+    description='HyP3 plugin for SAR processing with GAMMA',
     long_description=readme.read_text(),
     long_description_content_type='text/markdown',
 
-    url='https://github.com/ASFHyP3/hyp3-rtc-gamma',
+    url='https://github.com/ASFHyP3/hyp3-gamma',
 
     author='ASF APD/Tools Team',
     author_email='uaf-asf-apd@alaska.edu',
@@ -47,7 +47,7 @@ setup(
     packages=find_packages(),
 
     entry_points={'console_scripts': [
-            'rtc_gamma = hyp3_rtc_gamma.__main__:main',
+            'hyp3_gamma = hyp3_rtc_gamma.__main__:main',
             'hyp3_rtc_gamma_v2 = hyp3_rtc_gamma.__main__:rtc',
             'check_coreg.py = hyp3_rtc_gamma.check_coreg:main',
             'rtc_sentinel.py = hyp3_rtc_gamma.rtc_sentinel:main',

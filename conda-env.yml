@@ -1,4 +1,4 @@
-name: hyp3-rtc-gamma
+name: hyp3-gamma
 channels:
   - conda-forge
   - nodefaults

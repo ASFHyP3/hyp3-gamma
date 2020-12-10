@@ -1,6 +1,6 @@
-# HyP3 RTC GAMMA
+# HyP3 GAMMA
 
-HyP3 plugin for radiometric terrain correction using GAMMA
+HyP3 plugin for SAR processing with GAMMA
 
 ## Developer Setup
 
@@ -8,13 +8,13 @@ Ubuntu 18.0.4 is recommended for GAMMA support.
 
 1. Install GAMMA
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
-1. Install hyp3-rtc-gamma
+1. Install `hyp3_gamma`
    ```
-   git clone git@github.com:ASFHyP3/hyp3-rtc-gamma.git
-   cd hyp3-rtc-gamma
+   git clone git@github.com:ASFHyP3/hyp3-gamma.git
+   cd hyp3-gamma
    conda env create -f conda-env.yml
-   conda activate hyp3-rtc-gamma
-   pip install -e .
+   conda activate hyp3-gamma
+   pip install -e .[develop]
    ```
 1. Run It!
    ```
