@@ -38,8 +38,8 @@ from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal
 
 import hyp3_gamma
-from hyp3_gamma.hyp3_rtc_gamma.check_coreg import CoregistrationError, check_coreg
-from hyp3_gamma.hyp3_rtc_gamma.smoothem import smooth_dem_tiles
+from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
+from hyp3_gamma.rtc.smoothem import smooth_dem_tiles
 
 
 def fetch_orbit_file(in_file):

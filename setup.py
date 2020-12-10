@@ -49,9 +49,9 @@ setup(
     entry_points={'console_scripts': [
             'hyp3_gamma = hyp3_gamma.__main__:main',
             'rtc = hyp3_gamma.__main__:rtc',
-            'check_coreg.py = hyp3_gamma.hyp3_rtc_gamma.check_coreg:main',
-            'rtc_sentinel.py = hyp3_gamma.hyp3_rtc_gamma.rtc_sentinel:main',
-            'smooth_dem_tiles.py = hyp3_gamma.hyp3_rtc_gamma.smoothem:main',
+            'check_coreg.py = hyp3_gamma.rtc.check_coreg:main',
+            'rtc_sentinel.py = hyp3_gamma.rtc.rtc_sentinel:main',
+            'smooth_dem_tiles.py = hyp3_gamma.rtc.smoothem:main',
         ]
     },
 

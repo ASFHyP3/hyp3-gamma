@@ -16,7 +16,7 @@ from hyp3lib.scene import get_download_url
 from hyp3lib.util import string_is_true
 from pkg_resources import load_entry_point
 
-from hyp3_gamma.hyp3_rtc_gamma.rtc_sentinel import rtc_sentinel_gamma
+from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 
 
 def main():
