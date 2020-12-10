@@ -6,14 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.4.0...v2.4.1)
+##[3.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.4.1...v3.0.0)
+
+**HyP3 RTC GAMMA as been transformed into HyP3 GAMMA; a *processor* based plugin**
+
+### Changed
+* `hyp3_rtc_gamma` has been transformed into a `hyp3_gamma` package
+    * `hyp3_rtc_gamma.__init__` has moved to `hyp3_gamma.__init__`
+    * `hyp3_rtc_gamma.__main__` has moved to `hyp3_gamma.__main__`
+    * `hyp3_rtc_gamma.check_coreg` has moved to `hyp3_gamma.rtc.check_coreg`
+    * `hyp3_rtc_gamma.rtc_sentinel` has moved to `hyp3_gamma.rtc.rtc_sentinel`
+    * `hyp3_rtc_gamma.smoothem` has moved to `hyp3_gamma.rtc.smoothem`
+
+* `hyp3_gamma` now provides these entrypoints:
+    * `hyp3_gamma` is the main HyP3 entrypoint
+    * `rtc` provides the RTC process interface to HyP3
+    * `rtc_sentinel.py` is the RTC (science code) processor
+    * `check_coreg.py` for checking the results of the GAMMA coregistration process
+    * `smoothdem.py` for smoothing and filling holes in DEMs
+
+## [2.4.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.4.0...v2.4.1)
 
 ### Changed
 * `rtc_sentinel.py` now uses GAMMA's updated `mk_geo_radcal2` instead of `mk_geo_radcal`
   to remove no-data values in lakes and rivers
+
 * Upgraded to hyp3lib [v1.6.3](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#163) from v1.6.2
 
-## [2.4.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.4...v2.4.0)
+## [2.4.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.3.4...v2.4.0)
 
 **HyP3 v1 is no longer supported as of this release.**
 
@@ -31,25 +51,25 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `rtc_gamma` package entrypoint will now pass arguments to the `hyp3_rtc_gamma_v2` entrypoint by default.
 
 ### Fixed
-* `rtc_sentinel.py` now runs successfully when `--nocrosspol` is specified ([#179](https://github.com/ASFHyP3/hyp3-rtc-gamma/issues/179))
+* `rtc_sentinel.py` now runs successfully when `--nocrosspol` is specified ([#179](https://github.com/ASFHyP3/hyp3-gamma/issues/179))
 
-## [2.3.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.3...v2.3.4)
+## [2.3.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.3.3...v2.3.4)
 
 ### Changed
 - Upgraded to hyp3lib [v1.6.2](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#162) from v1.6.1
 
-## [2.3.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.2...v2.3.3)
+## [2.3.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.3.2...v2.3.3)
 
 ### Changed
 - Upgraded to hyp3lib [v1.6.1](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#161) from v1.6.0
 
-## [2.3.2](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.1...v2.3.2)
+## [2.3.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.3.1...v2.3.2)
 
 ### Changed
 - Upgraded to hyp3lib [v1.6.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#160) from v1.5.0
 - Upgraded to hyp3_metadata [v0.1.2](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#012) from v0.1.1
 
-## [2.3.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.3.0...v2.3.1)
+## [2.3.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.3.0...v2.3.1)
 
 ### Changed
 * `README.txt` has been renamed to `README.md.txt`
@@ -59,7 +79,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 * Removed the all-white placeholder thumbnail from `_ls_map.tif.xml`
 
-## [2.3.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.2.0...v2.3.0)
+## [2.3.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.2.0...v2.3.0)
 
 ### Added
 * Added cursory developer setup instructions in `README.md`
@@ -71,14 +91,14 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * RTC Gamma products no longer include an ISO 19115-2 .iso.xml metadata file.
 * ASF MapReady is no longer a dependency and has been removed.
 
-## [2.2.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.1.1...v2.2.0)
+## [2.2.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.1.1...v2.2.0)
 
 ### Changed
 * Files now get uploaded to S3 with a `file_type` in v2 tag indicating what the file is
 * Files no longer get a prefix based on file type in v2
 * Removed `lo_flag` from `rtc_sentinel` since it duplicates the functionality of `resolution`
 
-## [2.1.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.1.0...v2.1.1)
+## [2.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.1.0...v2.1.1)
 
 ### Changed
 * Input scenes are now downloaded directly from NGAP distribution endpoint rather than ASF's datapool 
@@ -90,7 +110,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 * Non-functional support for non-Sentinel-1 products
 
-## [2.1.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.6...v2.1.0)
+## [2.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.6...v2.1.0)
 
 ### Changed
 * Implemented new naming convention for output products.  The names of output zips, folders, and files now all share a
@@ -105,17 +125,17 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Upgrade to [hyp3-lib v1.4.1](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#141) from 1.3.0.
 * Install hyp3-lib via conda instead of pip
 
-## [2.0.6](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.5...v2.0.6)
+## [2.0.6](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.5...v2.0.6)
 
 ### Fixed
 * Resolved issue where thumbnail filenames ended in ..png rather than .png
 
-## [2.0.5](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.4...v2.0.5)
+## [2.0.5](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.4...v2.0.5)
 
 ### Added
 * The v2 entrypoint will now create and upload thumbnail images to S3 in addition to browse images
 
-## [2.0.4](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.3...v2.0.4)
+## [2.0.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.3...v2.0.4)
 
 ### Changed
 * The v2 entrypoint will now upload browse images and thumnail images in addition to the zip file.
@@ -123,7 +143,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   In particular, geotiff products no longer include overviews.
 * Eliminated seprate "low-res" (1024x) and "high-res" (2048x) browse image resolutions in favor of a single 2048x image.
 
-## [2.0.3](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.2...v2.0.3)
+## [2.0.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.2...v2.0.3)
 
 ### Fixed
 * Updates the minimum required `hyp3lib` and `hyp3proclib` version to bring in the
@@ -131,7 +151,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the [`default_rtc_resolution` bugfix](https://github.com/asfadmin/hyp3-proc-lib/pull/4),
   respectively
 
-## [2.0.2](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.1...v2.0.2)
+## [2.0.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.1...v2.0.2)
 
 ### Changed
 * The v2 entrypoint will now make up to three retry attempts if it fails to download the input 
@@ -144,14 +164,14 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Removed custom blank_bad_data.py from mk_geo_radcal processing.  Border pixels for older GRD products
   are now cleaned using the default `make_edge` setting of `par_S1_GRD`.
 
-## [2.0.1](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v2.0.0...v2.0.1)
+## [2.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.0...v2.0.1)
 
 ### Changed
 * hyp3-v2 output products are now packaged in a .zip file similar to hyp3-v1 products
 
-## [2.0.0](https://github.com/ASFHyP3/hyp3-rtc-gamma/compare/v1.3.1...v2.0.0)
+## [2.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v1.3.1...v2.0.0)
 
-This is a significant refactor of `hyp3-rtc-gamma` into:
+This is a significant refactor of `hyp3-gamma` into:
 * A `pip` installable package called `hyp3_rtc_gamma`
 * A stand alone, container-based HyP3 plugin
 
