@@ -27,14 +27,14 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.7
-          activate-environment: hyp3-rtc-gamma
+          activate-environment: hyp3-gamma
           environment-file: conda-env.yml
 
       - name: Pytest in conda environment
         shell: bash -l {0}
         run: |
           python -m pip install .[develop]
-          pytest --cov=hyp3_rtc_gamma
+          pytest --cov=hyp3_gamma
 
       - name: Safety analysis of conda environment
         shell: bash -l {0}
@@ -64,7 +64,7 @@ jobs:
           query: .github/queries/asssociated-pr.query.yml
           outputFile: pr.json
           owner: ASFHyP3
-          name: hyp3-rtc-gamma
+          name: hyp3-gamma
           sha: ${{ github.sha }}
 
       - name: Get PR labels
@@ -76,7 +76,7 @@ jobs:
           query: .github/queries/pr-labels.query.yml
           outputFile: labels.json
           owner: ASFHyP3
-          name: hyp3-rtc-gamma
+          name: hyp3-gamma
 
       - name: Upload a Build Artifact
         if: github.ref == 'refs/heads/master'
