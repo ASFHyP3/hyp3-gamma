@@ -13,7 +13,7 @@ on:
 env:
   HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
   S3_PYPI_HOST: hyp3-pypi-west.s3-website-us-west-2.amazonaws.com
-  S3PYPI_BUCKET: hyp3-pypi-west
+  S3_PYPI_BUCKET: hyp3-pypi-west
   AWS_REGION: us-west-2
   AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
