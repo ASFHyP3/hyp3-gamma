@@ -13,6 +13,7 @@ on:
 env:
   HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
   S3_PYPI_HOST: hyp3-pypi-west.s3-website-us-west-2.amazonaws.com
+  S3PYPI_BUCKET: hyp3-pypi-west
   AWS_REGION: us-west-2
   AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
@@ -129,7 +130,7 @@ jobs:
           echo "::set-output name=version::${SDIST_VERSION}"
           python setup.py sdist bdist_wheel
           echo "Uploading version ${SDIST_VERSION} to S3-PyPI"
-          s3pypi --bucket hyp3-pypi --force --verbose
+          s3pypi --bucket ${S3_PYPI_BUCKET} --force --verbose
 
 
   dockerize:
