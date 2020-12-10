@@ -11,11 +11,11 @@ on:
       - develop
 
 env:
-  HYP3_REGISTRY: 626226570674.dkr.ecr.us-east-1.amazonaws.com
-  S3_PYPI_HOST: hyp3-pypi.s3-website-us-east-1.amazonaws.com
-  AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
+  S3_PYPI_HOST: hyp3-pypi-west.s3-website-us-west-2.amazonaws.com
+  AWS_REGION: us-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   pytest:
@@ -149,7 +149,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
           tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
 
           export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
