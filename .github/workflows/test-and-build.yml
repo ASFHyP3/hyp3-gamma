@@ -129,7 +129,7 @@ jobs:
           export SDIST_VERSION=$(python setup.py --version)
           echo "::set-output name=version::${SDIST_VERSION}"
           python setup.py sdist bdist_wheel
-          echo "Uploading version ${SDIST_VERSION} to S3-PyPI"
+          echo "Uploading version ${SDIST_VERSION} to ${S3_PYPI_BUCKET}"
           s3pypi --bucket ${S3_PYPI_BUCKET} --force --verbose
 
 
