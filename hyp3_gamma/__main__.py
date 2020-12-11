@@ -14,8 +14,8 @@ from hyp3lib.util import string_is_true
 from pkg_resources import load_entry_point
 
 from hyp3_gamma import util
-from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 from hyp3_gamma.insar.ifm_sentinel import insar_sentinel_gamma
+from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 
 
 def main():

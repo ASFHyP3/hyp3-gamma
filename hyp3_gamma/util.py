@@ -3,8 +3,8 @@ import logging
 import os
 from zipfile import ZipFile
 
-from hyp3lib.scene import get_download_url
 from hyp3lib.fetch import download_file
+from hyp3lib.scene import get_download_url
 
 log = logging.getLogger(__name__)
 
