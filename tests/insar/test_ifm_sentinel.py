@@ -3,7 +3,7 @@ from re import match
 import pytest
 from hyp3lib import GranuleError
 
-from hyp3_insar_gamma import ifm_sentinel
+from hyp3_gamma.insar import ifm_sentinel
 
 
 def test_get_copol():

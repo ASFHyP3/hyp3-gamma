@@ -18,10 +18,10 @@ from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
 
-from hyp3_insar_gamma.create_metadata_insar_gamma import create_readme_file
-from hyp3_insar_gamma.getDemFileGamma import get_dem_file_gamma
-from hyp3_insar_gamma.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
-from hyp3_insar_gamma.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.insar.create_metadata_insar_gamma import create_readme_file
+from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
+from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
+from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 
 log = logging.getLogger(__name__)
 
@@ -240,7 +240,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Speckle filtering: off\n')
 
 
-def gamma_process(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False, los_flag=False):
+def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False, los_flag=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -363,8 +363,8 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    gamma_process(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
-                  los_flag=args.s)
+    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
+                         los_flag=args.s)
 
 
 if __name__ == "__main__":
