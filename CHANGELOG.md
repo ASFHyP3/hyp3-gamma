@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-##[3.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.0.0...v3.1.0)
+## [3.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.0.0...v3.1.0)
 
 ### Added
 * `hyp3-gamma-insar` [v2.2.1](https://github.com/ASFHyP3/hyp3-insar-gamma/blob/develop/CHANGELOG.md#221)
@@ -20,7 +20,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * `hyp3-gamma` entrypoint now allows InSAR processing through the `++process insar` option
 
-##[3.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.4.1...v3.0.0)
+## [3.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.4.1...v3.0.0)
 
 **HyP3 RTC GAMMA as been transformed into HyP3 GAMMA; a *processor* based plugin**
 
