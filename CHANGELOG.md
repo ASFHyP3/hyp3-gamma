@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [3.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.0.0...v3.1.0)
 
 ### Added
-* `hyp3-gamma-insar` [v2.2.1](https://github.com/ASFHyP3/hyp3-insar-gamma/blob/develop/CHANGELOG.md#221)
+* `hyp3-insar-gamma` [v2.2.1](https://github.com/ASFHyP3/hyp3-insar-gamma/blob/develop/CHANGELOG.md#221)
   has been merged into HyP3 GAMMA at `hyp3_gamma.insar` to provide InSAR processing
   of Sentinel-1. `hyp3_gamma` now provides these additional entrypoints:
   * `insar` provides the InSAR process interface to HyP3

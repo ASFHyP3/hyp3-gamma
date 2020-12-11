@@ -39,7 +39,7 @@ def test_insar_passthrough(script_runner):
     assert '--include-los-displacement' in ret.stdout
 
 
-def test_insar_gamma(script_runner):
+def test_insar(script_runner):
     default_help = script_runner.run('insar', '-h')
     assert default_help.success
 
