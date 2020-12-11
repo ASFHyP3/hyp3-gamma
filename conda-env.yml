@@ -1,0 +1,27 @@
+name: hyp3-gamma
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.7
+  - pip
+  # For packaging, and testing
+  - flake8
+  - flake8-import-order
+  - flake8-blind-except
+  - flake8-builtins
+  - setuptools
+  - setuptools_scm
+  - wheel
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
+  # For running
+  - hyp3lib>=1.6.3,<2
+  - hyp3_metadata>=0.1.4,<1
+  - importlib_metadata
+  - numpy
+  - pip:
+    # for packaging and testing
+    - s3pypi
+    - safety
