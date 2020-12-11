@@ -3,7 +3,7 @@ from re import match
 import pytest
 from hyp3lib import GranuleError
 
-from hyp3_rtc_gamma import rtc_sentinel
+from hyp3_gamma.rtc import rtc_sentinel
 
 
 def test_get_product_name():

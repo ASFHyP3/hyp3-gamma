@@ -1,4 +1,4 @@
-"""HyP3 plugin for radiometric terrain correction using GAMMA"""
+"""HyP3 plugin for processing SAR data with GAMMA"""
 
 # FIXME: Python 3.8+ this should be `from importlib.metadata...`
 from importlib_metadata import PackageNotFoundError, version
