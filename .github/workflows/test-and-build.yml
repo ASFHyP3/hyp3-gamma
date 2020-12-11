@@ -11,11 +11,12 @@ on:
       - develop
 
 env:
-  HYP3_REGISTRY: 626226570674.dkr.ecr.us-east-1.amazonaws.com
-  S3_PYPI_HOST: hyp3-pypi.s3-website-us-east-1.amazonaws.com
-  AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
+  S3_PYPI_HOST: hyp3-pypi-west.s3-website-us-west-2.amazonaws.com
+  S3_PYPI_BUCKET: hyp3-pypi-west
+  AWS_REGION: us-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   pytest:
@@ -27,14 +28,14 @@ jobs:
         with:
           auto-update-conda: true
           python-version: 3.7
-          activate-environment: hyp3-rtc-gamma
+          activate-environment: hyp3-gamma
           environment-file: conda-env.yml
 
       - name: Pytest in conda environment
         shell: bash -l {0}
         run: |
           python -m pip install .[develop]
-          pytest --cov=hyp3_rtc_gamma
+          pytest --cov=hyp3_gamma
 
       - name: Safety analysis of conda environment
         shell: bash -l {0}
@@ -64,7 +65,7 @@ jobs:
           query: .github/queries/asssociated-pr.query.yml
           outputFile: pr.json
           owner: ASFHyP3
-          name: hyp3-rtc-gamma
+          name: hyp3-gamma
           sha: ${{ github.sha }}
 
       - name: Get PR labels
@@ -76,7 +77,7 @@ jobs:
           query: .github/queries/pr-labels.query.yml
           outputFile: labels.json
           owner: ASFHyP3
-          name: hyp3-rtc-gamma
+          name: hyp3-gamma
 
       - name: Upload a Build Artifact
         if: github.ref == 'refs/heads/master'
@@ -128,8 +129,8 @@ jobs:
           export SDIST_VERSION=$(python setup.py --version)
           echo "::set-output name=version::${SDIST_VERSION}"
           python setup.py sdist bdist_wheel
-          echo "Uploading version ${SDIST_VERSION} to S3-PyPI"
-          s3pypi --bucket hyp3-pypi --force --verbose
+          echo "Uploading version ${SDIST_VERSION} to ${S3_PYPI_BUCKET}"
+          s3pypi --bucket ${S3_PYPI_BUCKET} --private --force --verbose
 
 
   dockerize:
@@ -149,7 +150,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          aws s3 cp s3://hyp3-docker/software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
           tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
 
           export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}

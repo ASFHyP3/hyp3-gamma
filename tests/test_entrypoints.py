@@ -1,18 +1,18 @@
-def test_rtc_gamma(script_runner):
-    ret = script_runner.run('rtc_gamma', '+h')
+def test_hyp3_gamma(script_runner):
+    ret = script_runner.run('hyp3_gamma', '+h')
     assert ret.success
 
 
-def test_rtc_gamma_passthrough_v2(script_runner):
+def test_rtc_passthrough(script_runner):
     ret = script_runner.run(
-        'rtc_gamma', '++entrypoint', 'hyp3_rtc_gamma_v2', '--help')
+        'hyp3_gamma', '++process', 'rtc', '--help')
     assert ret.success
-    assert 'hyp3_rtc_gamma_v2' in ret.stdout
-    assert '--bucket-prefix' in ret.stdout
+    assert 'rtc' in ret.stdout
+    assert '--radiometry' in ret.stdout
 
 
-def test_hyp3_rtc_gamma_v2(script_runner):
-    ret = script_runner.run('hyp3_rtc_gamma_v2', '-h')
+def test_rtc(script_runner):
+    ret = script_runner.run('rtc', '-h')
     assert ret.success
 
 
@@ -21,7 +21,7 @@ def test_check_coreg(script_runner):
     assert ret.success
 
 
-def test_rtc_sentinel(script_runner):
+def test_hyp3_sentinel(script_runner):
     ret = script_runner.run('rtc_sentinel.py', '-h')
     assert ret.success
 

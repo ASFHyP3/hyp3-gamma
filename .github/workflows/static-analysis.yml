@@ -20,7 +20,7 @@ jobs:
       - name: Lint with flake8
         run: |
           flake8 --max-line-length=120 --import-order-style=pycharm --statistics \
-              --application-import-names hyp3_rtc_gamma
+              --application-import-names hyp3_gamma
 
 
   gitleaks:
