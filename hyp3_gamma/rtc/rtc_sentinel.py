@@ -146,7 +146,7 @@ def reproject_dir(dem_type, res, prod_dir=None):
     for inGeotiff in glob.glob("*.tif"):
         in_raster = gdal.Open(inGeotiff)
         out_raster = reproject2grid(in_raster, epsg, xRes=res)
-        in_raster = None  # Because GDAL is weird!
+        del in_raster  # how to close with gdal
         gdal.Translate(tmp_geotiff, out_raster)
         os.remove(inGeotiff)
         shutil.move(tmp_geotiff, inGeotiff)
