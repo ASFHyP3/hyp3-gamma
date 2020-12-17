@@ -53,7 +53,6 @@ setup(
             'rtc = hyp3_gamma.__main__:rtc',
             'check_coreg.py = hyp3_gamma.rtc.check_coreg:main',
             'rtc_sentinel.py = hyp3_gamma.rtc.rtc_sentinel:main',
-            'smooth_dem_tiles.py = hyp3_gamma.rtc.smoothem:main',
             'insar = hyp3_gamma.__main__:insar',
             'ifm_sentinel.py = hyp3_gamma.insar.ifm_sentinel:main',
             'interf_pwr_s1_lt_tops_proc.py = hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc:main',

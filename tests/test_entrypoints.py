@@ -26,11 +26,6 @@ def test_hyp3_sentinel(script_runner):
     assert ret.success
 
 
-def test_smooth_dem_tiles(script_runner):
-    ret = script_runner.run('smooth_dem_tiles.py', '-h')
-    assert ret.success
-
-
 def test_insar_passthrough(script_runner):
     ret = script_runner.run(
         'hyp3_gamma', '++process', 'insar', '--help')
