@@ -24,13 +24,10 @@ from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_bb_from_shape import get_bb_from_shape
-from hyp3lib.get_dem import get_dem
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.ingest_S1_granule import ingest_S1_granule
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
-from hyp3lib.ps2dem import ps2dem
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
@@ -39,7 +36,6 @@ from osgeo import gdal
 
 import hyp3_gamma
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
-from hyp3_gamma.rtc.smoothem import smooth_dem_tiles
 
 
 def fetch_orbit_file(in_file):
@@ -155,17 +151,13 @@ def reproject_dir(dem_type, res, prod_dir=None):
         os.chdir(home)
 
 
-def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_scattering_area, orbit_file):
+def report_kwargs(in_name, out_name, res, dem, match_flag, dead_flag, gamma_flag,
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, include_scattering_area, orbit_file):
     logging.info("Parameters for this run:")
     logging.info("    Input name                        : {}".format(in_name))
     logging.info("    Output name                       : {}".format(out_name))
     logging.info("    Output resolution                 : {}".format(res))
     logging.info("    DEM file                          : {}".format(dem))
-    if roi is not None:
-        logging.info("    Area of Interest                  : {}".format(roi))
-    if shape is not None:
-        logging.info("    Shape File                        : {}".format(shape))
     logging.info("    Match flag                        : {}".format(match_flag))
     logging.info("    If no match, use Dead Reckoning   : {}".format(dead_flag))
     logging.info("    Gamma0 output                     : {}".format(gamma_flag))
@@ -176,7 +168,6 @@ def report_kwargs(in_name, out_name, res, dem, roi, shape, match_flag, dead_flag
     if par is not None:
         logging.info("    Offset file                       : {}".format(par))
     logging.info("    Process crosspol                  : {}".format(not no_cross_pol))
-    logging.info("    Smooth DEM tiles                  : {}".format(smooth))
     logging.info("    Include Scattering Area           : {}".format(include_scattering_area))
     logging.info("    Orbit File                        : {}".format(orbit_file))
 
@@ -408,8 +399,8 @@ def create_browse_images(out_name, pol, cpol, browse_res):
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
-def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag, roi,
-                            shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
+def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag,
+                            pwr_flag, filter_flag, pol, looks, log_file, terms,
                             no_cross_pol, par):
     logging.info("Creating log file: {}".format(logname))
 
@@ -426,18 +417,12 @@ def create_consolidated_log(logname, out_name, dead_flag, match_flag, gamma_flag
         options += "-f "
     if not pwr_flag:
         options += "--amp "
-    if smooth:
-        options += "--smooth "
     options += "-k {}".format(looks)
     options += "-t {}".format(terms)
     if par:
         options += "--par {}".format(par)
     if no_cross_pol:
         options += "--nocrosspol"
-    if roi:
-        options += "-a {}".format(roi)
-    if shape:
-        options += "-s {}".format(shape)
 
     cmd = "rtc_sentinel.py " + options
     f.write("Command: {}\n".format(cmd))
@@ -491,8 +476,6 @@ def rtc_sentinel_gamma(in_file,
                        out_name=None,
                        res=30.0,
                        dem=None,
-                       roi=None,
-                       shape=None,
                        match_flag=False,
                        dead_flag=True,
                        gamma_flag=True,
@@ -502,7 +485,6 @@ def rtc_sentinel_gamma(in_file,
                        terms=1,
                        par=None,
                        no_cross_pol=False,
-                       smooth=False,
                        include_scattering_area=False):
 
     log_file = configure_log_file()
@@ -539,34 +521,19 @@ def rtc_sentinel_gamma(in_file,
     if out_name is None:
         out_name = get_product_name(in_file, orbit_file, res, gamma_flag, pwr_flag, filter_flag, match_flag)
 
-    report_kwargs(in_file, out_name, res, dem, roi, shape, match_flag, dead_flag, gamma_flag,
-                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, smooth, include_scattering_area, orbit_file)
+    report_kwargs(in_file, out_name, res, dem, match_flag, dead_flag, gamma_flag,
+                  pwr_flag, filter_flag, looks, terms, par, no_cross_pol, include_scattering_area, orbit_file)
 
     orbit_file = os.path.abspath(orbit_file)  # ingest_S1_granule requires absolute path
 
     if dem is None:
         logging.info("Getting DEM file covering this SAR image")
         tifdem = "tmp_{}_dem.tif".format(os.getpid())
-        if shape is not None:
-            min_x, min_y, max_x, max_y = get_bb_from_shape(shape)
-            logging.info(f'bounding box: {min_x}, {min_y}, {max_x}, {max_y}')
-            roi = [min_x, min_y, max_x, max_y]
-        if roi is not None:
-            dem_type = get_dem(roi[0], roi[1], roi[2], roi[3], tifdem, post=30)
-        else:
-            demfile, dem_type = getDemFile(in_file, tifdem, post=30)
-
-        if 'REMA' in dem_type and smooth:
-            logging.info("Preparing to smooth DEM tiles")
-            dem, parfile = smooth_dem_tiles("DEM", build=True)
-        else:
-            dem = "area.dem"
-            parfile = "area.dem.par"
-            if "GIMP" in dem_type or "REMA" in dem_type:
-                ps2dem(tifdem, dem, parfile)
-            else:
-                utm2dem(tifdem, dem, parfile)
-            os.remove(tifdem)
+        demfile, dem_type = getDemFile(in_file, tifdem, post=30)
+        dem = "area.dem"
+        parfile = "area.dem.par"
+        utm2dem(tifdem, dem, parfile)
+        os.remove(tifdem)
     elif ".tif" in dem:
         tiff_dem = dem
         dem = "area.dem"
@@ -629,8 +596,8 @@ def rtc_sentinel_gamma(in_file,
     logging.info("               Sentinel RTC Program - Completed")
     logging.info("===================================================================")
 
-    create_consolidated_log(f'{out_name}/{out_name}.log', out_name, dead_flag, match_flag, gamma_flag, roi,
-                            shape, pwr_flag, filter_flag, pol, looks, log_file, smooth, terms,
+    create_consolidated_log(f'{out_name}/{out_name}.log', out_name, dead_flag, match_flag, gamma_flag,
+                            pwr_flag, filter_flag, pol, looks, log_file, terms,
                             no_cross_pol, par)
     return out_name
 
@@ -643,19 +610,12 @@ def main():
     )
     parser.add_argument('input', help='Name of input file, either .zip or .SAFE')
     parser.add_argument("-o", "--outputResolution", type=float, default=30.0, help="Desired output resolution")
-
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-e", "--externalDEM", help="Specify a DEM file to use - must be in UTM projection")
-    group.add_argument("-r", "--roi", type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                       help="Specify ROI to use")
-    group.add_argument("-s", "--shape", help="Specify shape file to use")
-
+    parser.add_argument("-e", "--externalDEM", help="Specify a DEM file to use - must be in UTM projection")
     parser.add_argument("-n", action="store_false", help="Do not perform matching")
     parser.add_argument("--fail", action="store_true",
                         help="if matching fails, fail the program. Default: use dead reckoning")
     parser.add_argument("--sigma", action="store_true", help="create sigma0 instead of gamma0")
     parser.add_argument("--amp", action="store_true", help="create amplitude images instead of power")
-    parser.add_argument("--smooth", action="store_true", help="smooth DEM file before terrain correction")
     parser.add_argument("-f", action="store_true", help="run enhanced lee filter")
     parser.add_argument("-k", "--looks", type=int,
                         help="set the number of looks to take (def:3 for SLC/6 for GRD)")
@@ -676,8 +636,6 @@ def main():
                        out_name=args.output,
                        res=args.outputResolution,
                        dem=args.externalDEM,
-                       roi=args.roi,
-                       shape=args.shape,
                        match_flag=args.n,
                        dead_flag=not args.fail,
                        gamma_flag=not args.sigma,
@@ -687,7 +645,6 @@ def main():
                        terms=args.terms,
                        par=args.par,
                        no_cross_pol=args.nocrosspol,
-                       smooth=args.smooth,
                        include_scattering_area=args.include_scattering_area)
 
 
