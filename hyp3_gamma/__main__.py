@@ -57,19 +57,16 @@ def rtc():
     granule = util.get_granule(args.granule)
 
     product_name = rtc_sentinel_gamma(
-                        in_file=granule,
-                        res=args.resolution,
-                        match_flag=args.dem_matching,
-                        pwr_flag=(args.scale == 'power'),
-                        gamma_flag=(args.radiometry == 'gamma0'),
-                        filter_flag=args.speckle_filter,
+                        safe_dir=granule,
+                        resolution=args.resolution,
+                        dem_matching=args.dem_matching,
+                        power=(args.scale == 'power'),
+                        gamma0=(args.radiometry == 'gamma0'),
+                        speckle_filter=args.speckle_filter,
+                        include_dem=args.include_dem,
+                        include_inc_map=args.include_inc_map,
                         include_scattering_area=args.include_scattering_area,
                     )
-
-    if not args.include_dem:
-        util.find_and_remove(product_name, '*_dem.tif*')
-    if not args.include_inc_map:
-        util.find_and_remove(product_name, '*_inc_map.tif*')
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
