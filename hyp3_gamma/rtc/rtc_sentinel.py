@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+from glob import glob
 from secrets import token_hex
 from tempfile import NamedTemporaryFile
 
@@ -15,6 +16,7 @@ from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.utm2dem import utm2dem
+from lxml import etree
 
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
 
@@ -101,8 +103,9 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
             execute(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
         elif 'SLC' in safe_dir:
             looks = 3
+            burst_counts = []
             for swath in (1, 2, 3):
-                annotation_xml = f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml'
+                annotation_xml = glob(f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml')[0]
                 calibration_xml = f'{safe_dir}/annotation/calibration/calibration-*-iw{swath}-slc-{pol}-*.xml'
                 noise_xml = f'{safe_dir}/annotation/calibration/noise-*-iw{swath}-slc-{pol}-*.xml'
                 pol_tif = f'{safe_dir}/measurement/*-iw{swath}-slc-{pol}-*.tiff'
@@ -110,12 +113,19 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
                 execute(f'par_S1_SLC {pol_tif} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc {swath}.tops.par')
                 execute(f'S1_OPOD_vec {swath}.par {orbit_file}')
 
-            with open('SLC_tab', 'w') as f:
+                root = etree.parse(annotation_xml)
+                burst_counts += root.find('.//burstList').attrib['count']
+
+            with open('SLC1_tab', 'w') as f:
                 for swath in (1, 2, 3):
                     f.write(f'{swath}.slc {swath}.par {swath}.tops.par\n')
+            with open('burst_tab', 'w') as f:
+                for burst_count in burst_counts:
+                    f.write(f'1 {burst_count}\n')
+            execute('SLC_copy_S1_TOPS SLC1_tab SLC2_tab burst_tab')
 
-            execute(f'SLC_mosaic_S1_TOPS SLC_tab multilooked multilooked.par {looks*5} {looks}')
-            execute(f'multi_look_ScanSAR SLC_tab multilooked multilooked.par {looks*5} {looks}')
+            execute(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
+            execute(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
         else:
             raise NotImplementedError('Only GRD and SLC are implemented')
 
