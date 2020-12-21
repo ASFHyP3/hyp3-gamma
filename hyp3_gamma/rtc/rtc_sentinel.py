@@ -49,8 +49,8 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
 
 def get_polarizations(safe_dir):
     mapping = {
-        'SH': ('hh',),
-        'SV': ('vv',),
+        'SH': ('hh', ),
+        'SV': ('vv', ),
         'DH': ('hh', 'hv'),
         'DV': ('vv', 'vh'),
     }
