@@ -70,8 +70,7 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
     nlines_out = getParameter(dem_par, 'nlines')
 
     with NamedTemporaryFile() as temp_file:
-        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2',
-                uselogging=True)
+        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
         execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}', uselogging=True)
 
 
@@ -103,15 +102,16 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
         elif 'SLC' in safe_dir:
             looks = 3
             for swath in (1, 2, 3):
-                annotation_xml = f'{safe_dir}/annotation/*-{pol}-*{swath}.xml'
-                calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*{swath}.xml'
-                noise_xml = f'{safe_dir}/annotation/calibration/noise*-{pol}-*{swath}.xml'
-                pol_tif = f'{safe_dir}/measurement/*-{pol}-*{swath}.tiff'
+                annotation_xml = f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml'
+                calibration_xml = f'{safe_dir}/annotation/calibration/calibration-*-iw{swath}-slc-{pol}-*.xml'
+                noise_xml = f'{safe_dir}/annotation/calibration/noise-*-iw{swath}-slc-{pol}-*.xml'
+                pol_tif = f'{safe_dir}/measurement/*-iw{swath}-slc-{pol}-*.tiff'
 
                 execute(f'par_S1_SLC {pol_tif} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc {swath}.tops.par')
                 execute(f'S1_OPOD_vec {swath}.par {orbit_file}')
 
-                with open('SLC_tab', 'a') as f:
+            with open('SLC_tab', 'w') as f:
+                for swath in (1, 2, 3):
                     f.write(f'{swath}.slc {swath}.par {swath}.tops.par\n')
 
             execute(f'SLC_mosaic_S1_TOPS SLC_tab multilooked multilooked.par {looks*5} {looks}')
