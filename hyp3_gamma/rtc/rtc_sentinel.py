@@ -73,7 +73,7 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
 
     with NamedTemporaryFile() as temp_file:
         execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
-        execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}', uselogging=True)
+        execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
 
 
 def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_matching=False,
@@ -96,9 +96,9 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
             annotation_xml = f'{safe_dir}/annotation/*-{pol}-*.xml'
             calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*.xml'
             noise_xml = f'{safe_dir}/annotation/calibration/noise*-{pol}-*.xml'
-            pol_tif = f'{safe_dir}/measurement/*-{pol}-*.tiff'
+            tiff = f'{safe_dir}/measurement/*-{pol}-*.tiff'
 
-            execute(f'par_S1_GRD {pol_tif} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
+            execute(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
             execute(f'S1_OPOD_vec ingested.par {orbit_file}')
             execute(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
         elif 'SLC' in safe_dir:
@@ -108,9 +108,9 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
                 annotation_xml = glob(f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml')[0]
                 calibration_xml = f'{safe_dir}/annotation/calibration/calibration-*-iw{swath}-slc-{pol}-*.xml'
                 noise_xml = f'{safe_dir}/annotation/calibration/noise-*-iw{swath}-slc-{pol}-*.xml'
-                pol_tif = f'{safe_dir}/measurement/*-iw{swath}-slc-{pol}-*.tiff'
+                tiff = f'{safe_dir}/measurement/*-iw{swath}-slc-{pol}-*.tiff'
 
-                execute(f'par_S1_SLC {pol_tif} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc {swath}.tops.par')
+                execute(f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc {swath}.tops.par')
                 execute(f'S1_OPOD_vec {swath}.par {orbit_file}')
 
                 root = etree.parse(annotation_xml)
