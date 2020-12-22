@@ -116,18 +116,20 @@ def create_browse_images(out_dir, out_name, polarizations):
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
-def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_matching=False,
+def rtc_sentinel_gamma(safe_dir, resolution=30.0, dem=None, gamma0=True, power=True, dem_matching=False,
                        speckle_filter=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
 
     orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
     name = get_product_name(safe_dir, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
     os.mkdir(name)
 
-    dem = 'dem.image'
+    if dem is None:
+        dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=resolution)
+    else:
+        dem_type = 'unknown'
+    dem_image = 'dem.image'
     dem_par = 'dem.par'
-    with NamedTemporaryFile() as temp_file:
-        temp_dem_file, dem_type = getDemFile(safe_dir, temp_file.name, post=resolution)
-        utm2dem(temp_dem_file, dem, dem_par)
+    utm2dem(dem, dem_image, dem_par)
 
     polarizations = get_polarizations(safe_dir)
     for pol in polarizations:
@@ -176,18 +178,18 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
             shutil.move('filtered', 'multilooked')
 
         if not os.path.exists('dem_seg'):
-            execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 0 -q')
+            execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 0 -q')
 
             if dem_matching:
                 try:
-                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 1 -q')
-                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 2 -q')
+                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 1 -q')
+                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 2 -q')
                     check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
                 except (ExecuteError, CoregistrationError):
                     log.warning('Coregistration check has failed; defaulting to dead reckoning')
                     os.remove('corrected.diff_par')
 
-        execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 3 -q -c {int(gamma0)}')
+        execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 3 -q -c {int(gamma0)}')
 
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
