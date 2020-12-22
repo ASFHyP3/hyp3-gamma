@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+from argparse import ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
 from pathlib import Path
@@ -116,8 +117,8 @@ def create_browse_images(out_dir, out_name, polarizations):
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
-def rtc_sentinel_gamma(safe_dir, resolution=30.0, dem=None, gamma0=True, power=True, dem_matching=False,
-                       speckle_filter=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
+def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
+                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
 
     orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
     name = get_product_name(safe_dir, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
@@ -227,3 +228,42 @@ def rtc_sentinel_gamma(safe_dir, resolution=30.0, dem=None, gamma0=True, power=T
             os.remove(f)
 
     return name
+
+
+def main():
+    """Main entrypoint"""
+    parser = ArgumentParser(
+        prog='rtc_sentinel.py',
+        description=__doc__,
+    )
+    parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
+    parser.add_argument('--dem', '-d', help='Specify a DEM file to use - must be in UTM projection')
+    parser.add_argument('--resolution', '-r', type=float, default=30.0, help='Desired output resolution')
+    parser.add_argument('--radiometry', choices=['gamma0', 'sigma0'], help='Desired output radiometry')
+    parser.add_argument('--scale', choices=['power', 'amplitude'], help='Desired output scale')
+    parser.add_argument('--speckle-filter', '-f', action='store_true', help='Apply enhanced Lee filter')
+    parser.add_argument('--dem-matching', '-m', action='store_true', help='Attempt DEM matching')
+    parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
+    parser.add_argument('--include-inc-map', action='store_true',
+                        help='Include the incidence angle geotiff in the output package')
+    parser.add_argument('--include-scattering-area', action='store_true',
+                        help='Include the scattering area geotiff in the output package')
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
+    rtc_sentinel_gamma(safe_dir=args.safe_dir,
+                       dem=args.dem,
+                       resolution=args.resolution,
+                       gamma0=(args.radiometry == 'gamma0'),
+                       power=(args.scale == 'power'),
+                       speckle_filter=args.speckle_filter,
+                       dem_matching=args.dem_matching,
+                       include_dem=args.include_dem,
+                       include_inc_map=args.include_inc_map,
+                       include_scattering_area=args.include_scattering_area)
+
+
+if __name__ == '__main__':
+    main()
