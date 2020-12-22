@@ -15,8 +15,8 @@ from hyp3lib import ExecuteError, GranuleError
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
-from hyp3lib.getDemFor import getDemFile
 from hyp3lib.execute import execute
+from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
@@ -59,6 +59,14 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
 
     product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
+
+
+def configure_log_file(log_file):
+    log_file_handler = logging.FileHandler(log_file)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', '%m/%d/%Y %I:%M:%S %p')
+    log_file_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(log_file_handler)
+    return log_file
 
 
 def get_polarizations(safe_dir):
@@ -123,6 +131,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
     name = get_product_name(safe_dir, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
     os.mkdir(name)
+    configure_log_file(f'{name}/{name}.log')
 
     if dem is None:
         dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=resolution)
