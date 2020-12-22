@@ -20,6 +20,8 @@ from lxml import etree
 
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
 
+log = logging.getLogger()
+
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True, power=True,
                      filtered=False, matching=False):
@@ -66,7 +68,7 @@ def get_polarizations(safe_dir):
 
 
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
-    logging.info(f'Creating scattering area geotiff: {output_name}')
+    log.info(f'Creating scattering area geotiff: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
     width_out = getParameter(dem_par, 'width')
     nlines_out = getParameter(dem_par, 'nlines')
@@ -143,7 +145,7 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
                     execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 2 -q')
                     check_coreg(None, resolution, max_offset=75, max_error=2.0)
                 except (ExecuteError, CoregistrationError):
-                    logging.warning('Coregistration check has failed; defaulting to dead reckoning')
+                    log.warning('Coregistration check has failed; defaulting to dead reckoning')
                     os.remove('corrected.diff_par')
 
         execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 3 -q -c {int(gamma0)}')
