@@ -12,12 +12,16 @@ from tempfile import NamedTemporaryFile
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError
 from hyp3lib.area2point import fix_geotiff_locations
+from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.getDemFor import getDemFile
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
+from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
+from hyp3lib.raster_boundary2shape import raster_boundary2shape
+from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 from lxml import etree
@@ -83,6 +87,35 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
         execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
 
 
+def create_browse_images(out_dir, out_name, polarizations):
+    pol_amp_tif = f'{polarizations[0]}-amp.tif'
+
+    if len(polarizations) > 1:
+        cpol_amp_tif = f'{polarizations[1]}-amp.tif'
+        threshold = -24
+        outfile = f'{out_dir}/{out_name}_rgb'
+        with NamedTemporaryFile() as rgb_tif:
+            rtc2color(pol_amp_tif, cpol_amp_tif, threshold, rgb_tif.name, amp=True, cleanup=True)
+            makeAsfBrowse(rgb_tif.name, outfile)
+
+    outfile = f'{out_dir}/{out_name}'
+    with NamedTemporaryFile() as rescaled_tif:
+        byteSigmaScale(pol_amp_tif, rescaled_tif.name)
+        makeAsfBrowse(rescaled_tif.name, outfile)
+
+    for file_type in ['inc_map', 'dem', 'area']:
+        tif = f'{out_dir}/{out_name}_{file_type}.tif'
+        if os.path.exists(tif):
+            outfile = f'{out_dir}/{out_name}_{file_type}'
+            with NamedTemporaryFile() as rescaled_tif:
+                byteSigmaScale(tif, rescaled_tif.name)
+                makeAsfBrowse(rescaled_tif.name, outfile)
+
+    pol_tif = f'{out_dir}/{out_name}_{polarizations[0].upper()}.tif'
+    shapefile = f'{out_dir}/{out_name}_shape.shp'
+    raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
+
+
 def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_matching=False,
                        speckle_filter=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
 
@@ -96,7 +129,8 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
         temp_dem_file, dem_type = getDemFile(safe_dir, temp_file.name, post=resolution)
         utm2dem(temp_dem_file, dem, dem_par)
 
-    for pol in get_polarizations(safe_dir):
+    polarizations = get_polarizations(safe_dir)
+    for pol in polarizations:
 
         if 'GRD' in safe_dir:
             looks = 6
@@ -155,11 +189,13 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
 
         execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 3 -q -c {int(gamma0)}')
 
+        power_tif = 'corrected_cal_map.mli.tif'
+        amp_tif = createAmp(power_tif, nodata=0)
         if power:
-            shutil.copy('corrected_cal_map.mli.tif', f'{name}/{name}_{pol.upper()}.tif')
+            shutil.copy(power_tif, f'{name}/{name}_{pol.upper()}.tif')
         else:
-            createAmp('corrected_cal_map.mli.tif', nodata=0)
-            shutil.move('corrected_cal_map.mli_amp.tif', f'{name}/{name}_{pol.upper()}.tif')
+            shutil.copy(amp_tif, f'{name}/{name}_{pol.upper()}.tif')
+        shutil.move(amp_tif, f'{pol}-amp.tif')
 
     execute(f'data2geotiff dem_seg.par corrected.ls_map 5 {name}/{name}_ls_map.tif')
     if include_dem:
@@ -172,6 +208,7 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
     fix_geotiff_locations(dir=name)
     cogify_dir(directory=name)
 
+    create_browse_images(name, name, polarizations)
     create_metadata_file_set(
         product_dir=Path(name),
         granule_name=safe_dir.replace('.SAFE', ''),
@@ -183,5 +220,8 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
         processor_name='GAMMA',
         processor_version=gamma_version(),
     )
+    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png*', '*area*kmz']:
+        for f in glob(f'{name}/{pattern}'):
+            os.remove(f)
 
     return name
