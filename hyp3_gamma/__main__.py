@@ -54,10 +54,10 @@ def rtc():
 
     write_credentials_to_netrc_file(args.username, args.password)
 
-    granule = util.get_granule(args.granule)
+    safe_dir = util.get_granule(args.granule)
 
     product_name = rtc_sentinel_gamma(
-                        safe_dir=granule,
+                        safe_dir=safe_dir,
                         resolution=args.resolution,
                         dem_matching=args.dem_matching,
                         power=(args.scale == 'power'),
