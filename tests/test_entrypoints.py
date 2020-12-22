@@ -16,11 +16,6 @@ def test_rtc(script_runner):
     assert ret.success
 
 
-def test_check_coreg(script_runner):
-    ret = script_runner.run('check_coreg.py', '-h')
-    assert ret.success
-
-
 def test_hyp3_sentinel(script_runner):
     ret = script_runner.run('rtc_sentinel.py', '-h')
     assert ret.success
