@@ -59,10 +59,10 @@ def rtc():
     product_name = rtc_sentinel_gamma(
                         safe_dir=safe_dir,
                         resolution=args.resolution,
-                        dem_matching=args.dem_matching,
                         power=(args.scale == 'power'),
                         gamma0=(args.radiometry == 'gamma0'),
                         speckle_filter=args.speckle_filter,
+                        dem_matching=args.dem_matching,
                         include_dem=args.include_dem,
                         include_inc_map=args.include_inc_map,
                         include_scattering_area=args.include_scattering_area,
