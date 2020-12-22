@@ -3,10 +3,13 @@
 import logging
 import os
 import shutil
+from datetime import datetime, timezone
 from glob import glob
+from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile
 
+from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.createAmp import createAmp
@@ -15,9 +18,11 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.make_cogs import cogify_dir
+from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 from lxml import etree
 
+import hyp3_gamma
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coregistration
 
 log = logging.getLogger()
@@ -166,5 +171,17 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
 
     fix_geotiff_locations(dir=name)
     cogify_dir(directory=name)
+
+    create_metadata_file_set(
+        product_dir=Path(name),
+        granule_name=safe_dir.replace('.SAFE', ''),
+        dem_name=dem_type,
+        processing_date=datetime.now(timezone.utc),
+        looks=looks,
+        plugin_name=hyp3_gamma.__name__,
+        plugin_version=hyp3_gamma.__version__,
+        processor_name='GAMMA',
+        processor_version=gamma_version(),
+    )
 
     return name
