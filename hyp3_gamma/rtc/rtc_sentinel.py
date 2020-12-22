@@ -18,7 +18,7 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.utm2dem import utm2dem
 from lxml import etree
 
-from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coreg
+from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coregistration
 
 log = logging.getLogger()
 
@@ -143,7 +143,7 @@ def rtc_sentinel_gamma(safe_dir,  resolution=30.0, gamma0=True, power=True, dem_
                 try:
                     execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 1 -q')
                     execute(f'mk_geo_radcal2 multilooked multilooked.par {dem} {dem_par} dem_seg dem_seg.par . corrected {resolution} 2 -q')
-                    check_coreg(None, resolution, max_offset=75, max_error=2.0)
+                    check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
                 except (ExecuteError, CoregistrationError):
                     log.warning('Coregistration check has failed; defaulting to dead reckoning')
                     os.remove('corrected.diff_par')
