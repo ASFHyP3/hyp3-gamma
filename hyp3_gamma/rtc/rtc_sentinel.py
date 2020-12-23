@@ -71,7 +71,7 @@ def configure_log_file(log_file):
 
 def log_program_start(parameters):
     log.info('*** Sentinel RTC Program - Starting ***')
-    for key, value in parameters:
+    for key, value in parameters.items():
         log.info(f'    {key}: {value}')
 
 
