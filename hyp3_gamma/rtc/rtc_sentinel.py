@@ -38,7 +38,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
-    datetime = granule_name[17:32]
+    date_time = granule_name[17:32]
     res = int(resolution)
 
     if orbit_file is None:
@@ -57,7 +57,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
     f = 'f' if filtered else 'n'
     m = 'm' if matching else 'd'
 
-    product_name = f'{platform}_{beam_mode}_{datetime}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
+    product_name = f'{platform}_{beam_mode}_{date_time}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
 
 
@@ -85,6 +85,10 @@ def get_polarizations(safe_dir):
     return polarizations
 
 
+def run(cmd):
+    execute(cmd, uselogging=True)
+
+
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
     log.info(f'Creating scattering area geotiff: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
@@ -92,8 +96,8 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
     nlines_out = getParameter(dem_par, 'nlines')
 
     with NamedTemporaryFile() as temp_file:
-        execute(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
-        execute(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
+        run(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
+        run(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
 
 
 def create_browse_images(out_dir, out_name, polarizations):
@@ -151,9 +155,9 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             noise_xml = f'{safe_dir}/annotation/calibration/noise*-{pol}-*.xml'
             tiff = f'{safe_dir}/measurement/*-{pol}-*.tiff'
 
-            execute(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
-            execute(f'S1_OPOD_vec ingested.par {orbit_file}')
-            execute(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
+            run(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
+            run(f'S1_OPOD_vec ingested.par {orbit_file}')
+            run(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
         elif 'SLC' in safe_dir:
             looks = 3
             burst_counts = []
@@ -163,8 +167,9 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                 noise_xml = f'{safe_dir}/annotation/calibration/noise-*-iw{swath}-slc-{pol}-*.xml'
                 tiff = f'{safe_dir}/measurement/*-iw{swath}-slc-{pol}-*.tiff'
 
-                execute(f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc {swath}.tops.par')
-                execute(f'S1_OPOD_vec {swath}.par {orbit_file}')
+                run(f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {swath}.par {swath}.slc '
+                    f'{swath}.tops.par')
+                run(f'S1_OPOD_vec {swath}.par {orbit_file}')
 
                 root = etree.parse(annotation_xml)
                 burst_counts += root.find('.//burstList').attrib['count']
@@ -175,31 +180,35 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             with open('burst_tab', 'w') as f:
                 for burst_count in burst_counts:
                     f.write(f'1 {burst_count}\n')
-            execute('SLC_copy_S1_TOPS SLC1_tab SLC2_tab burst_tab')
+            run('SLC_copy_S1_TOPS SLC1_tab SLC2_tab burst_tab')
 
-            execute(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
-            execute(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
+            run(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
+            run(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
         else:
             raise NotImplementedError('Only GRD and SLC are implemented')
 
         if speckle_filter:
             width = getParameter('multilooked.par', 'range_samples')
-            execute(f'enh_lee multilooked filtered {width} {looks*30} 1 7 7')
+            run(f'enh_lee multilooked filtered {width} {looks*30} 1 7 7')
             shutil.move('filtered', 'multilooked')
 
         if not os.path.exists('dem_seg'):
-            execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 0 -q')
+            run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
+                f'{resolution} 0 -q')
 
             if dem_matching:
                 try:
-                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 1 -q')
-                    execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 2 -q')
+                    run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . '
+                        f'corrected {resolution} 1 -q')
+                    run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . '
+                        f'corrected {resolution} 2 -q')
                     check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
                 except (ExecuteError, CoregistrationError):
                     log.warning('Coregistration check has failed; defaulting to dead reckoning')
                     os.remove('corrected.diff_par')
 
-        execute(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected {resolution} 3 -q -c {int(gamma0)}')
+        run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
+            f'{resolution} 3 -q -c {int(gamma0)}')
 
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
@@ -209,13 +218,14 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             shutil.copy(amp_tif, f'{name}/{name}_{pol.upper()}.tif')
         shutil.move(amp_tif, f'{pol}-amp.tif')
 
-    execute(f'data2geotiff dem_seg.par corrected.ls_map 5 {name}/{name}_ls_map.tif')
+    run(f'data2geotiff dem_seg.par corrected.ls_map 5 {name}/{name}_ls_map.tif')
     if include_dem:
-        execute(f'data2geotiff dem_seg.par dem_seg 2 {name}/{name}_dem.tif')
+        run(f'data2geotiff dem_seg.par dem_seg 2 {name}/{name}_dem.tif')
     if include_inc_map:
-        execute(f'data2geotiff dem_seg.par corrected.inc_map 2 {name}/{name}_inc_map.tif')
+        run(f'data2geotiff dem_seg.par corrected.inc_map 2 {name}/{name}_inc_map.tif')
     if include_scattering_area:
-        create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', 'multilooked.par', 'dem_seg.par', f'{name}/{name}_area.tif')
+        create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', 'multilooked.par', 'dem_seg.par',
+                            f'{name}/{name}_area.tif')
 
     fix_geotiff_locations(dir=name)
     cogify_dir(directory=name)
