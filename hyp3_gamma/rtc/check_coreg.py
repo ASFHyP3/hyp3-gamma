@@ -40,8 +40,8 @@ def check_coregistration(mk_geo_radcal2_log, diff_par, pixel_size=30.0, max_offs
 
     range_coefficients = np.array([float(c) for c in getParameter(diff_par, 'range_offset_polynomial').split()])
     azimuth_coefficients = np.array([float(c) for c in getParameter(diff_par, 'azimuth_offset_polynomial').split()])
-    offsets = [get_offset(corner, range_coefficients, azimuth_coefficients) for corner in corners]
-    absolute_offset = pixel_size * max(offsets)
+    corner_offsets = [get_offset(corner, range_coefficients, azimuth_coefficients) for corner in corners]
+    absolute_offset = pixel_size * max(corner_offsets)
 
     if absolute_offset >= max_offset:
         log.warning(f'Absolute offset of {absolute_offset} is larger than {max_offset}')
