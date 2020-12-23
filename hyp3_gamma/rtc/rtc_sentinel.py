@@ -193,7 +193,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run(f'enh_lee multilooked filtered {width} {looks*30} 1 7 7')
             shutil.move('filtered', 'multilooked')
 
-        if not os.path.exists('dem_seg'):
+        if pol == polarizations[0]:
             run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
                 f'{resolution} 0 -q')
 
@@ -206,7 +206,8 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                     check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
                 except (ExecuteError, CoregistrationError):
                     log.warning('Coregistration check has failed; defaulting to dead reckoning')
-                    os.remove('corrected.diff_par')
+                    if os.path.isfile('corrected.diff_par'):
+                        os.remove('corrected.diff_par')
 
         run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
             f'{resolution} 3 -q -c {int(gamma0)}')
