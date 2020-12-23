@@ -69,6 +69,12 @@ def configure_log_file(log_file):
     return log_file
 
 
+def log_program_start(parameters):
+    log.info('*** Sentinel RTC Program - Starting ***')
+    for key, value in parameters:
+        log.info(f'    {key}: {value}')
+
+
 def get_polarizations(safe_dir):
     mapping = {
         'SH': ('hh', ),
@@ -131,11 +137,12 @@ def create_browse_images(out_dir, out_name, polarizations):
 
 def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
                        dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
-
-    orbit_file, _ = downloadSentinelOrbitFile(safe_dir)
-    name = get_product_name(safe_dir, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
+    granule = os.path.splitext(os.path.basename(safe_dir))[0]
+    orbit_file, _ = downloadSentinelOrbitFile(granule)
+    name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
     os.mkdir(name)
     configure_log_file(f'{name}/{name}.log')
+    log_program_start(locals())
 
     if dem is None:
         dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=resolution)
@@ -145,10 +152,10 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     dem_par = 'dem.par'
     utm2dem(dem, dem_image, dem_par)
 
-    polarizations = get_polarizations(safe_dir)
+    polarizations = get_polarizations(granule)
     for pol in polarizations:
 
-        if 'GRD' in safe_dir:
+        if 'GRD' in granule:
             looks = 6
             annotation_xml = f'{safe_dir}/annotation/*-{pol}-*.xml'
             calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*.xml'
@@ -158,7 +165,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
             run(f'S1_OPOD_vec ingested.par {orbit_file}')
             run(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
-        elif 'SLC' in safe_dir:
+        elif 'SLC' in granule:
             looks = 3
             burst_counts = []
             for swath in (1, 2, 3):
@@ -235,7 +242,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     create_browse_images(name, name, polarizations)
     create_metadata_file_set(
         product_dir=Path(name),
-        granule_name=safe_dir.replace('.SAFE', ''),
+        granule_name=granule,
         dem_name=dem_type,
         processing_date=datetime.now(timezone.utc),
         looks=looks,
@@ -248,6 +255,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
         for f in glob(f'{name}/{pattern}'):
             os.remove(f)
 
+    log.info('*** Sentinel RTC Program - Completed ***')
     return name
 
 
