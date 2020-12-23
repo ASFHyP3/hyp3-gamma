@@ -60,3 +60,29 @@ def test_get_polarizations():
 
     with pytest.raises(GranuleError):
         rtc_sentinel.get_polarizations('foo')
+
+
+def test_get_looks():
+    assert rtc_sentinel.get_looks('GRDH', 90.0) == 9
+    assert rtc_sentinel.get_looks('GRDH', 30.0) == 6
+    assert rtc_sentinel.get_looks('GRDH', 10.0) == 1
+    assert rtc_sentinel.get_looks('GRDM', 90.0) == 9
+    assert rtc_sentinel.get_looks('GRDM', 30.0) == 3
+    assert rtc_sentinel.get_looks('GRDM', 10.0) == 1
+    assert rtc_sentinel.get_looks('SLC', 90.0) == 9
+    assert rtc_sentinel.get_looks('SLC', 30.0) == 3
+    assert rtc_sentinel.get_looks('SLC', 10.0) == 1
+
+
+def test_get_granule_type():
+    granule = 'S1A_S1_GRDH_1SSH_20181121T184017_20181121T184046_024690_02B6ED_6946'
+    assert rtc_sentinel.get_granule_type(granule) == 'GRDH'
+
+    granule = 'S1B_IW_SLC__1SDV_20200714T152128_20200714T152150_022469_02AA50_9A64'
+    assert rtc_sentinel.get_granule_type(granule) == 'SLC'
+
+    with pytest.raises(ValueError):
+        rtc_sentinel.get_granule_type('S1B_WV_OCN__2SSV_20200714T162902_20200714T163511_022469_02AA55_1A7D')
+
+    with pytest.raises(ValueError):
+        rtc_sentinel.get_granule_type('S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F')

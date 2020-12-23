@@ -6,6 +6,7 @@ import shutil
 from argparse import ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
+from math import isclose
 from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile
@@ -59,6 +60,19 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
 
     product_name = f'{platform}_{beam_mode}_{date_time}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
+
+
+def get_granule_type(granule):
+    granule_type = granule.split('_')[2]
+    if granule_type not in ('GRDH', 'SLC'):
+        raise ValueError(f'Unsupported granule type {granule_type}.  Only GRDH and SLC are supported.')
+    return granule_type
+
+
+def get_looks(granule_type, resolution):
+    if granule_type == 'GRDH' and isclose(resolution, 30.0):
+        return 6
+    return round(resolution / 10)
 
 
 def configure_log_file(log_file):
@@ -138,8 +152,11 @@ def create_browse_images(out_dir, out_name, polarizations):
 def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
                        dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
+    granule_type = get_granule_type(granule)
     orbit_file, _ = downloadSentinelOrbitFile(granule)
     name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
+    looks = get_looks(granule_type, resolution)
+
     os.mkdir(name)
     configure_log_file(f'{name}/{name}.log')
     log_program_start(locals())
@@ -155,8 +172,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     polarizations = get_polarizations(granule)
     for pol in polarizations:
 
-        if 'GRD' in granule:
-            looks = 6
+        if granule_type == 'GRDH':
             annotation_xml = f'{safe_dir}/annotation/*-{pol}-*.xml'
             calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*.xml'
             noise_xml = f'{safe_dir}/annotation/calibration/noise*-{pol}-*.xml'
@@ -165,8 +181,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} ingested.par ingested')
             run(f'S1_OPOD_vec ingested.par {orbit_file}')
             run(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
-        elif 'SLC' in granule:
-            looks = 3
+        elif granule_type == 'SLC':
             burst_counts = []
             for swath in (1, 2, 3):
                 annotation_xml = glob(f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml')[0]
@@ -192,8 +207,6 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run('SLC_copy_ScanSAR SLC1_tab SLC2_tab burst_tab')
             run(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
             run(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
-        else:
-            raise NotImplementedError('Only GRD and SLC are implemented')
 
         if speckle_filter:
             width = getParameter('multilooked.par', 'range_samples')
