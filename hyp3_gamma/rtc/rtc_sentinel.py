@@ -109,6 +109,11 @@ def run(cmd):
     execute(cmd, uselogging=True)
 
 
+def get_burst_count(annotation_xml):
+    root = etree.parse(annotation_xml)
+    return root.find('.//burstList').attrib['count']
+
+
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
     log.info(f'Creating scattering area geotiff: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
@@ -153,12 +158,13 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                        dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
+    polarizations = get_polarizations(granule)
     orbit_file, _ = downloadSentinelOrbitFile(granule)
-    name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
+    product_name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
     looks = get_looks(granule_type, resolution)
 
-    os.mkdir(name)
-    configure_log_file(f'{name}/{name}.log')
+    os.mkdir(product_name)
+    configure_log_file(f'{product_name}/{product_name}.log')
     log_program_start(locals())
 
     if dem is None:
@@ -169,7 +175,6 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     dem_par = 'dem.par'
     utm2dem(dem, dem_image, dem_par)
 
-    polarizations = get_polarizations(granule)
     for pol in polarizations:
 
         if granule_type == 'GRDH':
@@ -182,7 +187,8 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run(f'S1_OPOD_vec ingested.par {orbit_file}')
             run(f'multi_look_MLI ingested ingested.par multilooked multilooked.par {looks} {looks} - - - 1')
         elif granule_type == 'SLC':
-            burst_counts = []
+            burst_tab = ''
+            slc_tab = ''
             for swath in (1, 2, 3):
                 annotation_xml = glob(f'{safe_dir}/annotation/*-iw{swath}-slc-{pol}-*.xml')[0]
                 calibration_xml = f'{safe_dir}/annotation/calibration/calibration-*-iw{swath}-slc-{pol}-*.xml'
@@ -193,16 +199,13 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                     f'{swath}.tops.par')
                 run(f'S1_OPOD_vec {swath}.par {orbit_file}')
 
-                root = etree.parse(annotation_xml)
-                burst_counts += root.find('.//burstList').attrib['count']
+                slc_tab += f'{swath}.slc {swath}.par {swath}.tops.par\n'
+                burst_tab += f'1 {get_burst_count(annotation_xml)}\n'
 
             with open('SLC1_tab', 'w') as f:
-                for swath in (1, 2, 3):
-                    f.write(f'{swath}.slc {swath}.par {swath}.tops.par\n')
-
+                f.write(slc_tab)
             with open('burst_tab', 'w') as f:
-                for burst_count in burst_counts:
-                    f.write(f'1 {burst_count}\n')
+                f.write(burst_tab)
 
             run('SLC_copy_ScanSAR SLC1_tab SLC2_tab burst_tab')
             run(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
@@ -235,26 +238,26 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
         if power:
-            shutil.copy(power_tif, f'{name}/{name}_{pol.upper()}.tif')
+            shutil.copy(power_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
         else:
-            shutil.copy(amp_tif, f'{name}/{name}_{pol.upper()}.tif')
+            shutil.copy(amp_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
         shutil.move(amp_tif, f'{pol}-amp.tif')
 
-    run(f'data2geotiff dem_seg.par corrected.ls_map 5 {name}/{name}_ls_map.tif')
+    run(f'data2geotiff dem_seg.par corrected.ls_map 5 {product_name}/{product_name}_ls_map.tif')
     if include_dem:
-        run(f'data2geotiff dem_seg.par dem_seg 2 {name}/{name}_dem.tif')
+        run(f'data2geotiff dem_seg.par dem_seg 2 {product_name}/{product_name}_dem.tif')
     if include_inc_map:
-        run(f'data2geotiff dem_seg.par corrected.inc_map 2 {name}/{name}_inc_map.tif')
+        run(f'data2geotiff dem_seg.par corrected.inc_map 2 {product_name}/{product_name}_inc_map.tif')
     if include_scattering_area:
         create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', 'multilooked.par', 'dem_seg.par',
-                            f'{name}/{name}_area.tif')
+                            f'{product_name}/{product_name}_area.tif')
 
-    fix_geotiff_locations(dir=name)
-    cogify_dir(directory=name)
+    fix_geotiff_locations(dir=product_name)
+    cogify_dir(directory=product_name)
 
-    create_browse_images(name, name, polarizations)
+    create_browse_images(product_name, product_name, polarizations)
     create_metadata_file_set(
-        product_dir=Path(name),
+        product_dir=Path(product_name),
         granule_name=granule,
         dem_name=dem_type,
         processing_date=datetime.now(timezone.utc),
@@ -265,11 +268,11 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
         processor_version=gamma_version(),
     )
     for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png*', '*area*kmz']:
-        for f in glob(f'{name}/{pattern}'):
+        for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
     log.info('*** Sentinel RTC Program - Completed ***')
-    return name
+    return product_name
 
 
 def main():
