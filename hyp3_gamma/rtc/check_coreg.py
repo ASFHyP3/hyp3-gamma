@@ -3,7 +3,6 @@
 import logging
 
 import numpy as np
-
 from hyp3lib.getParameter import getParameter
 
 log = logging.getLogger()

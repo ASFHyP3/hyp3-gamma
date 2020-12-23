@@ -177,11 +177,12 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             with open('SLC1_tab', 'w') as f:
                 for swath in (1, 2, 3):
                     f.write(f'{swath}.slc {swath}.par {swath}.tops.par\n')
+
             with open('burst_tab', 'w') as f:
                 for burst_count in burst_counts:
                     f.write(f'1 {burst_count}\n')
-            run('SLC_copy_S1_TOPS SLC1_tab SLC2_tab burst_tab')
 
+            run('SLC_copy_S1_TOPS SLC1_tab SLC2_tab burst_tab')
             run(f'SLC_mosaic_S1_TOPS SLC2_tab multilooked multilooked.par {looks*5} {looks}')
             run(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
         else:
