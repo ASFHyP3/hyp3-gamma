@@ -18,7 +18,7 @@ def find_and_remove(directory, file_pattern):
 
 def get_granule(granule):
     download_url = get_download_url(granule)
-    zip_file = download_file(download_url)
+    zip_file = download_file(download_url, chunk_size=10485760)
     log.info(f'Unzipping {zip_file}')
     with ZipFile(zip_file) as z:
         z.extractall()
