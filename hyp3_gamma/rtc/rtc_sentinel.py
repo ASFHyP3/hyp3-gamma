@@ -115,7 +115,6 @@ def get_burst_count(annotation_xml):
 
 
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
-    log.info(f'Creating scattering area geotiff: {output_name}')
     width_in = getParameter(mli_par, 'range_samples')
     width_out = getParameter(dem_par, 'width')
     nlines_out = getParameter(dem_par, 'nlines')
@@ -167,6 +166,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     configure_log_file(f'{product_name}/{product_name}.log')
     log_program_start(locals())
 
+    log.info('\nPreparing DEM')
     if dem is None:
         dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=resolution)
     else:
@@ -177,6 +177,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
 
     for pol in polarizations:
 
+        log.info(f'\nGenerating multi-looked {pol.upper()} image')
         if granule_type == 'GRDH':
             annotation_xml = f'{safe_dir}/annotation/*-{pol}-*.xml'
             calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*.xml'
@@ -212,15 +213,18 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             run(f'multi_look_ScanSAR SLC2_tab multilooked multilooked.par {looks*5} {looks}')
 
         if speckle_filter:
+            log.info('\nApplying enhanced Lee speckle filter')
             width = getParameter('multilooked.par', 'range_samples')
             run(f'enh_lee multilooked filtered {width} {looks*30} 1 7 7')
             shutil.move('filtered', 'multilooked')
 
         if pol == polarizations[0]:
+            log.info('\nGenerating initial geocoding lookup table and simulating SAR image from the DEM')
             run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
                 f'{resolution} 0 -q')
 
             if dem_matching:
+                log.info('\nDetermining co-registration offsets (DEM matching)')
                 try:
                     run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . '
                         f'corrected {resolution} 1 -q')
@@ -228,10 +232,11 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                         f'corrected {resolution} 2 -q')
                     check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
                 except (ExecuteError, CoregistrationError):
-                    log.warning('Coregistration check has failed; defaulting to dead reckoning')
+                    log.warning('Co-registration offsets are large; defaulting to dead reckoning')
                     if os.path.isfile('corrected.diff_par'):
                         os.remove('corrected.diff_par')
 
+        log.info(f'\nGenerating terrain geocoded {pol.upper()} image and performing pixel area correction')
         run(f'mk_geo_radcal2 multilooked multilooked.par {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
             f'{resolution} 3 -q -c {int(gamma0)}')
 
@@ -243,6 +248,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
             shutil.copy(amp_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
         shutil.move(amp_tif, f'{pol}-amp.tif')
 
+    log.info('\nCollecting output GeoTIFFs')
     run(f'data2geotiff dem_seg.par corrected.ls_map 5 {product_name}/{product_name}_ls_map.tif')
     if include_dem:
         run(f'data2geotiff dem_seg.par dem_seg 2 {product_name}/{product_name}_dem.tif')
@@ -255,6 +261,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     fix_geotiff_locations(dir=product_name)
     cogify_dir(directory=product_name)
 
+    log.info('\nGenerating browse images and metadata files')
     create_browse_images(product_name, product_name, polarizations)
     create_metadata_file_set(
         product_dir=Path(product_name),
