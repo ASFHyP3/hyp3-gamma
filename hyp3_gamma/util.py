@@ -30,7 +30,7 @@ def unzip_granule(zip_file, remove=False):
         safe_dir = next(item.filename for item in z.infolist() if item.is_dir() and item.filename.endswith('.SAFE/'))
     if remove:
         os.remove(zip_file)
-    return safe_dir
+    return safe_dir.strip('/')
 
 
 def earlier_granule_first(g1, g2):
