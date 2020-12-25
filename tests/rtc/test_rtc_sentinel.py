@@ -107,7 +107,7 @@ def test_append_additional_log_files(tmp_path):
     with open(log2, 'w') as f:
         f.write('bar\n')
 
-    rtc_sentinel.append_additional_log_files(main_log, f'?.log')
+    rtc_sentinel.append_additional_log_files(main_log, '?.log')
     with open(main_log) as f:
         content = f.readlines()
     assert content == [
