@@ -95,6 +95,7 @@ def test_get_granule_type():
 
 def test_append_additional_log_files(tmp_path):
     chdir(tmp_path)
+
     main_log = 'main.log'
     with open(main_log, 'w') as f:
         f.write('hello world\n')
@@ -109,8 +110,8 @@ def test_append_additional_log_files(tmp_path):
 
     rtc_sentinel.append_additional_log_files(main_log, '?.log')
     with open(main_log) as f:
-        content = f.readlines()
-    assert content == [
+        lines = f.readlines()
+    assert lines == [
         'hello world\n',
         '==============================================\n',
         'Log: 1.log\n',
