@@ -229,7 +229,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
 
     log.info('Preparing DEM')
     if dem is None:
-        dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=resolution)
+        dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=30.0)
     else:
         dem_type = 'unknown'
     dem_image = 'dem.image'
