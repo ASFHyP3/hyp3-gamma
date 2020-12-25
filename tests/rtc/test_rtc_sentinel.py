@@ -1,3 +1,4 @@
+from os import chdir
 from re import match
 
 import pytest
@@ -90,3 +91,33 @@ def test_get_granule_type():
 
     with pytest.raises(ValueError):
         rtc_sentinel.get_granule_type('S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F')
+
+
+def test_append_additional_log_files(tmp_path):
+    chdir(tmp_path)
+    main_log = 'main.log'
+    with open(main_log, 'w') as f:
+        f.write('hello world\n')
+
+    log1 = '1.log'
+    with open(log1, 'w') as f:
+        f.write('foo\n')
+
+    log2 = '2.log'
+    with open(log2, 'w') as f:
+        f.write('bar\n')
+
+    rtc_sentinel.append_additional_log_files(main_log, f'?.log')
+    with open(main_log) as f:
+        content = f.readlines()
+    assert content == [
+        'hello world\n',
+        '==============================================\n',
+        'Log: 1.log\n',
+        '==============================================\n',
+        'foo\n',
+        '==============================================\n',
+        'Log: 2.log\n',
+        '==============================================\n',
+        'bar\n'
+    ]

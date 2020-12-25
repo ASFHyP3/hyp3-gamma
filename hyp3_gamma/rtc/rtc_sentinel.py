@@ -211,6 +211,17 @@ def create_browse_images(out_dir, out_name, polarizations):
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
+def append_additional_log_files(log_file, pattern):
+    for additional_log_file in sorted(glob(pattern)):
+        with open(additional_log_file) as f:
+            content = f.read()
+        with open(log_file, 'a') as f:
+            f.write('==============================================\n')
+            f.write(f'Log: {additional_log_file}\n')
+            f.write('==============================================\n')
+            f.write(content)
+
+
 def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
                        dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
                        skip_cross_pol=False):
@@ -223,7 +234,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     looks = get_looks(granule_type, resolution)
 
     os.mkdir(product_name)
-    configure_log_file(f'{product_name}/{product_name}.log')
+    log_file = configure_log_file(f'{product_name}/{product_name}.log')
     log_program_start(locals())
 
     log.info('Preparing DEM')
@@ -300,6 +311,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
         for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
+    append_additional_log_files(log_file, 'mk_geo_radcal2_?.log')
     return product_name
 
 
