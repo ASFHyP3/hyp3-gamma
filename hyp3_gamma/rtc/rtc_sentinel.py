@@ -85,7 +85,6 @@ def configure_log_file(log_file):
 
 
 def log_program_start(parameters):
-    log.info('*** Sentinel RTC Program - Starting ***')
     for key, value in parameters.items():
         log.info(f'    {key}: {value}')
 
@@ -301,7 +300,6 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
         for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
-    log.info('*** Sentinel RTC Program - Completed ***')
     return product_name
 
 
@@ -329,6 +327,10 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
+    log.info('===================================================================')
+    log.info('                Sentinel RTC Program - Starting')
+    log.info('===================================================================')
+
     if zipfile.is_zipfile(args.safe_dir):
         args.safe_dir = unzip_granule(args.safe_dir)
 
@@ -343,6 +345,10 @@ def main():
                        include_inc_map=args.include_inc_map,
                        include_scattering_area=args.include_scattering_area,
                        skip_cross_pol=args.skip_cross_pol)
+
+    log.info('===================================================================')
+    log.info('                Sentinel RTC Program - Completed')
+    log.info('===================================================================')
 
 
 if __name__ == '__main__':
