@@ -36,7 +36,7 @@ def check_coregistration(mk_geo_radcal2_log, diff_par, max_stddev=2.0, max_offse
         raise CoregistrationError()
 
     offset = pixel_size * get_offset(diff_par)
-    if offset >= max_offset:
+    if offset > max_offset:
         log.warning(f'Absolute offset of {offset} is larger than {max_offset}')
         raise CoregistrationError()
 
