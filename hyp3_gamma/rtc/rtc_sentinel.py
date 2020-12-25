@@ -308,7 +308,6 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     if zipfile.is_zipfile(args.safe_dir):
-        log.info(f'Unzipping {args.safe_dir}')
         args.safe_dir = unzip_granule(args.safe_dir)
 
     rtc_sentinel_gamma(safe_dir=args.safe_dir,

@@ -24,6 +24,7 @@ def get_granule(granule):
 
 
 def unzip_granule(zip_file, remove=False):
+    log.info(f'Unzipping {zip_file}')
     with ZipFile(zip_file) as z:
         z.extractall()
         safe_dir = next(item.filename for item in z.infolist() if item.is_dir() and item.filename.endswith('.SAFE/'))
