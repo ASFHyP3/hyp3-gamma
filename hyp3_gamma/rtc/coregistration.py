@@ -1,7 +1,7 @@
 """Checks results of Gamma RTC co-registration process"""
 
-from math import sqrt
 import logging
+from math import sqrt
 
 from hyp3lib.getParameter import getParameter
 

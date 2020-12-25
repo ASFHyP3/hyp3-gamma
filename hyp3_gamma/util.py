@@ -1,4 +1,3 @@
-import glob
 import logging
 import os
 from zipfile import ZipFile
