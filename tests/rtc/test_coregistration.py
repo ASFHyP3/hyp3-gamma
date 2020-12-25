@@ -18,7 +18,7 @@ def test_get_offset(tmp_path):
 
 
 def test_get_stddev(tmp_path):
-    log = tmp_path / 'mk_geo_radcal2_2.log'
+    log = tmp_path / 'log'
 
     with open(log, 'w') as f:
         f.write('final model fit std. dev. (samples) range: 3.0000   azimuth: 4.0000')
@@ -30,7 +30,7 @@ def test_get_stddev(tmp_path):
 
 
 def test_check_coreg(tmp_path):
-    log = tmp_path / 'mk_geo_radcal2_2.log'
+    log = tmp_path / 'log'
     with open(log, 'w') as f:
         f.write('final model fit std. dev. (samples) range: 3.0000   azimuth: 4.0000')
 
