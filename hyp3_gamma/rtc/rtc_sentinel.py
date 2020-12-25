@@ -84,9 +84,20 @@ def configure_log_file(log_file):
     return log_file
 
 
-def log_program_start(parameters):
-    for key, value in parameters.items():
-        log.info(f'    {key}: {value}')
+def log_parameters(safe_dir, resolution, gamma0, power, speckle_filter, dem_matching, include_dem, include_inc_map,
+                   include_scattering_area, orbit_file, product_name):
+    log.info('Parameters for this run:')
+    log.info(f'    SAFE directory          : {safe_dir}')
+    log.info(f'    Output resolution       : {resolution}')
+    log.info(f'    Gamma0 output           : {gamma0}')
+    log.info(f'    Power output            : {power}')
+    log.info(f'    Speckle filter          : {speckle_filter}')
+    log.info(f'    DEM matching            : {dem_matching}')
+    log.info(f'    Include DEM             : {include_dem}')
+    log.info(f'    Include inc. angle map  : {include_inc_map}')
+    log.info(f'    Include scattering area : {include_scattering_area}')
+    log.info(f'    Orbit file              : {orbit_file}')
+    log.info(f'    Output name             : {product_name}')
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
@@ -235,7 +246,8 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
-    log_program_start(locals())
+    log_parameters(safe_dir, resolution, gamma0, power, speckle_filter, dem_matching, include_dem, include_inc_map,
+                   include_scattering_area, orbit_file, product_name)
 
     log.info('Preparing DEM')
     if dem is None:
