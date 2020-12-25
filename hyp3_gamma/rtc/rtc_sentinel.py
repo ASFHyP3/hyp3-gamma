@@ -29,7 +29,7 @@ from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 
 import hyp3_gamma
-from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coregistration
+from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import unzip_granule
 
 log = logging.getLogger()
@@ -253,7 +253,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                         f'corrected {resolution} 1 -q')
                     run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . '
                         f'corrected {resolution} 2 -q')
-                    check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', resolution)
+                    check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', pixel_size=resolution)
                 except (ExecuteError, CoregistrationError):
                     log.warning('Co-registration offsets are too large; defaulting to dead reckoning')
                     if os.path.isfile('corrected.diff_par'):
