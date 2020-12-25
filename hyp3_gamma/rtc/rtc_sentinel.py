@@ -35,7 +35,7 @@ from hyp3_gamma.util import unzip_granule
 log = logging.getLogger()
 
 
-def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True, power=True,
+def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
                      filtered=False, matching=False):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
@@ -54,8 +54,8 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, gamma0=True
 
     product_id = token_hex(2).upper()
 
-    g = 'g' if gamma0 else 's'
-    p = 'p' if power else 'a'
+    g = 'g' if radiometry == 'gamma0' else 's'
+    p = 'p' if scale == 'power' else 'a'
     f = 'f' if filtered else 'n'
     m = 'm' if matching else 'd'
 
@@ -84,13 +84,13 @@ def configure_log_file(log_file):
     return log_file
 
 
-def log_parameters(safe_dir, resolution, gamma0, power, speckle_filter, dem_matching, include_dem, include_inc_map,
+def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, orbit_file, product_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory          : {safe_dir}')
     log.info(f'    Output resolution       : {resolution}')
-    log.info(f'    Gamma0 output           : {gamma0}')
-    log.info(f'    Power output            : {power}')
+    log.info(f'    Radiometry              : {radiometry}')
+    log.info(f'    Scale                   : {scale}')
     log.info(f'    Speckle filter          : {speckle_filter}')
     log.info(f'    DEM matching            : {dem_matching}')
     log.info(f'    Include DEM             : {include_dem}')
@@ -233,7 +233,7 @@ def append_additional_log_files(log_file, pattern):
             f.write(content)
 
 
-def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
+def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0', scale='power', speckle_filter=False,
                        dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
                        skip_cross_pol=False):
     safe_dir = safe_dir.strip('/')
@@ -241,12 +241,12 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
     granule_type = get_granule_type(granule)
     polarizations = get_polarizations(granule, skip_cross_pol)
     orbit_file, _ = downloadSentinelOrbitFile(granule)
-    product_name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
+    product_name = get_product_name(granule, orbit_file, resolution, radiometry, scale, speckle_filter, dem_matching)
     looks = get_looks(granule_type, resolution)
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
-    log_parameters(safe_dir, resolution, gamma0, power, speckle_filter, dem_matching, include_dem, include_inc_map,
+    log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, orbit_file, product_name)
 
     log.info('Preparing DEM')
@@ -282,12 +282,13 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=T
                         os.remove('corrected.diff_par')
 
         log.info(f'Generating terrain geocoded {pol.upper()} image and performing pixel area correction')
+        radiometry_flag = int(radiometry == 'gamma0')
         run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
-            f'{resolution} 3 -q -c {int(gamma0)}')
+            f'{resolution} 3 -q -c {radiometry_flag}')
 
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
-        if power:
+        if scale == 'power':
             shutil.copy(power_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
         else:
             shutil.copy(amp_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
@@ -361,8 +362,8 @@ def main():
     rtc_sentinel_gamma(safe_dir=args.safe_dir,
                        dem=args.dem,
                        resolution=args.resolution,
-                       gamma0=(args.radiometry == 'gamma0'),
-                       power=(args.scale == 'power'),
+                       radiometry=args.radiometry,
+                       scale=args.scale,
                        speckle_filter=args.speckle_filter,
                        dem_matching=args.dem_matching,
                        include_dem=args.include_dem,

@@ -12,8 +12,8 @@ def test_get_product_name():
         'granule_name': 'S1A_S1_GRDH_1SSH_20181121T184017_20181121T184046_024690_02B6ED_6946',
         'orbit_file': 'S1A_OPER_AUX_POEORB_OPOD_20181211T120749_V20181120T225942_20181122T005942.EOF',
         'resolution': 30,
-        'gamma0': False,
-        'power': False,
+        'radiometry': 'sigma0',
+        'scale': 'amplitude',
         'filtered': False,
         'matching': False,
     }
@@ -24,9 +24,9 @@ def test_get_product_name():
         'granule_name': 'S1B_WV_OCN__2SSV_20200714T162902_20200714T163511_022469_02AA55_1A7D',
         'orbit_file': 'S1B_OPER_AUX_RESORB_OPOD_20200714T223706_V20200714T150658_20200714T182428.EOF',
         'resolution': 10,
-        'power': True,
+        'radiometry': 'gamma0',
+        'scale': 'power',
         'filtered': True,
-        'gamma0': True,
         'matching': True,
     }
     name = rtc_sentinel.get_product_name(**payload)
