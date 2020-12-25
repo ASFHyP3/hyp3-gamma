@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+import zipfile
 from argparse import ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
@@ -30,6 +31,7 @@ from lxml import etree
 
 import hyp3_gamma
 from hyp3_gamma.rtc.check_coreg import CoregistrationError, check_coregistration
+from hyp3_gamma.util import unzip_granule
 
 log = logging.getLogger()
 
@@ -304,6 +306,10 @@ def main():
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
+    if zipfile.is_zipfile(args.safe_dir):
+        log.info(f'Unzipping {args.safe_dir}')
+        args.safe_dir = unzip_granule(args.safe_dir)
 
     rtc_sentinel_gamma(safe_dir=args.safe_dir,
                        dem=args.dem,
