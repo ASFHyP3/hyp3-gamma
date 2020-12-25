@@ -9,13 +9,6 @@ from hyp3lib.scene import get_download_url
 log = logging.getLogger(__name__)
 
 
-def find_and_remove(directory, file_pattern):
-    pattern = os.path.join(directory, file_pattern)
-    for filename in glob.glob(pattern):
-        logging.info(f'Removing {filename}')
-        os.remove(filename)
-
-
 def get_granule(granule):
     download_url = get_download_url(granule)
     zip_file = download_file(download_url, chunk_size=10485760)
