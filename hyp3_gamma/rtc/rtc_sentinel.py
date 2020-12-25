@@ -91,18 +91,21 @@ def log_program_start(parameters):
         log.info(f'    {key}: {value}')
 
 
-def get_polarizations(safe_dir):
+def get_polarizations(safe_dir, skip_cross_pol=True):
     mapping = {
-        'SH': ('hh', ),
-        'SV': ('vv', ),
-        'DH': ('hh', 'hv'),
-        'DV': ('vv', 'vh'),
+        'SH': ['hh'],
+        'SV': ['vv'],
+        'DH': ['hh', 'hv'],
+        'DV': ['vv', 'vh'],
     }
     key = safe_dir[14:16]
     polarizations = mapping.get(key)
 
     if not polarizations:
         raise GranuleError(f'Could not determine polarization(s) from {safe_dir}')
+
+    if len(polarizations) > 1 and skip_cross_pol:
+        polarizations.pop()
 
     return polarizations
 
@@ -156,10 +159,11 @@ def create_browse_images(out_dir, out_name, polarizations):
 
 
 def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, gamma0=True, power=True, speckle_filter=False,
-                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False):
+                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
+                       skip_cross_pol=False):
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
-    polarizations = get_polarizations(granule)
+    polarizations = get_polarizations(granule, skip_cross_pol)
     orbit_file, _ = downloadSentinelOrbitFile(granule)
     product_name = get_product_name(granule, orbit_file, resolution, gamma0, power, speckle_filter, dem_matching)
     looks = get_looks(granule_type, resolution)
@@ -302,6 +306,7 @@ def main():
                         help='Include the incidence angle geotiff in the output package')
     parser.add_argument('--include-scattering-area', action='store_true',
                         help='Include the scattering area geotiff in the output package')
+    parser.add_argument('--skip-cross-pol', action='store_true', help='Do not process the cross polarization image')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -319,7 +324,8 @@ def main():
                        dem_matching=args.dem_matching,
                        include_dem=args.include_dem,
                        include_inc_map=args.include_inc_map,
-                       include_scattering_area=args.include_scattering_area)
+                       include_scattering_area=args.include_scattering_area,
+                       skip_cross_pol=args.skip_cross_pol)
 
 
 if __name__ == '__main__':
