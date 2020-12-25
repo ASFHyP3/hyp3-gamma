@@ -324,7 +324,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0',
         for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
-    append_additional_log_files(log_file, 'mk_geo_radcal2_?.log')
+    append_additional_log_files(log_file, 'mk_geo_radcal_?.log')
     return product_name
 
 
