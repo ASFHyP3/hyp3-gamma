@@ -29,7 +29,7 @@ def test_get_stddev(tmp_path):
     assert coregistration.get_std_dev(log) == 94.67546616785154
 
 
-def test_check_coreg(tmp_path):
+def test_check_coregistration(tmp_path):
     log = tmp_path / 'log'
     with open(log, 'w') as f:
         f.write('final model fit std. dev. (samples) range: 3.0000   azimuth: 4.0000')
