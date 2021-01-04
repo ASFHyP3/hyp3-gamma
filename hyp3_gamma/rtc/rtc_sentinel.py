@@ -1,4 +1,4 @@
-"""Create a Radiometrically Terrain-Corrected (RTC) image from a  Sentinel-1 scene sing GAMMA software"""
+"""Create a Radiometrically Terrain-Corrected (RTC) image from a  Sentinel-1 scene using GAMMA software"""
 
 import logging
 import os
