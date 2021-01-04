@@ -254,7 +254,7 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0',
     if dem is None:
         dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=30.0)
     else:
-        dem_type = 'unknown'
+        dem_type = 'unknown'  # causes create_metadata_file_set() to raise NotImplementedError
     dem_image = 'dem.image'
     dem_par = 'dem.par'
     utm2dem(dem, dem_image, dem_par)
