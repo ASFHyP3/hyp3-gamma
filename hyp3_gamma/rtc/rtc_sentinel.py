@@ -234,15 +234,16 @@ def append_additional_log_files(log_file, pattern):
 
 
 def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0', scale='power', speckle_filter=False,
-                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
-                       skip_cross_pol=False):
+                       dem_matching=False, looks=None, include_dem=False, include_inc_map=False,
+                       include_scattering_area=False, skip_cross_pol=False):
     safe_dir = safe_dir.strip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
     polarizations = get_polarizations(granule, skip_cross_pol)
     orbit_file, _ = downloadSentinelOrbitFile(granule)
     product_name = get_product_name(granule, orbit_file, resolution, radiometry, scale, speckle_filter, dem_matching)
-    looks = get_looks(granule_type, resolution)
+    if looks is None:
+        looks = get_looks(granule_type, resolution)
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
@@ -288,10 +289,11 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0',
 
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
+        output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
         if scale == 'power':
-            shutil.copy(power_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
+            shutil.copy(power_tif, output_tif)
         else:
-            shutil.copy(amp_tif, f'{product_name}/{product_name}_{pol.upper()}.tif')
+            shutil.copy(amp_tif, output_tif)
         shutil.move(amp_tif, f'{pol}-amp.tif')
 
     log.info('Collecting output GeoTIFFs')
@@ -341,6 +343,7 @@ def main():
     parser.add_argument('--scale', choices=['power', 'amplitude'], help='Desired output scale')
     parser.add_argument('--speckle-filter', '-f', action='store_true', help='Apply enhanced Lee filter')
     parser.add_argument('--dem-matching', '-m', action='store_true', help='Attempt DEM matching')
+    parser.add_argument('--looks', '-l', type=int, help='Number of azimuth looks to take (def:3 for SLC/6 for GRD)')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
     parser.add_argument('--include-inc-map', action='store_true',
                         help='Include the incidence angle geotiff in the output package')
@@ -366,6 +369,7 @@ def main():
                        scale=args.scale,
                        speckle_filter=args.speckle_filter,
                        dem_matching=args.dem_matching,
+                       looks=args.looks,
                        include_dem=args.include_dem,
                        include_inc_map=args.include_inc_map,
                        include_scattering_area=args.include_scattering_area,
