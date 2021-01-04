@@ -339,8 +339,9 @@ def main():
     parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
     parser.add_argument('--dem', '-d', help='Specify a DEM file to use - must be in UTM projection')
     parser.add_argument('--resolution', '-r', type=float, default=30.0, help='Desired output resolution')
-    parser.add_argument('--radiometry', choices=['gamma0', 'sigma0'], help='Desired output radiometry')
-    parser.add_argument('--scale', choices=['power', 'amplitude'], help='Desired output scale')
+    parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
+                        help='Desired output radiometry')
+    parser.add_argument('--scale', choices=('power', 'amplitude'), default='power', help='Desired output scale')
     parser.add_argument('--speckle-filter', '-f', action='store_true', help='Apply enhanced Lee filter')
     parser.add_argument('--dem-matching', '-m', action='store_true', help='Attempt DEM matching')
     parser.add_argument('--looks', '-l', type=int, help='Number of azimuth looks to take (def:3 for SLC/6 for GRD)')
