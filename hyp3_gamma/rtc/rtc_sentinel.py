@@ -4,7 +4,7 @@ import logging
 import os
 import shutil
 import zipfile
-from argparse import ArgumentParser
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
 from math import isclose
@@ -335,6 +335,7 @@ def main():
     parser = ArgumentParser(
         prog='rtc_sentinel.py',
         description=__doc__,
+        formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
     parser.add_argument('--dem', '-d', help='Specify a DEM file to use - must be in UTM projection')
@@ -344,7 +345,8 @@ def main():
     parser.add_argument('--scale', choices=('power', 'amplitude'), default='power', help='Desired output scale')
     parser.add_argument('--speckle-filter', '-f', action='store_true', help='Apply enhanced Lee filter')
     parser.add_argument('--dem-matching', '-m', action='store_true', help='Attempt DEM matching')
-    parser.add_argument('--looks', '-l', type=int, help='Number of azimuth looks to take (def:3 for SLC/6 for GRD)')
+    parser.add_argument('--looks', '-l', type=int,
+                        help='Number of azimuth looks to take (will be set dynamically if not specified)')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
     parser.add_argument('--include-inc-map', action='store_true',
                         help='Include the incidence angle geotiff in the output package')
