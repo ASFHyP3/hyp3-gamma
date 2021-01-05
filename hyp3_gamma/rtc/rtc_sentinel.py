@@ -338,14 +338,14 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
-    parser.add_argument('--dem', '-d', help='Specify a DEM file to use - must be in UTM projection')
-    parser.add_argument('--resolution', '-r', type=float, default=30.0, help='Desired output resolution')
+    parser.add_argument('--dem', help='Specify a DEM file to use - must be in UTM projection')
+    parser.add_argument('--resolution', type=float, default=30.0, help='Desired output resolution')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Desired output radiometry')
     parser.add_argument('--scale', choices=('power', 'amplitude'), default='power', help='Desired output scale')
-    parser.add_argument('--speckle-filter', '-f', action='store_true', help='Apply enhanced Lee filter')
-    parser.add_argument('--dem-matching', '-m', action='store_true', help='Attempt DEM matching')
-    parser.add_argument('--looks', '-l', type=int,
+    parser.add_argument('--speckle-filter', action='store_true', help='Apply enhanced Lee filter')
+    parser.add_argument('--dem-matching', action='store_true', help='Attempt DEM matching')
+    parser.add_argument('--looks', type=int,
                         help='Number of azimuth looks to take (will be set dynamically if not specified)')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
     parser.add_argument('--include-inc-map', action='store_true',
