@@ -1,4 +1,4 @@
-"""Create a Radiometrically Terrain-Corrected (RTC) image from a  Sentinel-1 scene using GAMMA software"""
+"""Create a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software"""
 
 import logging
 import os
@@ -11,6 +11,7 @@ from math import isclose
 from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
+from typing import List
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError
@@ -234,9 +235,32 @@ def append_additional_log_files(log_file, pattern):
             f.write(content)
 
 
-def rtc_sentinel_gamma(safe_dir, resolution=30.0, radiometry='gamma0', scale='power', speckle_filter=False,
-                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
-                       dem=None, bbox=None, looks=None, skip_cross_pol=False):
+def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
+                       speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
+                       include_inc_map: bool = False, include_scattering_area: bool = False, dem: str = None,
+                       bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False) -> str:
+    """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
+    Args:
+        safe_dir: Path to the Sentinel-1 .SAFE directory to process.
+        resolution: Pixel size of the output images.
+        radiometry: Radiometry of the output backscatter image(s); `gamma0` or `sigma0`.
+        scale: Scale of the output backscatter image(s); `power` or `amplitude`.
+        speckle_filter: Apply an enhanced Lee speckle filter.
+        dem_matching: Attempt to co-register the image to the DEM.
+        include_dem: Include the DEM GeoTIFF in the output package.
+        include_inc_map: Include the incidence angle GeoTIFF in the output package.
+        include_scattering_area: Include the local scattering area GeoTIFF in the output package.
+        dem: Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection. A DEM will be selected
+            automatically if not provided.
+        bbox: Subset the output images to the given lat/lon bounding box: `[lon_min, lat_min, lon_max, lat_max]`.
+            `bbox` is ignored if `dem` is provided.
+        looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
+            are selected automatically based on azimuth looks and product type.
+        skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
+    Returns:
+        product_name: Name of the output product directory
+    """
+
     safe_dir = safe_dir.strip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
@@ -343,28 +367,32 @@ def main():
         description=__doc__,
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
+    parser.add_argument('safe_dir', help='Path to the Sentinel-1 .SAFE directory to process.')
 
-    parser.add_argument('--resolution', type=float, default=30.0, help='Desired output resolution')
+    parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
-                        help='Desired output radiometry')
-    parser.add_argument('--scale', choices=('power', 'amplitude'), default='power', help='Desired output scale')
-    parser.add_argument('--speckle-filter', action='store_true', help='Apply enhanced Lee filter')
-    parser.add_argument('--dem-matching', action='store_true', help='Attempt DEM matching')
-    parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
+                        help='Radiometry of the output backscatter image(s)')
+    parser.add_argument('--scale', choices=('power', 'amplitude'), default='power',
+                        help='Scale of the output backscatter image(s)')
+    parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
+    parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
+    parser.add_argument('--include-dem', action='store_true', help='Include the DEM GeoTIFF in the output package.')
     parser.add_argument('--include-inc-map', action='store_true',
-                        help='Include the incidence angle geotiff in the output package')
+                        help='Include the incidence angle GeoTIFF in the output package.')
     parser.add_argument('--include-scattering-area', action='store_true',
-                        help='Include the scattering area geotiff in the output package')
+                        help='Include the local scattering area GeoTIFF in the output package.')
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--dem', help='Specify a DEM file to use - must be in UTM projection')
+    group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
+                                     ' A DEM will be selected automatically if not provided.')
     group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                       help='Subset output to the given lat/lon bounding box')
+                       help='Subset the output images to the given lat/lon bounding box.')
 
     parser.add_argument('--looks', type=int,
-                        help='Number of azimuth looks to take (will be set dynamically if not specified)')
-    parser.add_argument('--skip-cross-pol', action='store_true', help='Do not process the cross polarization image')
+                        help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
+                             'and filter looks are selected automatically based on azimuth looks and product type.')
+    parser.add_argument('--skip-cross-pol', action='store_true',
+                        help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
