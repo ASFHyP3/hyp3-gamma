@@ -6,6 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.1.0...v4.0.0)
+
+RTC processing via `rtc_sentinel.py` has been significantly refactored, and a number of legacy options have been
+removed.
+
+### Added
+* `rtc.util.unzip_granule()` unzips a S1 zip file and returns the .SAFE directory name
+
+### Changed
+* The parameters to `rtc_sentinel.py` and `rtc.rtc_sentinel.rtc_sentinel_gamma()` have been significantly revised.
+  Review the corresponding help for more details:
+  * `rtc_sentinel.py --help`
+  * `from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma; help(rtc_sentinel_gamma)`
+* A refactored `rtc.coregistration` module has replaced `rtc.check_coreg`. The `check_coreg.py` entrypoint has been
+  removed.
+
+### Removed
+* Legacy support for the GIMP and REMA DEMs has been removed, including the `rtc.smoothem` module and the corresponding
+  `smoothem.py` entrypoint.
+* User-provided DEMs in GAMMA format are no longer supported. DEMs in GeoTIFF format are still supported.
+* The `output/out_name` options to set the name of the output product have been removed.
+* The `shape` option to subset to the bounds of a shapefile has been removed. Subsetting to a bounding box or to a
+  user-provided DEM are still supported.
+* The `terms` option has been removed. DEM matching will always use a one-term offset polynomial.
+* The `par` option to provide a pre-generated `diff_par` offset file has been removed.
+* The `fail/dead_flag` options have been removed. Processing will always proceed using dead reckoning when
+  `dem_matching` is selected and co-registration fails.
+
 ## [3.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.0.0...v3.1.0)
 
 ### Added
