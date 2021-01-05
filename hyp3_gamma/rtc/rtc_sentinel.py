@@ -20,6 +20,7 @@ from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
+from hyp3lib.get_dem import get_dem
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
@@ -40,7 +41,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry=
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
-    date_time = granule_name[17:32]
+    acq_start_time = granule_name[17:32]
     res = int(resolution)
 
     if orbit_file is None:
@@ -59,7 +60,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry=
     f = 'f' if filtered else 'n'
     m = 'm' if matching else 'd'
 
-    product_name = f'{platform}_{beam_mode}_{date_time}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
+    product_name = f'{platform}_{beam_mode}_{acq_start_time}_{polarization}{o}_RTC{res}_G_{g}{p}u{f}e{m}_{product_id}'
     return product_name
 
 
@@ -126,12 +127,12 @@ def run(cmd):
 def prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks):
     log.info(f'Generating multi-looked {pol.upper()} image')
     if granule_type == 'GRDH':
-        return prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks)
+        return _prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks)
     elif granule_type == 'SLC':
-        return prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks)
+        return _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks)
 
 
-def prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks):
+def _prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks):
     annotation_xml = f'{safe_dir}/annotation/*-{pol}-*.xml'
     calibration_xml = f'{safe_dir}/annotation/calibration/calibration*-{pol}-*.xml'
     noise_xml = f'{safe_dir}/annotation/calibration/noise*-{pol}-*.xml'
@@ -148,7 +149,7 @@ def prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks):
     return mli_image, mli_par
 
 
-def prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
+def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
     with TemporaryDirectory() as temp_dir:
         slc_tab = f'{temp_dir}/slc_tab'
         for swath in (1, 2, 3):
@@ -233,9 +234,9 @@ def append_additional_log_files(log_file, pattern):
             f.write(content)
 
 
-def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0', scale='power', speckle_filter=False,
-                       dem_matching=False, looks=None, include_dem=False, include_inc_map=False,
-                       include_scattering_area=False, skip_cross_pol=False):
+def rtc_sentinel_gamma(safe_dir, resolution=30.0, radiometry='gamma0', scale='power', speckle_filter=False,
+                       dem_matching=False, include_dem=False, include_inc_map=False, include_scattering_area=False,
+                       dem=None, bbox=None, looks=None, skip_cross_pol=False):
     safe_dir = safe_dir.strip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
@@ -251,10 +252,15 @@ def rtc_sentinel_gamma(safe_dir, dem=None, resolution=30.0, radiometry='gamma0',
                    include_scattering_area, orbit_file, product_name)
 
     log.info('Preparing DEM')
-    if dem is None:
-        dem, dem_type = getDemFile(safe_dir, 'dem.tif', post=30.0)
-    else:
+    if dem:
         dem_type = 'unknown'  # causes create_metadata_file_set() to raise NotImplementedError
+    else:
+        dem = 'dem.tif'
+        post = 30.0
+        if bbox:
+            dem_type = get_dem(bbox[0], bbox[1], bbox[2], bbox[3], dem, post=post)
+        else:
+            dem, dem_type = getDemFile(safe_dir, dem, post=post)
     dem_image = 'dem.image'
     dem_par = 'dem.par'
     utm2dem(dem, dem_image, dem_par)
@@ -338,20 +344,26 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Name of the input .SAFE directory')
-    parser.add_argument('--dem', help='Specify a DEM file to use - must be in UTM projection')
+
     parser.add_argument('--resolution', type=float, default=30.0, help='Desired output resolution')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Desired output radiometry')
     parser.add_argument('--scale', choices=('power', 'amplitude'), default='power', help='Desired output scale')
     parser.add_argument('--speckle-filter', action='store_true', help='Apply enhanced Lee filter')
     parser.add_argument('--dem-matching', action='store_true', help='Attempt DEM matching')
-    parser.add_argument('--looks', type=int,
-                        help='Number of azimuth looks to take (will be set dynamically if not specified)')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM geotiff in the output package')
     parser.add_argument('--include-inc-map', action='store_true',
                         help='Include the incidence angle geotiff in the output package')
     parser.add_argument('--include-scattering-area', action='store_true',
                         help='Include the scattering area geotiff in the output package')
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--dem', help='Specify a DEM file to use - must be in UTM projection')
+    group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
+                       help='Subset output to the given lat/lon bounding box')
+
+    parser.add_argument('--looks', type=int,
+                        help='Number of azimuth looks to take (will be set dynamically if not specified)')
     parser.add_argument('--skip-cross-pol', action='store_true', help='Do not process the cross polarization image')
     args = parser.parse_args()
 
@@ -366,16 +378,17 @@ def main():
         args.safe_dir = unzip_granule(args.safe_dir)
 
     rtc_sentinel_gamma(safe_dir=args.safe_dir,
-                       dem=args.dem,
                        resolution=args.resolution,
                        radiometry=args.radiometry,
                        scale=args.scale,
                        speckle_filter=args.speckle_filter,
                        dem_matching=args.dem_matching,
-                       looks=args.looks,
                        include_dem=args.include_dem,
                        include_inc_map=args.include_inc_map,
                        include_scattering_area=args.include_scattering_area,
+                       dem=args.dem,
+                       bbox=args.bbox,
+                       looks=args.looks,
                        skip_cross_pol=args.skip_cross_pol)
 
     log.info('===================================================================')
