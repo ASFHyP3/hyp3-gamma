@@ -66,7 +66,7 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
     return files
 
 
-def get_dem_resolution(dem_name: str) -> str:
+def get_dem_resolution(dem_name: str) -> Optional[str]:
     try:
         data = {
             'EU_DEM_V11': '1 arc second (about 30 meters)',
@@ -80,10 +80,10 @@ def get_dem_resolution(dem_name: str) -> str:
         }
         return data[dem_name]
     except KeyError:
-        raise NotImplementedError(f'Unknown resolution for DEM: {dem_name}')
+        return
 
 
-def get_dem_template_id(dem_name: str) -> str:
+def get_dem_template_id(dem_name: str) -> Optional[str]:
     if dem_name.startswith('EU'):
         return 'eu'
     if dem_name.startswith('GIMP'):
@@ -94,7 +94,6 @@ def get_dem_template_id(dem_name: str) -> str:
         return 'rema'
     if dem_name.startswith('SRTM'):
         return 'srtm'
-    raise NotImplementedError(f'Unkown DEM: {dem_name}')
 
 
 def get_projection(srs_wkt) -> str:
@@ -167,7 +166,10 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
 
     payload.update(get_granule_type(granule_name))
 
-    payload['dem_resolution'] = get_dem_resolution(dem_name)
+    if (dem_resolution := get_dem_resolution(dem_name)) is not None:
+        payload['dem_resolution'] = dem_resolution
+    else:
+        payload['dem_resolution'] = 'UNKNOWN'
 
     return payload
 
@@ -198,9 +200,8 @@ def create_product_xmls(payload: dict) -> List[Path]:
 def create_dem_xml(payload: dict) -> Path:
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_dem.tif'
 
-    dem_template_id = get_dem_template_id(payload['dem_name'])
-
-    return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
+    if (dem_template_id := get_dem_template_id(payload['dem_name'])) is not None:
+        return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
 def create_browse_xmls(payload: dict) -> List[Path]:
