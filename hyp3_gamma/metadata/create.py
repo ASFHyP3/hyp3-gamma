@@ -102,7 +102,7 @@ def get_dem_blurb(dem_name: str) -> str:
     return ''
 
 
-def get_dem_resolution(dem_name: str) -> Optional[str]:
+def get_dem_resolution(dem_name: str) -> str:
     try:
         data = {
             'EU_DEM_V11': '1 arc second (about 30 meters)',
