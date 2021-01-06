@@ -234,7 +234,8 @@ def create_product_xmls(payload: dict) -> List[Path]:
 def create_dem_xml(payload: dict) -> Path:
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_dem.tif'
 
-    if (dem_template_id := get_dem_template_id(payload['dem_name'])) is not None:
+    dem_template_id = get_dem_template_id(payload['dem_name'])
+    if dem_template_id is not None:
         return create_metadata_file(payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
 
