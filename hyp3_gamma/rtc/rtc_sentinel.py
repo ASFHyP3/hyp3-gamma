@@ -277,7 +277,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     log.info('Preparing DEM')
     if dem:
-        dem_type = 'unknown'  # causes create_metadata_file_set() to raise NotImplementedError
+        dem_type = 'UNKNOWN'
     else:
         dem = 'dem.tif'
         post = 30.0

@@ -80,12 +80,8 @@ def get_burst_overlaps(reference_dir, secondary_dir):
                             start2 = 1
                         cnt += 1
 
-                try:
-                    size1 = total_bursts1 - start1 + 1
-                    size2 = total_bursts2 - start2 + 1
-                except Exception:
-                    log.error("ERROR: Unable to find burst overlap")
-                    sys.exit(2)
+                size1 = total_bursts1 - start1 + 1
+                size2 = total_bursts2 - start2 + 1
 
                 if size1 > size2:
                     size = size2
