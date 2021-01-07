@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 from hyp3_metadata import create
 
 
@@ -59,6 +61,19 @@ def test_create_dem_xml(product_dir):
     output_file = create.create_dem_xml(payload)
     assert output_file == product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_dem.tif.xml'
     assert output_file.exists()
+
+    output_file.unlink()
+    payload['dem_name'] = 'unknown'
+    unknown_dem_file = create.create_dem_xml(payload)
+    assert unknown_dem_file is None
+
+    payload['dem_name'] = ''
+    empty_name_file = create.create_dem_xml(payload)
+    assert empty_name_file is None
+
+    payload['dem_name'] = None
+    with pytest.raises(AttributeError):
+        _ = create.create_dem_xml(payload)
 
 
 def test_create_browse_xmls(product_dir):
@@ -194,7 +209,7 @@ def test_thumbnail_reference_file_is_dem(test_data_folder):
 def test_decode_product():
     name = 'S1A_IW_20150621T120220_SVP_RTC10_G_sauned_F8E2'
     assert create.decode_product(name) == {
-        'resolution': 10,
+        'pixel_spacing': 10,
         'radiometry': 'sigma-0',
         'scale': 'amplitude',
         'masked': False,
@@ -206,7 +221,7 @@ def test_decode_product():
 
     name = 'S1B_IW_20150621T120220_DHR_RTC30_G_gpwfcm_F8E2'
     assert create.decode_product(name) == {
-        'resolution': 30,
+        'pixel_spacing': 30,
         'radiometry': 'gamma-0',
         'scale': 'power',
         'masked': True,

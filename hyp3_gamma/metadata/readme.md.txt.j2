@@ -1,7 +1,8 @@
+{% from 'macros.j2' import dem_blurb, dem_pixel_spacing %}
 ASF RTC Data Package (GAMMA)
 ============================
 
-This folder contains radiometric terrain corrected (RTC) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ resolution }} m.
+This folder contains Radiometric Terrain Corrected (RTC) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ pixel_spacing }} m.
 
 Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
@@ -12,9 +13,9 @@ x:          Sentinel-1 Mission (A or B)
 yy:         Beam Mode
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
 bbbbbb:     Start Time of Acquisition (HHMMSS)
-pp:         Polarization
+pp:         Polarization: Dual-pol (D) vs. Single-pol (S), primary polarization (H vs. V)
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
-zz:         Terrain Correction Resolution
+zz:         Terrain Correction Pixel Spacing
 u:          Software Package Used: GAMMA (G)
 d:          Gamma-0 (g) or Sigma-0 (s) Output
 e:          Power (p) or Amplitude (a) Output
@@ -89,20 +90,12 @@ KMZ files are generated for use in Google Earth and other compatible application
 
 The Digital Elevation Model (DEM) layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _dem.tif
 
-The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. The resolution of the source DEM varies depending on the location of the granule. The DEM is clipped from the source layer to the size needed for full granule coverage, or to the extent of the available DEM source data if full coverage is not available. It is then resampled from the native DEM resolution to {{ resolution }} m for use in RTC processing.
+The DEM used for this product is {{ dem_name }}, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}
 
-The DEM sources include the National Elevation Dataset (NED) and the Shuttle Radar Topography Mission (SRTM).
-
-The source of the DEM for this particular product is {{ dem_name }}, which has a native resolution of {{ dem_resolution }}.
-
+{% if dem_blurb(dem_name) %}
 *Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
 
-__Summary of the DEMs used by ASF for RTC Processing__
-
-The *NED* provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.
-
-The *SRTM* was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
-
+{% endif %}
 -------------
 ## 4. Incidence angle map
 
