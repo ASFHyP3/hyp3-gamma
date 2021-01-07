@@ -1,10 +1,10 @@
-{% macro dem_resolution(dem_name) %}
+{% macro dem_pixel_spacing(dem_name) %}
     {% if dem_name == 'EU_DEM_V11' -%}
         1 arc second (about 30 meters)
     {%- elif dem_name == 'GIMP' -%}
         1 arc second (about 30 meters)
     {%- elif dem_name == 'IFSAR' -%}
-        5 meter
+        5 meters
     {%- elif dem_name == 'NED13' -%}
         1/3 arc seconds (about 10 meters)
     {%- elif dem_name == 'NED1' -%}
