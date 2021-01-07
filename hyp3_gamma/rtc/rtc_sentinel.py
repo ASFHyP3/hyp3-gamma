@@ -316,6 +316,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         radiometry_flag = int(radiometry == 'gamma0')
         run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
             f'{resolution} 3 -q -c {radiometry_flag}')
+        shutil.move('mk_geo_radcal_3.log', f'mk_geo_radcal_3_{pol}.log')
 
         power_tif = 'corrected_cal_map.mli.tif'
         amp_tif = createAmp(power_tif, nodata=0)
@@ -356,7 +357,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
-    append_additional_log_files(log_file, 'mk_geo_radcal_?.log')
+    append_additional_log_files(log_file, 'mk_geo_radcal_*.log')
     return product_name
 
 
