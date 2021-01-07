@@ -2,7 +2,7 @@
 ASF RTC Data Package (GAMMA)
 ============================
 
-This folder contains radiometric terrain corrected (RTC) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ resolution }} m.
+This folder contains Radiometric Terrain Corrected (RTC) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ resolution }} m.
 
 Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
@@ -13,7 +13,7 @@ x:          Sentinel-1 Mission (A or B)
 yy:         Beam Mode
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD)
 bbbbbb:     Start Time of Acquisition (HHMMSS)
-pp:         Polarization
+pp:         Polarization: Dual-pol (D) vs. Single-pol (S), primary polarization (H vs. V)
 o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
 zz:         Terrain Correction Resolution
 u:          Software Package Used: GAMMA (G)
