@@ -21,6 +21,9 @@ removed.
   * `from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma; help(rtc_sentinel_gamma)`
 * A refactored `rtc.coregistration` module has replaced `rtc.check_coreg`. The `check_coreg.py` entrypoint has been
   removed.
+* Upgraded to hyp3_metadata [v0.2.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#020)
+  from v0.1.4
+
 
 ### Removed
 * Legacy support for the GIMP and REMA DEMs has been removed, including the `rtc.smoothem` module and the corresponding
