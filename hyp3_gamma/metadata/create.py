@@ -71,6 +71,8 @@ def get_dem_template_id(dem_name: str) -> Optional[str]:
         return 'eu'
     if dem_name.startswith('GIMP'):
         return 'gimp'
+    if dem_name.startswith('IFSAR'):
+        return 'ifsar'
     if dem_name.startswith('NED'):
         return 'ned'
     if dem_name.startswith('REMA'):
