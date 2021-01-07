@@ -112,7 +112,7 @@ def decode_product(product_name: str) -> dict:
     user_options = product_parts[-2]
 
     return {
-        'resolution': int(product_parts[-4][-2:]),
+        'pixel_spacing': int(product_parts[-4][-2:]),
         'radiometry': 'gamma-0' if user_options[0] == 'g' else 'sigma-0',
         'scale': 'power' if user_options[1] == 'p' else 'amplitude',
         'masked': False if user_options[2] == 'u' else True,
