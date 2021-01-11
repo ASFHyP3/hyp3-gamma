@@ -240,6 +240,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
                        include_inc_map: bool = False, include_scattering_area: bool = False, dem: str = None,
                        bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False) -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
+
     Args:
         safe_dir: Path to the Sentinel-1 .SAFE directory to process.
         resolution: Pixel size of the output images.
@@ -257,6 +258,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
             are selected automatically based on azimuth looks and product type.
         skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
+
     Returns:
         product_name: Name of the output product directory
     """

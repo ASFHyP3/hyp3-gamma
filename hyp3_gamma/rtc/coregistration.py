@@ -1,4 +1,4 @@
-"""Checks results of Gamma RTC co-registration process"""
+"""Checks results of GAMMA RTC co-registration process"""
 
 import logging
 from math import sqrt
