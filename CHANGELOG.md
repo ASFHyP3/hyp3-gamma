@@ -36,6 +36,7 @@ removed.
 * The `par` option to provide a pre-generated `diff_par` offset file has been removed.
 * The `fail/dead_flag` options have been removed. Processing will always proceed using dead reckoning when
   `dem_matching` is selected and co-registration fails.
+* `hyp3_gamma.util.find_and_remove()` has been removed.
 
 ## [3.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.0.0...v3.1.0)
 
