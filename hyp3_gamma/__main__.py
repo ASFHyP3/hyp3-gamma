@@ -54,22 +54,19 @@ def rtc():
 
     write_credentials_to_netrc_file(args.username, args.password)
 
-    granule = util.get_granule(args.granule)
+    safe_dir = util.get_granule(args.granule)
 
     product_name = rtc_sentinel_gamma(
-                        in_file=granule,
-                        res=args.resolution,
-                        match_flag=args.dem_matching,
-                        pwr_flag=(args.scale == 'power'),
-                        gamma_flag=(args.radiometry == 'gamma0'),
-                        filter_flag=args.speckle_filter,
+                        safe_dir=safe_dir,
+                        resolution=args.resolution,
+                        scale=args.scale,
+                        radiometry=args.radiometry,
+                        speckle_filter=args.speckle_filter,
+                        dem_matching=args.dem_matching,
+                        include_dem=args.include_dem,
+                        include_inc_map=args.include_inc_map,
                         include_scattering_area=args.include_scattering_area,
                     )
-
-    if not args.include_dem:
-        util.find_and_remove(product_name, '*_dem.tif*')
-    if not args.include_inc_map:
-        util.find_and_remove(product_name, '*_inc_map.tif*')
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
     if args.bucket:
