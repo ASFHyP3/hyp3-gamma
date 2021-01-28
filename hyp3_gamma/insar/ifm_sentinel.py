@@ -135,6 +135,11 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
+    inName = "{}.diff0.man.adf.geo.tif".format(output)
+    outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
+    if os.path.isfile(inName):
+        shutil.copy(inName, outName)
+
     inName = "{}.cc.geo.tif".format(output)
     outName = "{}_corr.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
