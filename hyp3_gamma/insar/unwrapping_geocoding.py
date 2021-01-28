@@ -12,7 +12,6 @@ log = logging.getLogger(__name__)
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
-
 def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname}", uselogging=True)
 
@@ -104,7 +103,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     geocode_back("{}.los.disp.bmp".format(ifgname), "{}.los.disp.bmp.geo".format(ifgname), width, lt, demw, demn, 2)
     geocode_back("{}.los.disp".format(ifgname), "{}.los.disp.geo".format(ifgname), width, lt, demw, demn, 0)
 
-    create_phase_from_complex("{}.adf.geo".format(ifgf),"{}.adf.geo.phase".format(ifgf),width)
+    create_phase_from_complex("{}.adf.geo".format(ifgf), "{}.adf.geo.phase".format(ifgf),width)
 
     data2geotiff(mmli + ".geo", mmli + ".geo.tif", dempar, 2)
     data2geotiff(smli + ".geo", smli + ".geo.tif", dempar, 2)
