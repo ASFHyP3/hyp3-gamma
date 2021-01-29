@@ -241,7 +241,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Speckle filtering: off\n')
 
 
-def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False, 
+def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False,
                          los_flag=False, wrapped_flag=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
