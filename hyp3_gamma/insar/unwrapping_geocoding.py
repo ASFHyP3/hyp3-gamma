@@ -12,11 +12,14 @@ log = logging.getLogger(__name__)
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
+
 def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname}", uselogging=True)
 
+
 def create_phase_from_complex(incpx, outfloat, width):
-    execute(f"cpx_to_real {incpx} {outfloat} {width} 4",uselogging=True) 
+    execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
+
 
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6):
