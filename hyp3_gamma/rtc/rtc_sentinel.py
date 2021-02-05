@@ -345,7 +345,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     if include_rgb and len(polarizations) == 2:
         pol_power_tif = f'{polarizations[0]}-power.tif'
         cpol_power_tif = f'{polarizations[1]}-power.tif'
-        rtc2color(pol_power_tif, cpol_power_tif, -24, f'{product_name}/{product_name}_rgb', cleanup=True)
+        rtc2color(pol_power_tif, cpol_power_tif, -24, f'{product_name}/{product_name}_rgb.tif', cleanup=True)
 
     fix_geotiff_locations(dir=product_name)
     cogify_dir(directory=product_name)
