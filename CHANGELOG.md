@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 * An `include_rgb` option has been added to `rtc_sentinel.py` to include an RGB decomoposition GeoTIFF in the output
-  package when processing dual-polarization products.
+  package when processing a dual-polarization product.
 
 ### Changed
 * Color browse images are only generated for RTC products when the `include_rgb` option is selected.
