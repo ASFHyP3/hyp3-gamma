@@ -87,7 +87,7 @@ def configure_log_file(log_file):
 
 
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, orbit_file, product_name):
+                   include_scattering_area, include_rgb, orbit_file, product_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory          : {safe_dir}')
     log.info(f'    Output resolution       : {resolution}')
@@ -98,6 +98,7 @@ def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_
     log.info(f'    Include DEM             : {include_dem}')
     log.info(f'    Include inc. angle map  : {include_inc_map}')
     log.info(f'    Include scattering area : {include_scattering_area}')
+    log.info(f'    Include RGB             : {include_rgb}')
     log.info(f'    Orbit file              : {orbit_file}')
     log.info(f'    Output name             : {product_name}')
 
@@ -274,7 +275,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
     log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, orbit_file, product_name)
+                   include_scattering_area, include_rgb, orbit_file, product_name)
 
     log.info('Preparing DEM')
     if dem:
