@@ -66,7 +66,6 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
             f" {ifgname}.sim_unw {ifgname}.diff0.{ifg_diff_sfx} {rlooks} {alooks} 0 0", uselogging=True)
 
     width = getParameter(offi, "interferogram_width")
-    f"offset_add {offit} {offi} {offi}.temp"
     execute(f"rasmph_pwr {ifgname}.diff0.{ifg_diff_sfx} {reference}.mli {width} 1 1 0 3 3", uselogging=True)
 
     if cnt == 0:

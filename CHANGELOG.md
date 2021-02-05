@@ -15,6 +15,12 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * Color browse images are only generated for RTC products when the `include_rgb` option is selected.
 
+## [4.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.0...v4.0.1)
+
+### Added
+
+* Added wrapped phase geotiff via commmand line option `-m` to `ifm_sentinel.py`
+
 ## [4.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.1.0...v4.0.0)
 
 RTC processing via `rtc_sentinel.py` has been significantly refactored, and a number of legacy options have been
@@ -32,7 +38,6 @@ removed.
   removed.
 * Upgraded to hyp3_metadata [v0.2.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#020)
   from v0.1.4
-
 
 ### Removed
 * Legacy support for the GIMP and REMA DEMs has been removed, including the `rtc.smoothem` module and the corresponding
