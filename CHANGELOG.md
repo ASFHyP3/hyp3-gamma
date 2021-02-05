@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+* An `include_rgb` option has been added to `rtc_sentinel.py` to include an RGB decomoposition GeoTIFF in the output
+  package.
+
+### Changed
+* Color browse images are only generated for RTC products when `include_rgb` option is selected.
+
 ## [4.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.1.0...v4.0.0)
 
 RTC processing via `rtc_sentinel.py` has been significantly refactored, and a number of legacy options have been
