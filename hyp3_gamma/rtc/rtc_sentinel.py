@@ -249,8 +249,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         include_dem: Include the DEM GeoTIFF in the output package.
         include_inc_map: Include the incidence angle GeoTIFF in the output package.
         include_scattering_area: Include the local scattering area GeoTIFF in the output package.
-        include_rgb: Include an RGB decomposition GeoTIFF in the output package.  This setting is ignored when processing
-            a single-polarization product or when `skip_cross_pol` is selected.
+        include_rgb: Include an RGB decomposition GeoTIFF in the output package.  This setting is ignored when
+            processing a single-polarization product or when `skip_cross_pol` is selected.
         dem: Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection. A DEM will be selected
             automatically if not provided.
         bbox: Subset the output images to the given lat/lon bounding box: `[lon_min, lat_min, lon_max, lat_max]`.
