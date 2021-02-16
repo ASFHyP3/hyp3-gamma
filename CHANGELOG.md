@@ -7,11 +7,17 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [4.0.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.1...v4.0.2)
+
+### Changed
+
+* Upgraded to hyp3lib [v1.6.4](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#164) from v1.6.3
+
 ## [4.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.0...v4.0.1)
 
 ### Added
 
-* Added wrapped phase geotiff via commmand line option `-m` to `ifm_sentinel.py`
+* Added wrapped phase geotiff via command line option `-m` to `ifm_sentinel.py`
 
 ## [4.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.1.0...v4.0.0)
 
