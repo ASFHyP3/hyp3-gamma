@@ -72,7 +72,7 @@ def parse_asf_rtc_name(infile):
     return parsed
 
 
-def get_dataset(infile,scene):
+def get_dataset(infile, scene):
     logging.debug('Input file: {}'.format(infile))
     dataset = rio.open(infile)
     image_dts = os.path.basename(infile)[12:27]
@@ -83,10 +83,10 @@ def get_dataset(infile,scene):
     dataset.close()
     x_extent = [ulx, lrx]
     y_extent = [uly, lry]
-  
+
     if 'VV' in scene['polarization'] or 'VH' in scene['polarization']:
         scene['co_pol'] = 'VV'
-        scene['cross_pol'] = 'VH' 
+        scene['cross_pol'] = 'VH'
     elif 'HH' in scene['polarization'] or 'HV' in scene['polarization']:
         scene['co_pol'] = 'HH'
         scene['cross_pol'] = 'HV'
@@ -100,7 +100,7 @@ def get_dataset(infile,scene):
     for name in ['co_pol', 'cross_pol', 'ls_map', 'inc_map', 'dem']:
         scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
 
-    for file_name in ['co_pol_file','cross_pol_file','ls_map_file','inc_map_file','dem_file']:
+    for file_name in ['co_pol_file', 'cross_pol_file', 'ls_map_file', 'inc_map_file', 'dem_file']:
         scene[f'{file_name}_exists'] = os.path.exists(scene[file_name])
 
     print(scene)
@@ -274,9 +274,7 @@ def do_resample(infile, res):
 
     # FIXME -- resampleAlg should be NN for SAR data and ls_map, but cubic for DEM, inc_map
     gdal.Translate(resampled_file, infile, xRes=res, yRes=res, resampleAlg='cubic')
-    pix_x = res
-    pix_y = -1 * res
-    
+
     return(resampled_file)
 
 
@@ -286,7 +284,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
-    image_dts, proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile,scene)
+    image_dts, proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile, scene)
 
     # open the  co-pol file (which is assumed to always exist)
     target_file = scene['co_pol_file']
@@ -313,7 +311,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     if resolution:
         if pix_x < resolution:
             resample = True
-            target_file = do_resample(target_file,resolution)
+            target_file = do_resample(target_file, resolution)
             pix_x = resolution
             pix_y = -1 * resolution
         elif pix_x >= resolution:
@@ -324,7 +322,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     else:
         resolution = pix_x
 
-    # Set data X, Y coordinates 
+    # Set data X, Y coordinates
     x_coords = np.arange(x_extent[0], x_extent[1], resolution)
     y_coords = np.arange(y_extent[0], y_extent[1], -1*resolution)
 
@@ -390,8 +388,8 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                 backscatter = scale_data(values, scene, output_scale)
                 backscatter = np.ma.masked_invalid(backscatter, copy=True)
                 check_for_all_zeros(backscatter)
-                var_name = f"normalized_radar_backscatter_{scene['cross_pol']}" 
-                data_array[var_name] = (('y','x'), backscatter.filled(0.0), {
+                var_name = f"normalized_radar_backscatter_{scene['cross_pol']}"
+                data_array[var_name] = (('y', 'x'), backscatter.filled(0.0), {
                     '_FillValue': no_data_value,
                     'grid_mapping': crs_name,
                     'long_name': 'normalize_radar_backscatter',
@@ -411,7 +409,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                     'sensor_band_identifier': 'C'
                 })
             else:
-                data_array[scene[f'{target}_long_name']] = (('y','x'), values) 
+                data_array[scene[f'{target}_long_name']] = (('y', 'x'), values)
 
     # Set the CRS for this dataset
     data_array = data_array.rio.set_crs(epsg_code)
@@ -447,7 +445,7 @@ if __name__ == '__main__':
 
     logFile = 'gamma_to_netcdf_{}.log'.format(os.getpid())
     logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
