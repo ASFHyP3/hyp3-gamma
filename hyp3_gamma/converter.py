@@ -1,7 +1,7 @@
 
 
-import logging
 import argparse
+import logging
 import os
 import re
 from datetime import datetime
@@ -9,8 +9,8 @@ from datetime import datetime
 import numpy as np
 import rasterio as rio
 import rioxarray
-import xarray as xr
 import pycrs
+import xarray as xr
 from osgeo import gdal
 
 
@@ -89,7 +89,7 @@ def get_dataset(infile):
 def get_granule(infile, image_dts):
     lines, logfile = read_log_file(infile)
     search_string = 'S1[AB]_.._...._1S[DS][HV]_' + '{}'.format(
-        image_dts) + '_\d{8}T\d{6}_\d+_([0-9A-Fa-f]+)_([0-9A-Fa-f]+)'
+        image_dts) + r'_\d{8}T\d{6}_\d+_([0-9A-Fa-f]+)_([0-9A-Fa-f]+)'
     granule = re.search(search_string, lines)
     if not granule:
         raise Exception('ERROR: No granule name found in {}'.format(logfile))
@@ -100,12 +100,12 @@ def get_granule(infile, image_dts):
 
 def get_processing_datetime(infile, granule):
     lines, logfile = read_log_file(infile)
-    date_string = re.search('\d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d [A,P]M - INFO -\s*Input name\s*: {}'.format(granule),
+    date_string = re.search(r'\d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d [A,P]M - INFO -\s*Input name\s*: {}'.format(granule),
                             lines)
     if not date_string:
         raise Exception('ERROR: No date_string found in {}'.format(infile))
     date_string = date_string.group(0)
-    proc_date = re.search('\d\d/\d\d/\d{4} \d\d:\d\d:\d\d [A,P]M', date_string)
+    proc_date = re.search(r'\d\d/\d\d/\d{4} \d\d:\d\d:\d\d [A,P]M', date_string)
     if not proc_date:
         raise Exception('ERROR: No processing date found in {}'.format(date_string))
     proc_date = proc_date.group(0)
@@ -255,7 +255,7 @@ def single2netcdf(prod_type, outfile, infile, output_scale=None, resolution=None
     pix_x = dataset.transform[0]
     pix_y = dataset.transform[4]
 
-    # resample if necessary    
+    # resample if necessary
     if resolution:
         if pix_x < resolution:
             res = int(resolution)
