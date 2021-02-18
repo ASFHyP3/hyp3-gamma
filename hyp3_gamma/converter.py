@@ -31,7 +31,7 @@ def parse_asf_rtc_name(infile):
         parsed['beam_mode'] = data[1]
         parsed['pixel_spacing'] = data[2][2:-1]
         parsed['start_time'] = data[3]
-    except:
+    except IndexError:
         raise Exception(f'ERROR: Unable to parse filename {infile}')
 
     if 'G' in data[4]:
@@ -46,7 +46,7 @@ def parse_asf_rtc_name(infile):
             parsed['radiometry'] = 'sigma0'
         elif data[5][0] == 'b':
             parsed['radiometry'] = 'beta0'
-    except:
+    except IndexError:
         logging.error(f'ERROR: Unable to determine radiometry from string {infile} letter {data[5][0]}')
         raise Exception(f'ERROR: Unable to determine radiometry from string {infile} letter {data[5][0]}')
 
@@ -55,7 +55,7 @@ def parse_asf_rtc_name(infile):
             parsed['scale'] = 'power'
         elif data[5][1] == 'a':
             parsed['scale'] = 'amplitude'
-    except:
+    except IndexError:
         logging.error(f'ERROR: Unable to determine scaling from string {infile} letter {data[5][1]}')
         raise Exception(f'ERROR: Unable to determine scaling from string {infile} letter {data[5][1]}')
 
@@ -64,12 +64,11 @@ def parse_asf_rtc_name(infile):
             parsed['filtered'] = 'no'
         elif data[5][2] == 'f':
             parsed['filtered'] = 'yes'
-    except:
+    except IndexError:
         logging.error(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
         raise Exception(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
 
     parsed['polarization'] = data[6]
-
     return parsed
 
 
@@ -247,8 +246,8 @@ def initialize_metadata(data_array, cfg, cfg_x, cfg_y):
 #        data_array.variables[crs_tmp].attrs[key] = cfg_p[key]
 
 
-def single2netcdf(prod_type, outfile, infile, output_scale=None, resolution=None):
-    logging.info('single2netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
+def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=None):
+    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
     dataset, image_dts, proc_dt, x_extent, y_extent, granule = get_dataset(infile)
 
     # get initial pixel size for dataset
@@ -349,7 +348,7 @@ def single2netcdf(prod_type, outfile, infile, output_scale=None, resolution=None
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='single2netcdf.py',
+    parser = argparse.ArgumentParser(prog='gamma_to_netcdf.py',
                                      description='Convert an RTC stack from .tif format into netCDF4',
                                      epilog='The log and README files must be in the same directory as the .tif')
 
@@ -362,10 +361,10 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--resolution', help='Desired output resolution', type=float)
     args = parser.parse_args()
 
-    logFile = 'single2netcdf_{}.log'.format(os.getpid())
+    logFile = 'gamma_to_netcdf_{}.log'.format(os.getpid())
     logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
-    single2netcdf(args.product_type, args.outfile, args.infile, args.output_scale, args.resolution)
+    gamma_to_netcdf(args.product_type, args.outfile, args.infile, args.output_scale, args.resolution)
