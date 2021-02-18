@@ -29,7 +29,7 @@ def parse_asf_rtc_name(infile):
     try:
         parsed['platform'] = data[0]
         parsed['beam_mode'] = data[1]
-        parsed['pixel_spacing'] = data[2][2:-1]
+        parsed['pixel_spacing'] = data[2][2:4]
         parsed['start_time'] = data[3]
     except IndexError:
         raise Exception(f'ERROR: Unable to parse filename {infile}')
@@ -68,11 +68,11 @@ def parse_asf_rtc_name(infile):
         logging.error(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
         raise Exception(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
 
-    parsed['polarization'] = data[6]
+    parsed['polarization'] = data[6][0:2]
     return parsed
 
 
-def get_dataset(infile):
+def get_dataset(infile,scene):
     logging.debug('Input file: {}'.format(infile))
     dataset = rio.open(infile)
     image_dts = os.path.basename(infile)[12:27]
@@ -80,9 +80,29 @@ def get_dataset(infile):
     proc_dt = get_processing_datetime(infile, granule)
     ulx, uly = dataset.transform * (0, 0)
     lrx, lry = dataset.transform * (dataset.width, dataset.height)
+    dataset.close()
     x_extent = [ulx, lrx]
     y_extent = [uly, lry]
-    return dataset, image_dts, proc_dt, x_extent, y_extent, granule
+  
+    if 'VV' in scene['polarization'] or 'VH' in scene['polarization']:
+        scene['co_pol'] = 'VV'
+        scene['cross_pol'] = 'VH' 
+    elif 'HH' in scene['polarization'] or 'HV' in scene['polarization']:
+        scene['co_pol'] = 'HH'
+        scene['cross_pol'] = 'HV'
+    scene['ls_map'] = 'ls_map'
+    scene['inc_map'] = 'inc_map'
+    scene['dem'] = 'dem'
+
+    for name in ['co_pol', 'cross_pol', 'ls_map', 'inc_map', 'dem']:
+        scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
+
+    for file_name in ['co_pol_file','cross_pol_file','ls_map_file','inc_map_file','dem_file']:
+        scene[f'{file_name}_exists'] = os.path.exists(scene[file_name])
+
+    print(scene)
+
+    return image_dts, proc_dt, x_extent, y_extent, granule, scene
 
 
 def get_granule(infile, image_dts):
@@ -155,7 +175,6 @@ def fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, p
            'crs_wkt': crs_wkt,
            'x_spacing': pix_x,
            'y_spacing': pix_y,
-           'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
            'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                      f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                      f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
@@ -245,62 +264,74 @@ def initialize_metadata(data_array, cfg, cfg_x, cfg_y):
 #    for key in cfg_p:
 #        data_array.variables[crs_tmp].attrs[key] = cfg_p[key]
 
+def do_resample(infile, res):
+    root, unused = os.path.splitext(os.path.basename(infile))
+    resampled_file = f'{root}_{res}.tif'
+    logging.info(f'Resampling {infile} to create file {resampled_file}')
+
+    # FIXME -- resampleAlg should be NN for SAR data and ls_map, but cubic for DEM, inc_map
+    gdal.Translate(resampled_file, infile, xRes=res, yRes=res, resampleAlg='cubic')
+    pix_x = res
+    pix_y = -1 * res
+    
+    return(resampled_file)
+
 
 def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=None):
-    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
-    dataset, image_dts, proc_dt, x_extent, y_extent, granule = get_dataset(infile)
 
-    # get initial pixel size for dataset
+    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
+
+    scene = parse_asf_rtc_name(os.path.basename(infile))
+    image_dts, proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile,scene)
+
+    # first, read in the co-pol file (which should always exist)
+    target_file = scene['co_pol_file']
+    logging.info('Processing file {}'.format(target_file))
+    dataset = rio.open(target_file)
     pix_x = dataset.transform[0]
     pix_y = dataset.transform[4]
-
-    # resample if necessary
-    if resolution:
-        if pix_x < resolution:
-            res = int(resolution)
-            root, unused = os.path.splitext(os.path.basename(infile))
-            resampled_file = f'{root}_{res}.tif'
-            logging.info(f'Resampling {infile} to file {resampled_file}')
-            gdal.Translate(resampled_file, infile, xRes=resolution, yRes=resolution, resampleAlg='cubic')
-            pix_x = resolution
-            pix_y = -1 * resolution
-            dataset.close()
-            dataset = rio.open(resampled_file)
-        elif pix_x >= resolution:
-            logging.warning(f'Desired output resolution less than original  ({resolution} vs {pix_x})')
-            logging.warning('No resampling performed')
-    else:
-        logging.info('Skipping resample step')
-
     no_data_value = dataset.nodata
     epsg_code = dataset.crs.to_epsg()
     crs_wkt = dataset.crs.wkt
+    dataset.close()
     crs = pycrs.parse.from_ogc_wkt(crs_wkt)
     crs_name = crs.proj.name.ogc_wkt.lower()
-    hyp3_ver, gamma_ver = get_science_code(infile)
+    hyp3_ver, gamma_ver = get_science_code(target_file)
     cfg, cfg_x, cfg_y = fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, pix_y)
-
     logging.debug('Config is {}'.format(cfg))
-    logging.info('Processing file {}'.format(infile))
 
-    scene = parse_asf_rtc_name(os.path.basename(infile))
+    resample = False
+    if resolution:
+        if pix_x < resolution:
+            resample = True
+            target_file = do_resample(target_file,resolution)
+            pix_x = resolution
+            pix_y = -1 * resolution
+        elif pix_x >= resolution:
+            logging.warning(f'Desired output resolution less than original  ({resolution} vs {pix_x})')
+            logging.warning('No resampling performed')
+        else:
+            logging.info('Skipping resample step')
+    else:
+        resolution = pix_x
 
-    backscatter = dataset.read(1)
-    backscatter = scale_data(backscatter, scene, output_scale)
-    backscatter = np.ma.masked_invalid(backscatter, copy=True)
-    check_for_all_zeros(backscatter)
-
-    x_coords = np.arange(x_extent[0], x_extent[1], pix_x)
-    y_coords = np.arange(y_extent[0], y_extent[1], pix_y)
+    x_coords = np.arange(x_extent[0], x_extent[1], resolution)
+    y_coords = np.arange(y_extent[0], y_extent[1], -1*resolution)
 
     # Deal with inconsistent rounding in arange!
-    logging.info(f'Dataset.width = {dataset.width}')
-    logging.info(f'Dataset.height = {dataset.height}')
-
+    dataset = rio.open(target_file)
     if len(x_coords) > dataset.width:
         x_coords = x_coords[0:dataset.width]
     if len(y_coords) > dataset.width:
         y_coords = y_coords[0:dataset.height]
+
+    logging.info(f'Dataset.width = {dataset.width}')
+    logging.info(f'Dataset.height = {dataset.height}')
+
+    values = dataset.read(1)
+    backscatter = scale_data(values, scene, output_scale)
+    backscatter = np.ma.masked_invalid(backscatter, copy=True)
+    check_for_all_zeros(backscatter)
 
     data_array = xr.Dataset({
         'y': y_coords,
@@ -317,6 +348,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
             'granule': granule,
             'acquisition_start_time': granule[17:32],
             'acquisition_end_time': granule[33:48],
+            'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
             'polarization': get_pol(infile),
             'radiation_frequency': 3.0 / 0.555,
             'radiation_frequency_unit': 'GHz',
@@ -328,6 +360,26 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
 
     # Set the metadata based upon the config dictionaries
     initialize_metadata(data_array, cfg, cfg_x, cfg_y)
+
+    for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
+        if scene[f'{target}_file_exists']:
+            target_file = infile.replace(scene['polarization'],scene[target])
+            logging.info('Processing file {}'.format(target_file))
+            dataset = rio.open(target_file)
+
+            # resample if necessary
+            if resample:
+                resampled_file = do_resample(target_file, resolution)
+                dataset.close()
+                dataset = rio.open(resampled_file)
+
+        values = dataset.read(1)
+        if scene['cross_pol'] in target_file:
+            backscatter = scale_data(values, scene, output_scale)
+            backscatter = np.ma.masked_invalid(backscatter, copy=True)
+            check_for_all_zeros(backscatter)
+   
+        data_array[target] = (('y','x'), values) 
 
     # Set the CRS for this dataset
     data_array = data_array.rio.set_crs(epsg_code)
