@@ -1,20 +1,22 @@
+
+
+import logging
+import argparse
+import os
+import re
+from datetime import datetime
+
 import numpy as np
 import rasterio as rio
-import xarray as xr
 import rioxarray
-import logging
-import os
-import argparse
-import re
+import xarray as xr
 import pycrs
 from osgeo import gdal
-from datetime import datetime
-from rasterio.enums import Resampling
 
 
 #
 #     The code assumes auxiliary files are in the same location as the tiff files
-# 
+#
 
 #
 # example: S1A_IW_RT30_20180727T161143_G_gpn_VV
@@ -148,17 +150,17 @@ def get_pol(infile):
 
 def fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, pix_y):
     logging.info('Adding metadata')
-    cfg = {'title': 'SAR RTC', 
-           'institution': 'Alaska Satellite Facility (ASF)', 
-           'mission': f'Sentinel-1{granule[2]}', 
+    cfg = {'title': 'SAR RTC',
+           'institution': 'Alaska Satellite Facility (ASF)',
+           'mission': f'Sentinel-1{granule[2]}',
            'crs_wkt': crs_wkt,
-           'x_spacing': pix_x, 
-           'y_spacing': pix_y, 
+           'x_spacing': pix_x,
+           'y_spacing': pix_y,
            'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
            'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                      f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                      f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
-           'Conventions': 'CF - 1.6', 
+           'Conventions': 'CF - 1.6',
            'references': 'asf.alaska.edu',
            'comment': 'This is an early prototype.'}
 
@@ -208,17 +210,6 @@ def get_science_code(infile):
             gamma_ver = obj.group(0)
 
     return hyp3_ver, gamma_ver
-
-
-def create_dB(data, input_type):
-    if 'amp' in input_type:
-        power_data = data * data
-        decibel_data = 10 * np.log(power_data)
-    elif 'power' in input_type:
-        decibel_data = 10 * np.log(data)
-    else:
-        raise Exception(f'Unknown input_type: {input_type}')
-    return decibel_data
 
 
 def scale_data(backscatter, scene, output_scale):
