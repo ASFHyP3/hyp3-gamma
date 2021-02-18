@@ -91,8 +91,11 @@ def get_dataset(infile,scene):
         scene['co_pol'] = 'HH'
         scene['cross_pol'] = 'HV'
     scene['ls_map'] = 'ls_map'
+    scene['ls_map_long_name'] = 'layover_shadow_mask'
     scene['inc_map'] = 'inc_map'
+    scene['inc_map_long_name'] = 'incidence_angle'
     scene['dem'] = 'dem'
+    scene['dem_long_name'] = 'digital_elevation_mode'
 
     for name in ['co_pol', 'cross_pol', 'ls_map', 'inc_map', 'dem']:
         scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
@@ -281,25 +284,31 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
 
     logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
 
+    # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
     image_dts, proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile,scene)
 
-    # first, read in the co-pol file (which should always exist)
+    # open the  co-pol file (which is assumed to always exist)
     target_file = scene['co_pol_file']
     logging.info('Processing file {}'.format(target_file))
     dataset = rio.open(target_file)
+
+    # read more global metadata from the dataset itself
     pix_x = dataset.transform[0]
     pix_y = dataset.transform[4]
     no_data_value = dataset.nodata
     epsg_code = dataset.crs.to_epsg()
     crs_wkt = dataset.crs.wkt
     dataset.close()
+
+    # fill out the config structure
     crs = pycrs.parse.from_ogc_wkt(crs_wkt)
     crs_name = crs.proj.name.ogc_wkt.lower()
     hyp3_ver, gamma_ver = get_science_code(target_file)
     cfg, cfg_x, cfg_y = fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, pix_y)
     logging.debug('Config is {}'.format(cfg))
 
+    # determine if files are to be resampled and resample the co-pol file
     resample = False
     if resolution:
         if pix_x < resolution:
@@ -315,6 +324,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     else:
         resolution = pix_x
 
+    # Set data X, Y coordinates 
     x_coords = np.arange(x_extent[0], x_extent[1], resolution)
     y_coords = np.arange(y_extent[0], y_extent[1], -1*resolution)
 
@@ -328,6 +338,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     logging.info(f'Dataset.width = {dataset.width}')
     logging.info(f'Dataset.height = {dataset.height}')
 
+    # Read in the co-pol data
     values = dataset.read(1)
     backscatter = scale_data(values, scene, output_scale)
     backscatter = np.ma.masked_invalid(backscatter, copy=True)
@@ -337,10 +348,10 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
         'y': y_coords,
         'x': x_coords,
         crs_name: crs_name,
-        'backscatter': (('y', 'x'), backscatter.filled(0.0), {
+        f"normalized_radar_backscatter_{scene['co_pol']}": (('y', 'x'), backscatter.filled(0.0), {
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
-            'long_name': 'SAR RTC',
+            'long_name': 'normalized_radar_basckscatter',
             'radiometry': scene['radiometry'],
             'scaling': scene['scale'],
             'standard_name': 'SAR',
@@ -363,7 +374,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
 
     for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
         if scene[f'{target}_file_exists']:
-            target_file = infile.replace(scene['polarization'],scene[target])
+            target_file = scene[f'{target}_file']
             logging.info('Processing file {}'.format(target_file))
             dataset = rio.open(target_file)
 
@@ -373,13 +384,34 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                 dataset.close()
                 dataset = rio.open(resampled_file)
 
-        values = dataset.read(1)
-        if scene['cross_pol'] in target_file:
-            backscatter = scale_data(values, scene, output_scale)
-            backscatter = np.ma.masked_invalid(backscatter, copy=True)
-            check_for_all_zeros(backscatter)
-   
-        data_array[target] = (('y','x'), values) 
+            values = dataset.read(1)
+            dataset.close()
+            if scene['cross_pol'] in target_file:
+                backscatter = scale_data(values, scene, output_scale)
+                backscatter = np.ma.masked_invalid(backscatter, copy=True)
+                check_for_all_zeros(backscatter)
+                var_name = f"normalized_radar_backscatter_{scene['cross_pol']}" 
+                data_array[var_name] = (('y','x'), backscatter.filled(0.0), {
+                    '_FillValue': no_data_value,
+                    'grid_mapping': crs_name,
+                    'long_name': 'normalize_radar_backscatter',
+                    'radiometry': scene['radiometry'],
+                    'scaling': scene['scale'],
+                    'standard_name': 'SAR',
+                    'product_name': os.path.basename(target_file),
+                    'granule': granule,
+                    'acquisition_start_time': granule[17:32],
+                    'acquisition_end_time': granule[33:48],
+                    'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
+                    'polarization': get_pol(infile),
+                    'radiation_frequency': 3.0 / 0.555,
+                    'radiation_frequency_unit': 'GHz',
+                    'radiation_wavelength': 3.0 / ((3.0 / 0.555) * 10),
+                    'radiation_wavelength_unit': 'm',
+                    'sensor_band_identifier': 'C'
+                })
+            else:
+                data_array[scene[f'{target}_long_name']] = (('y','x'), values) 
 
     # Set the CRS for this dataset
     data_array = data_array.rio.set_crs(epsg_code)
