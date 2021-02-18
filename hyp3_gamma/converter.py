@@ -8,8 +8,8 @@ from datetime import datetime
 
 import numpy as np
 import rasterio as rio
-import rioxarray
 import pycrs
+import rioxarray
 import xarray as xr
 from osgeo import gdal
 
@@ -202,11 +202,11 @@ def get_science_code(infile):
             sc_name = 'RTC S1TBX'
 
         if 'HYP3' in line and 'software version' in line:
-            obj = re.search('\d+\.\d+\.*\d*', line)
+            obj = re.search(r'\d+\.\d+\.*\d*', line)
             hyp3_ver = obj.group(0)
 
         if 'release' in line and '{}'.format(sc_name[0]) in line:
-            obj = re.search('\d{8}', line)
+            obj = re.search(r'\d{8}', line)
             gamma_ver = obj.group(0)
 
     return hyp3_ver, gamma_ver
