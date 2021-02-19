@@ -1,3 +1,4 @@
+from datetime import timedelta
 from re import match
 
 import pytest
@@ -33,6 +34,17 @@ def test_least_precise_orbit_of():
     assert ifm_sentinel.least_precise_orbit_of([predicted, predicted]) == 'O'
 
 
+def test_timedelta_in_days():
+    delta = timedelta(days=12, seconds=1)
+    assert ifm_sentinel.timedetla_in_days(delta) == 12
+
+    delta = timedelta(days=11, hours=23, minutes=59)
+    assert ifm_sentinel.timedetla_in_days(delta) == 12
+
+    delta = timedelta(days=-13, hours=23, minutes=59)
+    assert ifm_sentinel.timedetla_in_days(delta) == 12
+
+
 def test_get_product_name():
     payload = {
         'reference_name': 'S1A_IW_SLC__1SSV_20160527T014319_20160527T014346_011438_011694_26B0',
@@ -44,7 +56,7 @@ def test_get_product_name():
         'pixel_spacing': 80,
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1AA_20160527T014319_20160714T014322_VVP049_INT80_G_ueF_[0-9A-F]{4}$', name)
+    assert match(r'S1AA_20160527T014319_20160714T014322_VVP048_INT80_G_ueF_[0-9A-F]{4}$', name)
 
     payload = {
         'reference_name': 'S1B_IW_SLC__1SDH_20200918T073646_20200918T073716_023426_02C7FC_6374',
@@ -68,4 +80,4 @@ def test_get_product_name():
         'pixel_spacing': 40
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1AB_20150101T230038_20200924T005722_VVO2093_INT40_G_ueF_[0-9A-F]{4}$', name)
+    assert match(r'S1AB_20150101T230038_20200924T005722_VVO2092_INT40_G_ueF_[0-9A-F]{4}$', name)
