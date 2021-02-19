@@ -7,6 +7,12 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [4.0.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.2...v4.0.3)
+
+### Fixed
+
+* Resolved off-by-one error when computing days of separation for InSAR product names in `ifm_sentinel.py`
+
 ## [4.0.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.1...v4.0.2)
 
 ### Changed
