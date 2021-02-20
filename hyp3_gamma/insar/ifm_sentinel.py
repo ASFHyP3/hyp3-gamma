@@ -111,6 +111,12 @@ def least_precise_orbit_of(orbits):
     return 'P'
 
 
+def timedetla_in_days(delta):
+    seconds_in_a_day = 60 * 60 * 24
+    total_seconds = abs(delta.total_seconds())
+    return round(total_seconds/seconds_in_a_day)
+
+
 def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
@@ -120,7 +126,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
 
     ref_datetime = datetime.strptime(datetime1, '%Y%m%dT%H%M%S')
     sec_datetime = datetime.strptime(datetime2, '%Y%m%dT%H%M%S')
-    days = abs((ref_datetime - sec_datetime).days)
+    days = timedetla_in_days(ref_datetime - sec_datetime)
 
     pol1 = reference_name[15:16]
     pol2 = secondary_name[15:16]
