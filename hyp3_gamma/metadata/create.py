@@ -55,6 +55,7 @@ def create_metadata_file_set(product_dir: Path, granule_name: str, dem_name: str
         create_inc_map_xml,
         create_ls_map_xml,
         create_area_xml,
+        create_rgb_xml,
     ]
     for generator in generators:
         output = generator(payload)
@@ -214,6 +215,11 @@ def create_ls_map_xml(payload: dict) -> Path:
 def create_area_xml(payload: dict) -> Path:
     reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_area.tif'
     return create_metadata_file(payload, 'area.xml.j2', reference_file)
+
+
+def create_rgb_xml(payload: dict) -> Path:
+    reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_rgb.tif'
+    return create_metadata_file(payload, 'rgb.xml.j2', reference_file)
 
 
 def create_metadata_file(payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
