@@ -59,9 +59,10 @@ The files generated in this process include:
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 5. A local scattering area map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 6. A layover-shadow mask
-7. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
-8. A shapefile indicating the data and raster extents
-9. Log file
+7. A false-color RGB decomposition (omitted in standard products; you can choose to include this layer when custom ordering imagery)
+8. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
+9. A shapefile indicating the data and raster extents
+10. Log file
 
 See below for detailed descriptions of each of the products.
 
@@ -81,7 +82,7 @@ PNG files are generated for quick visualization of the backscatter data. Each pn
 
 All products will include a grayscale png browse image. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The image is designated by a simple .png extension.
 
-For dual-pol products, a false-color png browse image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
+For dual-pol products where an RGB decomposition (#7) is requested, a false-color png browse image is also generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
 
 KMZ files are generated for use in Google Earth and other compatible applications. All products will include a grayscale kmz image, and dual-pol products will also include a color browse kmz image.
 
@@ -145,7 +146,14 @@ _There are 17 possible different pixel values, indicating the layover, shadow, a
 31 Affected by shadow and layover; look angle < slope and opposite slope angle
 
 -------------
-## 7. ArcGIS-compatible xml metadata files
+## 7. False-color RGB decomposition
+
+The RGB decomposition is omitted with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _rgb.tif
+
+For dual-pol products, a false-color image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color.
+
+-------------
+## 8. ArcGIS-compatible xml metadata files
 
 Each raster in this folder has an associated xml file. It is named with the same filename as the raster, but also includes a .xml extension. When any of the rasters are viewed in ArcGIS, the associated xml file is recognized by the software, and the contents will display in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro) for that raster. Once the file is viewed in ArcGIS, the software will update the xml file to include metadata inherent to the raster (geographic extent, raster format, etc.) along with the descriptive metadata included in the original xml file.
 
@@ -154,12 +162,12 @@ ArcGIS users should take care not to edit the xml files directly, or to change f
 Users who do not use ArcGIS to interact with the data may still find the information included in the individual xml files very useful, although the xml tag system makes it look cluttered in a text editor or browser window.
 
 -------------
-## 8. Shapefile
+## 9. Shapefile
 
 The shapefile (comprised of the four files tagged with _shape) contains a polygon indicating the extent of actual data (pixels with values other than NoData).
 
 -------------
-## 9. Log file
+## 10. Log file
 
 A textfile is generated during processing, which includes the parameters used and step-by-step processing history for the product. It has a .log extension.
 
