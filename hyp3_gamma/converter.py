@@ -1,4 +1,4 @@
-
+"""Create a netcdf format data file using a single HyP3 RTC Gamma product"""
 
 import argparse
 import logging
@@ -34,10 +34,14 @@ def parse_asf_rtc_name(infile):
     except IndexError:
         raise Exception(f'ERROR: Unable to parse filename {infile}')
 
-    if 'G' in data[4]:
-        parsed['package'] = 'Gamma'
-    elif 'S' in data[4]:
-        parsed['package'] = 'S1TBX'
+    try:
+        if 'G' in data[4]:
+            parsed['package'] = 'Gamma'
+        elif 'S' in data[4]:
+            parsed['package'] = 'S1TBX'
+    except IndexError:
+        logging.error(f'ERROR: Unable to determine science code from string {infile} letter {data[4]}')
+        raise Exception(f'ERROR: Unable to determine science code from string {infile} letter {data[4]}')
 
     try:
         if data[5][0] == 'g':
@@ -68,16 +72,21 @@ def parse_asf_rtc_name(infile):
         logging.error(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
         raise Exception(f'ERROR: Unable to determine filtering from string {infile} letter {data[5][2]}')
 
-    parsed['polarization'] = data[6][0:2]
+    try:
+        parsed['polarization'] = data[6][0:2]
+    except IndexError:
+        logging.error(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
+        raise Exception(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
+        
     return parsed
 
 
 def get_dataset(infile, scene):
     logging.debug('Input file: {}'.format(infile))
-    dataset = rio.open(infile)
     image_dts = os.path.basename(infile)[12:27]
     granule = get_granule(infile, image_dts)
     proc_dt = get_processing_datetime(infile, granule)
+    dataset = rio.open(infile)
     ulx, uly = dataset.transform * (0, 0)
     lrx, lry = dataset.transform * (dataset.width, dataset.height)
     dataset.close()
@@ -186,9 +195,10 @@ def fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, p
            'comment': 'This is an early prototype.'}
 
     #
-    # we'll want this line for stacks:
+    # We'll want this line for stacks:
     #    cfg['product_type'] = prod_type + ' stack'
     #
+    # FIXME I wasn't sure what to put in here?
     #    cfg['feature_type'] = '????????'
     #
     #    Audit trail of process chain with time stamps
@@ -341,23 +351,18 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     backscatter = scale_data(values, scene, output_scale)
     backscatter = np.ma.masked_invalid(backscatter, copy=True)
     check_for_all_zeros(backscatter)
-
+   
     data_array = xr.Dataset({
         'y': y_coords,
         'x': x_coords,
-        crs_name: crs_name,
         f"normalized_radar_backscatter_{scene['co_pol']}": (('y', 'x'), backscatter.filled(0.0), {
+            crs_name: crs_name,
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
             'long_name': 'normalized_radar_basckscatter',
             'radiometry': scene['radiometry'],
             'scaling': scene['scale'],
             'standard_name': 'SAR',
-            'product_name': os.path.basename(infile),
-            'granule': granule,
-            'acquisition_start_time': granule[17:32],
-            'acquisition_end_time': granule[33:48],
-            'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
             'polarization': get_pol(infile),
             'radiation_frequency': 3.0 / 0.555,
             'radiation_frequency_unit': 'GHz',
@@ -370,6 +375,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     # Set the metadata based upon the config dictionaries
     initialize_metadata(data_array, cfg, cfg_x, cfg_y)
 
+    # Add in the other layers of data
     for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
         if scene[f'{target}_file_exists']:
             target_file = scene[f'{target}_file']
@@ -396,11 +402,6 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                     'radiometry': scene['radiometry'],
                     'scaling': scene['scale'],
                     'standard_name': 'SAR',
-                    'product_name': os.path.basename(target_file),
-                    'granule': granule,
-                    'acquisition_start_time': granule[17:32],
-                    'acquisition_end_time': granule[33:48],
-                    'rtc_processing_date': datetime.strftime(proc_dt, '%Y%m%dT%H%M%S'),
                     'polarization': get_pol(infile),
                     'radiation_frequency': 3.0 / 0.555,
                     'radiation_frequency_unit': 'GHz',
@@ -410,6 +411,13 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                 })
             else:
                 data_array[scene[f'{target}_long_name']] = (('y', 'x'), values)
+   
+    # Create other variables
+    data_array['product_name'] = os.path.basename(infile)
+    data_array['granule'] =  granule
+    data_array['acquisition_start_time'] = granule[17:32]
+    data_array['acquisition_end_time'] = granule[33:48]
+    data_array['rtc_processing_date'] = datetime.strftime(proc_dt, '%Y%m%dT%H%M%S')
 
     # Set the CRS for this dataset
     data_array = data_array.rio.set_crs(epsg_code)
@@ -422,16 +430,14 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']
     logging.info('Writing file {}'.format(outfile))
-    dsp.to_netcdf(outfile, encoding={
-        'x': {'_FillValue': None},
-        'y': {'_FillValue': None},
-    })
+#    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
+    dsp.to_netcdf(outfile)
     logging.info('Successful Completion!')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='gamma_to_netcdf.py',
-                                     description='Convert an RTC stack from .tif format into netCDF4',
+                                     description='Converts a HyP3 RTC product from .tif format into netCDF',
                                      epilog='The log and README files must be in the same directory as the .tif')
 
     parser.add_argument('infile', help='Name of input geotiff file')
