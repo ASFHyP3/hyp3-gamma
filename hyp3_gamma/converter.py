@@ -414,7 +414,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
    
     # Create other variables
     data_array['product_name'] = os.path.basename(infile)
-    data_array['granule'] =  granule
+    data_array['granule'] = granule
     data_array['acquisition_start_time'] = granule[17:32]
     data_array['acquisition_end_time'] = granule[33:48]
     data_array['rtc_processing_date'] = datetime.strftime(proc_dt, '%Y%m%dT%H%M%S')
