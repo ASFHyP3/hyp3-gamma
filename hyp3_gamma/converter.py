@@ -411,7 +411,7 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
                 })
             else:
                 data_array[scene[f'{target}_long_name']] = (('y', 'x'), values)
-   
+
     # Create other variables
     data_array['product_name'] = os.path.basename(infile)
     data_array['granule'] = granule
