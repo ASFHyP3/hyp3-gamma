@@ -180,20 +180,20 @@ def get_pol(infile):
 
 
     # We'll want this line for stacks:
-    #    cfg['product_type'] = prod_type + ' stack'
+    #    ['product_type'] = prod_type + ' stack'
     #
     # FIXME I wasn't sure what to put in here?
-    #    cfg['feature_type'] = '????????'
+    #    ['feature_type'] = '????????'
     #
     #    Audit trail of process chain with time stamps
-    #    cfg['history'] = f'Data acquired {granule[17:32]}; Processed to RTC at ASF on ' \
+    #    ['history'] = f'Data acquired {granule[17:32]}; Processed to RTC at ASF on ' \
     #                      f'{datetime.strftime(proc_dt, '%Y%m%dT%H%M%S')} using Hyp3 v{hyp3_ver}; ' \
     #                      f'netCDF created {datetime.now().strftime('%Y%m%dT%H%M%S')} using ' \
     #                      f'hyp3_stacking {stacking_ver}'
     #
     #   The compliance checker says that I need the field _NCProperties.  But, when I try to use it I get:
     #   file_creation_stack = f'rioxarray={rioxarray.__version__}, xarray={xr.__version__}, rasterio={rio.__version__}'
-    #   cfg['_NCProperties'] = file_creation_stack
+    #   ['_NCProperties'] = file_creation_stack
     #       AttributeError: NetCDF: String match to name in use
     #
 
@@ -279,8 +279,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     crs = pycrs.parse.from_ogc_wkt(crs_wkt)
     crs_name = crs.proj.name.ogc_wkt.lower()
     hyp3_ver, gamma_ver = get_science_code(target_file)
-    cfg, cfg_x, cfg_y = fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, pix_y)
-    logging.debug('Config is {}'.format(cfg))
 
     # determine if files are to be resampled and resample the co-pol file
     resample = False
