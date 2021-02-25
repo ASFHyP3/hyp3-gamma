@@ -104,7 +104,7 @@ def get_dataset(infile, scene):
     scene['inc_map'] = 'inc_map'
     scene['inc_map_long_name'] = 'incidence_angle'
     scene['dem'] = 'dem'
-    scene['dem_long_name'] = 'digital_elevation_mode'
+    scene['dem_long_name'] = 'digital_elevation_model'
 
     for name in ['co_pol', 'cross_pol', 'ls_map', 'inc_map', 'dem']:
         scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
