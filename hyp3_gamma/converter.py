@@ -179,24 +179,6 @@ def get_pol(infile):
     return pol
 
 
-    # We'll want this line for stacks:
-    #    ['product_type'] = prod_type + ' stack'
-    #
-    # FIXME I wasn't sure what to put in here?
-    #    ['feature_type'] = '????????'
-    #
-    #    Audit trail of process chain with time stamps
-    #    ['history'] = f'Data acquired {granule[17:32]}; Processed to RTC at ASF on ' \
-    #                      f'{datetime.strftime(proc_dt, '%Y%m%dT%H%M%S')} using Hyp3 v{hyp3_ver}; ' \
-    #                      f'netCDF created {datetime.now().strftime('%Y%m%dT%H%M%S')} using ' \
-    #                      f'hyp3_stacking {stacking_ver}'
-    #
-    #   The compliance checker says that I need the field _NCProperties.  But, when I try to use it I get:
-    #   file_creation_stack = f'rioxarray={rioxarray.__version__}, xarray={xr.__version__}, rasterio={rio.__version__}'
-    #   ['_NCProperties'] = file_creation_stack
-    #       AttributeError: NetCDF: String match to name in use
-    #
-
 def get_science_code(infile):
     readme = os.path.join(os.path.dirname(infile), 'README.txt')
     with open(readme, 'r') as f:
@@ -335,6 +317,41 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
             'sensor_band_identifier': 'C'
         })
     })
+
+
+    #
+    # We'll want this line for stacks:
+    #    'product_type' = prod_type + ' stack'
+    0
+    # FIXME I wasn't sure what to put in here?
+    #       ['feature_type'] = '????????'
+    #
+    #    Audit trail of process chain with time stamps
+    #       ['history'] = f'Data acquired {granule[17:32]}; Processed to RTC at ASF on ' \
+    #                      f'{datetime.strftime(proc_dt, '%Y%m%dT%H%M%S')} using Hyp3 v{hyp3_ver}; ' \
+    #                      f'netCDF created {datetime.now().strftime('%Y%m%dT%H%M%S')} using ' \
+    #                      f'hyp3_stacking {stacking_ver}'
+    #
+    #   The compliance checker says that I need the field _NCProperties.  But, when I try to use it I get:
+    #   file_creation_stack = f'rioxarray={rioxarray.__version__}, xarray={xr.__version__}, rasterio={rio.__version__}'
+    #      ['_NCProperties'] = file_creation_stack
+    #       AttributeError: NetCDF: String match to name in use
+    #
+
+    data_array.x.attrs = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate', 'long_name': 'Easting'}
+    data_array.y.attrs = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate', 'long_name': 'Northing'}
+    data_array.attrs = {'title': 'SAR RTC',
+                        'institution': 'Alaska Satellite Facility (ASF)',
+                        'mission': f'Sentinel-1{granule[2]}',
+                        'crs_wkt': crs_wkt,
+                        'x_spacing': pix_x,
+                        'y_spacing': pix_y,
+                        'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
+                        f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
+                        f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
+                        'Conventions': 'CF - 1.6',
+                        'references': 'asf.alaska.edu',
+                        'comment': 'This is an early prototype.'}
 
     # Add in the other layers of data
     for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
