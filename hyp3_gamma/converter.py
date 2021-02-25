@@ -301,7 +301,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     data_array = xr.Dataset({
         'y': y_coords,
         'x': x_coords,
-        f"normalized_radar_backscatter_{scene['co_pol']}": (('y', 'x'), backscatter.filled(0.0), {
+        f'normalized_radar_backscatter_{scene['co_pol']}': (('y', 'x'), backscatter.filled(0.0), {
             crs_name: crs_name,
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
@@ -346,7 +346,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
                         'crs_wkt': crs_wkt,
                         'x_spacing': pix_x,
                         'y_spacing': pix_y,
-                        'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
+                        'source': f'ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma '
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
                         'Conventions': 'CF - 1.6',
@@ -407,12 +407,13 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']
-    outfile = infile.replace(".tif", ".nc")
+    outfile = infile.replace('.tif', '.nc')
     logging.info('Writing file {}'.format(outfile))
 
 #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
     dsp.to_netcdf(outfile)
 
+    return(dsp)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='gamma_to_netcdf.py',
