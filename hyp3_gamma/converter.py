@@ -114,7 +114,7 @@ def get_dataset(infile, scene):
 
     print(scene)
 
-    return image_dts, proc_dt, x_extent, y_extent, granule, scene
+    return proc_dt, x_extent, y_extent, granule, scene
 
 
 def get_granule(infile, image_dts):
@@ -294,7 +294,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
-    image_dts, proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile, scene)
+    proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile, scene)
 
     # open the  co-pol file (which is assumed to always exist)
     target_file = scene['co_pol_file']
