@@ -288,9 +288,9 @@ def do_resample(infile, res):
     return(resampled_file)
 
 
-def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=None):
+def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
-    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, outfile, infile, output_scale))
+    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale))
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
@@ -429,7 +429,9 @@ def gamma_to_netcdf(prod_type, outfile, infile, output_scale=None, resolution=No
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']
+    outfile = infile.replace(".tif",".nc")
     logging.info('Writing file {}'.format(outfile))
+
 #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
     dsp.to_netcdf(outfile)
     logging.info('Successful Completion!')
@@ -441,7 +443,6 @@ if __name__ == '__main__':
                                      epilog='The log and README files must be in the same directory as the .tif')
 
     parser.add_argument('infile', help='Name of input geotiff file')
-    parser.add_argument('outfile', help='Name of output netcdf file')
     parser.add_argument('product_type', help='Type of data being stacked (RTC or INSAR)', metavar='InputType',
                         choices=['INSAR', 'RTC'])
     parser.add_argument('-o', '--output_scale', help='Output scale type\n', choices=['power', 'amp', 'dB'],
@@ -455,4 +456,4 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
-    gamma_to_netcdf(args.product_type, args.outfile, args.infile, args.output_scale, args.resolution)
+    gamma_to_netcdf(args.product_type, args.infile, args.output_scale, args.resolution)
