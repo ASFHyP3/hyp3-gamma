@@ -238,7 +238,7 @@ def do_resample(infile, res):
 
 def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
-    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale))
+    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale, resolution))
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
@@ -407,12 +407,11 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']
-    outfile = infile.replace(".tif",".nc")
+    outfile = infile.replace(".tif", ".nc")
     logging.info('Writing file {}'.format(outfile))
 
 #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
     dsp.to_netcdf(outfile)
-    logging.info('Successful Completion!')
 
 
 if __name__ == '__main__':
