@@ -179,22 +179,6 @@ def get_pol(infile):
     return pol
 
 
-def fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, pix_y):
-    logging.info('Adding metadata')
-    cfg = {'title': 'SAR RTC',
-           'institution': 'Alaska Satellite Facility (ASF)',
-           'mission': f'Sentinel-1{granule[2]}',
-           'crs_wkt': crs_wkt,
-           'x_spacing': pix_x,
-           'y_spacing': pix_y,
-           'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
-                     f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
-                     f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
-           'Conventions': 'CF - 1.6',
-           'references': 'asf.alaska.edu',
-           'comment': 'This is an early prototype.'}
-
-    #
     # We'll want this line for stacks:
     #    cfg['product_type'] = prod_type + ' stack'
     #
@@ -212,12 +196,6 @@ def fill_cfg(crs_wkt, prod_type, granule, proc_dt, hyp3_ver, gamma_ver, pix_x, p
     #   cfg['_NCProperties'] = file_creation_stack
     #       AttributeError: NetCDF: String match to name in use
     #
-
-    cfg_x = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate', 'long_name': 'Easting'}
-    cfg_y = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate', 'long_name': 'Northing'}
-
-    return cfg, cfg_x, cfg_y
-
 
 def get_science_code(infile):
     readme = os.path.join(os.path.dirname(infile), 'README.txt')
@@ -264,18 +242,6 @@ def check_for_all_zeros(data):
     if is_all_zero:
         logging.warning('Data array is all zeros!')
 
-
-def initialize_metadata(data_array, cfg, cfg_x, cfg_y):
-    for key in cfg:
-        data_array.attrs[key] = cfg[key]
-    for key in cfg_x:
-        data_array.x.attrs[key] = cfg_x[key]
-    for key in cfg_y:
-        data_array.y.attrs[key] = cfg_y[key]
-
-
-#    for key in cfg_p:
-#        data_array.variables[crs_tmp].attrs[key] = cfg_p[key]
 
 def do_resample(infile, res):
     root, unused = os.path.splitext(os.path.basename(infile))
@@ -371,9 +337,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
             'sensor_band_identifier': 'C'
         })
     })
-
-    # Set the metadata based upon the config dictionaries
-    initialize_metadata(data_array, cfg, cfg_x, cfg_y)
 
     # Add in the other layers of data
     for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
