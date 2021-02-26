@@ -13,7 +13,6 @@ import rioxarray
 import xarray as xr
 from osgeo import gdal
 
-
 #
 #     The code assumes auxiliary files are in the same location as the tiff files
 #
@@ -21,8 +20,6 @@ from osgeo import gdal
 #
 # example: S1A_IW_RT30_20180727T161143_G_gpn_VV
 #
-
-
 def parse_asf_rtc_name(infile):
     data = infile.split('_')
     parsed = {}
@@ -301,7 +298,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     data_array = xr.Dataset({
         'y': y_coords,
         'x': x_coords,
-        f'normalized_radar_backscatter_{scene['co_pol']}': (('y', 'x'), backscatter.filled(0.0), {
+        f"normalized_radar_backscatter_{scene['co_pol']}": (('y', 'x'), backscatter.filled(0.0), {
             crs_name: crs_name,
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
@@ -322,7 +319,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     #
     # We'll want this line for stacks:
     #    'product_type' = prod_type + ' stack'
-    0
+    #
     # FIXME I wasn't sure what to put in here?
     #       ['feature_type'] = '????????'
     #
@@ -346,7 +343,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
                         'crs_wkt': crs_wkt,
                         'x_spacing': pix_x,
                         'y_spacing': pix_y,
-                        'source': f'ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma '
+                        'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
                         'Conventions': 'CF - 1.6',
@@ -409,7 +406,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     #    del data_array.variables['backscatter'].attrs['coordinates']
     outfile = infile.replace('.tif', '.nc')
     logging.info('Writing file {}'.format(outfile))
-
 #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
     dsp.to_netcdf(outfile)
 
