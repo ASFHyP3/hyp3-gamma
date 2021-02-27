@@ -404,7 +404,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']
-    outfile = infile.replace('.tif', '.nc')
+    outfile = os.path.basename(infile.replace('.tif', '.nc'))
     logging.info('Writing file {}'.format(outfile))
 #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
     dsp.to_netcdf(outfile)
