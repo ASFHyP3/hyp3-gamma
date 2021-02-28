@@ -75,7 +75,6 @@ def parse_asf_rtc_name(infile):
             parsed['cross_polarization'] = 'VH'
         else:
             parsed['cross_polarization'] = 'HV'
-
     except IndexError:
         logging.error(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
         raise Exception(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
@@ -238,9 +237,9 @@ def do_resample(infile, res):
     return(resampled_file)
 
 
-def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
+def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
 
-    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale, resolution))
+    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale, pixel_spacing))
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
@@ -266,23 +265,23 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
     # determine if files are to be resampled and resample the co-pol file
     resample = False
-    if resolution:
-        if pix_x < resolution:
+    if pixel_spacing:
+        if pix_x < pixel_spacing:
             resample = True
-            target_file = do_resample(target_file, resolution)
-            pix_x = resolution
-            pix_y = -1 * resolution
-        elif pix_x >= resolution:
-            logging.warning(f'Desired output resolution less than original  ({resolution} vs {pix_x})')
+            target_file = do_resample(target_file, pixel_spacing)
+            pix_x = pixel_spacing
+            pix_y = -1 * pixel_spacing
+        elif pix_x >= pixel_spacing:
+            logging.warning(f'Desired output pixel_spacing less than original  ({pixel_spacing} vs {pix_x})')
             logging.warning('No resampling performed')
         else:
             logging.info('Skipping resample step')
     else:
-        resolution = pix_x
+        pixel_spacing = pix_x
 
     # Set data X, Y coordinates
-    x_coords = np.arange(x_extent[0], x_extent[1], resolution)
-    y_coords = np.arange(y_extent[0], y_extent[1], -1*resolution)
+    x_coords = np.arange(x_extent[0], x_extent[1], pixel_spacing)
+    y_coords = np.arange(y_extent[0], y_extent[1], -1*pixel_spacing)
 
     # Deal with inconsistent rounding in arange!
     dataset = rio.open(target_file)
@@ -364,7 +363,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
 
             # resample if necessary
             if resample:
-                resampled_file = do_resample(target_file, resolution)
+                resampled_file = do_resample(target_file, pixel_spacing)
                 dataset.close()
                 dataset = rio.open(resampled_file)
 
@@ -426,7 +425,7 @@ if __name__ == '__main__':
                         choices=['INSAR', 'RTC'])
     parser.add_argument('-o', '--output_scale', help='Output scale type\n', choices=['power', 'amp', 'dB'],
                         default='power')
-    parser.add_argument('-r', '--resolution', help='Desired output resolution', type=float)
+    parser.add_argument('-p', '--pixel_spacing', help='Desired output pixel_spacing', type=float)
     args = parser.parse_args()
 
     logFile = 'converter_{}.log'.format(os.getpid())
@@ -435,4 +434,4 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
-    gamma_to_netcdf(args.product_type, args.infile, args.output_scale, args.resolution)
+    gamma_to_netcdf(args.product_type, args.infile, args.output_scale, args.pixel_spacing)
