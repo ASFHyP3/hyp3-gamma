@@ -94,12 +94,6 @@ def get_dataset(infile, scene):
     x_extent = [ulx, lrx]
     y_extent = [uly, lry]
 
-    if 'VV' in scene['polarization'] or 'VH' in scene['polarization']:
-        scene['co_pol'] = 'VV'
-        scene['cross_pol'] = 'VH'
-    elif 'HH' in scene['polarization'] or 'HV' in scene['polarization']:
-        scene['co_pol'] = 'HH'
-        scene['cross_pol'] = 'HV'
     scene['ls_map'] = 'ls_map'
     scene['ls_map_long_name'] = 'layover_shadow_mask'
     scene['inc_map'] = 'inc_map'
@@ -107,11 +101,35 @@ def get_dataset(infile, scene):
     scene['dem'] = 'dem'
     scene['dem_long_name'] = 'digital_elevation_model'
 
-    for name in ['co_pol', 'cross_pol', 'ls_map', 'inc_map', 'dem']:
-        scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
+    scene['polarization_variable_name'] = f"normalized_radar_backscatter_{scene['polarization']}"
+    scene['cross_polarization_variable_name'] = f"normalized_radar_backscatter_{scene['cross_polarization']}"
 
-    for file_name in ['co_pol_file', 'cross_pol_file', 'ls_map_file', 'inc_map_file', 'dem_file']:
-        scene[f'{file_name}_exists'] = os.path.exists(scene[file_name])
+    tmp = scene['polarization']
+    scene[f'{tmp}'] = tmp
+    print(f'scene[{tmp}] = {tmp}')
+
+    tmp = scene['cross_polarization']
+    scene[f'{tmp}'] = tmp
+    print(f'scene[{tmp}] = {tmp}')
+
+    print(f"Names are {scene['polarization']}, {scene['cross_polarization']}, {'ls_map'}, {'inc_map'}, {'dem'}")
+
+    for name in [scene['polarization'], scene['cross_polarization'], 'ls_map', 'inc_map', 'dem']:
+        print(f"scene[name] = {name}")
+        scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
+        print(f"Created variable {name}_file value {scene[f'{name}_file']}")
+
+    co_pol = scene['polarization']
+    cross_pol = scene['cross_polarization']
+    co_pol_file = f"{co_pol}_file"
+    cross_pol_file = f"{cross_pol}_file" 
+
+    for file_name in [f'{co_pol}_file', f'{cross_pol}_file', 'ls_map_file', 'inc_map_file', 'dem_file']:
+        print(f"file name = {file_name}")
+        var_name = f'{file_name}_exists'
+        scene[var_name] = os.path.exists(scene[file_name])
+        tmp = scene[var_name]
+        print(f"scene[{var_name}] = {tmp}")
 
     print(scene)
 
@@ -245,8 +263,9 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
     scene = parse_asf_rtc_name(os.path.basename(infile))
     proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile, scene)
 
-    # open the  co-pol file (which is assumed to always exist)
-    target_file = scene['co_pol_file']
+    # open the co-pol file (which is assumed to always exist)
+    tmp = scene['polarization']
+    target_file = scene[f'{tmp}_file']
     logging.info('Processing file {}'.format(target_file))
     dataset = rio.open(target_file)
 
@@ -302,7 +321,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
     data_array = xr.Dataset({
         'y': y_coords,
         'x': x_coords,
-        f"normalized_radar_backscatter_{scene['co_pol']}": (('y', 'x'), backscatter.filled(0.0), {
+        f"normalized_radar_backscatter_{scene['polarization']}": (('y', 'x'), backscatter.filled(0.0), {
             crs_name: crs_name,
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
@@ -355,7 +374,9 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
                         'comment': 'This is an early prototype.'}
 
     # Add in the other layers of data
-    for target in ['cross_pol', 'ls_map', 'inc_map', 'dem']:
+    variable_targets = [scene['cross_polarization'], 'ls_map', 'inc_map', 'dem']
+
+    for target in variable_targets:
         if scene[f'{target}_file_exists']:
             target_file = scene[f'{target}_file']
             logging.info('Processing file {}'.format(target_file))
@@ -369,11 +390,11 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
 
             values = dataset.read(1)
             dataset.close()
-            if scene['cross_pol'] in target_file:
+            if scene['cross_polarization'] in target_file:
                 backscatter = scale_data(values, scene, output_scale)
                 backscatter = np.ma.masked_invalid(backscatter, copy=True)
                 check_for_all_zeros(backscatter)
-                var_name = f"normalized_radar_backscatter_{scene['cross_pol']}"
+                var_name = f"normalized_radar_backscatter_{scene['cross_polarization']}"
                 data_array[var_name] = (('y', 'x'), backscatter.filled(0.0), {
                     '_FillValue': no_data_value,
                     'grid_mapping': crs_name,
