@@ -95,12 +95,8 @@ def get_dataset(infile, scene):
     y_extent = [uly, lry]
 
     scene['ls_map'] = 'ls_map'
-    scene['ls_map_long_name'] = 'layover_shadow_mask'
     scene['inc_map'] = 'inc_map'
-    scene['inc_map_long_name'] = 'incidence_angle'
     scene['dem'] = 'dem'
-    scene['dem_long_name'] = 'digital_elevation_model'
-
     scene['polarization_variable_name'] = f"normalized_radar_backscatter_{scene['polarization']}"
     scene['cross_polarization_variable_name'] = f"normalized_radar_backscatter_{scene['cross_polarization']}"
 
@@ -387,7 +383,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                         'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
-                        'Conventions': 'CF - 1.6',
+                        'Conventions': 'CF-1.6',
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
 
