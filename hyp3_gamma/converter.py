@@ -412,7 +412,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, resolution=None):
     return(dsp)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='gamma_to_netcdf.py',
+    parser = argparse.ArgumentParser(prog='converter.py',
                                      description='Converts a HyP3 RTC product from .tif format into netCDF',
                                      epilog='The log and README files must be in the same directory as the .tif')
 
@@ -424,7 +424,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--resolution', help='Desired output resolution', type=float)
     args = parser.parse_args()
 
-    logFile = 'gamma_to_netcdf_{}.log'.format(os.getpid())
+    logFile = 'converter_{}.log'.format(os.getpid())
     logging.basicConfig(filename=logFile, format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler())
