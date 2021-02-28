@@ -257,8 +257,13 @@ def do_resample(infile, res):
 
 def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, drop_vars=None):
 
-    logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale, pixel_spacing))
-
+    scene = parse_asf_rtc_name(os.path.basename(infile))
+    
+    polarization_variable_name = f"normalized_radar_backscatter_{scene['polarization']}"
+    cross_polarization_variable_name = "normalized_radar_backscatter_{scene[cross_polarization']}"
+    print(f'co-pol variable name: {polarization_variable_name}')
+    print(f'cross-pol variable name: {cross_polarization_variable_name}')
+ 
     if drop_vars:
         for name in drop_vars:
             if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 'incidence_angle',
@@ -266,8 +271,14 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                 print(f'Unrecognized name: {name} - Removing from drop_vars list')
                 drop_vars.remove(name)
 
+    logging.info('gamma_to_netcdf parameters:')
+    logging.info(f'product type       {prod_type}')
+    logging.info(f'infile             {infile}')
+    logging.info(f'output_scale       {output_scale}')
+    logging.info(f'pixel spaing       {pixel_spacing}')
+    logging.info(f'variables to drop  {drop_vars}')
+
     # gather some necessary metadata for the file from the scene name and the log file
-    scene = parse_asf_rtc_name(os.path.basename(infile))
     proc_dt, x_extent, y_extent, granule, scene = get_dataset(infile, scene)
 
     # open the co-pol file (which is assumed to always exist)
