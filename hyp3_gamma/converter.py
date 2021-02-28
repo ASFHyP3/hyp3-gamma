@@ -260,7 +260,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     scene = parse_asf_rtc_name(os.path.basename(infile))
     
     polarization_variable_name = f"normalized_radar_backscatter_{scene['polarization']}"
-    cross_polarization_variable_name = "normalized_radar_backscatter_{scene[cross_polarization']}"
+    cross_polarization_variable_name = f"normalized_radar_backscatter_{scene['cross_polarization']}"
     print(f'co-pol variable name: {polarization_variable_name}')
     print(f'cross-pol variable name: {cross_polarization_variable_name}')
  
@@ -393,16 +393,28 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
 
 
     # Add in the other layers of data
-    variable_targets = [scene['cross_polarization'], 'ls_map', 'inc_map', 'dem']
+    variable_targets = [scene['cross_polarization'], 'layover_shadow_mask',
+                       'incidence_angle', 'digital_elevation_model']
     
     if drop_vars:
         for name in drop_vars:
             if name in variable_targets:
                 variable_targets.remove(name)
 
+    file_targets = []
+    for name in variable_targets:
+        if name == 'layover_shadow_mask':
+            file_targets.append('ls_map')
+        elif name == 'incidence_angle':
+            file_targets.append('inc_map')
+        elif name == 'digital_elevation_model':
+            file_targets.append('dem')
+        else:
+            file_targets.append(name)
+
     print(f"Cleaned up variable_targets {variable_targets}")
 
-    for target in variable_targets:
+    for target in file_targets:
         if scene[f'{target}_file_exists']:
             target_file = scene[f'{target}_file']
             logging.info('Processing file {}'.format(target_file))
@@ -436,7 +448,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                     'sensor_band_identifier': 'C'
                 })
             else:
-                data_array[scene[f'{target}_long_name']] = (('y', 'x'), values)
+                data_array[scene[target]] = (('y', 'x'), values)
 
     # Create other variables
     data_array['product_name'] = os.path.basename(infile)
