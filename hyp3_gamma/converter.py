@@ -255,9 +255,16 @@ def do_resample(infile, res):
     return(resampled_file)
 
 
-def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
+def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, drop_vars=None):
 
     logging.info('gamma_to_netcdf: {} {} {} {}'.format(prod_type, infile, output_scale, pixel_spacing))
+
+    if drop_vars:
+        for name in drop_vars:
+            if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 'incidence_angle',
+                            'digital_elevation_model']:
+                print(f'Unrecognized name: {name} - Removing from drop_vars list')
+                drop_vars.remove(name)
 
     # gather some necessary metadata for the file from the scene name and the log file
     scene = parse_asf_rtc_name(os.path.basename(infile))
@@ -373,8 +380,16 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None):
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
 
+
     # Add in the other layers of data
     variable_targets = [scene['cross_polarization'], 'ls_map', 'inc_map', 'dem']
+    
+    if drop_vars:
+        for name in drop_vars:
+            if name in variable_targets:
+                variable_targets.remove(name)
+
+    print(f"Cleaned up variable_targets {variable_targets}")
 
     for target in variable_targets:
         if scene[f'{target}_file_exists']:
@@ -447,6 +462,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output_scale', help='Output scale type\n', choices=['power', 'amp', 'dB'],
                         default='power')
     parser.add_argument('-p', '--pixel_spacing', help='Desired output pixel_spacing', type=float)
+    parser.add_argument('-d', '--drop_vars', help='Comma delimited list of variables to be dropped from the final stack',
+                        metavar='DropVars')
     args = parser.parse_args()
 
     logFile = 'converter_{}.log'.format(os.getpid())
@@ -455,4 +472,9 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
-    gamma_to_netcdf(args.product_type, args.infile, args.output_scale, args.pixel_spacing)
+    if args.drop_vars:
+        drop_list = [item for item in args.drop_vars.split(',')]
+    else:
+        drop_list = None
+
+    gamma_to_netcdf(args.product_type, args.infile, args.output_scale, args.pixel_spacing, drop_list)
