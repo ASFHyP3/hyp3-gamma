@@ -71,6 +71,11 @@ def parse_asf_rtc_name(infile):
 
     try:
         parsed['polarization'] = data[6][0:2]
+        if parsed['polarization'] == 'VV':
+            parsed['cross_polarization'] = 'VH'
+        else:
+            parsed['cross_polarization'] = 'HV'
+
     except IndexError:
         logging.error(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
         raise Exception(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
