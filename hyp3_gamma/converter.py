@@ -20,6 +20,7 @@ from osgeo import gdal
 #
 # example: S1A_IW_RT30_20180727T161143_G_gpn_VV
 #
+
 def parse_asf_rtc_name(infile):
     data = infile.split('_')
     parsed = {}
@@ -78,7 +79,7 @@ def parse_asf_rtc_name(infile):
     except IndexError:
         logging.error(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
         raise Exception(f'ERROR: Unable to determine polarization from string {infile} letter {data[6][0:2]}')
-        
+
     return parsed
 
 
@@ -242,14 +243,11 @@ def do_resample(infile, res):
 def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, drop_vars=None):
 
     scene = parse_asf_rtc_name(os.path.basename(infile))
-    
-    polarization_variable_name = f"normalized_radar_backscatter_{scene['polarization']}"
-    cross_polarization_variable_name = f"normalized_radar_backscatter_{scene['cross_polarization']}"
- 
+
     if drop_vars:
         for name in drop_vars:
-            if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 'incidence_angle',
-                            'digital_elevation_model']:
+            if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 
+                            'incidence_angle', 'digital_elevation_model']:
                 logging.warning(f'Unrecognized name: {name} - Removing from drop_vars list')
                 drop_vars.remove(name)
 
@@ -338,7 +336,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
         })
     })
 
-
     #
     # We'll want this line for stacks:
     #    'product_type' = prod_type + ' stack'
@@ -373,11 +370,10 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
 
-
     # Add in the other layers of data
     variable_targets = [scene['cross_polarization'], 'layover_shadow_mask',
                        'incidence_angle', 'digital_elevation_model']
-    
+
     if drop_vars:
         for name in drop_vars:
             if name in variable_targets:
@@ -456,6 +452,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
 
     return(dsp)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='converter.py',
                                      description='Converts a HyP3 RTC product from .tif format into netCDF',
@@ -467,7 +464,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output_scale', help='Output scale type\n', choices=['power', 'amp', 'dB'],
                         default='power')
     parser.add_argument('-p', '--pixel_spacing', help='Desired output pixel_spacing', type=float)
-    parser.add_argument('-d', '--drop_vars', help='Comma delimited list of variables to be dropped from the final stack',
+    parser.add_argument('-d', '--drop_vars', help='Comma delimited list of variables to be dropped from final stack',
                         metavar='DropVars')
     args = parser.parse_args()
 

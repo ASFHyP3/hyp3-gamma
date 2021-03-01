@@ -3,15 +3,10 @@
 import argparse
 import logging
 import os
-import re
 from datetime import datetime
 
 import numpy as np
-import pycrs
-import rasterio as rio
-import rioxarray
 import xarray as xr
-from osgeo import gdal
 from converter import gamma_to_netcdf
 from converter import parse_asf_rtc_name
 
@@ -21,7 +16,7 @@ def create_output_file_name(infiles, start_time, last_time, prod_type, pixel_spa
     int_spacing = int(pixel_spacing)
     scene = parse_asf_rtc_name(infiles[0])
     gamsig = scene['radiometry'][0]
-    amppower = scene['scale'][0]  
+    amppower = scene['scale'][0]
     if 'no' in scene['filtered']:
         filt = 'n'
     else:
@@ -29,9 +24,10 @@ def create_output_file_name(infiles, start_time, last_time, prod_type, pixel_spa
     name = f"S1_IW_{prod}{int_spacing}_{start_time}_{last_time}_G_{gamsig}{amppower}{filt}.nc"
     return(name)
 
+
 def prepare_time_dimension(time_0_str, all_time, projected_data_set_1):
 
-    # calculate milliseconds since first image in stack    
+    # calculate milliseconds since first image in stack
     time_0 = np.datetime64(time_0_str, 'ms').astype(np.float)
 
     # Set the times relative to the first frame
@@ -50,11 +46,11 @@ def prepare_time_dimension(time_0_str, all_time, projected_data_set_1):
 def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_vars):
     infiles.sort
     projected_data_set_1 = gamma_to_netcdf(product_type, infiles[0], output_scale, pixel_spacing, drop_vars)
-    all_time = [] 
+    all_time = []
     print(f"projected_data_set_1['acquisition_start_time'] {projected_data_set_1['acquisition_start_time']}")
     start = f'{projected_data_set_1.acquisition_start_time.values}'
     start_time = datetime(int(start[0:4]), int(start[4:6]), int(start[6:8]),
-                          int(start[9:11]), int(start[11:13]), int(start[13:15]),0)
+                          int(start[9:11]), int(start[11:13]), int(start[13:15]), 0)
     time_0_str = start_time
     all_time.append(start_time)
     print(f'all_time = {all_time}')
@@ -62,7 +58,7 @@ def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_va
         projected_data_set_2 = gamma_to_netcdf(product_type, infiles[cnt], output_scale, pixel_spacing, drop_vars)
         last_time = f'{projected_data_set_2.acquisition_start_time.values}'
         frame_time = datetime(int(last_time[0:4]), int(last_time[4:6]), int(last_time[6:8]),
-                             int(last_time[9:11]), int(last_time[11:13]), int(last_time[13:15]), 0)
+                              int(last_time[9:11]), int(last_time[11:13]), int(last_time[13:15]), 0)
         all_time.append(frame_time)
         print(f'all_time = {all_time}')
         projected_data_set_1 = xr.concat([projected_data_set_1, projected_data_set_2], dim='time')
@@ -82,12 +78,12 @@ if __name__ == '__main__':
     parser.add_argument('product_type', help='Type of data being stacked (RTC or INSAR)', metavar='InputType',
                         choices=['INSAR', 'RTC'])
 
-    parser.add_argument('-d', '--drop_vars', help='Comma delimited list of variables to be dropped from the final stack',
+    parser.add_argument('-d', '--drop_vars', help='Comma delimited list of variables to be dropped from final stack',
                         metavar='DropVars')
     parser.add_argument('-o', '--output_scale', help='Output scale type\n', choices=['power', 'amp', 'dB'],
                         default='power')
     parser.add_argument('-p', '--pixel_spacing', help='Desired output pixel_spacing', type=float)
-    parser.add_argument('infiles',nargs='*', help='Name of input geotiff files')
+    parser.add_argument('infiles', nargs='*', help='Name of input geotiff files')
     args = parser.parse_args()
 
     if args.drop_vars:
@@ -101,6 +97,4 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info('Starting run')
 
-
     series_to_netcdf(args.product_type, args.infiles, args.output_scale, args.pixel_spacing, drop_list)
-
