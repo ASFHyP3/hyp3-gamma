@@ -21,6 +21,7 @@ from osgeo import gdal
 # example: S1A_IW_RT30_20180727T161143_G_gpn_VV
 #
 
+
 def parse_asf_rtc_name(infile):
     data = infile.split('_')
     parsed = {}
@@ -246,7 +247,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
 
     if drop_vars:
         for name in drop_vars:
-            if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 
+            if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask',
                             'incidence_angle', 'digital_elevation_model']:
                 logging.warning(f'Unrecognized name: {name} - Removing from drop_vars list')
                 drop_vars.remove(name)
@@ -315,7 +316,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     backscatter = scale_data(values, scene, output_scale)
     backscatter = np.ma.masked_invalid(backscatter, copy=True)
     check_for_all_zeros(backscatter)
-   
+
     data_array = xr.Dataset({
         'y': y_coords,
         'x': x_coords,
@@ -372,7 +373,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
 
     # Add in the other layers of data
     variable_targets = [scene['cross_polarization'], 'layover_shadow_mask',
-                       'incidence_angle', 'digital_elevation_model']
+                              'incidence_angle', 'digital_elevation_model']
 
     if drop_vars:
         for name in drop_vars:
