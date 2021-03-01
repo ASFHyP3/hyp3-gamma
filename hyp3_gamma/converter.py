@@ -102,32 +102,20 @@ def get_dataset(infile, scene):
 
     tmp = scene['polarization']
     scene[f'{tmp}'] = tmp
-    print(f'scene[{tmp}] = {tmp}')
 
     tmp = scene['cross_polarization']
     scene[f'{tmp}'] = tmp
-    print(f'scene[{tmp}] = {tmp}')
-
-    print(f"Names are {scene['polarization']}, {scene['cross_polarization']}, {'ls_map'}, {'inc_map'}, {'dem'}")
 
     for name in [scene['polarization'], scene['cross_polarization'], 'ls_map', 'inc_map', 'dem']:
-        print(f"scene[name] = {name}")
         scene[f'{name}_file'] = infile.replace(scene['polarization'], scene[name])
-        print(f"Created variable {name}_file value {scene[f'{name}_file']}")
 
     co_pol = scene['polarization']
     cross_pol = scene['cross_polarization']
-    co_pol_file = f"{co_pol}_file"
-    cross_pol_file = f"{cross_pol}_file" 
 
     for file_name in [f'{co_pol}_file', f'{cross_pol}_file', 'ls_map_file', 'inc_map_file', 'dem_file']:
-        print(f"file name = {file_name}")
         var_name = f'{file_name}_exists'
         scene[var_name] = os.path.exists(scene[file_name])
         tmp = scene[var_name]
-        print(f"scene[{var_name}] = {tmp}")
-
-    print(scene)
 
     return proc_dt, x_extent, y_extent, granule, scene
 
@@ -257,14 +245,12 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     
     polarization_variable_name = f"normalized_radar_backscatter_{scene['polarization']}"
     cross_polarization_variable_name = f"normalized_radar_backscatter_{scene['cross_polarization']}"
-    print(f'co-pol variable name: {polarization_variable_name}')
-    print(f'cross-pol variable name: {cross_polarization_variable_name}')
  
     if drop_vars:
         for name in drop_vars:
             if name not in [scene['polarization'], scene['cross_polarization'], 'layover_shadow_mask', 'incidence_angle',
                             'digital_elevation_model']:
-                print(f'Unrecognized name: {name} - Removing from drop_vars list')
+                logging.warning(f'Unrecognized name: {name} - Removing from drop_vars list')
                 drop_vars.remove(name)
 
     logging.info('gamma_to_netcdf parameters:')
@@ -408,7 +394,7 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
         else:
             file_targets.append(name)
 
-    print(f"Cleaned up variable_targets {variable_targets}")
+    logging.info(f"Variables being created: {variable_targets}")
 
     for target in file_targets:
         if scene[f'{target}_file_exists']:
