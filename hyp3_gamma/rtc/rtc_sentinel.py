@@ -274,7 +274,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         orbit_file, _ = downloadSentinelOrbitFile(granule)
     except OrbitDownloadError as e:
         log.warning(e)
-        log.warning(f'Proceeding using Original Predicted orbit data included with {granule}')
+        log.warning(f'Proceeding using original predicted orbit data included with {granule}')
         orbit_file = None
 
     product_name = get_product_name(granule, orbit_file, resolution, radiometry, scale, speckle_filter, dem_matching)
