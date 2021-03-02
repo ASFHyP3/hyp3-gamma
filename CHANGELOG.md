@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.3...v4.0.4)
+
+### Changed
+
+* `rtc_sentinel.py` will now proceed with processing when no Restituted or Precision orbit file is found
 
 ## [4.0.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.2...v4.0.3)
 
