@@ -67,15 +67,17 @@ def rtc():
                         include_inc_map=args.include_inc_map,
                         include_scattering_area=args.include_scattering_area,
                     )
-
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
+
     if args.bucket:
+        product_dir = Path(product_name)
+        for browse in product_dir.glob('*.png'):
+            create_thumbnail(browse, output_dir=product_dir)
+
         upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
-        browse_images = Path(product_name).glob('*.png')
-        for browse in browse_images:
-            thumbnail = create_thumbnail(browse)
-            upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
-            upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix)
+
+        for product_file in product_dir.iterdir():
+            upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
 def insar():
