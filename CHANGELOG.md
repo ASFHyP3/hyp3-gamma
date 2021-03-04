@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-* `rtc` now uploads both zipped and unzipped product files when using the `--bucket` option
+* `rtc` now uploads unzipped product files (in addition to the zip archive) when using the `--bucket` option
 * Upgraded to hyp3lib [v1.6.5](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#165) from v1.6.4
 
 ## [4.0.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.3...v4.0.4)
