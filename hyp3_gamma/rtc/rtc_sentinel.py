@@ -89,20 +89,6 @@ def configure_log_file(log_file):
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name):
     log.info('Parameters for this run:')
-<<<<<<< HEAD
-    log.info(f'    SAFE directory            : {safe_dir}')
-    log.info(f'    Output resolution         : {resolution}')
-    log.info(f'    Radiometry                : {radiometry}')
-    log.info(f'    Scale                     : {scale}')
-    log.info(f'    Speckle filter            : {speckle_filter}')
-    log.info(f'    DEM matching              : {dem_matching}')
-    log.info(f'    Include DEM               : {include_dem}')
-    log.info(f'    Include inc. angle map    : {include_inc_map}')
-    log.info(f'    Include scattering area   : {include_scattering_area}')
-    log.info(f'    Include RGB decomposition : {include_rgb}')
-    log.info(f'    Orbit file                : {orbit_file}')
-    log.info(f'    Output name               : {product_name}')
-=======
     log.info(f'    SAFE directory          : {safe_dir}')
     log.info(f'    Output resolution       : {resolution}')
     log.info(f'    Radiometry              : {radiometry}')
@@ -112,9 +98,9 @@ def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_
     log.info(f'    Include DEM             : {include_dem}')
     log.info(f'    Include inc. angle map  : {include_inc_map}')
     log.info(f'    Include scattering area : {include_scattering_area}')
+    log.info(f'    Include RGB decomposition : {include_rgb}')
     log.info(f'    Orbit file              : {orbit_file or "Original Predicted"}')
     log.info(f'    Output name             : {product_name}')
->>>>>>> develop
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
