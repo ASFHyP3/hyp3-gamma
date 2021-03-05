@@ -16,11 +16,37 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * Color browse images are only generated for RTC products when the RGB decomposition GeoTIFF is requested
 
+## [4.0.5](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.4...v4.0.5)
+
+### Changed
+
+* `rtc` now uploads unzipped product files (in addition to the zip archive) when using the `--bucket` option
+* Upgraded to hyp3lib [v1.6.5](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#165) from v1.6.4
+
+## [4.0.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.3...v4.0.4)
+
+### Changed
+
+* `rtc_sentinel.py` will now proceed with processing when no Restituted or Precision orbit file is found
+
+## [4.0.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.2...v4.0.3)
+
+### Fixed
+
+* Resolved off-by-one error when computing days of separation for InSAR product names in `ifm_sentinel.py`
+
+## [4.0.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.1...v4.0.2)
+
+### Changed
+
+* Upgraded to hyp3lib [v1.6.4](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#164) from v1.6.3
+>>>>>>> develop
+
 ## [4.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.0...v4.0.1)
 
 ### Added
 
-* Added wrapped phase geotiff via commmand line option `-m` to `ifm_sentinel.py`
+* Added wrapped phase geotiff via command line option `-m` to `ifm_sentinel.py`
 
 ## [4.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v3.1.0...v4.0.0)
 

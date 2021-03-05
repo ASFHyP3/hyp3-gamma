@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 from hyp3_metadata import create_metadata_file_set
-from hyp3lib import ExecuteError, GranuleError
+from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
@@ -89,6 +89,7 @@ def configure_log_file(log_file):
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name):
     log.info('Parameters for this run:')
+<<<<<<< HEAD
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
     log.info(f'    Radiometry                : {radiometry}')
@@ -101,6 +102,19 @@ def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_
     log.info(f'    Include RGB decomposition : {include_rgb}')
     log.info(f'    Orbit file                : {orbit_file}')
     log.info(f'    Output name               : {product_name}')
+=======
+    log.info(f'    SAFE directory          : {safe_dir}')
+    log.info(f'    Output resolution       : {resolution}')
+    log.info(f'    Radiometry              : {radiometry}')
+    log.info(f'    Scale                   : {scale}')
+    log.info(f'    Speckle filter          : {speckle_filter}')
+    log.info(f'    DEM matching            : {dem_matching}')
+    log.info(f'    Include DEM             : {include_dem}')
+    log.info(f'    Include inc. angle map  : {include_inc_map}')
+    log.info(f'    Include scattering area : {include_scattering_area}')
+    log.info(f'    Orbit file              : {orbit_file or "Original Predicted"}')
+    log.info(f'    Output name             : {product_name}')
+>>>>>>> develop
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
@@ -145,7 +159,8 @@ def _prepare_mli_image_from_grd(safe_dir, pol, orbit_file, looks):
 
     with NamedTemporaryFile() as temp_image, NamedTemporaryFile() as temp_par:
         run(f'par_S1_GRD {tiff} {annotation_xml} {calibration_xml} {noise_xml} {temp_par.name} {temp_image.name}')
-        run(f'S1_OPOD_vec {temp_par.name} {orbit_file}')
+        if orbit_file:
+            run(f'S1_OPOD_vec {temp_par.name} {orbit_file}')
         run(f'multi_look_MLI {temp_image.name} {temp_par.name} {mli_image} {mli_par} {looks} {looks} - - - 1')
 
     return mli_image, mli_par
@@ -166,7 +181,8 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
 
             run(f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} '
                 f'{slc_tops_par}')
-            run(f'S1_OPOD_vec {slc_par} {orbit_file}')
+            if orbit_file:
+                run(f'S1_OPOD_vec {slc_par} {orbit_file}')
 
             with open(slc_tab, 'a') as f:
                 f.write(f'{slc_image} {slc_par} {slc_tops_par}\n')
@@ -267,7 +283,14 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
     polarizations = get_polarizations(granule, skip_cross_pol)
-    orbit_file, _ = downloadSentinelOrbitFile(granule)
+
+    try:
+        orbit_file, _ = downloadSentinelOrbitFile(granule)
+    except OrbitDownloadError as e:
+        log.warning(e)
+        log.warning(f'Proceeding using original predicted orbit data included with {granule}')
+        orbit_file = None
+
     product_name = get_product_name(granule, orbit_file, resolution, radiometry, scale, speckle_filter, dem_matching)
     if looks is None:
         looks = get_looks(granule_type, resolution)
