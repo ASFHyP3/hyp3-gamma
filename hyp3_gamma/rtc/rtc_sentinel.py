@@ -15,7 +15,6 @@ from typing import List
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
-from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
@@ -29,12 +28,14 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
+from osgeo import gdal
 
 import hyp3_gamma
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import unzip_granule
 
 log = logging.getLogger()
+gdal.UseExceptions()
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -198,6 +199,20 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
         run(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
 
 
+def set_pixel_as_point(tif_file):
+    ds = gdal.Open(tif_file, gdal.GA_Update)
+    if ds.GetMetadata().get('AREA_OR_POINT') == 'Point':
+        log.warning(f'{tif_file} is already AREA_OR_POINT=Point')
+    else:
+        log.info(f'Updating {tif_file} to AREA_OR_POINT=Point')
+        transform = list(ds.GetGeoTransform())
+        transform[0] += transform[1] / 2
+        transform[3] += transform[5] / 2
+        ds.SetGeoTransform(transform)
+        ds.SetMetadataItem('AREA_OR_POINT', 'Point')
+    ds = None
+
+
 def create_browse_images(out_dir, out_name, pol):
     pol_amp_tif = f'{pol}-amp.tif'
     outfile = f'{out_dir}/{out_name}'
@@ -355,7 +370,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         if not include_rgb:
             os.remove(rgb_tif)
 
-    fix_geotiff_locations(dir=product_name)
+    for tif_file in glob(f'{product_name}/*.tif'):
+        set_pixel_as_point(tif_file)
     cogify_dir(directory=product_name)
 
     log.info('Generating browse images and metadata files')
