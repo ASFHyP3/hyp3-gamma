@@ -13,9 +13,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * an `--include-rgb` option has been added to `rtc_sentinel.py`
   * an `include_rgb` keyword argument has been added to `hyp3_gamma.rtc.rtc_sentinel.rtc_sentinel_gamma`
 
-### Changed
-* Color browse images are only generated for RTC products when the RGB decomposition GeoTIFF is requested
-
 ## [4.0.5](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.4...v4.0.5)
 
 ### Changed
