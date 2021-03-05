@@ -37,7 +37,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 * Upgraded to hyp3lib [v1.6.4](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#164) from v1.6.3
->>>>>>> develop
 
 ## [4.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.0...v4.0.1)
 
