@@ -213,11 +213,6 @@ def create_browse_images(out_dir, out_name, pol):
                 byteSigmaScale(tif, rescaled_tif.name)
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
-    rgb_tif = f'{out_dir}/{out_name}_rgb.tif'
-    if os.path.exists(rgb_tif):
-        outfile = f'{out_dir}/{out_name}_rgb'
-        makeAsfBrowse(rgb_tif, outfile)
-
     pol_tif = f'{out_dir}/{out_name}_{pol.upper()}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
@@ -351,10 +346,14 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     if include_scattering_area:
         create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', mli_par, 'dem_seg.par',
                             f'{product_name}/{product_name}_area.tif')
-    if include_rgb and len(polarizations) == 2:
+    if len(polarizations) == 2:
         pol_power_tif = f'{polarizations[0]}-power.tif'
         cpol_power_tif = f'{polarizations[1]}-power.tif'
-        rtc2color(pol_power_tif, cpol_power_tif, -24, f'{product_name}/{product_name}_rgb.tif', cleanup=True)
+        rgb_tif = f'{product_name}/{product_name}_rgb.tif'
+        rtc2color(pol_power_tif, cpol_power_tif, -24, rgb_tif, cleanup=True)
+        makeAsfBrowse(rgb_tif, f'{product_name}/{product_name}_rgb')
+        if not include_rgb:
+            os.remove(rgb_tif)
 
     fix_geotiff_locations(dir=product_name)
     cogify_dir(directory=product_name)
