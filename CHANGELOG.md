@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.5](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.4...v4.0.5)
+
+### Changed
+
+* `rtc` now uploads unzipped product files (in addition to the zip archive) when using the `--bucket` option
+* Upgraded to hyp3lib [v1.6.5](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#165) from v1.6.4
+
 ## [4.0.4](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.3...v4.0.4)
 
 ### Changed
