@@ -32,7 +32,7 @@ from osgeo import gdal
 
 import hyp3_gamma
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
-from hyp3_gamma.util import unzip_granule
+from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 log = logging.getLogger()
 gdal.UseExceptions()
@@ -197,20 +197,6 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
     with NamedTemporaryFile() as temp_file:
         run(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
         run(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
-
-
-def set_pixel_as_point(tif_file):
-    ds = gdal.Open(tif_file, gdal.GA_Update)
-    if ds.GetMetadata().get('AREA_OR_POINT') == 'Point':
-        log.warning(f'{tif_file} is already AREA_OR_POINT=Point')
-    else:
-        log.info(f'Updating {tif_file} to AREA_OR_POINT=Point')
-        transform = list(ds.GetGeoTransform())
-        transform[0] += transform[1] / 2
-        transform[3] += transform[5] / 2
-        ds.SetGeoTransform(transform)
-        ds.SetMetadataItem('AREA_OR_POINT', 'Point')
-    ds = None
 
 
 def create_browse_images(out_dir, out_name, pol):
