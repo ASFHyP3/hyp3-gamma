@@ -19,19 +19,17 @@ from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_dem import get_dem
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib.utm2dem import utm2dem
 
 import hyp3_gamma
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
+from hyp3_gamma.dem import prepare_dem
 from hyp3_gamma.util import unzip_granule
 
 log = logging.getLogger()
@@ -287,18 +285,13 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
                    include_scattering_area, orbit_file, product_name)
 
     log.info('Preparing DEM')
-    if dem:
-        dem_type = 'UNKNOWN'
-    else:
-        dem = 'dem.tif'
-        post = 30.0
-        if bbox:
-            dem_type = get_dem(bbox[0], bbox[1], bbox[2], bbox[3], dem, post=post)
-        else:
-            dem, dem_type = getDemFile(safe_dir, dem, post=post)
+    dem_type = 'UNKNOWN'
     dem_image = 'dem.image'
     dem_par = 'dem.par'
-    utm2dem(dem, dem_image, dem_par)
+    with NamedTemporaryFile() as dem_tif:
+        prepare_dem(dem_tif.name, f'{safe_dir}/manifest.safe')
+        run(f'dem_import {dem_tif.name} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)
