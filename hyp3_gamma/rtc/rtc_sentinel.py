@@ -15,7 +15,6 @@ from typing import List
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
-from hyp3lib.area2point import fix_geotiff_locations
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
@@ -29,12 +28,14 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
+from osgeo import gdal
 
 import hyp3_gamma
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
-from hyp3_gamma.util import unzip_granule
+from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 log = logging.getLogger()
+gdal.UseExceptions()
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -87,19 +88,20 @@ def configure_log_file(log_file):
 
 
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, orbit_file, product_name):
+                   include_scattering_area, include_rgb, orbit_file, product_name):
     log.info('Parameters for this run:')
-    log.info(f'    SAFE directory          : {safe_dir}')
-    log.info(f'    Output resolution       : {resolution}')
-    log.info(f'    Radiometry              : {radiometry}')
-    log.info(f'    Scale                   : {scale}')
-    log.info(f'    Speckle filter          : {speckle_filter}')
-    log.info(f'    DEM matching            : {dem_matching}')
-    log.info(f'    Include DEM             : {include_dem}')
-    log.info(f'    Include inc. angle map  : {include_inc_map}')
-    log.info(f'    Include scattering area : {include_scattering_area}')
-    log.info(f'    Orbit file              : {orbit_file or "Original Predicted"}')
-    log.info(f'    Output name             : {product_name}')
+    log.info(f'    SAFE directory            : {safe_dir}')
+    log.info(f'    Output resolution         : {resolution}')
+    log.info(f'    Radiometry                : {radiometry}')
+    log.info(f'    Scale                     : {scale}')
+    log.info(f'    Speckle filter            : {speckle_filter}')
+    log.info(f'    DEM matching              : {dem_matching}')
+    log.info(f'    Include DEM               : {include_dem}')
+    log.info(f'    Include inc. angle map    : {include_inc_map}')
+    log.info(f'    Include scattering area   : {include_scattering_area}')
+    log.info(f'    Include RGB decomposition : {include_rgb}')
+    log.info(f'    Orbit file                : {orbit_file or "Original Predicted"}')
+    log.info(f'    Output name               : {product_name}')
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
@@ -197,17 +199,8 @@ def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
         run(f'data2geotiff {dem_par} {temp_file.name} 2 {output_name}')
 
 
-def create_browse_images(out_dir, out_name, polarizations):
-    pol_amp_tif = f'{polarizations[0]}-amp.tif'
-
-    if len(polarizations) > 1:
-        cpol_amp_tif = f'{polarizations[1]}-amp.tif'
-        threshold = -24
-        outfile = f'{out_dir}/{out_name}_rgb'
-        with NamedTemporaryFile() as rgb_tif:
-            rtc2color(pol_amp_tif, cpol_amp_tif, threshold, rgb_tif.name, amp=True, cleanup=True)
-            makeAsfBrowse(rgb_tif.name, outfile)
-
+def create_browse_images(out_dir, out_name, pol):
+    pol_amp_tif = f'{pol}-amp.tif'
     outfile = f'{out_dir}/{out_name}'
     with NamedTemporaryFile() as rescaled_tif:
         byteSigmaScale(pol_amp_tif, rescaled_tif.name)
@@ -221,7 +214,7 @@ def create_browse_images(out_dir, out_name, polarizations):
                 byteSigmaScale(tif, rescaled_tif.name)
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
-    pol_tif = f'{out_dir}/{out_name}_{polarizations[0].upper()}.tif'
+    pol_tif = f'{out_dir}/{out_name}_{pol.upper()}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
     raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
@@ -239,8 +232,9 @@ def append_additional_log_files(log_file, pattern):
 
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
                        speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
-                       include_inc_map: bool = False, include_scattering_area: bool = False, dem: str = None,
-                       bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False) -> str:
+                       include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
+                       dem: str = None, bbox: List[float] = None, looks: int = None,
+                       skip_cross_pol: bool = False) -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
@@ -253,6 +247,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         include_dem: Include the DEM GeoTIFF in the output package.
         include_inc_map: Include the incidence angle GeoTIFF in the output package.
         include_scattering_area: Include the local scattering area GeoTIFF in the output package.
+        include_rgb: Include an RGB decomposition GeoTIFF in the output package.  This setting is ignored when
+            processing a single-polarization product or when `skip_cross_pol` is selected.
         dem: Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection. A DEM will be selected
             automatically if not provided.
         bbox: Subset the output images to the given lat/lon bounding box: `[lon_min, lat_min, lon_max, lat_max]`.
@@ -284,7 +280,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
     log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, orbit_file, product_name)
+                   include_scattering_area, include_rgb, orbit_file, product_name)
 
     log.info('Preparing DEM')
     if dem:
@@ -329,14 +325,18 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             f'{resolution} 3 -q -c {radiometry_flag}')
         shutil.move('mk_geo_radcal_3.log', f'mk_geo_radcal_3_{pol}.log')
 
-        power_tif = 'corrected_cal_map.mli.tif'
-        amp_tif = createAmp(power_tif, nodata=0)
+        power_tif = f'{pol}-power.tif'
+        shutil.move('corrected_cal_map.mli.tif', power_tif)
+
+        tmp_tif = createAmp(power_tif, nodata=0)
+        amp_tif = f'{pol}-amp.tif'
+        shutil.move(tmp_tif, amp_tif)
+
         output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
         if scale == 'power':
             shutil.copy(power_tif, output_tif)
         else:
             shutil.copy(amp_tif, output_tif)
-        shutil.move(amp_tif, f'{pol}-amp.tif')
 
     log.info('Collecting output GeoTIFFs')
     run(f'data2geotiff dem_seg.par corrected.ls_map 5 {product_name}/{product_name}_ls_map.tif')
@@ -347,12 +347,21 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     if include_scattering_area:
         create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', mli_par, 'dem_seg.par',
                             f'{product_name}/{product_name}_area.tif')
+    if len(polarizations) == 2:
+        pol_power_tif = f'{polarizations[0]}-power.tif'
+        cpol_power_tif = f'{polarizations[1]}-power.tif'
+        rgb_tif = f'{product_name}/{product_name}_rgb.tif'
+        rtc2color(pol_power_tif, cpol_power_tif, -24, rgb_tif, cleanup=True)
+        makeAsfBrowse(rgb_tif, f'{product_name}/{product_name}_rgb')
+        if not include_rgb:
+            os.remove(rgb_tif)
 
-    fix_geotiff_locations(dir=product_name)
+    for tif_file in glob(f'{product_name}/*.tif'):
+        set_pixel_as_point(tif_file)
     cogify_dir(directory=product_name)
 
     log.info('Generating browse images and metadata files')
-    create_browse_images(product_name, product_name, polarizations)
+    create_browse_images(product_name, product_name, polarizations[0])
     create_metadata_file_set(
         product_dir=Path(product_name),
         granule_name=granule,
@@ -395,6 +404,12 @@ def main():
                         help='Include the local scattering area GeoTIFF in the output package.')
 
     group = parser.add_mutually_exclusive_group()
+    parser.add_argument('--include-rgb', action='store_true',
+                        help='Include an RGB decomposition GeoTIFF in the output package.')
+    group.add_argument('--skip-cross-pol', action='store_true',
+                       help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
+
+    group = parser.add_mutually_exclusive_group()
     group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
                                      ' A DEM will be selected automatically if not provided.')
     group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
@@ -403,8 +418,6 @@ def main():
     parser.add_argument('--looks', type=int,
                         help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
                              'and filter looks are selected automatically based on azimuth looks and product type.')
-    parser.add_argument('--skip-cross-pol', action='store_true',
-                        help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -426,6 +439,7 @@ def main():
                        include_dem=args.include_dem,
                        include_inc_map=args.include_inc_map,
                        include_scattering_area=args.include_scattering_area,
+                       include_rgb=args.include_rgb,
                        dem=args.dem,
                        bbox=args.bbox,
                        looks=args.looks,
