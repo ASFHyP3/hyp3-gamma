@@ -7,6 +7,7 @@ from hyp3lib.scene import get_download_url
 from osgeo import gdal
 
 log = logging.getLogger(__name__)
+gdal.UseExceptions()
 
 
 def get_granule(granule):
