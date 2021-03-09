@@ -28,12 +28,14 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
+from osgeo import gdal, gdalconst
 
 import hyp3_gamma
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 log = logging.getLogger()
+gdal.UseExceptions()
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -339,7 +341,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     log.info('Collecting output GeoTIFFs')
     run(f'data2geotiff dem_seg.par corrected.ls_map 5 {product_name}/{product_name}_ls_map.tif')
     if include_dem:
-        run(f'data2geotiff dem_seg.par dem_seg 2 {product_name}/{product_name}_dem.tif')
+        with NamedTemporaryFile() as temp_file:
+            run(f'data2geotiff dem_seg.par dem_seg 2 {temp_file.name}')
+            gdal.Translate(f'{product_name}/{product_name}_dem.tif', temp_file.name, outputType=gdalconst.GDT_Int16)
     if include_inc_map:
         run(f'data2geotiff dem_seg.par corrected.inc_map 2 {product_name}/{product_name}_inc_map.tif')
     if include_scattering_area:
