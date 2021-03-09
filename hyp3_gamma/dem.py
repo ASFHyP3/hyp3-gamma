@@ -1,10 +1,10 @@
 from tempfile import NamedTemporaryFile
 from typing import List, Tuple
 
-from lxml import etree
-from osgeo import gdal, ogr
 from hyp3lib import DemError
 from hyp3lib.execute import execute
+from lxml import etree
+from osgeo import gdal, ogr
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.us-west-2.amazonaws.com/v2/cop30.geojson'
 
