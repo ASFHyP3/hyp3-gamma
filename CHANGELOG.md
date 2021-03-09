@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.5...v4.1.0)
+
+### Added
+* Ability to include an RGB decomposition GeoTIFF in RTC output
+  * an `--include-rgb` option has been added to `rtc_sentinel.py`
+  * an `include_rgb` keyword argument has been added to `hyp3_gamma.rtc.rtc_sentinel.rtc_sentinel_gamma`
+
+### Changed
+* Upgraded to hyp3lib [v1.6.6](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#166) from v1.6.5
+
 ## [4.0.5](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.4...v4.0.5)
 
 ### Changed
