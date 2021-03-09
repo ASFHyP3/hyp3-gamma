@@ -283,12 +283,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     log.info('Preparing DEM')
     dem_type = 'UNKNOWN'
-    dem_image = 'dem.image'
-    dem_par = 'dem.par'
-    with NamedTemporaryFile() as dem_tif:
-        prepare_dem(dem_tif.name, f'{safe_dir}/manifest.safe')
-        run(f'dem_import {dem_tif.name} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
-            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
+    dem_image, dem_par = prepare_dem('dem.image', 'dem.par', f'{safe_dir}/manifest.safe', pixel_size=resolution)
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)
