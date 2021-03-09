@@ -4,8 +4,10 @@ from zipfile import ZipFile
 
 from hyp3lib.fetch import download_file
 from hyp3lib.scene import get_download_url
+from osgeo import gdal
 
 log = logging.getLogger(__name__)
+gdal.UseExceptions()
 
 
 def get_granule(granule):
@@ -29,3 +31,13 @@ def earlier_granule_first(g1, g2):
     if g1[17:32] <= g2[17:32]:
         return g1, g2
     return g2, g1
+
+
+def set_pixel_as_point(tif_file):
+    ds = gdal.Open(tif_file, gdal.GA_Update)
+    transform = list(ds.GetGeoTransform())
+    transform[0] += transform[1] / 2
+    transform[3] += transform[5] / 2
+    ds.SetGeoTransform(transform)
+    ds.SetMetadataItem('AREA_OR_POINT', 'Point')
+    ds = None
