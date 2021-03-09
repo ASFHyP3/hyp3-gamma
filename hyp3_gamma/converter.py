@@ -161,7 +161,7 @@ def read_log_file(infile):
         pol = 'VV'
     elif pol == 'HV':
         pol = 'HH'
-    file_name = infile.replace('_{}.tif'.format(pol), '.log')
+    file_name = infile.replace('_{}_cut.tif'.format(pol), '.log')
     if not os.path.exists(file_name):
         raise Exception('ERROR: Unable to find file {}'.format(file_name))
     logging.debug('Reading file {}'.format(file_name))
@@ -327,7 +327,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
             'long_name': 'normalized_radar_basckscatter',
             'radiometry': scene['radiometry'],
             'scaling': scene['scale'],
-            'standard_name': 'SAR',
             'polarization': get_pol(infile),
             'radiation_frequency': 3.0 / 0.555,
             'radiation_frequency_unit': 'GHz',
@@ -356,17 +355,15 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     #       AttributeError: NetCDF: String match to name in use
     #
 
-    data_array.x.attrs = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate', 'long_name': 'Easting'}
-    data_array.y.attrs = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate', 'long_name': 'Northing'}
+    data_array.x.attrs = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate', 'long_name': 'Easting', 'x_spacing': pix_x}
+    data_array.y.attrs = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate', 'long_name': 'Northing', 'y_spacing': pix_y}
     data_array.attrs = {'title': 'SAR RTC',
                         'institution': 'Alaska Satellite Facility (ASF)',
                         'mission': f'Sentinel-1{granule[2]}',
-                        'crs_wkt': crs_wkt,
-                        'x_spacing': pix_x,
-                        'y_spacing': pix_y,
                         'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
+#                        'crs_wkt': crs_wkt,
                         'Conventions': 'CF-1.6',
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
@@ -418,7 +415,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                     'long_name': 'normalize_radar_backscatter',
                     'radiometry': scene['radiometry'],
                     'scaling': scene['scale'],
-                    'standard_name': 'SAR',
                     'polarization': get_pol(infile),
                     'radiation_frequency': 3.0 / 0.555,
                     'radiation_frequency_unit': 'GHz',
@@ -443,6 +439,8 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     # Fix the CRS for this dataset
     dsp.variables[crs_name].attrs['spatial_ref'] = crs_wkt
     dsp.variables[crs_name].attrs['crs_wkt'] = crs_wkt
+    dsp.variables[crs_name].attrs['grid_mapping_name'] = crs_name 
+
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
     #    del data_array.variables['backscatter'].attrs['coordinates']

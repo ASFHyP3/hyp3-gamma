@@ -9,7 +9,7 @@ import numpy as np
 import xarray as xr
 from converter import gamma_to_netcdf
 from converter import parse_asf_rtc_name
-
+from hyp3lib.cutGeotiffsByLine import cutGeotiffsByLine
 
 def create_output_file_name(infiles, start_time, last_time, prod_type, pixel_spacing):
     prod = prod_type[0:2]
@@ -25,47 +25,71 @@ def create_output_file_name(infiles, start_time, last_time, prod_type, pixel_spa
     return(name)
 
 
-def prepare_time_dimension(time_0_str, all_time, projected_data_set_1):
+def prepare_time_dimension(time_0_str, all_time, ds1):
 
-    # calculate milliseconds since first image in stack
-    time_0 = np.datetime64(time_0_str, 'ms').astype(np.float)
+    # calculate seconds since first image in stack
+    time_0 = np.datetime64(time_0_str, 's').astype(np.float)
 
     # Set the times relative to the first frame
     new_times = []
     for i in range(0, len(all_time)):
-        milliseconds_since = (np.datetime64(all_time[i], 'ms').astype(np.float)-time_0)
-        new_times.append(milliseconds_since)
+        seconds_since = (np.datetime64(all_time[i], 's').astype(np.float)-time_0)
+        new_times.append(seconds_since)
 
-    projected_data_set_1 = projected_data_set_1.assign_coords(time=new_times)
-    projected_data_set_1.time.attrs['axis'] = "T"
-    projected_data_set_1.time.attrs['units'] = "milliseconds since {}".format(time_0_str)
-    projected_data_set_1.time.attrs['calendar'] = "proleptic_gregorian"
-    projected_data_set_1.time.attrs['long_name'] = "Time"
+    ds1 = ds1.assign_coords(time=new_times)
+    ds1.time.attrs['axis'] = "T"
+    ds1.time.attrs['units'] = "seconds since {}".format(time_0_str)
+    ds1.time.attrs['calendar'] = "gregorian"
+    ds1.time.attrs['long_name'] = 'time'
+    ds1.time.attrs['standard_name'] = 'time'
+    return ds1
+
+
+def func(x):
+    return(x)
 
 
 def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_vars):
     infiles.sort
-    projected_data_set_1 = gamma_to_netcdf(product_type, infiles[0], output_scale, pixel_spacing, drop_vars)
+  
+    cut_files = cutGeotiffsByLine(infiles)
+   
+    ds1 = gamma_to_netcdf(product_type, cut_files[0], output_scale, pixel_spacing, drop_vars)
+
+    # Get rid of spurious 'transverse_mercator' coordinate
+    ds1 = ds1.reset_coords()
+
     all_time = []
-    print(f"projected_data_set_1['acquisition_start_time'] {projected_data_set_1['acquisition_start_time']}")
-    start = f'{projected_data_set_1.acquisition_start_time.values}'
+    print(f"ds1['acquisition_start_time'] {ds1['acquisition_start_time']}")
+    start = f'{ds1.acquisition_start_time.values}'
     start_time = datetime(int(start[0:4]), int(start[4:6]), int(start[6:8]),
                           int(start[9:11]), int(start[11:13]), int(start[13:15]), 0)
     time_0_str = start_time
     all_time.append(start_time)
     print(f'all_time = {all_time}')
-    for cnt in np.arange(1, len(infiles)):
-        projected_data_set_2 = gamma_to_netcdf(product_type, infiles[cnt], output_scale, pixel_spacing, drop_vars)
-        last_time = f'{projected_data_set_2.acquisition_start_time.values}'
+    for cnt in np.arange(1, len(cut_files)):
+        ds2 = gamma_to_netcdf(product_type, cut_files[cnt], output_scale, pixel_spacing, drop_vars)
+
+        # Get rid of spurious 'transverse_mercator' coordinate
+        ds2 = ds2.reset_coords()
+
+        last_time = f'{ds2.acquisition_start_time.values}'
         frame_time = datetime(int(last_time[0:4]), int(last_time[4:6]), int(last_time[6:8]),
                               int(last_time[9:11]), int(last_time[11:13]), int(last_time[13:15]), 0)
         all_time.append(frame_time)
         print(f'all_time = {all_time}')
-        projected_data_set_1 = xr.concat([projected_data_set_1, projected_data_set_2], dim='time')
+        ds1 = xr.concat([ds1, ds2], dim='time')
 
-    prepare_time_dimension(time_0_str, all_time, projected_data_set_1)
-    outfile = create_output_file_name(infiles, start, last_time, product_type, pixel_spacing)
-    projected_data_set_1.to_netcdf(outfile, unlimited_dims=['time'])
+    ds1 = prepare_time_dimension(time_0_str, all_time, ds1)
+
+    # get rid of time dimension for projection
+    ds1['transverse_mercator'] = ds1.transverse_mercator.reduce(func, keep_attrs=True)
+    ds1['transverse_mercator'] = ds1.transverse_mercator[0]
+    ds1['transverse_mercator'].attrs['standard_name'] = 'transverse_mercator'
+
+    # write out the file 
+    outfile = create_output_file_name(cut_files, start, last_time, product_type, pixel_spacing)
+    ds1.to_netcdf(outfile, unlimited_dims=['time'])
 
     logging.info('Successful Completion!')
 
