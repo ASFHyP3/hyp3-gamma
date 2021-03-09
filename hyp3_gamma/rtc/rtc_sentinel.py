@@ -32,7 +32,6 @@ from hyp3_gamma.dem import prepare_dem
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
-
 log = logging.getLogger()
 gdal.UseExceptions()
 
