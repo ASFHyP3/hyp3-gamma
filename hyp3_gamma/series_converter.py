@@ -11,6 +11,7 @@ from converter import gamma_to_netcdf
 from converter import parse_asf_rtc_name
 from hyp3lib.cutGeotiffsByLine import cutGeotiffsByLine
 
+
 def create_output_file_name(infiles, start_time, last_time, prod_type, pixel_spacing):
     prod = prod_type[0:2]
     int_spacing = int(pixel_spacing)
@@ -51,14 +52,13 @@ def func(x):
 
 def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_vars):
     infiles.sort
-  
+ 
     cut_files = cutGeotiffsByLine(infiles)
-   
-    ds1 = gamma_to_netcdf(product_type, cut_files[0], output_scale, pixel_spacing, drop_vars)
+    ds1 = gamma_to_netcdf(product_type, cut_files[0], output_scale=output_scale,
+                          pixel_spacing=pixel_spacing, drop_vars=drop_vars, write_file=False)
 
     # Get rid of spurious 'transverse_mercator' coordinate
     ds1 = ds1.reset_coords()
-
     all_time = []
     print(f"ds1['acquisition_start_time'] {ds1['acquisition_start_time']}")
     start = f'{ds1.acquisition_start_time.values}'
@@ -68,7 +68,8 @@ def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_va
     all_time.append(start_time)
     print(f'all_time = {all_time}')
     for cnt in np.arange(1, len(cut_files)):
-        ds2 = gamma_to_netcdf(product_type, cut_files[cnt], output_scale, pixel_spacing, drop_vars)
+        ds2 = gamma_to_netcdf(product_type, cut_files[cnt], output_scale=output_scale, 
+                              pixel_spacing=pixel_spacing, drop_vars=drop_vars, write_file=False)
 
         # Get rid of spurious 'transverse_mercator' coordinate
         ds2 = ds2.reset_coords()

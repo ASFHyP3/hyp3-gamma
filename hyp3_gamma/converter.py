@@ -241,7 +241,7 @@ def do_resample(infile, res):
     return(resampled_file)
 
 
-def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, drop_vars=None):
+def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, drop_vars=None, write_file=True):
 
     scene = parse_asf_rtc_name(os.path.basename(infile))
 
@@ -321,7 +321,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
         'y': y_coords,
         'x': x_coords,
         f"normalized_radar_backscatter_{scene['polarization']}": (('y', 'x'), backscatter.filled(0.0), {
-            crs_name: crs_name,
             '_FillValue': no_data_value,
             'grid_mapping': crs_name,
             'long_name': 'normalized_radar_basckscatter',
@@ -355,22 +354,24 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     #       AttributeError: NetCDF: String match to name in use
     #
 
-    data_array.x.attrs = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate', 'long_name': 'Easting', 'x_spacing': pix_x}
-    data_array.y.attrs = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate', 'long_name': 'Northing', 'y_spacing': pix_y}
+    data_array.x.attrs = {'axis': 'X', 'units': 'm', 'standard_name': 'projection_x_coordinate',
+                          'long_name': 'Easting', 'x_spacing': pix_x}
+    data_array.y.attrs = {'axis': 'Y', 'units': 'm', 'standard_name': 'projection_y_coordinate',
+                          'long_name': 'Northing', 'y_spacing': pix_y}
     data_array.attrs = {'title': 'SAR RTC',
                         'institution': 'Alaska Satellite Facility (ASF)',
                         'mission': f'Sentinel-1{granule[2]}',
                         'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
-#                        'crs_wkt': crs_wkt,
+    #                   'crs_wkt': crs_wkt,
                         'Conventions': 'CF-1.6',
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
 
     # Add in the other layers of data
     variable_targets = [scene['cross_polarization'], 'layover_shadow_mask',
-                              'incidence_angle', 'digital_elevation_model']
+                        'incidence_angle', 'digital_elevation_model']
 
     if drop_vars:
         for name in drop_vars:
@@ -439,15 +440,16 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
     # Fix the CRS for this dataset
     dsp.variables[crs_name].attrs['spatial_ref'] = crs_wkt
     dsp.variables[crs_name].attrs['crs_wkt'] = crs_wkt
-    dsp.variables[crs_name].attrs['grid_mapping_name'] = crs_name 
-
+    dsp.variables[crs_name].attrs['grid_mapping_name'] = crs_name
 
     # FIXME: Want to delete the backscatter coordinates, but not sure how?
-    #    del data_array.variables['backscatter'].attrs['coordinates']
-    outfile = os.path.basename(infile.replace('.tif', '.nc'))
-    logging.info('Writing file {}'.format(outfile))
-#    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
-    dsp.to_netcdf(outfile)
+    #   del data_array.variables['backscatter'].attrs['coordinates']
+    #
+    if write_file:
+        outfile = os.path.basename(infile.replace('.tif', '.nc'))
+        logging.info('Writing file {}'.format(outfile))
+    #    dsp.to_netcdf(outfile, encoding={ 'x': {'_FillValue': None}, 'y': {'_FillValue': None}, })
+        dsp.to_netcdf(outfile)
 
     return(dsp)
 
