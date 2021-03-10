@@ -52,7 +52,7 @@ def func(x):
 
 def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_vars):
     infiles.sort
- 
+
     cut_files = cutGeotiffsByLine(infiles)
     ds1 = gamma_to_netcdf(product_type, cut_files[0], output_scale=output_scale,
                           pixel_spacing=pixel_spacing, drop_vars=drop_vars, write_file=False)
@@ -68,7 +68,7 @@ def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_va
     all_time.append(start_time)
     print(f'all_time = {all_time}')
     for cnt in np.arange(1, len(cut_files)):
-        ds2 = gamma_to_netcdf(product_type, cut_files[cnt], output_scale=output_scale, 
+        ds2 = gamma_to_netcdf(product_type, cut_files[cnt], output_scale=output_scale,
                               pixel_spacing=pixel_spacing, drop_vars=drop_vars, write_file=False)
 
         # Get rid of spurious 'transverse_mercator' coordinate
@@ -88,7 +88,7 @@ def series_to_netcdf(product_type, infiles, output_scale, pixel_spacing, drop_va
     ds1['transverse_mercator'] = ds1.transverse_mercator[0]
     ds1['transverse_mercator'].attrs['standard_name'] = 'transverse_mercator'
 
-    # write out the file 
+    # write out the file
     outfile = create_output_file_name(cut_files, start, last_time, product_type, pixel_spacing)
     ds1.to_netcdf(outfile, unlimited_dims=['time'])
 

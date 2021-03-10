@@ -364,7 +364,6 @@ def gamma_to_netcdf(prod_type, infile, output_scale=None, pixel_spacing=None, dr
                         'source': f"ASF DAAC HyP3 {datetime.now().strftime('%Y')} using hyp3_gamma "
                         f'v{hyp3_ver} running GAMMA release {gamma_ver}. '
                         f'Contains modified Copernicus Sentinel data {granule[17:21]}, processed by ESA',
-    #                   'crs_wkt': crs_wkt,
                         'Conventions': 'CF-1.6',
                         'references': 'asf.alaska.edu',
                         'comment': 'This is an early prototype.'}
