@@ -282,7 +282,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
         par_s1_slc_single(granule, pol, orbit_file)
         orbit_files.append(orbit_file)
 
-
     #  Fetch the DEM file
     log.info("Getting a DEM file")
     dem, dem_source = get_dem_file_gamma(reference_file, alooks)
