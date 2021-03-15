@@ -277,10 +277,10 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
             log.warning(f'Proceeding using original predicted orbit data included with {granule}')
             orbit_file = None
 
+        orbit_files.append(orbit_file)
         if orbit_file is not None:
+            # par_s1_slc_single requires abs paths
             orbit_file = os.path.abspath(orbit_file)
-            orbit_files.append(orbit_file)
-
         par_s1_slc_single(granule, pol, orbit_file)
 
     #  Fetch the DEM file
