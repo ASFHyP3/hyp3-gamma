@@ -10,7 +10,7 @@ import sys
 from datetime import datetime
 from secrets import token_hex
 
-from hyp3lib import GranuleError
+from hyp3lib import GranuleError, OrbitDownloadError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
@@ -270,8 +270,16 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     log.info("Starting par_S1_SLC")
     orbit_files = []
     for granule in (reference_file, secondary_file):
-        orbit_file, _ = downloadSentinelOrbitFile(granule)
-        par_s1_slc_single(granule, pol, os.path.abspath(orbit_file))
+        try:
+            orbit_file, _ = downloadSentinelOrbitFile(granule)
+        except OrbitDownloadError as e:
+            log.warning(e)
+            log.warning(f'Proceeding using original predicted orbit data included with {granule}')
+            orbit_file = None
+
+        if orbit_file is not None:
+            orbit_file = os.path.abspath(orbit_file)
+        par_s1_slc_single(granule, pol, orbit_file)
         orbit_files.append(orbit_file)
 
     #  Fetch the DEM file
