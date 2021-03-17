@@ -9,8 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ##  [4.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.0...v4.1.1)
 
 ### Changed
-
 * `ifm_sentinel.py` will now proceed with processing when no Restituted or Precision orbit file is found
+* Upgraded to hyp3lib [v1.6.7](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#167) from v1.6.6
 
 ## [4.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.0.5...v4.1.0)
 
