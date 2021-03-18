@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+##  [4.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.1...v4.1.2)
+
+### Changed
+* Reverted change that allows `ifm_sentinel.py` to proceed with processing when no Restituted or 
+  Precision orbit file is found. Restituted or Precision orbit files are required.
+
 ##  [4.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.0...v4.1.1)
 
 ### Changed
