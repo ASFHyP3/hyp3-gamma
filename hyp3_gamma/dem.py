@@ -90,21 +90,20 @@ class GDALConfigManager:
     def __init__(self, **kwargs):
         """
         Args:
-            **kwargs: GDAL Config `option=value` keyword arguments
+            **options: GDAL Config `option=value` keyword arguments.
         """
-        self.kwargs = kwargs.copy()
-        self.context = {}
+        self.options = kwargs.copy()
+        self._previous_options = {}
 
     def __enter__(self):
-        for key in self.kwargs:
-            self.context[key] = gdal.GetConfigOption(key)
+        for key in self.options:
+            self._previous_options[key] = gdal.GetConfigOption(key)
 
-        for key, value in self.kwargs.items():
+        for key, value in self.options.items():
             gdal.SetConfigOption(key, value)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for key in self.kwargs:
-            value = self.context.pop(key)
+        for key, value in self._previous_options.items():
             gdal.SetConfigOption(key, value)
 
 
