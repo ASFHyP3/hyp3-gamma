@@ -17,6 +17,8 @@ def test_gdal_config_manager():
         assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
         assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
         assert gdal.GetConfigOption('OPTION3') == 'VALUE3'
+        assert gdal.GetConfigOption('OPTION4') is None
+
         gdal.SetConfigOption('OPTION4', 'VALUE4')
 
     assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
