@@ -15,7 +15,8 @@ ogr.UseExceptions()
 
 
 def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
-    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/foo.geojson', kml_file],
+    # TODO suppress warnings about Date parsing?
+    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout', kml_file],
                    stdout=PIPE, check=True)
     geojson = json.loads(response.stdout)
     geometry = json.dumps(geojson['features'][0]['geometry'])
@@ -30,7 +31,7 @@ def intersects_dem(geometry: ogr.Geometry) -> bool:
         if feature.GetGeometryRef().Intersects(geometry):
             intersects = True
             break
-    ds = None
+    del ds
     return intersects
 
 
@@ -41,8 +42,12 @@ def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
     for feature in layer:
         if feature.GetGeometryRef().Intersects(geometry):
             file_paths.append(feature.GetField('file_path'))
-    ds = None
+    del ds
     return file_paths
+
+
+def crosses_antimeridian(geometry: ogr.Geometry) -> bool:
+    return geometry.GetGeometryCount() > 1
 
 
 def utm_from_lon_lat(lon: float, lat: float) -> int:
@@ -51,11 +56,7 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
     return hemisphere + zone
 
 
-def crosses_antimeridian(geometry: ogr.Geometry) -> bool:
-    return geometry.GetGeometryCount() > 1
-
-
-def utm_from_geometry(geometry):
+def utm_from_geometry(geometry: ogr.Geometry) -> int:
     centroid = geometry.Centroid()
     if crosses_antimeridian(geometry):
         x = 180  # TODO address antimeridian
@@ -68,7 +69,8 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[st
     shifted_file_paths = []
     for file_path in dem_file_paths:
         if '_W' in file_path:
-            shifted_file_path = f'{directory}/{path.basename(file_path)}'
+            shifted_file_path = f'{directory}/{path.basename(file_path)}'  # TODO .vrt extension instead of .tif?
+            # TODO use geoTransform instead of cornerCoordinates for higher precision?
             corners = gdal.Info(file_path, format='json')['cornerCoordinates']
             output_bounds = [
                 corners['upperLeft'][0] + 360,
@@ -76,8 +78,7 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[st
                 corners['lowerRight'][0] + 360,
                 corners['lowerRight'][1]
             ]
-            gdal.Translate(shifted_file_path, file_path, format='VRT',
-                           outputBounds=output_bounds)
+            gdal.Translate(shifted_file_path, file_path, format='VRT', outputBounds=output_bounds)
             shifted_file_paths.append(shifted_file_path)
         else:
             shifted_file_paths.append(file_path)
@@ -93,15 +94,15 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
 
     dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
     with TemporaryDirectory() as temp_dir:
-        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')
+        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')  # TODO use config context manager
 
         if crosses_antimeridian(geometry):
             dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
 
-        dem_vrt = 'dem.vrt'
+        dem_vrt = 'dem.vrt'  # TODO use temp_dir for intermediate files
         gdal.BuildVRT(dem_vrt, dem_file_paths)
 
-        dem_tif = 'dem.tif'
+        dem_tif = 'dem.tif'  # TODO use temp_dir for intermediate files
         pixel_size = 30.0
         gdal.Warp(dem_tif, dem_vrt, dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                   targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
