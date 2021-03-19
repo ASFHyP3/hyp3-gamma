@@ -1,9 +1,11 @@
-from tempfile import NamedTemporaryFile
+import json
+from os import path
+from subprocess import PIPE, run
+from tempfile import TemporaryDirectory
 from typing import List, Tuple
 
 from hyp3lib import DemError
 from hyp3lib.execute import execute
-from lxml import etree
 from osgeo import gdal, ogr
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.us-west-2.amazonaws.com/v2/cop30.geojson'
@@ -12,34 +14,32 @@ gdal.UseExceptions()
 ogr.UseExceptions()
 
 
-def get_polygon_from_manifest(manifest_file: str) -> ogr.Geometry:
-    root = etree.parse(manifest_file)
-    coordinates_string = root.find('//gml:coordinates', namespaces={'gml': 'http://www.opengis.net/gml'}).text
-    points = [point.split(',') for point in coordinates_string.split(' ')]
-    points.append(points[0])
-    wkt = ','.join([f'{p[1]} {p[0]}' for p in points])
-    wkt = f'POLYGON(({wkt}))'
-    return ogr.CreateGeometryFromWkt(wkt)
+def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
+    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/foo.geojson', kml_file],
+                   stdout=PIPE, check=True)
+    geojson = json.loads(response.stdout)
+    geometry = json.dumps(geojson['features'][0]['geometry'])
+    return ogr.CreateGeometryFromJson(geometry)
 
 
-def intersects_dem(polygon: ogr.Geometry) -> bool:
+def intersects_dem(geometry: ogr.Geometry) -> bool:
     intersects = False
     ds = ogr.Open(DEM_GEOJSON)
     layer = ds.GetLayer()
     for feature in layer:
-        if feature.GetGeometryRef().Intersects(polygon):
+        if feature.GetGeometryRef().Intersects(geometry):
             intersects = True
             break
     ds = None
     return intersects
 
 
-def get_dem_file_paths(polygon: ogr.Geometry) -> List[str]:
+def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
     file_paths = []
     ds = ogr.Open(DEM_GEOJSON)
     layer = ds.GetLayer()
     for feature in layer:
-        if feature.GetGeometryRef().Intersects(polygon):
+        if feature.GetGeometryRef().Intersects(geometry):
             file_paths.append(feature.GetField('file_path'))
     ds = None
     return file_paths
@@ -51,20 +51,64 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
     return hemisphere + zone
 
 
-def prepare_dem(dem_file: str, dem_par_file: str, manifest_file: str, pixel_size: float = 30.0) -> Tuple[str, str]:
-    polygon = get_polygon_from_manifest(manifest_file)
-    if not intersects_dem(polygon):
+def crosses_antimeridian(geometry: ogr.Geometry) -> bool:
+    return geometry.GetGeometryCount() > 1
+
+
+def utm_from_geometry(geometry):
+    centroid = geometry.Centroid()
+    if crosses_antimeridian(geometry):
+        x = 180  # TODO address antimeridian
+    else:
+        x = centroid.GetX()
+    return utm_from_lon_lat(x, centroid.GetY())
+
+
+def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[str]:
+    shifted_file_paths = []
+    for file_path in dem_file_paths:
+        if '_W' in file_path:
+            shifted_file_path = f'{directory}/{path.basename(file_path)}'
+            corners = gdal.Info(file_path, format='json')['cornerCoordinates']
+            output_bounds = [
+                corners['upperLeft'][0] + 360,
+                corners['upperLeft'][1],
+                corners['lowerRight'][0] + 360,
+                corners['lowerRight'][1]
+            ]
+            gdal.Translate(shifted_file_path, file_path, format='VRT',
+                           outputBounds=output_bounds)
+            shifted_file_paths.append(shifted_file_path)
+        else:
+            shifted_file_paths.append(file_path)
+    return shifted_file_paths
+
+
+def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, str]:
+    geometry = get_geometry_from_kml(kml_file)
+    if not intersects_dem(geometry):
         raise DemError('DEM does not cover this area')
 
-    centroid = polygon.Centroid()
-    epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
+    epsg_code = utm_from_geometry(geometry)
 
-    dem_file_paths = get_dem_file_paths(polygon.Buffer(0.15))
-    with NamedTemporaryFile() as vrt, NamedTemporaryFile() as dem_tif:
-        gdal.BuildVRT(vrt.name, dem_file_paths)
-        gdal.Warp(dem_tif.name, vrt.name, dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+    dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
+    with TemporaryDirectory() as temp_dir:
+        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')
+
+        if crosses_antimeridian(geometry):
+            dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
+
+        dem_vrt = 'dem.vrt'
+        gdal.BuildVRT(dem_vrt, dem_file_paths)
+
+        dem_tif = 'dem.tif'
+        pixel_size = 30.0
+        gdal.Warp(dem_tif, dem_vrt, dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                   targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-        execute(f'dem_import {dem_tif.name} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
-                f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
+
+        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', None)
+
+    execute(f'dem_import {dem_tif} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
 
     return dem_file, dem_par_file

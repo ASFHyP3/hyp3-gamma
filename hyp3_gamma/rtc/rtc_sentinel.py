@@ -282,7 +282,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     log.info('Preparing DEM')
     dem_type = 'UNKNOWN'
-    dem_image, dem_par = prepare_dem('dem.image', 'dem.par', f'{safe_dir}/manifest.safe', pixel_size=resolution)
+    kml_file = f'{safe_dir}/preview/map-overlay.kml'
+    dem_image, dem_par = prepare_dem('dem.image', 'dem.par', kml_file)
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)
