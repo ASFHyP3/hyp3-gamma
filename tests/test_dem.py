@@ -6,20 +6,20 @@ gdal.UseExceptions()
 
 
 def test_gdal_config_manager():
-    assert gdal.GetConfigOption('FOO') is None
-    assert gdal.GetConfigOption('HELLO') is None
-    assert gdal.GetConfigOption('FOREVER') is None
-    assert gdal.GetConfigOption('ANOTHER') is None
+    gdal.SetConfigOption('OPTION1', 'VALUE1')
 
-    gdal.SetConfigOption('FOREVER', 'TOGETHER')
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') is None
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') is None
 
-    with dem.GDALConfigManager(FOO='BAR', HELLO='WORLD'):
-        assert gdal.GetConfigOption('FOO') == 'BAR'
-        assert gdal.GetConfigOption('HELLO') == 'WORLD'
-        assert gdal.GetConfigOption('FOREVER') == 'TOGETHER'
-        gdal.SetConfigOption('ANOTHER', 'OPTION')
+    with dem.GDALConfigManager(OPTION2='VALUE2', OPTION3='VALUE3'):
+        assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+        assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
+        assert gdal.GetConfigOption('OPTION3') == 'VALUE3'
+        gdal.SetConfigOption('OPTION4', 'VALUE4')
 
-    assert gdal.GetConfigOption('FOO') is None
-    assert gdal.GetConfigOption('HELLO') is None
-    assert gdal.GetConfigOption('FOREVER') == 'TOGETHER'
-    assert gdal.GetConfigOption('ANOTHER') == 'OPTION'
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') is None
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') == 'VALUE4'
