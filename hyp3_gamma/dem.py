@@ -58,7 +58,13 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
 def utm_from_geometry(geometry: ogr.Geometry) -> int:
     centroid = geometry.Centroid()
     if crosses_antimeridian(geometry):
-        x = 180  # TODO address antimeridian
+        geojson = json.loads(geometry.ExportToJson())
+        for feature in geojson['coordinates']:
+            for point in feature[0]:
+                if point[0] < 0:
+                    point[0] += 360
+        shifted_geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+        x = shifted_geometry.Centroid().GetX()
     else:
         x = centroid.GetX()
     return utm_from_lon_lat(x, centroid.GetY())
