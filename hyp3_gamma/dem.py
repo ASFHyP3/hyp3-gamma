@@ -15,9 +15,8 @@ ogr.UseExceptions()
 
 
 def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
-    # TODO suppress warnings about Date parsing?
-    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout', kml_file],
-                   stdout=PIPE, check=True)
+    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '-mapfieldtype',
+                    'DateTime=String', '/vsistdout', kml_file], stdout=PIPE, check=True)
     geojson = json.loads(response.stdout)
     geometry = json.dumps(geojson['features'][0]['geometry'])
     return ogr.CreateGeometryFromJson(geometry)
