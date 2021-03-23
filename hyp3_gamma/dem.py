@@ -70,11 +70,11 @@ def utm_from_geometry(geometry: ogr.Geometry) -> int:
     return utm_from_lon_lat(x, centroid.GetY())
 
 
-def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[str]:
+def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[str]:
     shifted_file_paths = []
     for file_path in dem_file_paths:
         if '_W' in file_path:
-            shifted_file_path = str(Path(directory) / Path(file_path).with_suffix('.vrt').name)
+            shifted_file_path = str(directory / Path(file_path).with_suffix('.vrt').name)
             corners = gdal.Info(file_path, format='json')['cornerCoordinates']
             output_bounds = [
                 corners['upperLeft'][0] + 360,
@@ -119,20 +119,19 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
     epsg_code = utm_from_geometry(geometry)
 
     dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
-    with TemporaryDirectory() as temp_dir, GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
-
+    with Path(TemporaryDirectory().name) as temp_dir, GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
         if crosses_antimeridian(geometry):
             dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
 
-        dem_vrt = 'dem.vrt'  # TODO use temp_dir for intermediate files
-        gdal.BuildVRT(dem_vrt, dem_file_paths)
+        dem_vrt = temp_dir / 'dem.vrt'
+        gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
-        dem_tif = 'dem.tif'  # TODO use temp_dir for intermediate files
+        dem_tif = temp_dir / 'dem.tif'
         pixel_size = 30.0
-        gdal.Warp(dem_tif, dem_vrt, dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+        gdal.Warp(str(dem_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                   targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-    execute(f'dem_import {dem_tif} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
-            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
+        execute(f'dem_import {str(dem_tif)} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
+                f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
 
     return dem_file, dem_par_file
