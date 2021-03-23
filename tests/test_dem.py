@@ -124,3 +124,32 @@ def test_utm_from_lon_lat():
     assert dem.utm_from_lon_lat(182, 1) == 32601
     assert dem.utm_from_lon_lat(-182, 1) == 32660
     assert dem.utm_from_lon_lat(-360, -1) == 32731
+
+
+def test_get_centroid_antimeridian():
+    geojson = {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [[
+                [177.0, 50.0],
+                [177.0, 51.0],
+                [180.0, 51.0],
+                [180.0, 50.0],
+                [177.0, 50.0]
+            ]],
+            [[
+                [-180.0, 50.0],
+                [-180.0, 51.0],
+                [-179.0, 51.0],
+                [-179.0, 50.0],
+                [-180.0, 50.0],
+            ]]
+        ],
+    }
+    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+    assert geometry.Centroid().GetX() == 89.0
+    assert geometry.Centroid().GetY() == 50.5
+
+    centroid = dem.get_centroid_antimeridian(geometry)
+    assert centroid.GetX() == 179.0
+    assert centroid.GetY() == 50.5

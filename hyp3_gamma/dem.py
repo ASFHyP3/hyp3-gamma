@@ -55,19 +55,14 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
     return hemisphere + zone
 
 
-def utm_from_geometry(geometry: ogr.Geometry) -> int:
-    centroid = geometry.Centroid()
-    if crosses_antimeridian(geometry):
-        geojson = json.loads(geometry.ExportToJson())
-        for feature in geojson['coordinates']:
-            for point in feature[0]:
-                if point[0] < 0:
-                    point[0] += 360
-        shifted_geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-        x = shifted_geometry.Centroid().GetX()
-    else:
-        x = centroid.GetX()
-    return utm_from_lon_lat(x, centroid.GetY())
+def get_centroid_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
+    geojson = json.loads(geometry.ExportToJson())
+    for feature in geojson['coordinates']:
+        for point in feature[0]:
+            if point[0] < 0:
+                point[0] += 360
+    shifted_geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+    return shifted_geometry.Centroid()
 
 
 def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[str]:
@@ -112,26 +107,29 @@ class GDALConfigManager:
 
 
 def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, str]:
-    geometry = get_geometry_from_kml(kml_file)
-    if not intersects_dem(geometry):
-        raise DemError('DEM does not cover this area')
+    with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
+        geometry = get_geometry_from_kml(kml_file)
+        if not intersects_dem(geometry):
+            raise DemError('DEM does not cover this area')
 
-    epsg_code = utm_from_geometry(geometry)
+        with Path(TemporaryDirectory().name) as temp_dir:
+            centroid = geometry.Centroid()
+            dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
 
-    dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
-    with Path(TemporaryDirectory().name) as temp_dir, GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
-        if crosses_antimeridian(geometry):
-            dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
+            if geometry.GetGeometryName() == 'MULTIPOLYGON':
+                centroid = get_centroid_antimeridian(geometry)
+                dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
 
-        dem_vrt = temp_dir / 'dem.vrt'
-        gdal.BuildVRT(str(dem_vrt), dem_file_paths)
+            dem_vrt = temp_dir / 'dem.vrt'
+            gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
-        dem_tif = temp_dir / 'dem.tif'
-        pixel_size = 30.0
-        gdal.Warp(str(dem_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
-                  targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
+            dem_tif = temp_dir / 'dem.tif'
+            pixel_size = 30.0
+            epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
+            gdal.Warp(str(dem_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+                      targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-        execute(f'dem_import {str(dem_tif)} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
-                f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
+            execute(f'dem_import {str(dem_tif)} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
+                    f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
 
     return dem_file, dem_par_file
