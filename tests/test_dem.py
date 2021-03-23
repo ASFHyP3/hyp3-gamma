@@ -32,7 +32,6 @@ def test_gdal_config_manager():
 
 def test_get_geometry_from_kml(test_data_dir):
     kml = test_data_dir / 'alaska.kml'
-    geometry = dem.get_geometry_from_kml(kml)
     expected = {
         'type': 'Polygon',
         'coordinates': [[
@@ -43,10 +42,10 @@ def test_get_geometry_from_kml(test_data_dir):
             [-154.765991, 71.443138],
         ]],
     }
+    geometry = dem.get_geometry_from_kml(kml)
     assert json.loads(geometry.ExportToJson()) == expected
 
     kml = test_data_dir / 'antimeridian.kml'
-    geometry = dem.get_geometry_from_kml(kml)
     expected = {
         'type': 'MultiPolygon',
         'coordinates': [
@@ -66,6 +65,7 @@ def test_get_geometry_from_kml(test_data_dir):
             ]]
         ],
     }
+    geometry = dem.get_geometry_from_kml(kml)
     assert json.loads(geometry.ExportToJson()) == expected
 
 
@@ -88,6 +88,13 @@ def test_intersects_dem():
 def test_get_file_paths():
     geojson = {
         'type': 'Point',
+        'coordinates': [0, 0],
+    }
+    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+    assert dem.get_dem_file_paths(geometry) == []
+
+    geojson = {
+        'type': 'Point',
         'coordinates': [169, -45],
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
@@ -95,13 +102,6 @@ def test_get_file_paths():
         '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
         'Copernicus_DSM_COG_10_S46_00_E169_00_DEM/Copernicus_DSM_COG_10_S46_00_E169_00_DEM.tif'
     ]
-
-    geojson = {
-        'type': 'Point',
-        'coordinates': [0, 0],
-    }
-    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert dem.get_dem_file_paths(geometry) == []
 
     geojson = {
         'type': 'MultiPoint',
