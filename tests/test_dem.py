@@ -153,3 +153,22 @@ def test_get_centroid_antimeridian():
     centroid = dem.get_centroid_antimeridian(geometry)
     assert centroid.GetX() == 179.0
     assert centroid.GetY() == 50.5
+
+
+def test_shift_for_antimeridian(tmp_path):
+    file_paths = [
+        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        'Copernicus_DSM_COG_10_N51_00_W180_00_DEM/Copernicus_DSM_COG_10_N51_00_W180_00_DEM.tif',
+        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        'Copernicus_DSM_COG_10_N51_00_E179_00_DEM/Copernicus_DSM_COG_10_N51_00_E179_00_DEM.tif'
+    ]
+
+    with dem.GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
+        shifted_file_paths = dem.shift_for_antimeridian(file_paths, tmp_path)
+
+    assert shifted_file_paths[0] == str(tmp_path / 'Copernicus_DSM_COG_10_N51_00_W180_00_DEM.vrt')
+    assert shifted_file_paths[1] == file_paths[1]
+
+    info = gdal.Info(shifted_file_paths[0], format='json')
+    assert info['cornerCoordinates']['upperLeft'] == [179.9997917, 52.0001389]
+    assert info['cornerCoordinates']['lowerRight'] == [180.9997917, 51.0001389]
