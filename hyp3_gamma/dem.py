@@ -1,5 +1,5 @@
 import json
-from os import path
+from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import List, Tuple
@@ -69,8 +69,7 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[st
     shifted_file_paths = []
     for file_path in dem_file_paths:
         if '_W' in file_path:
-            shifted_file_path = f'{directory}/{path.basename(file_path)}'  # TODO .vrt extension instead of .tif?
-            # TODO use geoTransform instead of cornerCoordinates for higher precision?
+            shifted_file_path = str(Path(directory) / Path(file_path).with_suffix('.vrt').name)
             corners = gdal.Info(file_path, format='json')['cornerCoordinates']
             output_bounds = [
                 corners['upperLeft'][0] + 360,
