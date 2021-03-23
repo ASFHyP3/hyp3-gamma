@@ -2,10 +2,9 @@ import json
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
-from typing import Generator, List, Tuple
+from typing import Generator, List
 
 from hyp3lib import DemError
-from hyp3lib.execute import execute
 from osgeo import gdal, ogr
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.us-west-2.amazonaws.com/v2/cop30.geojson'
