@@ -84,6 +84,28 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: str) -> List[st
     return shifted_file_paths
 
 
+class GDALConfigManager:
+    """Context manager for setting GDAL config options temporarily"""
+    def __init__(self, **kwargs):
+        """
+        Args:
+            **options: GDAL Config `option=value` keyword arguments.
+        """
+        self.options = kwargs.copy()
+        self._previous_options = {}
+
+    def __enter__(self):
+        for key in self.options:
+            self._previous_options[key] = gdal.GetConfigOption(key)
+
+        for key, value in self.options.items():
+            gdal.SetConfigOption(key, value)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for key, value in self._previous_options.items():
+            gdal.SetConfigOption(key, value)
+
+
 def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, str]:
     geometry = get_geometry_from_kml(kml_file)
     if not intersects_dem(geometry):
@@ -92,8 +114,7 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
     epsg_code = utm_from_geometry(geometry)
 
     dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
-    with TemporaryDirectory() as temp_dir:
-        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', 'EMPTY_DIR')  # TODO use config context manager
+    with TemporaryDirectory() as temp_dir, GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
 
         if crosses_antimeridian(geometry):
             dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
@@ -105,8 +126,6 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
         pixel_size = 30.0
         gdal.Warp(dem_tif, dem_vrt, dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                   targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-
-        gdal.SetConfigOption('GDAL_DISABLE_READDIR_ON_OPEN', None)
 
     execute(f'dem_import {dem_tif} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
