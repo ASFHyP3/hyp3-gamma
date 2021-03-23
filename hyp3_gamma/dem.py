@@ -22,26 +22,25 @@ def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
     return ogr.CreateGeometryFromJson(geometry)
 
 
-def intersects_dem(geometry: ogr.Geometry) -> bool:
-    intersects = False
+def get_dem_features():
     ds = ogr.Open(DEM_GEOJSON)
     layer = ds.GetLayer()
     for feature in layer:
-        if feature.GetGeometryRef().Intersects(geometry):
-            intersects = True
-            break
+        yield feature
     del ds
-    return intersects
+
+
+def intersects_dem(geometry: ogr.Geometry) -> bool:
+    for feature in get_dem_features():
+        if feature.GetGeometryRef().Intersects(geometry):
+            return True
 
 
 def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
     file_paths = []
-    ds = ogr.Open(DEM_GEOJSON)
-    layer = ds.GetLayer()
-    for feature in layer:
+    for feature in get_dem_features():
         if feature.GetGeometryRef().Intersects(geometry):
             file_paths.append(feature.GetField('file_path'))
-    del ds
     return file_paths
 
 
@@ -55,7 +54,7 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
     return hemisphere + zone
 
 
-def get_centroid_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
+def get_centroid_crossing_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
     geojson = json.loads(geometry.ExportToJson())
     for feature in geojson['coordinates']:
         for point in feature[0]:
@@ -86,12 +85,12 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
 
 class GDALConfigManager:
     """Context manager for setting GDAL config options temporarily"""
-    def __init__(self, **kwargs):
+    def __init__(self, **options):
         """
         Args:
             **options: GDAL Config `option=value` keyword arguments.
         """
-        self.options = kwargs.copy()
+        self.options = options.copy()
         self._previous_options = {}
 
     def __enter__(self):
@@ -117,7 +116,7 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
             dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
 
             if geometry.GetGeometryName() == 'MULTIPOLYGON':
-                centroid = get_centroid_antimeridian(geometry)
+                centroid = get_centroid_crossing_antimeridian(geometry)
                 dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
 
             dem_vrt = temp_dir / 'dem.vrt'

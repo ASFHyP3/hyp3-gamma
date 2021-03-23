@@ -35,11 +35,11 @@ def test_get_geometry_from_kml(test_data_dir):
     expected = {
         'type': 'Polygon',
         'coordinates': [[
-            [-154.765991, 71.443138],
-            [- 147.69957, 71.992523],
-            [-146.76358, 70.338882],
-            [-153.28656, 69.820648],
-            [-154.765991, 71.443138],
+            [-154.0, 71.0],
+            [- 147.0, 71.0],
+            [-146.0, 70.0],
+            [-153.0, 69.0],
+            [-154.0, 71.0],
         ]],
     }
     geometry = dem.get_geometry_from_kml(kml)
@@ -50,18 +50,18 @@ def test_get_geometry_from_kml(test_data_dir):
         'type': 'MultiPolygon',
         'coordinates': [
             [[
-                [176.674484, 51.302433],
-                [177.037384, 52.755581],
-                [180.0, 52.43662881351332],
-                [180.0, 50.93483522676132],
-                [176.674484, 51.302433]
+                [176.0, 51.0],
+                [177.0, 52.0],
+                [180.0, 52.0],
+                [180.0, 50.2],
+                [176.0, 51.0],
             ]],
             [[
-                [-180.0, 50.93483522676132],
-                [-180.0, 52.43662881351332],
-                [-179.303116, 52.361603],
-                [-179.781296, 50.91066],
-                [-180.0, 50.93483522676132],
+                [-180.0, 50.2],
+                [-180.0, 52.0],
+                [-179.0, 52.0],
+                [-179.0, 50.0],
+                [-180.0, 50.2],
             ]]
         ],
     }
@@ -126,7 +126,7 @@ def test_utm_from_lon_lat():
     assert dem.utm_from_lon_lat(-360, -1) == 32731
 
 
-def test_get_centroid_antimeridian():
+def test_get_centroid_crossing_antimeridian():
     geojson = {
         'type': 'MultiPolygon',
         'coordinates': [
@@ -150,7 +150,7 @@ def test_get_centroid_antimeridian():
     assert geometry.Centroid().GetX() == 89.0
     assert geometry.Centroid().GetY() == 50.5
 
-    centroid = dem.get_centroid_antimeridian(geometry)
+    centroid = dem.get_centroid_crossing_antimeridian(geometry)
     assert centroid.GetX() == 179.0
     assert centroid.GetY() == 50.5
 
