@@ -100,21 +100,22 @@ class GDALConfigManager:
             gdal.SetConfigOption(key, value)
 
 
-def prepare_dem_geotiff(output_name: str, kml_file: str) -> str:
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
-        geometry = get_geometry_from_kml(kml_file)
         if not intersects_dem(geometry):
             raise DemError('DEM does not cover this area')
 
-        with Path(TemporaryDirectory().name) as temp_dir:
+        with TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+
             centroid = geometry.Centroid()
             dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
 
             if geometry.GetGeometryName() == 'MULTIPOLYGON':
                 centroid = get_centroid_crossing_antimeridian(geometry)
-                dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_dir)
+                dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
 
-            dem_vrt = temp_dir / 'dem.vrt'
+            dem_vrt = temp_path / 'dem.vrt'
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
