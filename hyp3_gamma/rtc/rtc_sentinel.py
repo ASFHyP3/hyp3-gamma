@@ -28,7 +28,7 @@ from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst
 
 import hyp3_gamma
-from hyp3_gamma.dem import prepare_dem
+from hyp3_gamma.dem import prepare_dem_geotiff
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
@@ -283,8 +283,13 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     # TODO support legacy dem options?
     log.info('Preparing DEM')
     dem_type = 'UNKNOWN'
+    dem_image = 'dem.image'
+    dem_par = 'dem.par'
     kml_file = f'{safe_dir}/preview/map-overlay.kml'
-    dem_image, dem_par = prepare_dem('dem.image', 'dem.par', kml_file)
+    with NamedTemporaryFile() as dem_tif:
+        prepare_dem_geotiff(dem_tif.name, kml_file)
+        run(f'dem_import {dem_tif.name} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)

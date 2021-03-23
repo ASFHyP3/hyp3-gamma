@@ -105,7 +105,7 @@ class GDALConfigManager:
             gdal.SetConfigOption(key, value)
 
 
-def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, str]:
+def prepare_dem_geotiff(dem_tif: str, kml_file: str) -> str:
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
         geometry = get_geometry_from_kml(kml_file)
         if not intersects_dem(geometry):
@@ -122,13 +122,9 @@ def prepare_dem(dem_file: str, dem_par_file: str, kml_file: str) -> Tuple[str, s
             dem_vrt = temp_dir / 'dem.vrt'
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
-            dem_tif = temp_dir / 'dem.tif'
             pixel_size = 30.0
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(str(dem_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+            gdal.Warp(dem_tif, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-            execute(f'dem_import {str(dem_tif)} {dem_file} {dem_par_file} - - $DIFF_HOME/scripts/egm2008-5.dem '
-                    f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
-
-    return dem_file, dem_par_file
+    return dem_tif
