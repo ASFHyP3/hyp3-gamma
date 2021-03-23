@@ -43,10 +43,6 @@ def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
     return file_paths
 
 
-def crosses_antimeridian(geometry: ogr.Geometry) -> bool:
-    return geometry.GetGeometryCount() > 1
-
-
 def utm_from_lon_lat(lon: float, lat: float) -> int:
     hemisphere = 32600 if lat >= 0 else 32700
     zone = int(lon // 6 + 30) % 60 + 1
@@ -104,7 +100,7 @@ class GDALConfigManager:
             gdal.SetConfigOption(key, value)
 
 
-def prepare_dem_geotiff(dem_tif: str, kml_file: str) -> str:
+def prepare_dem_geotiff(output_name: str, kml_file: str) -> str:
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
         geometry = get_geometry_from_kml(kml_file)
         if not intersects_dem(geometry):
@@ -121,9 +117,9 @@ def prepare_dem_geotiff(dem_tif: str, kml_file: str) -> str:
             dem_vrt = temp_dir / 'dem.vrt'
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
-            pixel_size = 30.0
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(dem_tif, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+            pixel_size = 30.0
+            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-    return dem_tif
+    return output_name
