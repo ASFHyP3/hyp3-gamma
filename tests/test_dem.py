@@ -155,6 +155,10 @@ def test_get_centroid_crossing_antimeridian():
     assert centroid.GetY() == 50.5
 
 
+def test_get_dem_features():
+    assert len(list(dem.get_dem_features())) == 26445
+
+
 def test_shift_for_antimeridian(tmp_path):
     file_paths = [
         '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'

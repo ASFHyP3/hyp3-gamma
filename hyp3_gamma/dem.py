@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
 from hyp3lib import DemError
 from hyp3lib.execute import execute
@@ -22,7 +22,7 @@ def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
     return ogr.CreateGeometryFromJson(geometry)
 
 
-def get_dem_features():
+def get_dem_features() -> Generator[ogr.Feature, None, None]:
     ds = ogr.Open(DEM_GEOJSON)
     layer = ds.GetLayer()
     for feature in layer:
