@@ -7,7 +7,7 @@ from typing import Generator, List
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
-DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.us-west-2.amazonaws.com/v2/cop30.geojson'
+DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
 
 gdal.UseExceptions()
 ogr.UseExceptions()

@@ -101,7 +101,7 @@ def test_get_file_paths():
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
     assert dem.get_dem_file_paths(geometry) == [
-        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_S46_00_E169_00_DEM/Copernicus_DSM_COG_10_S46_00_E169_00_DEM.tif'
     ]
 
@@ -111,9 +111,9 @@ def test_get_file_paths():
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
     assert dem.get_dem_file_paths(geometry) == [
-        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_S46_00_E169_00_DEM/Copernicus_DSM_COG_10_S46_00_E169_00_DEM.tif',
-        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_N73_00_W122_00_DEM/Copernicus_DSM_COG_10_N73_00_W122_00_DEM.tif',
     ]
 
@@ -163,9 +163,9 @@ def test_get_dem_features():
 
 def test_shift_for_antimeridian(tmp_path):
     file_paths = [
-        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_N51_00_W180_00_DEM/Copernicus_DSM_COG_10_N51_00_W180_00_DEM.tif',
-        '/vsicurl/https://copernicus-dem-30m.s3.eu-central-1.amazonaws.com/'
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_N51_00_E179_00_DEM/Copernicus_DSM_COG_10_N51_00_E179_00_DEM.tif'
     ]
 
