@@ -280,9 +280,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name)
 
-    # TODO support legacy dem options?
     log.info('Preparing DEM')
-    dem_type = 'UNKNOWN'
+    dem_type = 'COP30'
     dem_image = 'dem.image'
     dem_par = 'dem.par'
     geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
