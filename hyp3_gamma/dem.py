@@ -14,11 +14,11 @@ ogr.UseExceptions()
 
 
 def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
-    response = run(['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '-mapfieldtype',
-                    'DateTime=String', '/vsistdout', kml_file], stdout=PIPE, check=True)
-    geojson = json.loads(response.stdout)
-    geometry = json.dumps(geojson['features'][0]['geometry'])
-    return ogr.CreateGeometryFromJson(geometry)
+    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '-mapfieldtype', 'DateTime=String',
+           '/vsistdout', kml_file]
+    geojson_str = run(cmd, stdout=PIPE, check=True).stdout
+    geometry = json.loads(geojson_str)['features'][0]['geometry']
+    return ogr.CreateGeometryFromJson(json.dumps(geometry))
 
 
 def get_dem_features() -> Generator[ogr.Feature, None, None]:
