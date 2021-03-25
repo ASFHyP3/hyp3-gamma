@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+* `hyp3_gamma.dem` module for preparing GeoTIFF mosaics of the
+  [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
+
+### Changed
+* `rtc_sentinel.py` now leverages the [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
+  for RTC processing.
+* Upgraded to hyp3-metadata [v0.3.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#030)
+  from v0.2.0
+
+### Removed
+* Options to provide a custom DEM GeoTIFF or DEM bounding box have been removed:
+  * `dem` and `bbox` parameters of `rtc_sentinel.rtc_sentinel_gamma()`
+  * `--dem` and `--bbox` parameters of `rtc_sentinel.py`
+
 ##  [4.1.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.1...v4.1.2)
 
 ### Changed

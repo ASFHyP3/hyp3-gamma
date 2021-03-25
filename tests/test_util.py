@@ -45,11 +45,13 @@ def test_unzip_granule_and_remove(tmp_path, test_data_dir):
 def test_set_pixel_as_point(tmp_path, test_data_dir):
     shutil.copy(test_data_dir / 'test_geotiff.tif', tmp_path)
     geotiff = str(tmp_path / 'test_geotiff.tif')
-    info = gdal.Info(geotiff, format='json')
-    assert info['geoTransform'] == [440720.0, 60.0, 0.0, 3751320.0, 0.0, -60.0]
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Area'
+    area_info = gdal.Info(geotiff, format='json')
+    assert area_info['metadata']['']['AREA_OR_POINT'] == 'Area'
 
     util.set_pixel_as_point(geotiff)
-    info = gdal.Info(geotiff, format='json')
-    assert info['geoTransform'] == [440750.0, 60.0, 0.0, 3751290.0, 0.0, -60.0]
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Point'
+    point_info = gdal.Info(geotiff, format='json')
+    assert point_info['metadata']['']['AREA_OR_POINT'] == 'Point'
+
+    del area_info['metadata']['']['AREA_OR_POINT']
+    del point_info['metadata']['']['AREA_OR_POINT']
+    assert area_info == point_info
