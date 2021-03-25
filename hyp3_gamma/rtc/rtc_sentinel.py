@@ -231,8 +231,7 @@ def append_additional_log_files(log_file, pattern):
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
                        speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
                        include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
-                       dem: str = None, bbox: List[float] = None, looks: int = None,
-                       skip_cross_pol: bool = False) -> str:
+                       looks: int = None, skip_cross_pol: bool = False) -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
@@ -247,10 +246,6 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         include_scattering_area: Include the local scattering area GeoTIFF in the output package.
         include_rgb: Include an RGB decomposition GeoTIFF in the output package.  This setting is ignored when
             processing a single-polarization product or when `skip_cross_pol` is selected.
-        dem: Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection. A DEM will be selected
-            automatically if not provided.
-        bbox: Subset the output images to the given lat/lon bounding box: `[lon_min, lat_min, lon_max, lat_max]`.
-            `bbox` is ignored if `dem` is provided.
         looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
             are selected automatically based on azimuth looks and product type.
         skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
@@ -405,12 +400,6 @@ def main():
     group.add_argument('--skip-cross-pol', action='store_true',
                        help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
 
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
-                                     ' A DEM will be selected automatically if not provided.')
-    group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                       help='Subset the output images to the given lat/lon bounding box.')
-
     parser.add_argument('--looks', type=int,
                         help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
                              'and filter looks are selected automatically based on azimuth looks and product type.')
@@ -436,8 +425,6 @@ def main():
                        include_inc_map=args.include_inc_map,
                        include_scattering_area=args.include_scattering_area,
                        include_rgb=args.include_rgb,
-                       dem=args.dem,
-                       bbox=args.bbox,
                        looks=args.looks,
                        skip_cross_pol=args.skip_cross_pol)
 
