@@ -41,7 +41,7 @@ def main():
         processing_date=args.processing_date,
         looks=args.looks,
         plugin_name='hyp3_gamma',
-        plugin_version='0.0.0',
+        plugin_version='X.Y.Z',
         processor_name='GAMMA',
         processor_version='YYYYMMDD',
     )
