@@ -59,7 +59,7 @@ The files generated in this process include:
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 5. A local scattering area map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 6. A layover-shadow mask
-7. A false-color RGB decomposition (omitted in standard products; you can choose to include this layer when custom ordering imagery)
+7. A false-color RGB decomposition GeoTIFF (omitted in standard products; you can choose to include this layer when custom ordering imagery)
 8. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
 9. A shapefile indicating the data and raster extents
 10. Log file
@@ -82,7 +82,7 @@ PNG files are generated for quick visualization of the backscatter data. Each pn
 
 All products will include a grayscale png browse image. It is a rendering of the primary polarization data, scaled to an ASF standard to display nicely in grayscale. The image is designated by a simple .png extension.
 
-For dual-pol products where an RGB decomposition (#7) is requested, a false-color png browse image is also generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
+For dual-pol products, a false-color png browse image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color. These files are additionally tagged with _rgb, but otherwise have the same tags/extensions as the grayscale browse images.
 
 KMZ files are generated for use in Google Earth and other compatible applications. All products will include a grayscale kmz image, and dual-pol products will also include a color browse kmz image.
 
@@ -150,9 +150,11 @@ _There are 17 possible different pixel values, indicating the layover, shadow, a
 -------------
 ## 7. False-color RGB decomposition
 
-The RGB decomposition is omitted with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _rgb.tif
+The RGB decomposition GeoTIFF is not included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _rgb.tif, and has the same pixel spacing as the RTC products.
 
-For dual-pol products, a false-color image is generated. It is a rendering of the primary and cross-polarization data, scaled to an ASF standard to display nicely in color.
+If you do not require a full-resolution decomposition raster, you can omit this product and simply refer to the lower-resolution color browse image included in the product package.
+
+This option is only available for dual-pol products, as it combines the co- and cross-polarized RTC values to generate a false-color image. In general, blue indicates areas with low backscatter in both co- and cross-polarizations (calm water, dry sand, frozen ground), green indicates high cross-pol values (vegetation or other volume scatterers), and red indicates areas with low cross-pol but relatively high co-pol values (urban areas). A full description of the approach used for generating this particular decomposition is available [here](https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md).
 
 -------------
 ## 8. ArcGIS-compatible xml metadata files
