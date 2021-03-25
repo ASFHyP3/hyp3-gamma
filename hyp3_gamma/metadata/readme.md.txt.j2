@@ -59,9 +59,10 @@ The files generated in this process include:
 4. An incidence angle map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 5. A local scattering area map (included in standard products; you can choose to omit this layer when custom ordering imagery)
 6. A layover-shadow mask
-7. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
-8. A shapefile indicating the data and raster extents
-9. Log file
+7. A false-color RGB decomposition GeoTIFF (omitted in standard products; you can choose to include this layer when custom ordering imagery)
+8. An ArcGIS xml metadata file for each raster layer, displayed in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro)
+9. A shapefile indicating the RTC data extent
+10. Log file
 
 See below for detailed descriptions of each of the products.
 
@@ -147,7 +148,16 @@ _There are 17 possible different pixel values, indicating the layover, shadow, a
 31 Affected by shadow and layover; look angle < slope and opposite slope angle
 
 -------------
-## 7. ArcGIS-compatible xml metadata files
+## 7. False-color RGB decomposition
+
+The RGB decomposition GeoTIFF is not included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _rgb.tif, and has the same pixel spacing as the RTC products.
+
+If you do not require a full-resolution decomposition raster, you can omit this product and simply refer to the lower-resolution color browse image included in the product package.
+
+This option is only available for dual-pol products, as it combines the co- and cross-polarized RTC values to generate a false-color image. In general, blue indicates areas with low backscatter in both co- and cross-polarizations (calm water, dry sand, frozen ground), green indicates high cross-pol values (vegetation or other volume scatterers), and red indicates areas with low cross-pol but relatively high co-pol values (urban areas). A full description of the approach used for generating this particular decomposition is available [here](https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md).
+
+-------------
+## 8. ArcGIS-compatible xml metadata files
 
 Each raster in this folder has an associated xml file. It is named with the same filename as the raster, but also includes a .xml extension. When any of the rasters are viewed in ArcGIS, the associated xml file is recognized by the software, and the contents will display in the Item Description (ArcGIS Desktop) or Metadata (ArcGIS Pro) for that raster. Once the file is viewed in ArcGIS, the software will update the xml file to include metadata inherent to the raster (geographic extent, raster format, etc.) along with the descriptive metadata included in the original xml file.
 
@@ -156,12 +166,12 @@ ArcGIS users should take care not to edit the xml files directly, or to change f
 Users who do not use ArcGIS to interact with the data may still find the information included in the individual xml files very useful, although the xml tag system makes it look cluttered in a text editor or browser window.
 
 -------------
-## 8. Shapefile
+## 9. Shapefile
 
 The shapefile (comprised of the four files tagged with _shape) contains a polygon indicating the extent of actual data (pixels with values other than NoData).
 
 -------------
-## 9. Log file
+## 10. Log file
 
 A textfile is generated during processing, which includes the parameters used and step-by-step processing history for the product. It has a .log extension.
 
