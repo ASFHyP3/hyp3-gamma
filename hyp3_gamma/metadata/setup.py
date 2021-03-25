@@ -1,16 +1,14 @@
-import os
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
-_HERE = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(_HERE, 'README.md'), 'r') as f:
-    long_desc = f.read()
+readme = Path(__file__).parent / 'README.md'
 
 setup(
     name='hyp3_metadata',
     use_scm_version=True,
     description="Package for generating HyP3 products' metadata",
-    long_description=long_desc,
+    long_description=readme.read_text(),
     long_description_content_type='text/markdown',
 
     url='https://github.com/ASFHyP3/hyp3-metadata-templates',
@@ -36,6 +34,7 @@ setup(
         'jinja2',
         'gdal',
         'pillow',
+        'python-dateutil',
     ],
 
     extras_require={
