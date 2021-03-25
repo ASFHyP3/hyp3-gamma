@@ -5,6 +5,7 @@ import pytest
 from hyp3_metadata import data
 from hyp3_metadata.util import populate_example_data
 
+
 @pytest.fixture()
 def test_data_folder():
     return Path(data.__file__).parent
