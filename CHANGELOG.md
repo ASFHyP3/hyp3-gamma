@@ -23,6 +23,12 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `dem` and `bbox` parameters of `rtc_sentinel.rtc_sentinel_gamma()`
   * `--dem` and `--bbox` parameters of `rtc_sentinel.py`
 
+##  [4.1.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.1...v4.1.2)
+
+### Changed
+* Reverted change that allows `ifm_sentinel.py` to proceed with processing when no Restituted or
+  Precision orbit file is found. Restituted or Precision orbit files are required.
+
 ##  [4.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.0...v4.1.1)
 
 ### Changed
