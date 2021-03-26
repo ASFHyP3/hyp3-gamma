@@ -15,7 +15,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * `rtc_sentinel.py` now leverages the [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
   for RTC processing.
-* Upgraded to hyp3-metadata [v0.3.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#030)
+* Upgraded to hyp3-metadata [v0.4.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#040)
   from v0.2.0
 
 ### Removed
