@@ -80,10 +80,20 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry):
+    """Create a DEM mosaic GeoTIFF covering a given geometry
+
+    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
+    buffered by 0.15 degrees, and will be projected to UTM with a pixel size of 30m.
+
+    Args:
+        output_name: Path for the output GeoTIFF
+        geometry: EPSG:4326 (lon/lat) geometry for which to prepare a DEM mosaic
+
+    """
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
         if not intersects_dem(geometry):
-            raise DemError('DEM does not cover this area')
+            raise DemError(f'Copernicus GLO-30 Public DEM does not intersect this geometry: {geometry}')
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -102,5 +112,3 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
             pixel_size = 30.0
             gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-
-    return output_name
