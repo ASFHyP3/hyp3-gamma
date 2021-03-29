@@ -7,6 +7,8 @@ from typing import Generator, List
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
+from hyp3_gamma.util import GDALConfigManager
+
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
 
 gdal.UseExceptions()
@@ -76,28 +78,6 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
         else:
             shifted_file_paths.append(file_path)
     return shifted_file_paths
-
-
-class GDALConfigManager:
-    """Context manager for setting GDAL config options temporarily"""
-    def __init__(self, **options):
-        """
-        Args:
-            **options: GDAL Config `option=value` keyword arguments.
-        """
-        self.options = options.copy()
-        self._previous_options = {}
-
-    def __enter__(self):
-        for key in self.options:
-            self._previous_options[key] = gdal.GetConfigOption(key)
-
-        for key, value in self.options.items():
-            gdal.SetConfigOption(key, value)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for key, value in self._previous_options.items():
-            gdal.SetConfigOption(key, value)
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
