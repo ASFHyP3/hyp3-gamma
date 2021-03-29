@@ -84,11 +84,11 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry):
     """Create a DEM mosaic GeoTIFF covering a given geometry
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
-    buffered by 0.15 degrees, and will be projected to UTM with a pixel size of 30m.
+    buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
 
     Args:
         output_name: Path for the output GeoTIFF
-        geometry: EPSG:4326 (lon/lat) geometry for which to prepare a DEM mosaic
+        geometry: Geometry in EPSG:4326 (lon/lat) projection for which to prepare a DEM mosaic
 
     """
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
