@@ -7,6 +7,8 @@ from typing import Generator, List
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
+from hyp3_gamma.util import GDALConfigManager
+
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
 
 gdal.UseExceptions()
@@ -78,32 +80,20 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-class GDALConfigManager:
-    """Context manager for setting GDAL config options temporarily"""
-    def __init__(self, **options):
-        """
-        Args:
-            **options: GDAL Config `option=value` keyword arguments.
-        """
-        self.options = options.copy()
-        self._previous_options = {}
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry):
+    """Create a DEM mosaic GeoTIFF covering a given geometry
 
-    def __enter__(self):
-        for key in self.options:
-            self._previous_options[key] = gdal.GetConfigOption(key)
+    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
+    buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
 
-        for key, value in self.options.items():
-            gdal.SetConfigOption(key, value)
+    Args:
+        output_name: Path for the output GeoTIFF
+        geometry: Geometry in EPSG:4326 (lon/lat) projection for which to prepare a DEM mosaic
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for key, value in self._previous_options.items():
-            gdal.SetConfigOption(key, value)
-
-
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
+    """
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
         if not intersects_dem(geometry):
-            raise DemError('DEM does not cover this area')
+            raise DemError(f'Copernicus GLO-30 Public DEM does not intersect this geometry: {geometry}')
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -122,5 +112,3 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry) -> str:
             pixel_size = 30.0
             gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-
-    return output_name
