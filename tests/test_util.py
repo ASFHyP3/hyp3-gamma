@@ -5,6 +5,31 @@ from osgeo import gdal
 
 from hyp3_gamma import util
 
+gdal.UseExceptions()
+
+
+def test_gdal_config_manager():
+    gdal.SetConfigOption('OPTION1', 'VALUE1')
+    gdal.SetConfigOption('OPTION2', 'VALUE2')
+
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') is None
+
+    with util.GDALConfigManager(OPTION2='CHANGED', OPTION3='VALUE3'):
+        assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+        assert gdal.GetConfigOption('OPTION2') == 'CHANGED'
+        assert gdal.GetConfigOption('OPTION3') == 'VALUE3'
+        assert gdal.GetConfigOption('OPTION4') is None
+
+        gdal.SetConfigOption('OPTION4', 'VALUE4')
+
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') == 'VALUE4'
+
 
 def test_earlier_granule_first():
     a = 'S1A_EW_GRDM_1SSH_20141112T235735_20141112T235835_003255_003C39_913F'
