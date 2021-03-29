@@ -25,7 +25,6 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal, gdalconst
 
 import hyp3_gamma
