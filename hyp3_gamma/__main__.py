@@ -47,6 +47,7 @@ def rtc():
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--include-scattering-area', type=string_is_true, default=False)
     parser.add_argument('--include-rgb', type=string_is_true, default=False)
+    parser.add_argument('--dem-name', choices=['copernicus', 'legacy'], default='copernicus')
     parser.add_argument('granule')
     args = parser.parse_args()
 
@@ -68,6 +69,7 @@ def rtc():
                         include_inc_map=args.include_inc_map,
                         include_scattering_area=args.include_scattering_area,
                         include_rgb=args.include_rgb,
+                        dem_name=args.dem_name,
                     )
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 
