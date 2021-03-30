@@ -9,12 +9,13 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+* Option for RTC_GAMMA jobs to use either Copernicus GLO-30 Public DEM or legacy SRTM/NED DEMs for processing:
+  * `--dem-name` option to `rtc` entrypoint and `rtc_sentinel.py` script
+  * `dem_name` parameter to `hyp3_gamma.rtc_sentinel.rtc_sentinel_gamma()`
 * `hyp3_gamma.dem` module for preparing GeoTIFF mosaics of the
   [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
 
 ### Changed
-* `rtc_sentinel.py` now leverages the [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
-  for RTC processing.
 * Upgraded to hyp3-metadata [v0.4.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#040)
   from v0.2.0
 
