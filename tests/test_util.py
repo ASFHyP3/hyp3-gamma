@@ -80,3 +80,16 @@ def test_set_pixel_as_point(tmp_path, test_data_dir):
     del area_info['metadata']['']['AREA_OR_POINT']
     del point_info['metadata']['']['AREA_OR_POINT']
     assert area_info == point_info
+
+
+def test_set_pixel_as_point_with_shift(tmp_path, test_data_dir):
+    shutil.copy(test_data_dir / 'test_geotiff.tif', tmp_path)
+    geotiff = str(tmp_path / 'test_geotiff.tif')
+    area_info = gdal.Info(geotiff, format='json')
+    assert area_info['metadata']['']['AREA_OR_POINT'] == 'Area'
+    assert area_info['geoTransform'] == [440720.0, 60.0, 0.0, 3751320.0, 0.0, -60.0]
+
+    util.set_pixel_as_point(geotiff, shift_origin=True)
+    point_info = gdal.Info(geotiff, format='json')
+    assert point_info['metadata']['']['AREA_OR_POINT'] == 'Point'
+    assert point_info['geoTransform'] == [440750.0, 60.0, 0.0, 3751290.0, 0.0, -60.0]

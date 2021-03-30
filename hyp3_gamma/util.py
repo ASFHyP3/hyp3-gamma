@@ -55,7 +55,12 @@ def earlier_granule_first(g1, g2):
     return g2, g1
 
 
-def set_pixel_as_point(tif_file):
+def set_pixel_as_point(tif_file, shift_origin=False):
     ds = gdal.Open(tif_file, gdal.GA_Update)
     ds.SetMetadataItem('AREA_OR_POINT', 'Point')
+    if shift_origin:
+        transform = list(ds.GetGeoTransform())
+        transform[0] += transform[1] / 2
+        transform[3] += transform[5] / 2
+        ds.SetGeoTransform(transform)
     del ds

@@ -25,6 +25,7 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
+from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal, gdalconst
 
 import hyp3_gamma
@@ -86,7 +87,7 @@ def configure_log_file(log_file):
 
 
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name):
+                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
@@ -100,6 +101,7 @@ def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_
     log.info(f'    Include RGB decomposition : {include_rgb}')
     log.info(f'    Orbit file                : {orbit_file or "Original Predicted"}')
     log.info(f'    Output name               : {product_name}')
+    log.info(f'    DEM name                  : {dem_name}')
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
@@ -274,7 +276,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
     log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name)
+                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
 
     log.info('Preparing DEM')
     dem_tif = 'dem.tif'
@@ -288,7 +290,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
     elif dem_name == 'legacy':
         dem, dem_type = getDemFile(safe_dir, dem_tif, post=30.0)
-        run(f'dem_import {dem_tif} {dem_image} {dem_par}')
+        utm2dem(dem_tif, dem_image, dem_par)
     else:
         raise DemError(f'DEM name "{dem_name}" is invalid; supported options are "copernicus" and "legacy".')
 
@@ -355,7 +357,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             os.remove(rgb_tif)
 
     for tif_file in glob(f'{product_name}/*.tif'):
-        set_pixel_as_point(tif_file)
+        set_pixel_as_point(tif_file, shift_origin=dem_name == 'legacy')
     cogify_dir(directory=product_name)
 
     log.info('Generating browse images and metadata files')
