@@ -16,7 +16,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
 
 ### Changed
-* Upgraded to hyp3-metadata [v0.4.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#040)
+* Upgraded to hyp3-metadata [v0.4.1](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#041)
   from v0.2.0
 
 ##  [4.1.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.1...v4.1.2)

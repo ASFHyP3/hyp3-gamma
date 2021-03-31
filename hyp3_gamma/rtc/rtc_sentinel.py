@@ -141,7 +141,7 @@ def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str
             f'$DIFF_HOME/scripts/egm2008-5.dem_par')
 
     elif dem_name == 'copernicus':
-        dem_type = 'COP30'
+        dem_type = 'GLO-30'
         if bbox:
             wkt = f'POLYGON (({bbox[0]} {bbox[3]}, {bbox[2]} {bbox[3]}, {bbox[2]} {bbox[1]}, {bbox[0]} {bbox[1]}, ' \
                   f'{bbox[0]} {bbox[3]}))'
