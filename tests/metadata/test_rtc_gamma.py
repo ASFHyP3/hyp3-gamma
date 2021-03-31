@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 
 from hyp3_metadata import create
+from hyp3_metadata.util import SUPPORTED_DEMS
 
 
 def test_create_rtc_gamma_readme(product_dir):
@@ -46,23 +47,24 @@ def test_rtc_gamma_product(product_dir):
 
 
 def test_create_dem_xml(product_dir):
-    payload = create.marshal_metadata(
-        product_dir=product_dir,
-        granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
-        processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
-        looks=1,
-        plugin_name='hyp3_rtc_gamma',
-        plugin_version='2.3.0',
-        processor_name='GAMMA',
-        processor_version='20191203',
-    )
+    for dem_name in SUPPORTED_DEMS:
+        payload = create.marshal_metadata(
+            product_dir=product_dir,
+            granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
+            dem_name=dem_name,
+            processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
+            looks=1,
+            plugin_name='hyp3_rtc_gamma',
+            plugin_version='2.3.0',
+            processor_name='GAMMA',
+            processor_version='20191203',
+        )
 
-    output_file = create.create_dem_xml(payload)
-    assert output_file == product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_dem.tif.xml'
-    assert output_file.exists()
+        output_file = create.create_dem_xml(payload)
+        assert output_file == product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_dem.tif.xml'
+        assert output_file.exists()
+        output_file.unlink()
 
-    output_file.unlink()
     payload['dem_name'] = 'unknown'
     unknown_dem_file = create.create_dem_xml(payload)
     assert unknown_dem_file is None
