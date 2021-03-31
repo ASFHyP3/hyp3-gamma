@@ -2,8 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from hyp3_metadata.__main__ import _SUPPORTED_DEMS
 from hyp3_metadata import create
+from hyp3_metadata.util import SUPPORTED_DEMS
 
 
 def test_create_rtc_gamma_readme(product_dir):
@@ -47,7 +47,7 @@ def test_rtc_gamma_product(product_dir):
 
 
 def test_create_dem_xml(product_dir):
-    for dem_name in _SUPPORTED_DEMS:
+    for dem_name in SUPPORTED_DEMS:
         payload = create.marshal_metadata(
             product_dir=product_dir,
             granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
