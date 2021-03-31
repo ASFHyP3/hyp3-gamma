@@ -80,7 +80,7 @@ def get_dem_template_id(dem_name: str) -> Optional[str]:
         return 'rema'
     if dem_name.startswith('SRTM'):
         return 'srtm'
-    if dem_name.startswith('COP'):
+    if dem_name == 'GLO-30':
         return 'cop'
 
 
