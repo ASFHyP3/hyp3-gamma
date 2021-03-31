@@ -287,7 +287,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         include_scattering_area: Include the local scattering area GeoTIFF in the output package.
         include_rgb: Include an RGB decomposition GeoTIFF in the output package.  This setting is ignored when
             processing a single-polarization product or when `skip_cross_pol` is selected.
-        dem: Path to the DEM to use for RTC processing. Must be a format accepted by dem_import. A DEM will be selected
+        dem: Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection. A DEM will be selected
             automatically if not provided.
         bbox: Subset the output images to the given lat/lon bounding box: `[lon_min, lat_min, lon_max, lat_max]`.
             `bbox` is ignored if `dem` is provided.
@@ -440,8 +440,8 @@ def main():
                        help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a format accepted by '
-                                     'dem_import. A DEM will be selected automatically if not provided.')
+    group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
+                                     ' A DEM will be selected automatically if not provided.')
     group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
                        help='Subset the output images to the given lat/lon bounding box.')
 
