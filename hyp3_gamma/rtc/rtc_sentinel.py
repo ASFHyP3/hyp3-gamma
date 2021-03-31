@@ -294,7 +294,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
             are selected automatically based on azimuth looks and product type.
         skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
-        dem_name: DEM to use for RTC processing; `copernicus` or `legacy`.
+        dem_name: DEM to use for RTC processing; `copernicus` or `legacy`. `dem_name` is ignored if `dem` is provided.
 
     Returns:
         product_name: Name of the output product directory
@@ -442,14 +442,15 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
                                      ' A DEM will be selected automatically if not provided.')
-    group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                       help='Subset the output images to the given lat/lon bounding box.')
+    group.add_argument('--dem-name', choices=('copernicus', 'legacy'), default='copernicus',
+                       help='DEM to use for RTC processing.')
 
+    parser.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
+                        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is '
+                             'provided.')
     parser.add_argument('--looks', type=int,
                         help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
                              'and filter looks are selected automatically based on azimuth looks and product type.')
-    parser.add_argument('--dem-name', choices=('copernicus', 'legacy'), default='copernicus',
-                        help='DEM to use for RTC processing')
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
