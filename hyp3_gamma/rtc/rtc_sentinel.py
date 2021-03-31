@@ -283,7 +283,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     dem_image = 'dem.image'
     dem_par = 'dem.par'
     if dem_name == 'copernicus':
-        dem_type = 'COP30'
+        dem_type = 'GLO-30'
         geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
         prepare_dem_geotiff(dem_tif, geometry)
         run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
