@@ -19,11 +19,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Upgraded to hyp3-metadata [v0.4.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#040)
   from v0.2.0
 
-### Removed
-* Options to provide a custom DEM GeoTIFF or DEM bounding box have been removed:
-  * `dem` and `bbox` parameters of `rtc_sentinel.rtc_sentinel_gamma()`
-  * `--dem` and `--bbox` parameters of `rtc_sentinel.py`
-
 ##  [4.1.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.1...v4.1.2)
 
 ### Changed
