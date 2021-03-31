@@ -4,9 +4,7 @@ from pathlib import Path
 from dateutil.parser import parse as dt_parse
 
 from hyp3_metadata import __version__, create_metadata_file_set
-from hyp3_metadata.util import populate_example_data
-
-_SUPPORTED_DEMS = ['EU_DEM_V11', 'GIMP', 'IFSAR', 'NED13', 'NED1', 'NED2', 'REMA', 'SRTMGL1', 'SRTMGL3', 'COP30']
+from hyp3_metadata.util import SUPPORTED_DEMS, populate_example_data
 
 
 def main():
@@ -21,7 +19,7 @@ def main():
     parser.add_argument('--granule-name',
                         default='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
                         help='Source granule used to generate the RTC product')
-    parser.add_argument('--dem-name', default='COP30', choices=_SUPPORTED_DEMS,
+    parser.add_argument('--dem-name', default='GLO-30', choices=SUPPORTED_DEMS,
                         help='DEM used to generate the RTC product')
     parser.add_argument('--processing-date', default='2020-01-01T00:00:00+00:00', type=dt_parse)
     parser.add_argument('--looks', default=1, type=int,
