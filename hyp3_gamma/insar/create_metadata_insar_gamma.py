@@ -55,6 +55,9 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType):
     elif "REMA" in demType:
         resa = 1
         resm = 30
+    elif demType == 'GLO-30':
+        resa = 1
+        resm = 30
     else:
         log.error("Unrecognized DEM type: {}".format(demType))
         sys.exit(1)

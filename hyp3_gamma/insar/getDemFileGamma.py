@@ -1,30 +1,18 @@
-import logging
-import os
+from hyp3lib.execute import execute
 
-from hyp3lib.getDemFor import getDemFile
-from hyp3lib.utm2dem import utm2dem
-from osgeo import gdal
-
-log = logging.getLogger(__name__)
+from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 
 
-def get_dem_file_gamma(filename, alooks):
-    demfile, demtype = getDemFile(filename, "tmpdem.tif")
+def get_dem_file_gamma(filename, azimuth_looks):
+    dem_tif = 'dem.tif'
+    dem_name = 'GLO-30'
+    dem_image = 'big.dem'
+    dem_par = 'big.par'
+    pixel_size = int(azimuth_looks) * 40
 
-    # If we downsized the SAR image, downsize the DEM file
-    # if alks == 1, then the SAR image is roughly 20 m square -> use native dem res
-    # if alks == 2, then the SAR image is roughly 40 m square -> set dem to 80 meters
-    # if alks == 3, then the SAR image is roughly 60 m square -> set dem to 120 meters
-    # etc.
-    #
-    # The DEM is set to double the res because it will be 1/2'd by the procedure
-    # I.E. if you give a 100 meter DEM as input, the output Igram is 50 meters
-    pix_size = 20 * int(alooks) * 2
-    log.info("Changing DEM resolution")
-    gdal.Warp("tmpdem2.tif", demfile, xRes=pix_size, yRes=pix_size, resampleAlg="cubic", dstNodata=-32767,
-              creationOptions=['COMPRESS=LZW'])
-    os.remove(demfile)
+    geometry = get_geometry_from_kml(f'{filename}/preview/map-overlay.kml')
+    prepare_dem_geotiff(dem_tif, geometry, pixel_size)
+    execute(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
 
-    utm2dem("tmpdem2.tif", "big.dem", "big.par")
-
-    return "big", demtype
+    return 'big', dem_name
