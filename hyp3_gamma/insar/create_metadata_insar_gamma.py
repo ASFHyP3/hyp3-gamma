@@ -1,7 +1,6 @@
 import datetime
 import logging
 import os
-import sys
 
 from hyp3lib.system import gamma_version
 
