@@ -135,7 +135,7 @@ The basic steps in InSAR processing are as follows:
 
 *Pre-Processing*
 1. Ingest SLC data into GAMMA format
-2. Get DEM file covering the area from the ASF DEM heap
+2. Get DEM file covering the area
 3. Calculate overlapping bursts for input scenes
 4. Mosaic swaths and bursts together
 
