@@ -344,8 +344,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag)
 
-    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing,
-                       dem_source)
+    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)

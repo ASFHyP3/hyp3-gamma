@@ -32,7 +32,7 @@ Interferometric SAR (InSAR) uses the phase differences from repeat passes over t
 
 Note that the imaging surface will vary depending on the sensor wavelength. Because Sentinel-1 is a C-band sensor, the waves will not penetrate very deeply into vegetation. The imagery likely represents the top of the canopy in densely vegetated areas rather than the actual terrain. In addition, vegetated areas tend to have low coherence, because plants can grow or move from one acquisition to the next. Use caution when generating interferograms for areas with extensive/dense vegetation cover.
 
-A digital elevation model is required for processing InSAR, and ASF uses the best publicly-available DEM with full coverage of the processing area. The source of the DEM used for this particular product is [DEM], which has a native resolution of [RESA] arc seconds (about [RESM] meters). Scroll to the bottom of this file (after the description of InSAR Processing) to read more about the DEMs used by ASF.
+A digital elevation model is required for processing InSAR. The DEM used for this particular product is the Copernicus GLO-30 Public DEM, which has a native resolution of 1 arc second (about 30 meters). Scroll to the bottom of this file (after the description of InSAR Processing) to read more about the DEMs used by ASF.
 
 ----------------
 ### To cite the data: ###
@@ -227,17 +227,9 @@ The detailed process, including the calls to GAMMA software, is as follows:
 *************
 # DEMs #
 
-ASF uses publicly-available Digital Elevation Models for processing SAR data. The DEM used will vary by granule location; the best available DEM with full coverage of the granule extent will be used for processing any given granule. The source DEMs include the National Elevation Dataset (NED), the Shuttle Radar Topography Mission (SRTM), the Copernicus Land Monitoring Service EU-DEM (EUDEM), the Greenland Ice sheet Mapping Project DEM (GIMP), and the Reference Elevation Model of Antarctica DSM (REMA).
+ASF uses publicly-available Digital Elevation Models for processing SAR data.
 
-The NED provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.
-
-The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
-
-The EUDEM combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.
-
-The GIMP DEM was constructed by combining ASTER and SPOT 5 DEMs over the ice sheet periphery and margin with AVHRR photoclinometry for the interior and far north, and calibrating the data to approximate mean ICESat/GLAS elevations from 2003 to 2009. For more information and to access the full GIMP dataset, refer to https://nsidc.org/data/nsidc-0645.
-
-The REMA DSM was constructed from hundreds of thousands of individual stereoscopic Digital Elevation Models extracted from pairs of submeter-resolution DigitalGlobe satellite imagery acquired between 2009 and 2017, and vertically registered to altimetry measurements from Cryosat-2 and ICESat. For more information and to access the full REMA dataset at the original 8-meter resolution, refer to https://www.pgc.umn.edu/data/rema.
+The Copernicus GLO-30 Public DEM is a global Digital Surface Model (DSM) derived from the WorldDEM. The WorldDEM is based on radar satellite data acquired by the TanDEM-X mission, which was funded by the German Aerospace Center (DLR) and Airbus Defence and Space, and edited to flatten water bodies, provide consistent flow of rivers, and apply corrections to shore/coastlines and special features. For an overview of the dataset, visit https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198. The product handbook is available at https://spacedata.copernicus.eu/documents/20126/0/GEO1988-CopernicusDEM-SPE-002_ProductHandbook_I1.00.pdf.
 
 *************
 # The Sentinel-1 mission #

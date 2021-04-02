@@ -11,7 +11,7 @@ from hyp3_gamma.insar import etc
 log = logging.getLogger(__name__)
 
 
-def create_readme_file(refFile, secFile, outfile, pixelSize, demType):
+def create_readme_file(refFile, secFile, outfile, pixelSize):
     looks = pixelSize / 20
     txtlooks = "{}x{}".format(looks * 5, looks)
 
@@ -28,39 +28,6 @@ def create_readme_file(refFile, secFile, outfile, pixelSize, demType):
     secname = os.path.splitext(basename)[0]
 
     gamma_ver = gamma_version()
-
-    if "NED" in demType:
-        if "13" in demType:
-            resa = "1/3"
-            resm = 10
-        elif "1" in demType:
-            resa = 1
-            resm = 30
-        else:
-            resa = 2
-            resm = 60
-    elif "SRTMGL" in demType:
-        if "1" in demType:
-            resa = 1
-            resm = 30
-        else:
-            resa = 3
-            resm = 90
-    elif "EU_DEM" in demType:
-        resa = 1
-        resm = 30
-    elif "GIMP" in demType:
-        resa = 1
-        resm = 30
-    elif "REMA" in demType:
-        resa = 1
-        resm = 30
-    elif demType == 'GLO-30':
-        resa = 1
-        resm = 30
-    else:
-        log.error("Unrecognized DEM type: {}".format(demType))
-        sys.exit(1)
 
     with open(outfile, "w") as g:
         with open("{}/README_InSAR_GAMMA.txt".format(etcdir)) as f:
