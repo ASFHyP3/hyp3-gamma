@@ -276,7 +276,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
 
     #  Fetch the DEM file
     log.info("Getting a DEM file")
-    dem, dem_source = get_dem_file_gamma(reference_file, alooks)
+    dem_source = 'GLO-30'
+    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=int(alooks) * 40)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
