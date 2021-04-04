@@ -48,29 +48,16 @@ def test_get_geometry_from_kml(test_data_dir):
     assert json.loads(geometry.ExportToJson()) == expected
 
 
-def test_intersects_dem():
-    geojson = {
-        'type': 'Point',
-        'coordinates': [169, -45],
-    }
-    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert dem.intersects_dem(geometry)
-
-    geojson = {
-        'type': 'Point',
-        'coordinates': [0, 0],
-    }
-    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert not dem.intersects_dem(geometry)
-
-
 def test_get_file_paths():
     geojson = {
         'type': 'Point',
         'coordinates': [0, 0],
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert dem.get_dem_file_paths(geometry) == []
+    assert dem.get_dem_file_paths(geometry) == [
+        '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
+        'Copernicus_DSM_COG_10_N00_00_E106_00_DEM/Copernicus_DSM_COG_10_N00_00_E106_00_DEM.tif',
+    ]
 
     geojson = {
         'type': 'Point',
@@ -105,7 +92,7 @@ def test_utm_from_lon_lat():
     assert dem.utm_from_lon_lat(-360, -1) == 32731
 
 
-def test_get_centroid_crossing_antimeridian():
+def test_shift_geometry_for_antimeridian():
     geojson = {
         'type': 'MultiPolygon',
         'coordinates': [
@@ -126,19 +113,33 @@ def test_get_centroid_crossing_antimeridian():
         ],
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert geometry.Centroid().GetX() == 89.0
-    assert geometry.Centroid().GetY() == 50.5
-
-    centroid = dem.get_centroid_crossing_antimeridian(geometry)
-    assert centroid.GetX() == 179.0
-    assert centroid.GetY() == 50.5
+    shifted_geometry = dem.shift_geometry_for_antimeridian(geometry)
+    assert json.loads(shifted_geometry.ExportToJson()) == {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [[
+                [177.0, 50.0],
+                [177.0, 51.0],
+                [180.0, 51.0],
+                [180.0, 50.0],
+                [177.0, 50.0],
+            ]],
+            [[
+                [180.0, 50.0],
+                [180.0, 51.0],
+                [181.0, 51.0],
+                [181.0, 50.0],
+                [180.0, 50.0],
+            ]],
+        ],
+    }
 
 
 def test_get_dem_features():
     assert len(list(dem.get_dem_features())) == 26445
 
 
-def test_shift_for_antimeridian(tmp_path):
+def test_shift_tiles_for_antimeridian(tmp_path):
     file_paths = [
         '/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
         'Copernicus_DSM_COG_10_N51_00_W180_00_DEM/Copernicus_DSM_COG_10_N51_00_W180_00_DEM.tif',
@@ -147,7 +148,7 @@ def test_shift_for_antimeridian(tmp_path):
     ]
 
     with dem.GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
-        shifted_file_paths = dem.shift_for_antimeridian(file_paths, tmp_path)
+        shifted_file_paths = dem.shift_tiles_for_antimeridian(file_paths, tmp_path)
 
     assert shifted_file_paths[0] == str(tmp_path / 'Copernicus_DSM_COG_10_N51_00_W180_00_DEM.vrt')
     assert shifted_file_paths[1] == file_paths[1]
@@ -157,26 +158,16 @@ def test_shift_for_antimeridian(tmp_path):
     assert info['cornerCoordinates']['lowerRight'] == [180.9997917, 51.0001389]
 
 
-def test_prepare_dem_geotiff_no_coverage():
-    geojson = {
-        'type': 'Point',
-        'coordinates': [0, 0],
-    }
-    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    with pytest.raises(DemError):
-        dem.prepare_dem_geotiff('foo', geometry)
-
-
-def test_prepare_dem_geotiff(tmp_path):
+def test_prepare_dem_geotiff_no_coverage(tmp_path):
     dem_geotiff = tmp_path / 'dem.tif'
     geojson = {
         'type': 'Polygon',
         'coordinates': [[
-            [0.4, 10.16],
-            [0.4, 10.86],
-            [0.6, 10.86],
-            [0.6, 10.16],
-            [0.4, 10.16],
+            [0.0, 0.0],
+            [0.0, 0.1],
+            [0.1, 0.1],
+            [0.1, 0.0],
+            [0.0, 0.0],
         ]],
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
@@ -184,9 +175,36 @@ def test_prepare_dem_geotiff(tmp_path):
     dem.prepare_dem_geotiff(str(dem_geotiff), geometry)
     assert dem_geotiff.exists()
 
-    info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [171030.0, 30.0, 0.0, 1328370.0, 0.0, -30.0]
-    assert info['size'] == [3707, 7410]
+    info = gdal.Info(str(dem_geotiff), format='json', stats=True)
+    assert info['geoTransform'] == [166020.0, 30.0, 0.0, 11070.0, 0.0, -30.0]
+    assert info['size'] == [372, 369]
+    assert info['bands'][0]['minimum'] == 0
+    assert info['bands'][0]['maximum'] == 0
+
+
+def test_prepare_dem_geotiff(tmp_path):
+    dem_geotiff = tmp_path / 'dem.tif'
+    geojson = {
+        'type': 'Polygon',
+        'coordinates': [[
+            [0.4, 10.9],
+            [0.4, 11.1],
+            [0.6, 11.1],
+            [0.6, 10.9],
+            [0.4, 10.9],
+        ]],
+    }
+    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+
+    dem.prepare_dem_geotiff(str(dem_geotiff), geometry)
+    assert dem_geotiff.exists()
+
+    info = gdal.Info(str(dem_geotiff), format='json', stats=True)
+    assert info['geoTransform'] == [215760.0, 30.0, 0.0, 1228110.0, 0.0, -30.0]
+    assert info['size'] == [736, 733]
+    assert round(info['bands'][0]['minimum']) == 163
+    assert round(info['bands'][0]['mean']) == 211
+    assert round(info['bands'][0]['maximum']) == 345
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
@@ -195,18 +213,18 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
         'type': 'MultiPolygon',
         'coordinates': [
             [[
-                [179.5, 51.4],
-                [179.5, 51.6],
-                [180.0, 51.6],
-                [180.0, 51.4],
-                [179.5, 51.4],
+                [179.5, 51.7],
+                [179.5, 51.9],
+                [180.0, 51.9],
+                [180.0, 51.7],
+                [179.5, 51.7],
             ]],
             [[
-                [-180.0, 51.4],
-                [-180.0, 51.6],
-                [-179.5, 51.6],
-                [-179.5, 51.4],
-                [-180.0, 51.4],
+                [-180.0, 51.7],
+                [-180.0, 51.9],
+                [-179.5, 51.9],
+                [-179.5, 51.7],
+                [-180.0, 51.7],
             ]],
         ],
     }
@@ -215,6 +233,9 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     dem.prepare_dem_geotiff(str(dem_geotiff), geometry)
     assert dem_geotiff.exists()
 
-    info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [219330.0, 30.0, 0.0, 5768640.0, 0.0, -30.0]
-    assert info['size'] == [4780, 3897]
+    info = gdal.Info(str(dem_geotiff), format='json', stats=True)
+    assert info['geoTransform'] == [258150.0, 30.0, 0.0, 5752890.0, 0.0, -30.0]
+    assert info['size'] == [2329, 648]
+    assert round(info['bands'][0]['minimum']) == -1
+    assert round(info['bands'][0]['mean']) == 0
+    assert round(info['bands'][0]['maximum']) == 191

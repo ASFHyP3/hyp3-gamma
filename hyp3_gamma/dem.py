@@ -31,17 +31,14 @@ def get_dem_features() -> Generator[ogr.Feature, None, None]:
     del ds
 
 
-def intersects_dem(geometry: ogr.Geometry) -> bool:
-    for feature in get_dem_features():
-        if feature.GetGeometryRef().Intersects(geometry):
-            return True
-
-
 def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
     file_paths = []
     for feature in get_dem_features():
         if feature.GetGeometryRef().Intersects(geometry):
             file_paths.append(feature.GetField('file_path'))
+    if not file_paths:
+        file_paths.append('/vsicurl/https://copernicus-dem-30m.s3.amazonaws.com/'
+                          'Copernicus_DSM_COG_10_N00_00_E106_00_DEM/Copernicus_DSM_COG_10_N00_00_E106_00_DEM.tif')
     return file_paths
 
 
@@ -51,17 +48,16 @@ def utm_from_lon_lat(lon: float, lat: float) -> int:
     return hemisphere + zone
 
 
-def get_centroid_crossing_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
+def shift_geometry_for_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
     geojson = json.loads(geometry.ExportToJson())
     for feature in geojson['coordinates']:
         for point in feature[0]:
             if point[0] < 0:
                 point[0] += 360
-    shifted_geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    return shifted_geometry.Centroid()
+    return ogr.CreateGeometryFromJson(json.dumps(geojson))
 
 
-def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[str]:
+def shift_tiles_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[str]:
     shifted_file_paths = []
     for file_path in dem_file_paths:
         if '_W' in file_path:
@@ -80,35 +76,39 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry):
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size=30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry
 
-    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
-    buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
+    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry and
+    is projected to the UTM zone of the geometry centroid.
 
     Args:
         output_name: Path for the output GeoTIFF
         geometry: Geometry in EPSG:4326 (lon/lat) projection for which to prepare a DEM mosaic
+        pixel_size: Pixel size of the output GeoTIFF
 
     """
     with GDALConfigManager(GDAL_DISABLE_READDIR_ON_OPEN='EMPTY_DIR'):
-        if not intersects_dem(geometry):
-            raise DemError(f'Copernicus GLO-30 Public DEM does not intersect this geometry: {geometry}')
+        dem_file_paths = get_dem_file_paths(geometry)
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
 
-            centroid = geometry.Centroid()
-            dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
-
             if geometry.GetGeometryName() == 'MULTIPOLYGON':
-                centroid = get_centroid_crossing_antimeridian(geometry)
-                dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
+                shifted_geometry = shift_geometry_for_antimeridian(geometry)
+                centroid = shifted_geometry.Centroid()
+                envelope = list(shifted_geometry.GetEnvelope())
+                envelope[1] -= 360
+                dem_file_paths = shift_tiles_for_antimeridian(dem_file_paths, temp_path)
+            else:
+                centroid = geometry.Centroid()
+                envelope = geometry.GetEnvelope()
 
             dem_vrt = temp_path / 'dem.vrt'
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
+            output_bounds = (envelope[0], envelope[2], envelope[1], envelope[3])
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            pixel_size = 30.0
             gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
-                      targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
+                      targetAlignedPixels=True, outputBounds=output_bounds, outputBoundsSRS='EPSG:4326',
+                      resampleAlg='cubic', multithread=True)

@@ -148,7 +148,7 @@ def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str
             geometry = ogr.CreateGeometryFromWkt(wkt)
         else:
             geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
-        prepare_dem_geotiff(dem_tif, geometry)
+        prepare_dem_geotiff(dem_tif, geometry.Buffer(0.15), pixel_size=30.0)
         run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
