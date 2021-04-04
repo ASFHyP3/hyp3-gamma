@@ -4,7 +4,6 @@ from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import Generator, List
 
-from hyp3lib import DemError
 from osgeo import gdal, ogr
 
 from hyp3_gamma.util import GDALConfigManager

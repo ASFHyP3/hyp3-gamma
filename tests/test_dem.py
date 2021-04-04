@@ -1,7 +1,5 @@
 import json
 
-import pytest
-from hyp3lib import DemError
 from osgeo import gdal, ogr
 
 from hyp3_gamma import dem
