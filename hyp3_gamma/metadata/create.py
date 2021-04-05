@@ -93,7 +93,7 @@ def get_projection(srs_wkt) -> str:
 def get_granule_type(granule_name) -> Dict[str, str]:
     granule_type = granule_name[7:10]
     if granule_type == 'SLC':
-        return {'granule_type': 'SLC', 'granule_description': 'Single-Look Complex'}
+        return {'granule_type': 'SLC', 'granule_description': 'Single Look Complex'}
     if granule_type == 'GRD':
         return {'granule_type': 'GRD', 'granule_description': 'Ground Range Detected'}
     raise NotImplementedError(f'Unknown granule type: {granule_name}')
