@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.2.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.2...v4.2.0)
 
 ### Added
 * Option for RTC_GAMMA jobs to use either Copernicus GLO-30 Public DEM or legacy SRTM/NED DEMs for processing:
