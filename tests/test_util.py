@@ -5,6 +5,31 @@ from osgeo import gdal
 
 from hyp3_gamma import util
 
+gdal.UseExceptions()
+
+
+def test_gdal_config_manager():
+    gdal.SetConfigOption('OPTION1', 'VALUE1')
+    gdal.SetConfigOption('OPTION2', 'VALUE2')
+
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') is None
+
+    with util.GDALConfigManager(OPTION2='CHANGED', OPTION3='VALUE3'):
+        assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+        assert gdal.GetConfigOption('OPTION2') == 'CHANGED'
+        assert gdal.GetConfigOption('OPTION3') == 'VALUE3'
+        assert gdal.GetConfigOption('OPTION4') is None
+
+        gdal.SetConfigOption('OPTION4', 'VALUE4')
+
+    assert gdal.GetConfigOption('OPTION1') == 'VALUE1'
+    assert gdal.GetConfigOption('OPTION2') == 'VALUE2'
+    assert gdal.GetConfigOption('OPTION3') is None
+    assert gdal.GetConfigOption('OPTION4') == 'VALUE4'
+
 
 def test_earlier_granule_first():
     a = 'S1A_EW_GRDM_1SSH_20141112T235735_20141112T235835_003255_003C39_913F'
@@ -45,11 +70,26 @@ def test_unzip_granule_and_remove(tmp_path, test_data_dir):
 def test_set_pixel_as_point(tmp_path, test_data_dir):
     shutil.copy(test_data_dir / 'test_geotiff.tif', tmp_path)
     geotiff = str(tmp_path / 'test_geotiff.tif')
-    info = gdal.Info(geotiff, format='json')
-    assert info['geoTransform'] == [440720.0, 60.0, 0.0, 3751320.0, 0.0, -60.0]
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Area'
+    area_info = gdal.Info(geotiff, format='json')
+    assert area_info['metadata']['']['AREA_OR_POINT'] == 'Area'
 
     util.set_pixel_as_point(geotiff)
-    info = gdal.Info(geotiff, format='json')
-    assert info['geoTransform'] == [440750.0, 60.0, 0.0, 3751290.0, 0.0, -60.0]
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Point'
+    point_info = gdal.Info(geotiff, format='json')
+    assert point_info['metadata']['']['AREA_OR_POINT'] == 'Point'
+
+    del area_info['metadata']['']['AREA_OR_POINT']
+    del point_info['metadata']['']['AREA_OR_POINT']
+    assert area_info == point_info
+
+
+def test_set_pixel_as_point_with_shift(tmp_path, test_data_dir):
+    shutil.copy(test_data_dir / 'test_geotiff.tif', tmp_path)
+    geotiff = str(tmp_path / 'test_geotiff.tif')
+    area_info = gdal.Info(geotiff, format='json')
+    assert area_info['metadata']['']['AREA_OR_POINT'] == 'Area'
+    assert area_info['geoTransform'] == [440720.0, 60.0, 0.0, 3751320.0, 0.0, -60.0]
+
+    util.set_pixel_as_point(geotiff, shift_origin=True)
+    point_info = gdal.Info(geotiff, format='json')
+    assert point_info['metadata']['']['AREA_OR_POINT'] == 'Point'
+    assert point_info['geoTransform'] == [440750.0, 60.0, 0.0, 3751290.0, 0.0, -60.0]

@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 from hyp3_metadata import create_metadata_file_set
-from hyp3lib import ExecuteError, GranuleError, OrbitDownloadError
+from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
@@ -28,14 +28,16 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
-from osgeo import gdal, gdalconst
+from osgeo import gdal, gdalconst, ogr
 
 import hyp3_gamma
+from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 log = logging.getLogger()
 gdal.UseExceptions()
+ogr.UseExceptions()
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -88,7 +90,7 @@ def configure_log_file(log_file):
 
 
 def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name):
+                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
@@ -102,6 +104,7 @@ def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_
     log.info(f'    Include RGB decomposition : {include_rgb}')
     log.info(f'    Orbit file                : {orbit_file or "Original Predicted"}')
     log.info(f'    Output name               : {product_name}')
+    log.info(f'    DEM name                  : {dem_name}')
 
 
 def get_polarizations(safe_dir, skip_cross_pol=True):
@@ -125,6 +128,41 @@ def get_polarizations(safe_dir, skip_cross_pol=True):
 
 def run(cmd):
     execute(cmd, uselogging=True)
+
+
+def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None):
+    dem_tif = 'dem.tif'
+    dem_type = 'UNKNOWN'
+    dem_image = 'dem.image'
+    dem_par = 'dem.par'
+
+    if dem:
+        run(f'dem_import {dem} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par')
+
+    elif dem_name == 'copernicus':
+        dem_type = 'GLO-30'
+        if bbox:
+            wkt = f'POLYGON (({bbox[0]} {bbox[3]}, {bbox[2]} {bbox[3]}, {bbox[2]} {bbox[1]}, {bbox[0]} {bbox[1]}, ' \
+                  f'{bbox[0]} {bbox[3]}))'
+            geometry = ogr.CreateGeometryFromWkt(wkt)
+        else:
+            geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
+        prepare_dem_geotiff(dem_tif, geometry)
+        run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
+
+    elif dem_name == 'legacy':
+        if bbox:
+            dem_type = get_dem(bbox[0], bbox[1], bbox[2], bbox[3], dem_tif, post=30.0)
+        else:
+            dem, dem_type = getDemFile(safe_dir, dem_tif, post=30.0)
+        utm2dem(dem_tif, dem_image, dem_par)
+
+    else:
+        raise DemError(f'DEM name "{dem_name}" is invalid; supported options are "copernicus" and "legacy".')
+
+    return dem_image, dem_par, dem_type
 
 
 def prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks):
@@ -233,8 +271,8 @@ def append_additional_log_files(log_file, pattern):
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
                        speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
                        include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
-                       dem: str = None, bbox: List[float] = None, looks: int = None,
-                       skip_cross_pol: bool = False) -> str:
+                       dem: str = None, bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False,
+                       dem_name: str = 'copernicus') -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
@@ -256,6 +294,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
             are selected automatically based on azimuth looks and product type.
         skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
+        dem_name: DEM to use for RTC processing; `copernicus` or `legacy`. `dem_name` is ignored if `dem` is provided.
 
     Returns:
         product_name: Name of the output product directory
@@ -280,21 +319,10 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
     log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name)
+                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
 
     log.info('Preparing DEM')
-    if dem:
-        dem_type = 'UNKNOWN'
-    else:
-        dem = 'dem.tif'
-        post = 30.0
-        if bbox:
-            dem_type = get_dem(bbox[0], bbox[1], bbox[2], bbox[3], dem, post=post)
-        else:
-            dem, dem_type = getDemFile(safe_dir, dem, post=post)
-    dem_image = 'dem.image'
-    dem_par = 'dem.par'
-    utm2dem(dem, dem_image, dem_par)
+    dem_image, dem_par, dem_type = prepare_dem(safe_dir, dem_name, bbox, dem)
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)
@@ -359,7 +387,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             os.remove(rgb_tif)
 
     for tif_file in glob(f'{product_name}/*.tif'):
-        set_pixel_as_point(tif_file)
+        set_pixel_as_point(tif_file, shift_origin=dem_name == 'legacy')
     cogify_dir(directory=product_name)
 
     log.info('Generating browse images and metadata files')
@@ -414,9 +442,12 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
                                      ' A DEM will be selected automatically if not provided.')
-    group.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                       help='Subset the output images to the given lat/lon bounding box.')
+    group.add_argument('--dem-name', choices=('copernicus', 'legacy'), default='copernicus',
+                       help='DEM to use for RTC processing.')
 
+    parser.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
+                        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is '
+                             'provided.')
     parser.add_argument('--looks', type=int,
                         help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
                              'and filter looks are selected automatically based on azimuth looks and product type.')
@@ -445,7 +476,8 @@ def main():
                        dem=args.dem,
                        bbox=args.bbox,
                        looks=args.looks,
-                       skip_cross_pol=args.skip_cross_pol)
+                       skip_cross_pol=args.skip_cross_pol,
+                       dem_name=args.dem_name)
 
     log.info('===================================================================')
     log.info('                Sentinel RTC Program - Completed')
