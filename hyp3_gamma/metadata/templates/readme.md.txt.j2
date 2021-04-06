@@ -36,9 +36,13 @@ The source granule used to generate the products contained in this folder is:
 Please refer to the ASF Sentinel-1 RTC User Guide for in-depth guidance on the use of this dataset:
 * https://asf.alaska.edu/wp-content/uploads/2019/02/Sentinel_RTC_Users_Guide.pdf
 
-When using this data in a publication or presentation, we ask that you include the following acknowledgement:
+When using this data as an image in a publication such as journal papers, articles, presentations, posters, and websites, please include the following credit with the image (portions in square brackets are optional):
 
-    RTC product processed by ASF DAAC HyP3 {{ processing_date.year }} using GAMMA software. Contains modified Copernicus Sentinel data {{ granule_name[17:21] }}, processed by ESA.
+    [RTC product processed by ]ASF DAAC HyP3 {{ processing_date.year }}[ using GAMMA software]. Contains modified Copernicus Sentinel data {{ granule_name[17:21] }}, processed by ESA.
+
+When using this data in a manuscript and/or crediting datasets used for analysis, an acknowledgement including the software versions may be appropriate:
+
+    ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.
 
 DOIs are also provided for citation when discussing the HyP3 software or plugins:
 * HyP3 processing environment, DOI: [10.5281/zenodo.3962581](https://doi.org/10.5281/zenodo.3962581)
