@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dateutil.parser import parse as dt_parse
 
-from hyp3_metadata import __version__, create_metadata_file_set
+from hyp3_metadata import __version__, create_metadata_file_set_rtc
 from hyp3_metadata.util import SUPPORTED_DEMS, populate_example_data
 
 
@@ -32,7 +32,7 @@ def main():
 
     populate_example_data(product_dir)
 
-    create_metadata_file_set(
+    create_metadata_file_set_rtc(
         product_dir=product_dir,
         granule_name=args.granule_name,
         dem_name=args.dem_name,

@@ -37,25 +37,26 @@ hand.
 If you have a current HyP3 product and would like re-generate the metadata for
 the product, you can do so using `hyp3_metadata.create_metadata_file_set`. For
 example, in a python interpreter, you can:
+
 ```python
 from datetime import datetime
 from pathlib import Path
 
-from hyp3_metadata import create_metadata_file_set
+from hyp3_metadata import create_metadata_file_set_rtc
 
 PRODUCT_DIR = Path('./S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2')
 SOURCE_GRANULE = 'S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8'
 
-create_metadata_file_set(
-    product_dir=PRODUCT_DIR,
-    granule_name=SOURCE_GRANULE,
-    dem_name='GLO-30',
-    processing_date=datetime.now(),
-    looks=1,  # Typically 6 for GRDH or (resolution / 10) for SLC
-    plugin_name='hyp3_gamma',
-    plugin_version='X.Y.Z',
-    processor_name='GAMMA',
-    processor_version='YYYYMMDD',
+create_metadata_file_set_rtc(
+   product_dir=PRODUCT_DIR,
+   granule_name=SOURCE_GRANULE,
+   dem_name='GLO-30',
+   processing_date=datetime.now(),
+   looks=1,  # Typically 6 for GRDH or (resolution / 10) for SLC
+   plugin_name='hyp3_gamma',
+   plugin_version='X.Y.Z',
+   processor_name='GAMMA',
+   processor_version='YYYYMMDD',
 )
 ```
 
