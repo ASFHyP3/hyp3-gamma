@@ -5,10 +5,10 @@ from datetime import datetime
 from glob import glob
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from PIL import Image
-from jinja2 import Environment, PackageLoader, select_autoescape, StrictUndefined
+from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import osr
 
 import hyp3_metadata

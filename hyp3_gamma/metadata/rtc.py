@@ -34,10 +34,12 @@ class RtcMetadataWriter:
         return files
 
     def create_readme(self) -> Path:
-        reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_{self.payload["polarizations"][0]}.tif'
+        reference_file = self.payload[
+                             'product_dir'] / f'{self.payload["product_dir"].name}_{self.payload["polarizations"][0]}.tif'
 
-        return self.create_metadata_file(self.payload, 'rtc/readme.md.txt.j2', reference_file, out_ext='README.md.txt', strip_ext=True, strip_pol=True
-        )
+        return self.create_metadata_file(self.payload, 'rtc/readme.md.txt.j2', reference_file, out_ext='README.md.txt',
+                                         strip_ext=True, strip_pol=True
+                                         )
 
     def create_product_xmls(self) -> List[Path]:
         payload = deepcopy(self.payload)
