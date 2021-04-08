@@ -11,6 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * InSAR processing via `ifm_sentinel.py` now leverages the
   [Copernicus GLO-30 Public DEM](https://registry.opendata.aws/copernicus-dem/)
+* InSAR GeoTIFF files are now aligned to a common 40m (for 10x2 looks) or 80m (for 20x4 looks) grid 
 
 ## [4.2.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.1.2...v4.2.0)
 
