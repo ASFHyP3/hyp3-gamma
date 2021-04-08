@@ -14,7 +14,7 @@ Ubuntu 18.0.4 is recommended for GAMMA support.
    cd hyp3-gamma
    conda env create -f conda-env.yml
    conda activate hyp3-gamma
-   pip install -e .[develop]
+   python -m pip install -e .[develop]
    ```
 1. Check hyp3_gamma is installed
    ```
