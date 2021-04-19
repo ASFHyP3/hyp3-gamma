@@ -276,7 +276,9 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
 
     #  Fetch the DEM file
     log.info("Getting a DEM file")
-    dem, dem_source = get_dem_file_gamma(reference_file, alooks)
+    dem_source = 'GLO-30'
+    dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
+    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
@@ -344,8 +346,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag)
 
-    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing,
-                       dem_source)
+    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)

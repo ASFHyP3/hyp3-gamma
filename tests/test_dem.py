@@ -181,12 +181,12 @@ def test_prepare_dem_geotiff(tmp_path):
     }
     geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
 
-    dem.prepare_dem_geotiff(str(dem_geotiff), geometry)
+    dem.prepare_dem_geotiff(str(dem_geotiff), geometry, pixel_size=60)
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [171030.0, 30.0, 0.0, 1328370.0, 0.0, -30.0]
-    assert info['size'] == [3707, 7410]
+    assert info['geoTransform'] == [171000.0, 60.0, 0.0, 1328400.0, 0.0, -60.0]
+    assert info['size'] == [1854, 3706]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
