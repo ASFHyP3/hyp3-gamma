@@ -14,8 +14,8 @@ from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
-from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.getParameter import getParameter
+from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
 
@@ -137,7 +137,8 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag, wrapped_flag, inc_flag):
+def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors, 
+                      include_wrapped_phase, include_inc_map):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -155,22 +156,22 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    if wrapped_flag:
+    if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if los_flag:
+    if include_los_deformation:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if inc_flag:
+    if include_inc_map:
         inName = "{}.inc.tif".format(output)
         outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if look_flag:
+    if include_look_vectors:
         inName = "{}.lv_theta.tif".format(output)
         outName = "{}_lv_theta.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
@@ -263,8 +264,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Speckle filtering: off\n')
 
 
-def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False,
-                         los_flag=False, wrapped_flag=False, inc_flag=False):
+def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
+                         include_los_deformation=False, include_wrapped_phase=False, include_inc_map=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -360,7 +361,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     pixel_spacing = int(alooks) * 20
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag, inc_flag)
+    move_output_files(output, reference, product_name, product_name, include_los_deformation, include_look_vectors,
+                      include_wrapped_phase, include_inc_map)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
@@ -390,8 +392,9 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
-                         los_flag=args.s, wrapped_flag=args.w, inc_flag=args.i)
+    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, 
+                         include_look_vectors=args.l, include_los_deformation=args.s, 
+                         include_wrapped_phase=args.w, include_inc_map=args.i)
 
 
 if __name__ == "__main__":
