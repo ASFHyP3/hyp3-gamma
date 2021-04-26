@@ -58,7 +58,7 @@ The files generated in this process include:
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
 8. Look Vector maps (GeoTIFFs) - *Optional*
-9. Incidence angle map (GeoTIFFs) - *Optional*
+9. Incidence Angle map (GeoTIFF) - *Optional*
 
 *See below for detailed descriptions of each of the product files.*
 
