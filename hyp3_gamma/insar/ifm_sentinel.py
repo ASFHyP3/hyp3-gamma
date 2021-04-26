@@ -15,6 +15,7 @@ from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
+from hyp3lib.getParameter import getParameter
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
 
@@ -189,10 +190,18 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
     reference_date = mydir[:15]
     secondary_date = mydir[17:]
+    reference_date_short = reference_date[:8]
 
-    log.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
+    log.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date_short))
     reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
     secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
+
+    parfile = f'{reference_date_short}.mli.par'
+    erad_nadir = getParameter(parfile, 'earth_radius_below_sensor')
+    erad_nadir = erad_nadir.split()[0]
+    sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
+    sar_to_earth_center = sar_to_earth_center.split()[0]
+    height = float(sar_to_earth_center) - float(erad_nadir)
 
     with open("baseline.log") as f:
         for line in f:
@@ -238,6 +247,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Baseline: %s\n' % baseline)
         f.write('UTCtime: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
+        f.write('Spacecraft height %s\n' % height)
+        f.write('Earth radius at nadir %s\n' % erad_nadir)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
