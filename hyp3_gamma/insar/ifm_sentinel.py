@@ -13,8 +13,8 @@ from secrets import token_hex
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
-from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.getParameter import getParameter
+from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from lxml import etree
@@ -137,7 +137,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors, 
+def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors,
                       include_wrapped_phase, include_inc_map):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
@@ -392,8 +392,8 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, 
-                         include_look_vectors=args.l, include_los_deformation=args.s, 
+    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
+                         include_look_vectors=args.l, include_los_deformation=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i)
 
 
