@@ -136,7 +136,8 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag, wrapped_flag):
+def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag, wrapped_flag,
+                      include_dem):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -157,6 +158,11 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
     if wrapped_flag:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
+    if include_dem:
+        inName = "{}.dem.tif".format(output)
+        outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if los_flag:
@@ -248,7 +254,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False,
-                         los_flag=False, wrapped_flag=False):
+                         los_flag=False, wrapped_flag=False, include_dem=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -344,7 +350,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     pixel_spacing = int(alooks) * 20
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag)
+    move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag,
+                      include_dem)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
@@ -368,13 +375,14 @@ def main():
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
+    parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
-                         los_flag=args.s, wrapped_flag=args.w)
+                         los_flag=args.s, wrapped_flag=args.w, include_dem=args.d)
 
 
 if __name__ == "__main__":
