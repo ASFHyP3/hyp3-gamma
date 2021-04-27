@@ -266,7 +266,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
                          include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
-                         water_making=False):
+                         water_masking=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -395,7 +395,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
-                         include_look_vectors=args.l, include_los_displacment=args.s,
+                         include_look_vectors=args.l, include_los_displacement=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
                          water_masking=args.m)
 
