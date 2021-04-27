@@ -248,7 +248,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False,
-                         los_flag=False, wrapped_flag=False):
+                         los_flag=False, wrapped_flag=False, water_masking=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -278,7 +278,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
-    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
+    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size, water_masking=water_masking)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
@@ -368,13 +368,14 @@ def main():
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
+    parser.add_argument("-m", action="store_true", help="Mask water")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
-                         los_flag=args.s, wrapped_flag=args.w)
+                         los_flag=args.s, wrapped_flag=args.w, water_masking=args.m)
 
 
 if __name__ == "__main__":
