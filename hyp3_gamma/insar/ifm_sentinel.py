@@ -138,7 +138,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors,
-                      include_wrapped_phase, include_inc_map):
+                      include_wrapped_phase, include_inc_map, water_masking):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -169,6 +169,11 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_defo
     if include_inc_map:
         inName = "{}.inc.tif".format(output)
         outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
+    if water_masking:
+        inName = "final_mask.tif"
+        outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_look_vectors:
@@ -363,7 +368,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
-                      include_wrapped_phase, include_inc_map)
+                      include_wrapped_phase, include_inc_map, water_masking)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
