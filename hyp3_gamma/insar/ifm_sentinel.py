@@ -137,7 +137,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors,
+def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
@@ -161,7 +161,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_defo
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if include_los_deformation:
+    if include_los_displacement:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
@@ -265,7 +265,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
-                         include_los_deformation=False, include_wrapped_phase=False, include_inc_map=False):
+                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -361,7 +361,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     pixel_spacing = int(alooks) * 20
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, include_los_deformation, include_look_vectors,
+    move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
@@ -393,7 +393,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
-                         include_look_vectors=args.l, include_los_deformation=args.s,
+                         include_look_vectors=args.l, include_los_displacement=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i)
 
 
