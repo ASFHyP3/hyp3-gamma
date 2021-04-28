@@ -132,7 +132,7 @@ Two look vector maps are output with the product as GeoTIFFs. The lv_theta map i
 ----------------
 ## 9. Incidence Angle Map
 
-The local incidence angle is defined as the angle between the incident radar signal and the local surface normal.  Output is a geotiff in radians giving the local incidence angle for each pixel in the scene.
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal.  Output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
 
 *Note that this file is optional. Select the "Include Inc. Angle Map" option in the HyP3 Processing Options to include it in the product package.*
 
