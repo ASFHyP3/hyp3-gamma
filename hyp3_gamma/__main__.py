@@ -118,7 +118,7 @@ def insar():
         alooks=alooks,
         rlooks=rlooks,
         include_look_vectors=args.include_look_vectors,
-        include_los_deformation=args.include_los_displacement,
+        include_los_displacement=args.include_los_displacement,
         include_inc_map=args.include_inc_map,
     )
 
