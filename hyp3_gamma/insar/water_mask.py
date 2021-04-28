@@ -4,10 +4,11 @@ import argparse
 import logging
 import os
 
+from osgeo import gdal, ogr, osr
+
 from hyp3lib import saa_func_lib as saa
 from hyp3_gamma.dem import get_geometry_from_kml
 
-from osgeo import gdal, ogr, osr
 
 def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
 
@@ -48,7 +49,7 @@ def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
             feat = None
 
     ds = None
-    return 
+    return
 
 
 def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1):
@@ -56,7 +57,7 @@ def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1)
 
     xmin, ymax = upper_left
     xmax, ymin = lower_right
-
+ 
     shape_file = f'{mask_location}/GSHHG/GSHHS_f_L1.shp'
     reproj_shape_file = 'reproj_shape_file.shp'
     reproject_shapefile(in_tif, shape_file, reproj_shape_file, safe_dir)
@@ -105,9 +106,9 @@ def apply_water_mask(tiffile, outfile, safe_dir, maskval=0, band=1):
 
     logging.info("Applying water body mask")
     mask = get_water_mask(tiffile, upper_left, lower_right, trans[1], safe_dir)
-    saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask) 
+    saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask)
     data[mask == 0] = maskval
-    saa.write_gdal_file_byte("final_dem.tif", trans, proj, data)
+    saa.write_gdal_file("final_dem.tif", trans, proj, data)
 
     dst_ds = gdal.GetDriverByName('GTiff').Create(
         outfile, data.shape[1], data.shape[0], band, gdal.GDT_Float32
