@@ -117,9 +117,9 @@ def insar():
         secondary_file=secondary_granule,
         alooks=alooks,
         rlooks=rlooks,
-        look_flag=args.include_look_vectors,
-        los_flag=args.include_los_displacement,
-        inc_flag=args.include_inc_map,
+        include_look_vectors=args.include_look_vectors,
+        include_los_displacement=args.include_los_displacement,
+        include_inc_map=args.include_inc_map,
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)

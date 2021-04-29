@@ -137,8 +137,8 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, include_los_deformation, include_look_vectors,
-                      include_wrapped_phase, include_inc_map, water_masking):
+def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
+                      include_wrapped_phase, include_inc_map):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -161,7 +161,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_defo
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if include_los_deformation:
+    if include_los_displacement:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
@@ -169,11 +169,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_defo
     if include_inc_map:
         inName = "{}.inc.tif".format(output)
         outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
-        shutil.copy(inName, outName)
-
-    if water_masking:
-        inName = "final_mask.tif"
-        outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_look_vectors:
@@ -253,8 +248,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Baseline: %s\n' % baseline)
         f.write('UTCtime: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
-        f.write('Spacecraft height %s\n' % height)
-        f.write('Earth radius at nadir %s\n' % erad_nadir)
+        f.write('Spacecraft height: %s\n' % height)
+        f.write('Earth radius at nadir: %s\n' % erad_nadir)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
@@ -270,8 +265,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
-                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
-                         water_masking=False):
+                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -301,7 +295,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
-    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size, water_masking=water_masking)
+    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
@@ -368,7 +362,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
-                      include_wrapped_phase, include_inc_map, water_masking)
+                      include_wrapped_phase, include_inc_map)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
@@ -393,7 +387,6 @@ def main():
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-i", action="store_true", help="Create incidence angle map")
-    parser.add_argument("-m", action="store_true", help="Create and apply water mask")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -401,8 +394,7 @@ def main():
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
                          include_look_vectors=args.l, include_los_displacement=args.s,
-                         include_wrapped_phase=args.w, include_inc_map=args.i,
-                         water_masking=args.m)
+                         include_wrapped_phase=args.w, include_inc_map=args.i)
 
 
 if __name__ == "__main__":
