@@ -92,6 +92,7 @@ def insar():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
+    parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
@@ -116,8 +117,9 @@ def insar():
         secondary_file=secondary_granule,
         alooks=alooks,
         rlooks=rlooks,
-        look_flag=args.include_look_vectors,
-        los_flag=args.include_los_displacement,
+        include_look_vectors=args.include_look_vectors,
+        include_los_displacement=args.include_los_displacement,
+        include_inc_map=args.include_inc_map,
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
