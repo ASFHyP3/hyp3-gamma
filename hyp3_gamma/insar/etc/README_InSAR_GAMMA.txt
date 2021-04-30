@@ -140,7 +140,7 @@ The local incidence angle is defined as the angle between the incident radar sig
 ----------------
 ## 10. Water Mask
 
-The water mask specifies, pixel-by-pixel, where there is land and where there is water in the corresponding InSAR product.  In the mask, 1 is land and 0 denotes water.  This mask is applied to the DEM prior to running insar jobs, effectively clipping out the water as water is set to a no data value at the start of processing.  The water mask file is stored as a byte-valued GeoTIFF file.
+The water mask specifies, pixel-by-pixel, where there is land and where there is water in the corresponding InSAR product.  In the mask, 1 is land and 0 denotes water.  This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water as water is set to a no data value at the start of processing.  The water mask file is stored as a byte-valued GeoTIFF file.
 
 *Note that this file is optional. Select the "Include Water Mask" option in the HyP3 Processing Options to include it in the product package.*
 
