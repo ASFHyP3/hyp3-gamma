@@ -118,7 +118,7 @@ def timedetla_in_days(delta):
     return round(total_seconds/seconds_in_a_day)
 
 
-def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80):
+def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80, water_mask=False):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
 
@@ -132,9 +132,11 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     pol1 = reference_name[15:16]
     pol2 = secondary_name[15:16]
     orb = least_precise_orbit_of(orbit_files)
+    mask = 'w' if water_mask else 'u'
     product_id = token_hex(2).upper()
 
-    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_' \
+           f'{product_id}'
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
@@ -365,7 +367,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Move the outputs to the product directory
     pixel_spacing = int(alooks) * 20
-    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
+    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, water_masking)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, water_masking)
