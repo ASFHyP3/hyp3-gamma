@@ -58,6 +58,8 @@ The files generated in this process include:
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
 8. Look Vector maps (GeoTIFFs) - *Optional*
+9. Incidence Angle map (GeoTIFF) - *Optional*
+10. Water Mask (GeoTIFF) - *Optional*
 
 *See below for detailed descriptions of each of the product files.*
 
@@ -127,6 +129,20 @@ The text file is not tagged; it has a .txt extension on the base filename.
 Two look vector maps are output with the product as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from 0 (east) to pi/2 (north).
 
 *Note that these files are optional. Select the "Angle Maps" option in the HyP3 Processing Options to include them in the product package.*
+
+----------------
+## 9. Incidence Angle Map
+
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal.  Output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
+
+*Note that this file is optional. Select the "Include Inc. Angle Map" option in the HyP3 Processing Options to include it in the product package.*
+
+----------------
+## 10. Water Mask
+
+The water mask specifies, pixel-by-pixel, where there is land and where there is water in the corresponding InSAR product.  In the mask, 1 is land and 0 denotes water.  This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water as water is set to a no data value at the start of processing.  The water mask is stored as a byte-valued GeoTIFF file.
+
+*Note that this file is optional. Select the "Include Water Mask" option in the HyP3 Processing Options to include it in the product package.*
 
 *************
 # InSAR Processing #
@@ -248,5 +264,5 @@ uso@asf.alaska.edu
 907-474-5041
 
 -------------
-Revised 2020-03-11
+Revised 2020-04-22
 

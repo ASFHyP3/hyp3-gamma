@@ -13,6 +13,7 @@ from secrets import token_hex
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
+from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
@@ -117,7 +118,7 @@ def timedetla_in_days(delta):
     return round(total_seconds/seconds_in_a_day)
 
 
-def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80):
+def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80, water_mask=False):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
 
@@ -131,13 +132,15 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     pol1 = reference_name[15:16]
     pol2 = secondary_name[15:16]
     orb = least_precise_orbit_of(orbit_files)
+    mask = 'w' if water_mask else 'u'
     product_id = token_hex(2).upper()
 
-    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_' \
+           f'{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, los_flag, look_flag, wrapped_flag,
-                      include_dem):
+def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
+                      include_wrapped_phase, include_inc_map, water_masking, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -155,7 +158,7 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    if wrapped_flag:
+    if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
@@ -164,13 +167,23 @@ def move_output_files(output, reference, prod_dir, long_output, los_flag, look_f
         inName = "{}.dem.tif".format(output)
         outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
-
-    if los_flag:
+    
+    if include_los_displacement:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if look_flag:
+    if include_inc_map:
+        inName = "{}.inc.tif".format(output)
+        outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
+    if water_masking:
+        inName = "final_mask.tif"
+        outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
+    if include_look_vectors:
         inName = "{}.lv_theta.tif".format(output)
         outName = "{}_lv_theta.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
@@ -190,10 +203,18 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
     reference_date = mydir[:15]
     secondary_date = mydir[17:]
+    reference_date_short = reference_date[:8]
 
-    log.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date))
+    log.info("In directory {} looking for file with date {}".format(os.getcwd(), reference_date_short))
     reference_file = glob.glob("*%s*.SAFE" % reference_date)[0]
     secondary_file = glob.glob("*%s*.SAFE" % secondary_date)[0]
+
+    parfile = f'{reference_date_short}.mli.par'
+    erad_nadir = getParameter(parfile, 'earth_radius_below_sensor')
+    erad_nadir = erad_nadir.split()[0]
+    sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
+    sar_to_earth_center = sar_to_earth_center.split()[0]
+    height = float(sar_to_earth_center) - float(erad_nadir)
 
     with open("baseline.log") as f:
         for line in f:
@@ -239,6 +260,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Baseline: %s\n' % baseline)
         f.write('UTCtime: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
+        f.write('Spacecraft height: %s\n' % height)
+        f.write('Earth radius at nadir: %s\n' % erad_nadir)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
@@ -253,8 +276,9 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Speckle filtering: off\n')
 
 
-def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, look_flag=False,
-                         los_flag=False, wrapped_flag=False, include_dem=False):
+def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
+                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
+                         water_masking=False, include_dem=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -284,7 +308,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
-    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
+    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size, water_masking=water_masking)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
@@ -334,7 +358,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
     execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True)
 
-    log.info("Starting interf_pwr_s1_lt_tops_proc.py 2")
+    log.info("Starting interf_pwr_s1_lt_tops_proc.py 3")
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, step=3)
 
     # Perform phase unwrapping and geocoding of results
@@ -348,10 +372,10 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, lo
 
     # Move the outputs to the product directory
     pixel_spacing = int(alooks) * 20
-    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
+    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, water_masking)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, los_flag, look_flag, wrapped_flag,
-                      include_dem)
+    move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
+                      include_wrapped_phase, include_inc_map, water_masking, include_dem)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
@@ -376,13 +400,17 @@ def main():
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
+    parser.add_argument("-i", action="store_true", help="Create incidence angle map")
+    parser.add_argument("-m", action="store_true", help="Create and apply water mask")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks, look_flag=args.l,
-                         los_flag=args.s, wrapped_flag=args.w, include_dem=args.d)
+    insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
+                         include_look_vectors=args.l, include_los_displacement=args.s,
+                         include_wrapped_phase=args.w, include_inc_map=args.i,
+                         water_masking=args.m, include_dem=args.d)
 
 
 if __name__ == "__main__":

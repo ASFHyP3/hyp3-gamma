@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.0]
+
+### Added
+* Option to apply water masking to the DEM before processing
+  * `water_masking` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `--apply-watger-mask` parameter to `insar` entrypoint
+  * `-m` parameter to `ifm_sentinel.py` script
+  
+## [4.4.0]
+
+### Added
+* Option to include an Incidence Angle GeoTIFF with InSAR products
+  * `include_inc_map` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `--include-inc-map` parameter to `insar` entrypoint
+  * `-i` parameter to `ifm_sentinel.py` script
+* Parameter metadata file for InSAR products now includes `Spacecraft height` and `Earth radius at nadir` attributes
+
 ## [4.3.0]
 
 ### Changed
