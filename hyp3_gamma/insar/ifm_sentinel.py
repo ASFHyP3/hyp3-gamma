@@ -396,12 +396,12 @@ def main():
     parser.add_argument("secondary", help="Secondary input file")
     parser.add_argument("-r", "--rlooks", default=20, help="Number of range looks (def=20)")
     parser.add_argument("-a", "--alooks", default=4, help="Number of azimuth looks (def=4)")
-    parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
-    parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
-    parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
     parser.add_argument("-i", action="store_true", help="Create incidence angle map")
+    parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-m", action="store_true", help="Create and apply water mask")
+    parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
+    parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
