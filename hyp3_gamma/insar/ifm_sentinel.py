@@ -167,7 +167,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         inName = "{}.dem.tif".format(output)
         outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
-    
+
     if include_los_displacement:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
