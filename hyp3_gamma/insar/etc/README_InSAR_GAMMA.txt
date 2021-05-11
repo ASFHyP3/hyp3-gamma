@@ -139,7 +139,7 @@ The local incidence angle is defined as the angle between the incident radar sig
 
 
 -------------
-## 11. Digital Elevation Model
+## 10. Digital Elevation Model
 
 The digital elevation file contains the terrain height for the scenes being processed. The values are taken from the Copernicus GLO-30 Public DEM.
 
