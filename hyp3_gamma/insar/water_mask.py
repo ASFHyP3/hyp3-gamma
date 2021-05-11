@@ -9,7 +9,6 @@ from osgeo import gdal, ogr, osr
 
 from hyp3_gamma.dem import get_geometry_from_kml
 
-
 def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
 
     # Get source projection from the SAFE dir
