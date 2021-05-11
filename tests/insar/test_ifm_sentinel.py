@@ -54,7 +54,6 @@ def test_get_product_name():
             'S1A_OPER_AUX_POEORB_OPOD_20160616T121500_V20160526T225943_20160528T005943.EOF',
         ],
         'pixel_spacing': 80,
-        'water_mask': False,
     }
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1AA_20160527T014319_20160714T014322_VVP048_INT80_G_ueF_[0-9A-F]{4}$', name)
@@ -66,11 +65,10 @@ def test_get_product_name():
             'S1B_OPER_AUX_RESORB_OPOD_20200907T115242_V20200906T042511_20200906T074241.EOF',
             'S1A_OPER_AUX_POEORB_OPOD_20160616T121500_V20160526T225943_20160528T005943.EOF',
         ],
-        'pixel_spacing': 40,
-        'water_mask': True,
+        'pixel_spacing': 40
     }
     name = ifm_sentinel.get_product_name(**payload)
-    assert match(r'S1BA_20200918T073646_20200906T073646_HHR012_INT40_G_weF_[0-9A-F]{4}$', name)
+    assert match(r'S1BA_20200918T073646_20200906T073646_HHR012_INT40_G_ueF_[0-9A-F]{4}$', name)
 
     payload = {
         'reference_name': 'S1A_IW_SLC__1SSV_20150101T230038_20150101T230114_003984_004CC1_0481',
@@ -79,7 +77,7 @@ def test_get_product_name():
             'S1B_OPER_AUX_RESORB_OPOD_20200907T115242_V20200906T042511_20200906T074241.EOF',
             None,
         ],
-        'pixel_spacing': 40,
+        'pixel_spacing': 40
     }
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1AB_20150101T230038_20200924T005722_VVO2092_INT40_G_ueF_[0-9A-F]{4}$', name)
