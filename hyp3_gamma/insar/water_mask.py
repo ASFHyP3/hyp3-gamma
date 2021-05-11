@@ -122,10 +122,8 @@ def apply_water_mask(tiffile, outfile, safe_dir, maskval=0, band=1):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(
-        prog='mask_water_bodies.py',
-        description='Create and employ a water body mask wherein all water is 0 and land is 1'
-    )
+    parser = argparse.ArgumentParser(prog='mask_water_bodies.py',
+      description='Create and employ a water body mask wherein all water is 0 and land is 1')
 
     parser.add_argument('tiffile', help='Name of tif file to mask')
     parser.add_argument('outfile', help='Name of output masked file')
