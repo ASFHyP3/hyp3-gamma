@@ -4,10 +4,11 @@ import argparse
 import logging
 import os
 
-from hyp3lib import saa_func_lib as saa
 from osgeo import gdal, ogr, osr
 
+from hyp3lib import saa_func_lib as saa
 from hyp3_gamma.dem import get_geometry_from_kml
+
 
 def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
 
@@ -56,7 +57,7 @@ def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1)
 
     xmin, ymax = upper_left
     xmax, ymin = lower_right
-
+ 
     shape_file = f'{mask_location}/GSHHG/GSHHS_f_L1.shp'
     reproj_shape_file = 'reproj_shape_file.shp'
     reproject_shapefile(in_tif, shape_file, reproj_shape_file, safe_dir)

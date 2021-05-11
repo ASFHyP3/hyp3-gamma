@@ -6,7 +6,6 @@ from hyp3lib.execute import execute
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.insar.water_mask import apply_water_mask
 
-
 def get_dem_file_gamma(dem_image: str, dem_par: str, safe_dir: str, pixel_size: int, water_masking: bool):
     geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
     with NamedTemporaryFile() as dem_tif:
