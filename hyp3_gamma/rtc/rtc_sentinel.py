@@ -52,8 +52,8 @@ def createPowerDB(fi, nodata=None):
     data[ch] = np.NaN
     powerdb = 10*np.log10(data)
     if not nodata:
-        with np.errstate(divide='ignore'):
-            nodata = 10*np.log10(in_nodata)
+        #nodata = np.iinfo(data.dtype).max
+        nodata = np.NaN
     powerdb[ch] = nodata
     outfile = fi.replace('.tif','_db.tif')
     saa.write_gdal_file_float(outfile, trans, proj, powerdb, nodata=nodata)
@@ -110,14 +110,13 @@ def configure_log_file(log_file):
     return log_file
 
 
-def log_parameters(safe_dir, resolution, radiometry, scale, power_unit, speckle_filter, dem_matching, include_dem, include_inc_map,
+def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name, dem_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
     log.info(f'    Radiometry                : {radiometry}')
     log.info(f'    Scale                     : {scale}')
-    log.info(f'    Power Unit                : {power_unit}')
     log.info(f'    Speckle filter            : {speckle_filter}')
     log.info(f'    DEM matching              : {dem_matching}')
     log.info(f'    Include DEM               : {include_dem}')
@@ -291,7 +290,7 @@ def append_additional_log_files(log_file, pattern):
 
 
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
-                       power_unit: str = 'power', speckle_filter: bool = False, dem_matching: bool = False,
+                       speckle_filter: bool = False, dem_matching: bool = False,
                        include_dem: bool = False, include_inc_map: bool = False, include_scattering_area: bool = False,
                        include_rgb: bool = False, dem: str = None, bbox: List[float] = None, looks: int = None,
                        skip_cross_pol: bool = False, dem_name: str = 'copernicus') -> str:
@@ -340,7 +339,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
-    log_parameters(safe_dir, resolution, radiometry, scale, power_unit, speckle_filter, dem_matching, include_dem, include_inc_map,
+    log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
 
     log.info('Preparing DEM')
@@ -383,12 +382,11 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         shutil.move(tmp_tif, amp_tif)
 
         output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
-        output_db_tif = output_tif.replace('.tif', '_db.tif')
         if scale == 'power':
-            if power_unit.lower() == 'db':
-                power_db_tif = createPowerDB(power_tif, nodata=None)
-                shutil.copy(power_db_tif, output_db_tif)                    
             shutil.copy(power_tif, output_tif)
+        elif scale == 'db':
+            power_db_tif = createPowerDB(power_tif, nodata=None)
+            shutil.copy(power_db_tif, output_tif)                    
         else:
             shutil.copy(amp_tif, output_tif)
 
@@ -445,14 +443,11 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Path to the Sentinel-1 .SAFE directory to process.')
-
     parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Radiometry of the output backscatter image(s)')
-    parser.add_argument('--scale', choices=('power', 'amplitude'), default='power',
+    parser.add_argument('--scale', choices=('power', 'db', 'amplitude'), default='power',
                         help='Scale of the output backscatter image(s)')
-    parser.add_argument('--power-unit', choices=('power', 'db'), default='power',
-                        help='unit of the output backscatter power')
     parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
     parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM GeoTIFF in the output package.')
@@ -495,7 +490,6 @@ def main():
                        resolution=args.resolution,
                        radiometry=args.radiometry,
                        scale=args.scale,
-                       power_unit=args.power_unit,
                        speckle_filter=args.speckle_filter,
                        dem_matching=args.dem_matching,
                        include_dem=args.include_dem,
