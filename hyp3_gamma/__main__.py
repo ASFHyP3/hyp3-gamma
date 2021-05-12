@@ -90,6 +90,7 @@ def insar():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--inlcude-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
@@ -117,6 +118,7 @@ def insar():
         secondary_file=secondary_granule,
         alooks=alooks,
         rlooks=rlooks,
+        include_dem=args.include_dem,
         include_look_vectors=args.include_look_vectors,
         include_los_displacement=args.include_los_displacement,
         include_inc_map=args.include_inc_map,
