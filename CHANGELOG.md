@@ -13,6 +13,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `include_dem` parameter to ifm_sentinel.insar_sentinel_gamma` function
   * `--include-dem` parameter to `insar` entrypoint
   * `-d` parameter to `ifm_sentinel.py` script
+* Parameter metadata file for InSAR products now includes `Slant range near`, `Slant range center` and  `Slant range far` attributes
 
 ## [4.4.0]
 

@@ -208,6 +208,12 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
     sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
     sar_to_earth_center = sar_to_earth_center.split()[0]
     height = float(sar_to_earth_center) - float(erad_nadir)
+    near_slant_range = getParameter(parfile, 'near_range_slc')
+    near_slant_range = near_slant_range.split()[0]
+    center_slant_range = getParameter(parfile, 'center_range_slc')
+    center_slant_range = center_slant_range.split()[0]
+    far_slant_range = getParameter(parfile, 'far_range_slc')
+    far_slant_range = far_slant_range.split()[0]
 
     with open("baseline.log") as f:
         for line in f:
@@ -255,6 +261,9 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Heading: %s\n' % heading)
         f.write('Spacecraft height: %s\n' % height)
         f.write('Earth radius at nadir: %s\n' % erad_nadir)
+        f.write('Slant range near: %s\n' % near_slant_range)
+        f.write('Slant range center: %s\n' % center_slant_range)
+        f.write('Slant range far: %s\n' % far_slant_range)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
