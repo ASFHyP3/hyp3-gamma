@@ -12,6 +12,7 @@ from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
+import numpy as np
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
@@ -28,6 +29,8 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
+from hyp3lib import saa_func_lib as saa
+
 from osgeo import gdal, gdalconst, ogr
 
 import hyp3_gamma
@@ -35,9 +38,27 @@ from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
+
 log = logging.getLogger()
 gdal.UseExceptions()
 ogr.UseExceptions()
+
+
+def createPowerDB(fi, nodata=None):
+    f = saa.open_gdal_file(fi)
+    in_nodata = f.GetRasterBand(1).GetNoDataValue()
+    (x,y,trans,proj,data) = saa.read_gdal_file(f)
+    ch = (data == in_nodata) | (data <= 0.0)
+    data[ch] = np.NaN
+    powerdb = 10*np.log10(data)
+    if not nodata:
+        with np.errstate(divide='ignore'):
+            nodata = 10*np.log10(in_nodata)
+    powerdb[ch] = nodata
+    outfile = fi.replace('.tif','_db.tif')
+    saa.write_gdal_file_float(outfile, trans, proj, powerdb, nodata=nodata)
+    f = None
+    return outfile
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -89,13 +110,14 @@ def configure_log_file(log_file):
     return log_file
 
 
-def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
+def log_parameters(safe_dir, resolution, radiometry, scale, power_unit, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name, dem_name):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
     log.info(f'    Radiometry                : {radiometry}')
     log.info(f'    Scale                     : {scale}')
+    log.info(f'    Power Unit                : {power_unit}')
     log.info(f'    Speckle filter            : {speckle_filter}')
     log.info(f'    DEM matching              : {dem_matching}')
     log.info(f'    Include DEM               : {include_dem}')
@@ -269,10 +291,10 @@ def append_additional_log_files(log_file, pattern):
 
 
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
-                       speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
-                       include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
-                       dem: str = None, bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False,
-                       dem_name: str = 'copernicus') -> str:
+                       power_unit: str = 'power', speckle_filter: bool = False, dem_matching: bool = False,
+                       include_dem: bool = False, include_inc_map: bool = False, include_scattering_area: bool = False,
+                       include_rgb: bool = False, dem: str = None, bbox: List[float] = None, looks: int = None,
+                       skip_cross_pol: bool = False, dem_name: str = 'copernicus') -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
@@ -318,7 +340,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
-    log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
+    log_parameters(safe_dir, resolution, radiometry, scale, power_unit, speckle_filter, dem_matching, include_dem, include_inc_map,
                    include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
 
     log.info('Preparing DEM')
@@ -361,7 +383,11 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         shutil.move(tmp_tif, amp_tif)
 
         output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
+        output_db_tif = output_tif.replace('.tif', '_db.tif')
         if scale == 'power':
+            if power_unit.lower() == 'db':
+                power_db_tif = createPowerDB(power_tif, nodata=None)
+                shutil.copy(power_db_tif, output_db_tif)                    
             shutil.copy(power_tif, output_tif)
         else:
             shutil.copy(amp_tif, output_tif)
@@ -425,6 +451,8 @@ def main():
                         help='Radiometry of the output backscatter image(s)')
     parser.add_argument('--scale', choices=('power', 'amplitude'), default='power',
                         help='Scale of the output backscatter image(s)')
+    parser.add_argument('--power-unit', choices=('power', 'db'), default='power',
+                        help='unit of the output backscatter power')
     parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
     parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
     parser.add_argument('--include-dem', action='store_true', help='Include the DEM GeoTIFF in the output package.')
@@ -467,6 +495,7 @@ def main():
                        resolution=args.resolution,
                        radiometry=args.radiometry,
                        scale=args.scale,
+                       power_unit=args.power_unit,
                        speckle_filter=args.speckle_filter,
                        dem_matching=args.dem_matching,
                        include_dem=args.include_dem,
