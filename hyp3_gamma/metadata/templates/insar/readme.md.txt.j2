@@ -28,6 +28,16 @@ f:          Swath Number: 1, 2, 3, or Full (F)
 ssss:       Product ID
 
 ----------------
+### Pixel Spacing ###
+
+When ordering InSAR On Demand products, users can choose between 20x4 looks or 10x2 looks, which drives the resolution and pixel spacing of the output products. The first number indicates the number of looks in range, the second is the number of looks in azimuth.
+
+The output product pixel spacing depends on the number of looks in azimuth:
+pixel spacing = 20 * azimuth looks
+
+Products with 20x4 looks have a pixel spacing of 80 m, while those with 10x2 looks have a pixel spacing of 40 m.
+
+----------------
 ### Using this data ###
 
 Please refer to the ASF Sentinel-1 InSAR Product Guide for in-depth guidance on the use of this dataset:
@@ -128,9 +138,6 @@ The amplitude image is tagged with _amp.tif
 ## 7. Parameter Documentation
 
 The text file included with the product lists the key processing parameters used, including the full granule names, baseline length, number of looks, output resolution, and source DEM information. Note that the DEM is down-sampled to twice the pixel spacing of the desired InSAR output pixel spacing; an 80-m InSAR product requires the DEM to be down-sampled to a pixel spacing of 160 m.
-
-The output product resolution depends on the number of looks in azimuth:
-pixel spacing = 20 * azimuth looks
 
 The text file is not tagged; it has a .txt extension on the base filename.
 
