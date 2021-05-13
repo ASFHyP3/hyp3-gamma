@@ -93,6 +93,7 @@ def insar():
     parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
+    parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
@@ -121,6 +122,7 @@ def insar():
         include_dem=args.include_dem,
         include_look_vectors=args.include_look_vectors,
         include_los_displacement=args.include_los_displacement,
+        include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
     )
 

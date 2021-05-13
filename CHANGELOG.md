@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.1]
+
+### Added
+* `--include-wrapped-phase` option for the `insar` entrypoint to include the wrapped phase GeoTIFF in the output product
+
+### Changed
+* Updated the description of the Wrapped Interferogram in the InSAR product README, including the optional GeoTIFF
+
 ## [4.5.0]
 
 ### Added
