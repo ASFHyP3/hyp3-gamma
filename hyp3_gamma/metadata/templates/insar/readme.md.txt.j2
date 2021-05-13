@@ -102,7 +102,9 @@ The LOS displacement map is tagged with _los_disp.tif
 ----------------
 ## 4. Vertical Displacement Map
 
-Gamma software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. The height map is transformed from the radar geometry (slant range/Doppler) using a DEM and resampled to the WGS84 ellipsoid to output an orthorectified product. Note that in cases where displacement has both a vertical and a horizontal component to the change, the assumptions used to generate height may not be correct. Time series analysis or external data sources may be necessary to generate reliable displacement maps that take into consideration the relative influences of horizontal and vertical movement.
+Gamma software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. The height map is transformed from the radar geometry (slant range/Doppler) using a DEM and resampled to the WGS84 ellipsoid to output an orthorectified product.
+
+Note that in cases where displacement has both a vertical and a horizontal component to the change, the assumptions used to generate height may not be correct. Time series analysis or external data sources may be necessary to generate reliable displacement maps that take into consideration the relative influences of horizontal and vertical movement.
 
 Values are in meters, with positive values indicating uplift and negative values indicating subsidence.
 
