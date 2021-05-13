@@ -45,18 +45,16 @@ ogr.UseExceptions()
 
 
 def createPowerDB(fi, nodata=None):
-    f = saa.open_gdal_file(fi)
+    f = gdal.Open(fi)
     in_nodata = f.GetRasterBand(1).GetNoDataValue()
-    (x,y,trans,proj,data) = saa.read_gdal_file(f)
-    ch = (data == in_nodata) | (data <= 0.0)
-    data[ch] = np.NaN
-    powerdb = 10*np.log10(data)
+    _,_,trans,proj,data = saa.read_gdal_file(f)
+    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
+    powerdb = 10*np.ma.log10(data)
     if not nodata:
-        nodata = np.finfo(data.dtype).min.astype(np.float64)
-    powerdb[ch] = nodata
-    outfile = fi.replace('.tif','_db.tif')
-    saa.write_gdal_file_float(outfile, trans, proj, powerdb, nodata=nodata)
-    f = None
+        nodata = np.finfo(data.dtype).min.astype(float)
+    outfile = fi.replace('.tif','-db.tif')
+    saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
+    del f
     return outfile
 
 
@@ -383,9 +381,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
         if scale == 'power':
             shutil.copy(power_tif, output_tif)
-        elif scale == 'db':
-            power_db_tif = createPowerDB(power_tif, nodata=None)
-            shutil.copy(power_db_tif, output_tif)                    
+        elif scale == 'decibel':
+            decibel_tif = createPowerDB(power_tif, nodata=None)
+            shutil.copy(decibel_tif, output_tif)                    
         else:
             shutil.copy(amp_tif, output_tif)
 
@@ -445,7 +443,7 @@ def main():
     parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Radiometry of the output backscatter image(s)')
-    parser.add_argument('--scale', choices=('power', 'db', 'amplitude'), default='power',
+    parser.add_argument('--scale', choices=('power', 'decibel', 'amplitude'), default='power',
                         help='Scale of the output backscatter image(s)')
     parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
     parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
