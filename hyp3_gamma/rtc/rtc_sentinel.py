@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import zipfile
+import numpy as np
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
@@ -12,7 +13,6 @@ from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
-import numpy as np
 
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
@@ -28,8 +28,8 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib.utm2dem import utm2dem
 from hyp3lib import saa_func_lib as saa
+from hyp3lib.utm2dem import utm2dem
 
 from osgeo import gdal, gdalconst, ogr
 
@@ -47,12 +47,12 @@ ogr.UseExceptions()
 def createPowerDB(fi, nodata=None):
     f = gdal.Open(fi)
     in_nodata = f.GetRasterBand(1).GetNoDataValue()
-    _,_,trans,proj,data = saa.read_gdal_file(f)
+    _, _, trans, proj, data = saa.read_gdal_file(f)
     data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
     powerdb = 10*np.ma.log10(data)
     if not nodata:
         nodata = np.finfo(data.dtype).min.astype(float)
-    outfile = fi.replace('.tif','-db.tif')
+    outfile = fi.replace('.tif', '-db.tif')
     saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
     del f
     return outfile
@@ -272,7 +272,7 @@ def create_browse_images(out_dir, out_name, pol):
 
     pol_tif = f'{out_dir}/{out_name}_{pol.upper()}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
-    raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
+    raster_boundary2shape(pol_amp_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
 def append_additional_log_files(log_file, pattern):

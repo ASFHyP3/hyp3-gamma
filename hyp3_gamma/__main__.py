@@ -40,7 +40,7 @@ def rtc():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
     parser.add_argument('--radiometry', choices=['gamma0', 'sigma0'], default='gamma0')
-    parser.add_argument('--scale', choices=['power', 'amplitude'], default='power')
+    parser.add_argument('--scale', choices=['power', 'decibel', 'amplitude'], default='power')
     parser.add_argument('--speckle-filter', type=string_is_true, default=False)
     parser.add_argument('--dem-matching', type=string_is_true, default=False)
     parser.add_argument('--include-dem', type=string_is_true, default=False)
