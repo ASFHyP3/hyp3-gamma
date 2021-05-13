@@ -52,7 +52,6 @@ def createPowerDB(fi, nodata=None):
     data[ch] = np.NaN
     powerdb = 10*np.log10(data)
     if not nodata:
-        #have to define the minimum of datatype as nodata, can not define maximum of datatype as nodata
         nodata = np.finfo(data.dtype).min.astype(np.float64)
     powerdb[ch] = nodata
     outfile = fi.replace('.tif','_db.tif')
