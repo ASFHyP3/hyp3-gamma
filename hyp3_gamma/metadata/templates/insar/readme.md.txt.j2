@@ -91,6 +91,8 @@ The wrapped interferogram is output in both a georeferenced PNG and KMZ format b
 
 The wrapped interferogram image is generated from the interferogram phase prior to unwrapping. The PNG and KMZ files are tagged with _color_phase, and are 2048 pixels wide. The optional GeoTIFF is tagged with _wrapped_phase.tif
 
+*The GeoTIFF version of the wrapped interferogram is optional. Select the "Include Wrapped GeoTIFF" option in the On Demand HyP3 Processing Options to include it in the product package.*
+
 ----------------
 ## 2. Unwrapped Interferogram
 
@@ -107,7 +109,7 @@ The LOS displacement map is in GeoTIFF format and converts the unwrapped differe
 
 The LOS displacement map is tagged with _los_disp.tif
 
-*Note that this file is optional. Select the "Include LOS Displacement" option in the HyP3 Processing Options to include it in the product package.*
+*This file is optional. Select the "Include LOS Displacement" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
 ## 4. Vertical Displacement Map
@@ -146,14 +148,14 @@ The text file is not tagged; it has a .txt extension on the base filename.
 
 Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from 0 (east) to pi/2 (north).
 
-*Note that these files are optional. Select the "Include Look Vectors" option in the HyP3 Processing Options to include them in the product package.*
+*These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
 ## 9. Incidence Angle Map
 
 The local incidence angle is defined as the angle between the incident radar signal and the local surface normal. The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
 
-*Note that this file is optional. Select the "Include Inc. Angle Map" option in the HyP3 Processing Options to include it in the product package.*
+*This file is optional. Select the "Include Inc. Angle Map" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
 ## 10. Water Mask
@@ -162,7 +164,7 @@ The water mask specifies, pixel-by-pixel, where large waterbodies exist in the c
 
 The water mask is not precise; land is buffered to reduce the possibility of near-shore features being excluded while reducing the impact of phase-unwrapping errors over large expanses of water. Only oceans, seas, and very large inland waterbodies are masked.
 
-*Note that this file is optional. Select the "Include Water Mask" option in the HyP3 Processing Options to include it in the product package.*
+*This file/processing is optional. Select the "Include Water Mask" option in the On Demand HyP3 Processing Options to apply water masking and include a copy of the mask in the product package.*
 
 *************
 # InSAR Processing #
