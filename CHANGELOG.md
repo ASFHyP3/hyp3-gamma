@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.5.0]
+
+### Added
+* Option to include DEM file with InSAR products
+  * `include_dem` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `--include-dem` parameter to `insar` entrypoint
+  * `-d` parameter to `ifm_sentinel.py` script
+* Parameter metadata file for InSAR products now includes `Slant range near`, `Slant range center` and  `Slant range far` attributes
+
 ## [4.4.0]
 
 ### Added
