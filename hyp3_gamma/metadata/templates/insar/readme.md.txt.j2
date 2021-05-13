@@ -80,7 +80,8 @@ The files generated in this process include:
 7. Parameter Documentation (Text File)
 8. Look Vector maps (GeoTIFFs) - *Optional*
 9. Incidence Angle map (GeoTIFF) - *Optional*
-10. Water Mask (GeoTIFF) - *Optional*
+10. DEM used to process the data (GeoTIFF) - *Optional*
+11. Water Mask (GeoTIFF) - *Optional*
 
 *See below for detailed descriptions of each of the product files.*
 
@@ -139,7 +140,7 @@ The amplitude image is tagged with _amp.tif
 ----------------
 ## 7. Parameter Documentation
 
-The text file included with the product lists the key processing parameters used, including the full granule names, baseline length, number of looks, output resolution, and source DEM information. Note that the DEM is down-sampled to twice the pixel spacing of the desired InSAR output pixel spacing; an 80-m InSAR product requires the DEM to be down-sampled to a pixel spacing of 160 m.
+The text file included with the product lists the key processing parameters used, including the full granule names, baseline length, number of looks, output resolution, and source DEM information.
 
 The text file is not tagged; it has a .txt extension on the base filename.
 
@@ -158,7 +159,22 @@ The local incidence angle is defined as the angle between the incident radar sig
 *This file is optional. Select the "Include Inc. Angle Map" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
-## 10. Water Mask
+## 10. DEM used to process the data
+
+This is a copy of the Digital Elevation Model (DEM) layer used for processing. This layer is tagged with _dem.tif, and is a 32-bit float GeoTIFF.
+
+The source DEM has a geoid correction applied before it is used for processing, so height values in this file will differ from the source DEM. The DEM is down-sampled to twice the pixel spacing of the desired InSAR output pixel spacing before processing. As such, an 80-m InSAR product requires the DEM to be down-sampled to a pixel spacing of 160 m. It is provided in the same pixel spacing/alignment and projected to the same UTM Zone as the interferogram files.
+
+*This file is optional. Select the "Include DEM" option in the On Demand HyP3 Processing Options to include it in the product package.*
+
+The DEM used for this product is {{ dem_name }}, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}
+
+{% if dem_blurb(dem_name) %}
+*Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
+
+{% endif %}
+----------------
+## 11. Water Mask
 
 The water mask specifies, pixel-by-pixel, where large waterbodies exist in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 are included in the InSAR processing. This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water, as areas with DEM heights of 0 are considered invalid for InSAR processing. The water mask is stored as a byte-valued GeoTIFF file and is included in the product package when water masking is applied.
 
