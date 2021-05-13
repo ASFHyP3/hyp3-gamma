@@ -4,7 +4,9 @@ import logging
 import os
 import shutil
 import zipfile
+
 import numpy as np
+
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
@@ -15,6 +17,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 from hyp3_metadata import create_metadata_file_set
+from hyp3lib import saa_func_lib as saa
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
@@ -28,7 +31,6 @@ from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib import saa_func_lib as saa
 from hyp3lib.utm2dem import utm2dem
 
 from osgeo import gdal, gdalconst, ogr
@@ -270,7 +272,6 @@ def create_browse_images(out_dir, out_name, pol):
                 byteSigmaScale(tif, rescaled_tif.name)
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
-    pol_tif = f'{out_dir}/{out_name}_{pol.upper()}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
     raster_boundary2shape(pol_amp_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
@@ -382,7 +383,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         if scale == 'power':
             shutil.copy(power_tif, output_tif)
         elif scale == 'decibel':
-            decibel_tif = createPowerDB(power_tif, nodata=None)
+            decibel_tif = createPowerDB(power_tif)
             shutil.copy(decibel_tif, output_tif)                    
         else:
             shutil.copy(amp_tif, output_tif)
