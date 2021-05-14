@@ -4,7 +4,6 @@ import logging
 import os
 import shutil
 import zipfile
-
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from datetime import datetime, timezone
 from glob import glob
@@ -15,7 +14,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 import numpy as np
-
 from hyp3_metadata import create_metadata_file_set
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
@@ -34,7 +32,6 @@ from hyp3lib.system import gamma_version
 from hyp3lib.utm2dem import utm2dem
 
 from osgeo import gdal, gdalconst, ogr
-
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
