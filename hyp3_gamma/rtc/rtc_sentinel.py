@@ -80,7 +80,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry=
     product_id = token_hex(2).upper()
 
     g = 'g' if radiometry == 'gamma0' else 's'
-    p = 'p' if scale == 'power' else 'a'
+    p = 'p' if scale == 'power' else 'd' if scale == 'decibel' else 'a'
     f = 'f' if filtered else 'n'
     m = 'm' if matching else 'd'
 
@@ -384,7 +384,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             shutil.copy(power_tif, output_tif)
         elif scale == 'decibel':
             decibel_tif = createPowerDB(power_tif)
-            shutil.copy(decibel_tif, output_tif) 
+            shutil.copy(decibel_tif, output_tif)
         else:
             shutil.copy(amp_tif, output_tif)
 
