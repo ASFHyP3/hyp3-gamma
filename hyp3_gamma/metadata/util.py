@@ -91,7 +91,7 @@ def decode_product(product_name: str) -> dict:
     return {
         'pixel_spacing': int(product_parts[-4][-2:]),
         'radiometry': 'gamma-0' if user_options[0] == 'g' else 'sigma-0',
-        'scale': 'power' if user_options[1] == 'p' else 'amplitude',
+        'scale': 'power' if user_options[1] == 'p' else 'decibel' if user_options[1] == 'd' else 'amplitude',
         'masked': False if user_options[2] == 'u' else True,
         'filter_applied': False if user_options[3] == 'n' else True,
         'clipped': False if user_options[4] == 'e' else True,
