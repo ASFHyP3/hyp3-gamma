@@ -1,0 +1,52 @@
+{% extends 'insar/insar.xml.j2' %}
+{% block idPurp %}
+This is the theta look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). It is a 32-bit float GeoTIFF projected to {{ projection }} with a pixel spacing of {{ pixel_spacing|int }} m.
+{% endblock %}
+{% block idAbs %}
+&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the theta look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). It is a 32-bit float GeoTIFF projected to {{ projection }} with a pixel spacing of {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ granule_name_ref }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ granule_name_sec }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt
+{% endblock %}
+{% block dataLineage %}
+The theta look vector map is generated during InSAR processing [ADD DETAIL].
+
+The basic steps in InSAR processing are as follows:
+
+*Pre-Processing*
+1. Ingest SLC data into GAMMA format
+2. Get DEM file covering the area, apply geoid correction and resample/reproject as required
+3. Calculate overlapping bursts for input scenes
+4. Mosaic swaths and bursts together
+
+*InSAR Processing*
+5. Prepare initial look-up table and simulated unwrapped image
+    - Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+    - Simulate unwrapped interferometric phase using DEM height, and deformation rate using orbit state vectors
+6. Interferogram creation, matching, refinement
+    - Initial co-registration with look-up table
+    - Iterative co-registration with look-up table
+    - Removal of curved earth and topographic phase
+7. Determine a co-registration offset based on the burst overlap (spectral diversity method)
+    - Single iteration co-registration with look-up table
+8. Phase unwrapping and coherence map generation
+9. Generation of displacement maps from unwrapped differential phase
+
+*Post-Processing*
+10. Generation of geocoded GeoTIFF outputs
+
+For a detailed description of InSAR processing using GAMMA software, refer to the readme file included with the product package.
+{% endblock %}
+
+******************
+
+{{ Begin idAbs READABLE - not to be included in the xml template }}
+This is the theta look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). It is a 32-bit float GeoTIFF projected to {{ projection }} with a pixel spacing of {{ pixel_spacing|int }} m.
+
+Reference Scene: {{ granule_name_ref }}
+Secondary Scene: {{ granule_name_sec }}
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+{{ End idAbs READABLE - not to be included in the xml template }}
