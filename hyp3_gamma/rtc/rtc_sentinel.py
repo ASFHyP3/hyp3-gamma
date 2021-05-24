@@ -380,7 +380,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         if scale == 'power':
             shutil.copy(power_tif, output_tif)
         elif scale == 'decibel':
-            decibel_tif = create_decibel_tiff(power_tif)
+            decibel_tif = create_decibel_tif(power_tif)
             shutil.copy(decibel_tif, output_tif)
         else:
             shutil.copy(amp_tif, output_tif)
