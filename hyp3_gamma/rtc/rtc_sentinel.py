@@ -13,8 +13,10 @@ from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
-from hyp3_metadata import create_metadata_file_set
+import numpy as np
+from hyp3_metadata import create_metadata_file_set_rtc
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
+from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
@@ -35,9 +37,24 @@ from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
+
 log = logging.getLogger()
 gdal.UseExceptions()
 ogr.UseExceptions()
+
+
+def create_decibel_tif(fi, nodata=None):
+    f = gdal.Open(fi)
+    in_nodata = f.GetRasterBand(1).GetNoDataValue()
+    _, _, trans, proj, data = saa.read_gdal_file(f)
+    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
+    powerdb = 10*np.ma.log10(data)
+    if not nodata:
+        nodata = np.finfo(data.dtype).min.astype(float)
+    outfile = fi.replace('.tif', '-db.tif')
+    saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
+    del f
+    return outfile
 
 
 def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
@@ -60,7 +77,7 @@ def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry=
     product_id = token_hex(2).upper()
 
     g = 'g' if radiometry == 'gamma0' else 's'
-    p = 'p' if scale == 'power' else 'a'
+    p = 'p' if scale == 'power' else 'd' if scale == 'decibel' else 'a'
     f = 'f' if filtered else 'n'
     m = 'm' if matching else 'd'
 
@@ -252,9 +269,8 @@ def create_browse_images(out_dir, out_name, pol):
                 byteSigmaScale(tif, rescaled_tif.name)
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
-    pol_tif = f'{out_dir}/{out_name}_{pol.upper()}.tif'
     shapefile = f'{out_dir}/{out_name}_shape.shp'
-    raster_boundary2shape(pol_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
+    raster_boundary2shape(pol_amp_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
 
 
 def append_additional_log_files(log_file, pattern):
@@ -363,6 +379,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         output_tif = f'{product_name}/{product_name}_{pol.upper()}.tif'
         if scale == 'power':
             shutil.copy(power_tif, output_tif)
+        elif scale == 'decibel':
+            decibel_tif = create_decibel_tif(power_tif)
+            shutil.copy(decibel_tif, output_tif)
         else:
             shutil.copy(amp_tif, output_tif)
 
@@ -392,7 +411,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     log.info('Generating browse images and metadata files')
     create_browse_images(product_name, product_name, polarizations[0])
-    create_metadata_file_set(
+    create_metadata_file_set_rtc(
         product_dir=Path(product_name),
         granule_name=granule,
         dem_name=dem_type,
@@ -419,11 +438,10 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Path to the Sentinel-1 .SAFE directory to process.')
-
     parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Radiometry of the output backscatter image(s)')
-    parser.add_argument('--scale', choices=('power', 'amplitude'), default='power',
+    parser.add_argument('--scale', choices=('power', 'decibel', 'amplitude'), default='power',
                         help='Scale of the output backscatter image(s)')
     parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
     parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
