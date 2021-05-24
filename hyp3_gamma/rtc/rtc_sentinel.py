@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 import numpy as np
-from hyp3_metadata import create_metadata_file_set
+from hyp3_metadata import create_metadata_file_set_rtc
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
@@ -411,7 +411,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     log.info('Generating browse images and metadata files')
     create_browse_images(product_name, product_name, polarizations[0])
-    create_metadata_file_set(
+    create_metadata_file_set_rtc(
         product_dir=Path(product_name),
         granule_name=granule,
         dem_name=dem_type,
