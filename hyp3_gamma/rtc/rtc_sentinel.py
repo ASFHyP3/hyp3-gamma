@@ -285,10 +285,10 @@ def append_additional_log_files(log_file, pattern):
 
 
 def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
-                       speckle_filter: bool = False, dem_matching: bool = False,
-                       include_dem: bool = False, include_inc_map: bool = False, include_scattering_area: bool = False,
-                       include_rgb: bool = False, dem: str = None, bbox: List[float] = None, looks: int = None,
-                       skip_cross_pol: bool = False, dem_name: str = 'copernicus') -> str:
+                       speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
+                       include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
+                       dem: str = None, bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False,
+                       dem_name: str = 'copernicus') -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
