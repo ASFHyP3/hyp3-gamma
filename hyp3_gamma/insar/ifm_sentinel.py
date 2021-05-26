@@ -410,7 +410,6 @@ def main():
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
-    parser.add_argument("-i", action="store_true", help="Create incidence angle map")
     parser.add_argument("-m", action="store_true", help="Create and apply water mask")
     args = parser.parse_args()
 
