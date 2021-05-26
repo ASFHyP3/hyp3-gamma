@@ -40,7 +40,7 @@ def rtc():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
     parser.add_argument('--radiometry', choices=['gamma0', 'sigma0'], default='gamma0')
-    parser.add_argument('--scale', choices=['power', 'amplitude'], default='power')
+    parser.add_argument('--scale', choices=['power', 'decibel', 'amplitude'], default='power')
     parser.add_argument('--speckle-filter', type=string_is_true, default=False)
     parser.add_argument('--dem-matching', type=string_is_true, default=False)
     parser.add_argument('--include-dem', type=string_is_true, default=False)
@@ -90,8 +90,10 @@ def insar():
     parser.add_argument('--password', required=True)
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
+    parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--apply-water-mask', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
@@ -118,8 +120,10 @@ def insar():
         secondary_file=secondary_granule,
         alooks=alooks,
         rlooks=rlooks,
+        include_dem=args.include_dem,
         include_look_vectors=args.include_look_vectors,
         include_los_displacement=args.include_los_displacement,
+        include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
         water_masking=args.apply_water_mask,
     )

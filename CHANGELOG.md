@@ -6,15 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.5.0]
+## [unreleased]
 
 ### Added
 * Option to apply water masking to the DEM before processing
   * `water_masking` parameter to `ifm_sentinel.insar_sentinel_gamma` function
   * `--apply-watger-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
-  
-## [4.4.0]
+
+##[4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
+
+### Added
+* Option to output decibel of power RTC product
+  * `--scale` parameter provides choice of power, decibel, or amplitude
+
+## [4.5.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.0...v4.5.1)
+
+### Added
+* `--include-wrapped-phase` option for the `insar` entrypoint to include the wrapped phase GeoTIFF in the output product
+
+### Changed
+* Updated the description of the Wrapped Interferogram in the InSAR product README, including the optional GeoTIFF
+
+## [4.5.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.4.0...v4.5.0)
+
+### Added
+* Option to include DEM file with InSAR products
+  * `include_dem` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `--include-dem` parameter to `insar` entrypoint
+  * `-d` parameter to `ifm_sentinel.py` script
+* Parameter metadata file for InSAR products now includes `Slant range near`, `Slant range center` and  `Slant range far` attributes
+
+## [4.4.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.3.0...v4.4.0)
 
 ### Added
 * Option to include an Incidence Angle GeoTIFF with InSAR products
@@ -23,7 +46,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `-i` parameter to `ifm_sentinel.py` script
 * Parameter metadata file for InSAR products now includes `Spacecraft height` and `Earth radius at nadir` attributes
 
-## [4.3.0]
+## [4.3.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.2.0...v4.3.0)
 
 ### Changed
 * InSAR processing via `ifm_sentinel.py` now leverages the

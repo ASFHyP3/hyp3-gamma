@@ -140,7 +140,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
-                      include_wrapped_phase, include_inc_map, water_masking):
+                      include_wrapped_phase, include_inc_map, include_dem, water_masking):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
@@ -161,6 +161,11 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
+    if include_dem:
+        inName = "{}.dem.tif".format(output)
+        outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_los_displacement:
@@ -210,6 +215,12 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
     sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
     sar_to_earth_center = sar_to_earth_center.split()[0]
     height = float(sar_to_earth_center) - float(erad_nadir)
+    near_slant_range = getParameter(parfile, 'near_range_slc')
+    near_slant_range = near_slant_range.split()[0]
+    center_slant_range = getParameter(parfile, 'center_range_slc')
+    center_slant_range = center_slant_range.split()[0]
+    far_slant_range = getParameter(parfile, 'far_range_slc')
+    far_slant_range = far_slant_range.split()[0]
 
     with open("baseline.log") as f:
         for line in f:
@@ -257,6 +268,9 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Heading: %s\n' % heading)
         f.write('Spacecraft height: %s\n' % height)
         f.write('Earth radius at nadir: %s\n' % erad_nadir)
+        f.write('Slant range near: %s\n' % near_slant_range)
+        f.write('Slant range center: %s\n' % center_slant_range)
+        f.write('Slant range far: %s\n' % far_slant_range)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
@@ -273,7 +287,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
                          include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
-                         water_masking=False):
+                         include_dem=False, water_masking=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -370,7 +384,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, water_masking)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
-                      include_wrapped_phase, include_inc_map, water_masking)
+                      include_wrapped_phase, include_inc_map, include_dem, water_masking)
 
     create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
 
@@ -391,6 +405,8 @@ def main():
     parser.add_argument("secondary", help="Secondary input file")
     parser.add_argument("-r", "--rlooks", default=20, help="Number of range looks (def=20)")
     parser.add_argument("-a", "--alooks", default=4, help="Number of azimuth looks (def=4)")
+    parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
+    parser.add_argument("-i", action="store_true", help="Create incidence angle map")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
@@ -404,7 +420,7 @@ def main():
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
                          include_look_vectors=args.l, include_los_displacement=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
-                         water_masking=args.m)
+                         include_dem=args.d, water_masking=args.m)
 
 
 if __name__ == "__main__":

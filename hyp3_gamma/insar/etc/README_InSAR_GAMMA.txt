@@ -50,27 +50,28 @@ https://www.gamma-rs.ch
 
 The files generated in this process include:
 
-1. Wrapped Interferogram (PNG images, KMZ file)
+1. Wrapped Interferogram (PNG images, KMZ file, GeoTIFF (*optional*))
 2. Unwrapped Interferogram (GeoTIFF, PNG images, KMZ file)
 3. Line-of-Sight Displacement Map (GeoTIFF) - *Optional*
 4. Vertical Displacement Map (GeoTIFF)
 5. Coherence Map (GeoTIFF)
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
-8. Look Vector maps (GeoTIFFs) - *Optional*
+8. Look Vector Maps (GeoTIFFs) - *Optional*
 9. Incidence Angle map (GeoTIFF) - *Optional*
-10. Water Mask (GeoTIFF) - *Optional*
+10. Digital Elevation Model (GeoTIFF) - *Optional*
+11. Water Mask (GeoTIFF) - *Optional*
 
 *See below for detailed descriptions of each of the product files.*
 
 ----------------
 ## 1. Wrapped Interferogram
 
-The wrapped interferogram is output in both a georeferenced PNG and KMZ format. Because the fringes are on a wrapped 2-pi scale rather than representing continuous values, a wrapped interferogram is most useful as a visualization. This product displays deformation in multiples of half of the sensor wavelength, so areas with fringes that are very close together indicate greater amounts of deformation in the line-of-sight direction from the sensor.
+The wrapped interferogram is output in both a georeferenced PNG and KMZ format by default, and the full GeoTIFF file can also be optionally included. Because the fringes are on a wrapped 2-pi scale rather than representing continuous values, a wrapped interferogram tends to be most useful as a color visualization. This product displays deformation in multiples of half of the sensor wavelength, so areas with fringes that are very close together indicate greater amounts of deformation in the line-of-sight direction from the sensor.
 
-The wrapped interferogram image is generated from the interferogram phase prior to unwrapping.
+The wrapped interferogram image is generated from the interferogram phase prior to unwrapping. The PNG and KMZ files are tagged with _color_phase, and are 2048 pixels wide. The optional GeoTIFF is tagged with _wrapped_phase.tif
 
-The wrapped interferogram files are tagged with _color_phase, and PNG files are generated in two different resolutions. The file _color_phase.png is a small browse image (1024 pixels wide), and _color_phase_large.png is of higher resolution (2048 pixels wide). The KMZ file is 2048 pixels wide.
+*The GeoTIFF version of the wrapped interferogram is optional. Select the "Include Wrapped Phase" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
 ## 2. Unwrapped Interferogram
@@ -137,12 +138,20 @@ The local incidence angle is defined as the angle between the incident radar sig
 
 *Note that this file is optional. Select the "Include Inc. Angle Map" option in the HyP3 Processing Options to include it in the product package.*
 
+## 10. Digital Elevation Model
+
+The digital elevation file contains the terrain height for the scenes being processed. The values are taken from the Copernicus GLO-30 Public DEM. The height values will differ from the original Copernicus DEM dataset, as a geoid correction has been applied
+
+*Note that this file is optional. Select the "Include DEM" option in the HyP3 Processing Options to include it in the product package.*
+
 ----------------
-## 10. Water Mask
+## 11. Water Mask
 
-The water mask specifies, pixel-by-pixel, where there is land and where there is water in the corresponding InSAR product.  In the mask, 1 is land and 0 denotes water.  This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water as water is set to a no data value at the start of processing.  The water mask is stored as a byte-valued GeoTIFF file.
+The water mask specifies, pixel-by-pixel, where large waterbodies exist in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 are included in the InSAR processing. This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water, as areas with DEM heights of 0 are considered invalid for InSAR processing. The water mask is stored as a byte-valued GeoTIFF file and is included in the product package when water masking is applied.
 
-*Note that this file is optional. Select the "Include Water Mask" option in the HyP3 Processing Options to include it in the product package.*
+The water mask is not precise; land is buffered to reduce the possibility of near-shore features being excluded while reducing the impact of phase-unwrapping errors over large expanses of water. Only oceans, seas, and very large inland waterbodies are masked.
+
+*This file/processing is optional. Select the "Include Water Mask" option in the On Demand HyP3 Processing Options to apply water masking and include a copy of the mask in the product package.*
 
 *************
 # InSAR Processing #
