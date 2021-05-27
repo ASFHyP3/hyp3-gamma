@@ -37,12 +37,11 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
     python3 -m pip install --no-cache-dir GDAL==2.2.3 statsmodels==0.9 pandas==0.23
 
+COPY . /hyp3-gamma/
+RUN  python3 -m pip install --no-cache-dir /hyp3-gamma
+
 ARG S3_PYPI_HOST
 ARG SDIST_SPEC
-
-RUN python3 -m pip install --no-cache-dir hyp3_gamma${SDIST_SPEC} \
-    --trusted-host "${S3_PYPI_HOST}" \
-    --extra-index-url "http://${S3_PYPI_HOST}"
 
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
@@ -66,19 +65,19 @@ ENV GAMMA_RASTER=BMP
 WORKDIR /home/conda/
 
 ## ASF TOOLS
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh \
-    && echo PATH="/home/conda/miniconda3/bin":$PATH >> .profile \
-    && echo ". /home/conda/miniconda3/etc/profile.d/conda.sh" >> .profile
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
+    && bash Mambaforge-Linux-x86_64.sh -b \
+    && rm -f Mambaforge-Linux-x86_64.sh \
+    && echo PATH="/home/conda/mambaforge/bin":$PATH >> .profile \
+    && echo ". /home/conda/mambaforge/etc/profile.d/conda.sh" >> .profile
 
 RUN conda --version \
     && conda config --set auto_activate_base false
 
 
-RUN git clone git@github.com:ASFHyP3/asf-tools.git
-RUN conda env create asf-tools/environment.yml
-RUN conda run -n asf-tools python -m pip -e asf-tools
+RUN git clone https://github.com/ASFHyP3/asf-tools.git \
+    && mamba env create -f asf-tools/environment.yml
+RUN conda run -n asf-tools python -m pip install ./asf-tools
 
 
 

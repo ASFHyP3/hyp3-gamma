@@ -22,7 +22,7 @@ from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 def main():
     parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '++process', choices=['rtc', 'insar'], default='rtc',
+        '++process', choices=['rtc', 'insar', 'water_map'], default='rtc',
         help='Select the HyP3 entrypoint version to use'
     )
     args, unknowns = parser.parse_known_args()
