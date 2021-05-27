@@ -8,6 +8,7 @@ from pathlib import Path
 from shutil import make_archive
 
 from hyp3lib.aws import upload_file_to_s3
+from hyp3lib.execute import execute
 from hyp3lib.fetch import write_credentials_to_netrc_file
 from hyp3lib.image import create_thumbnail
 from hyp3lib.util import string_is_true
@@ -135,6 +136,61 @@ def insar():
             thumbnail = create_thumbnail(browse)
             upload_file_to_s3(browse, args.bucket, args.bucket_prefix)
             upload_file_to_s3(thumbnail, args.bucket, args.bucket_prefix)
+
+
+def water_map():
+    parser = ArgumentParser()
+    parser.add_argument('--username', required=True)
+    parser.add_argument('--password', required=True)
+    parser.add_argument('--bucket')
+    parser.add_argument('--bucket-prefix', default='')
+    parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
+    parser.add_argument('--speckle-filter', type=string_is_true, default=False)
+    parser.add_argument('--max-vv-threshold', type=float, default=-17.)
+    parser.add_argument('--max-vh-threshold', type=float, default=-24.)
+    parser.add_argument('--hand-threshold', type=float, default=15.)
+    parser.add_argument('--hand-fraction', type=float, default=0.8)
+    parser.add_argument('--membership-fraction', type=float, default=0.45)
+    parser.add_argument('granule')
+    args = parser.parse_args()
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+
+    write_credentials_to_netrc_file(args.username, args.password)
+
+    safe_dir = util.get_granule(args.granule)
+
+    product_name = rtc_sentinel_gamma(
+        safe_dir=safe_dir,
+        resolution=args.resolution,
+        scale='power',
+        radiometry='gamma0',
+        speckle_filter=args.speckle_filter,
+        dem_matching=False,
+        include_dem=True,
+        include_inc_map=False,
+        include_scattering_area=False,
+        include_rgb=True,
+        dem_name='copernicus',
+    )
+    execute(f'conda run -n  asf-tools water_map {product_name}/{product_name}_WM.tif '
+            f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_VH.tif '
+            f'--max-vv-threshold {args.max_vv_threshold} --max-vh-threshold {args.max_vh_threshold} '
+            f'-hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction}'
+            f' --membership-threshold {args.membership_threshold}')
+
+    output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
+
+    if args.bucket:
+        product_dir = Path(product_name)
+        for browse in product_dir.glob('*.png'):
+            create_thumbnail(browse, output_dir=product_dir)
+
+        upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
+
+        for product_file in product_dir.iterdir():
+            upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
 if __name__ == '__main__':

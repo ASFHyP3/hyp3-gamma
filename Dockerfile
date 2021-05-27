@@ -27,7 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
     libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
     python3-dev python3-h5py python3-netcdf4 \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
+    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget git && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
@@ -64,6 +64,23 @@ ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/
 ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
+
+## ASF TOOLS
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh \
+    && echo PATH="/home/conda/miniconda3/bin":$PATH >> .profile \
+    && echo ". /home/conda/miniconda3/etc/profile.d/conda.sh" >> .profile
+
+RUN conda --version \
+    && conda config --set auto_activate_base false
+
+
+RUN git clone git@github.com:ASFHyP3/asf-tools.git
+RUN conda env create asf-tools/environment.yml
+RUN conda run -n asf-tools python -m pip -e asf-tools
+
+
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
