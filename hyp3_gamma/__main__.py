@@ -150,7 +150,7 @@ def water_map():
     parser.add_argument('--max-vh-threshold', type=float, default=-24.)
     parser.add_argument('--hand-threshold', type=float, default=15.)
     parser.add_argument('--hand-fraction', type=float, default=0.8)
-    parser.add_argument('--membership-fraction', type=float, default=0.45)
+    parser.add_argument('--membership-threshold', type=float, default=0.45)
     parser.add_argument('granule')
     args = parser.parse_args()
 

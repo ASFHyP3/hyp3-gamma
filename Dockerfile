@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.authors="ASF APD/Tools Team <uaf-asf-apd@alaska.e
 LABEL org.opencontainers.image.licenses="BSD-3-Clause"
 LABEL org.opencontainers.image.url="https://github.com/ASFHyP3/hyp3-gamma"
 LABEL org.opencontainers.image.source="https://github.com/ASFHyP3/hyp3-gamma"
-# LABEL org.opencontainers.image.documentation=""
+LABEL org.opencontainers.image.documentation="https://hyp3-docs.asf.alaska.edu"
 
 # Dynamic lables to define at build time via `docker build --label`
 # LABEL org.opencontainers.image.created=""
@@ -38,7 +38,8 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     python3 -m pip install --no-cache-dir GDAL==2.2.3 statsmodels==0.9 pandas==0.23
 
 COPY . /hyp3-gamma/
-RUN  python3 -m pip install --no-cache-dir /hyp3-gamma
+RUN  python3 -m pip install --no-cache-dir /hyp3-gamma \
+    && rm -rf /hyp3-gamma
 
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
@@ -73,9 +74,11 @@ RUN conda --version \
 
 
 RUN git clone https://github.com/ASFHyP3/asf-tools.git \
-    && mamba env create -f asf-tools/environment.yml
+    && mamba env create -f asf-tools/environment.yml \
+    && mamba clean -afy
 
-RUN conda run -n asf-tools python -m pip install ./asf-tools
+RUN conda run -n asf-tools python -m pip install --no-cache-dir ./asf-tools \
+    && rm -rf ./asf-tools
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
