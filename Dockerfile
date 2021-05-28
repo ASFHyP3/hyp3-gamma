@@ -73,7 +73,9 @@ RUN conda --version \
     && conda config --set auto_activate_base false
 
 # FIXME: branch!
-ADD https://github.com/ASFHyP3/asf-tools/archive/refs/heads/global-hand.tar.gz /home/conda/asf-tools.tar.gz
+ADD --chown=${CONDA_UID}:${CONDA_GID} \
+    https://github.com/ASFHyP3/asf-tools/archive/refs/heads/global-hand.tar.gz /home/conda/asf-tools.tar.gz
+
 RUN tar -zxvf asf-tools.tar.gz \
     && mamba env create -f asf-tools/environment.yml \
     && mamba clean -afy
