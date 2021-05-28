@@ -115,7 +115,7 @@ jobs:
 
   dockerize:
     runs-on: ubuntu-latest
-    needs: package
+    needs: tag-version
     steps:
       - uses: actions/checkout@v2
 
@@ -133,7 +133,7 @@ jobs:
           aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
           tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
 
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
           echo "Building ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_}"
           docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
@@ -148,7 +148,7 @@ jobs:
       - name: Add test tag
         if: github.ref == 'refs/heads/develop'
         run: |
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           docker tag ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
               ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test
@@ -156,7 +156,7 @@ jobs:
       - name: Add latest tag
         if: github.ref == 'refs/heads/master'
         run: |
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           docker tag ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
               ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:latest
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:latest
