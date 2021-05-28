@@ -10,8 +10,10 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ##[4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
 
 ### Added
-* Option to output decibel of power RTC product
-  * `--scale` parameter provides choice of power, decibel, or amplitude
+* `water_map` entrypoint to create a water map product
+* Option to output decibel scaled RTC products
+  * `--scale` parameter to `rtc` entrypoint now accepts `decibel`
+  * `scale` parameter to `rtc_sentinel.rtc_sentinel_gamma` now accepts `decibel`
 
 ## [4.5.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.0...v4.5.1)
 
