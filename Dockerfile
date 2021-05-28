@@ -72,16 +72,13 @@ RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mamba
 RUN conda --version \
     && conda config --set auto_activate_base false
 
-# FIXME: branch!
-ADD --chown=${CONDA_UID}:${CONDA_GID} \
-    https://github.com/ASFHyP3/asf-tools/archive/refs/heads/global-hand.tar.gz /home/conda/asf-tools.tar.gz
-
-RUN tar -zxvf asf-tools.tar.gz --strip-components=1 --one-top-level=asf-tools \
+# FIXME: Branch and cached stale clone
+RUN git clone -b global-hand https://github.com/ASFHyP3/asf-tools.git \
     && mamba env create -f asf-tools/environment.yml \
     && mamba clean -afy
 
 RUN conda run -n asf-tools python -m pip install --no-cache-dir ./asf-tools \
-    && rm -rf ./asf-tools ./asf-tools.tar.gz
+    && rm -rf ./asf-tools
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
