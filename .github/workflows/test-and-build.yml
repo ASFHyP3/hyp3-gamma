@@ -12,8 +12,6 @@ on:
 
 env:
   HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
-  S3_PYPI_HOST: hyp3-pypi-west.s3-website-us-west-2.amazonaws.com
-  S3_PYPI_BUCKET: hyp3-pypi-west
   AWS_REGION: us-west-2
   AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
@@ -36,7 +34,7 @@ jobs:
           python -m pip install .[develop]
           pytest --cov=hyp3_gamma
 
-  package:
+  tag-version:
     runs-on: ubuntu-latest
     needs: pytest
     outputs:
@@ -84,7 +82,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade setuptools wheel twine s3pypi "setuptools-scm[toml]" importlib_metadata
+          python -m pip install --upgrade setuptools wheel "setuptools-scm[toml]" importlib_metadata
           python -m pip install bump2version
 
       - name: Tag version
@@ -107,26 +105,17 @@ jobs:
           git push --tags
           echo "Tagged version $(git describe --abbrev=0) and pushed back to repo"
 
-      - uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Build distribuion and upload to S3-PyPI
+      - name: Determine SDIST_VERSION
         id: build
         run: |
           git fetch origin +refs/tags/*:refs/tags/*
           export SDIST_VERSION=$(python setup.py --version)
           echo "::set-output name=version::${SDIST_VERSION}"
-          python setup.py sdist bdist_wheel
-          echo "Uploading version ${SDIST_VERSION} to ${S3_PYPI_BUCKET}"
-          s3pypi --bucket ${S3_PYPI_BUCKET} --private --force --verbose
 
 
   dockerize:
     runs-on: ubuntu-latest
-    needs: package
+    needs: tag-version
     steps:
       - uses: actions/checkout@v2
 
@@ -144,23 +133,22 @@ jobs:
           aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
           tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
 
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
           echo "Building ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_}"
-          docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
+          # docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
           docker build --no-cache \
                 -t ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
                 --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}" \
                 --label org.opencontainers.image.version="${SDIST_VERSION}" \
                 --label org.opencontainers.image.revision="${GITHUB_SHA}" \
-                --build-arg S3_PYPI_HOST=${S3_PYPI_HOST} \
-                --build-arg SDIST_SPEC="==${SDIST_VERSION}" .
+                .
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_}
 
       - name: Add test tag
         if: github.ref == 'refs/heads/develop'
         run: |
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           docker tag ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
               ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test
@@ -168,7 +156,7 @@ jobs:
       - name: Add latest tag
         if: github.ref == 'refs/heads/master'
         run: |
-          export SDIST_VERSION=${{ needs.package.outputs.SDIST_VERSION }}
+          export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           docker tag ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
               ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:latest
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:latest

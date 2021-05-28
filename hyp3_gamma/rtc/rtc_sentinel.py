@@ -295,7 +295,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         safe_dir: Path to the Sentinel-1 .SAFE directory to process.
         resolution: Pixel size of the output images.
         radiometry: Radiometry of the output backscatter image(s); `gamma0` or `sigma0`.
-        scale: Scale of the output backscatter image(s); `power` or `amplitude`.
+        scale: Scale of the output backscatter image(s); `decibel`, `power`, or `amplitude`.
         speckle_filter: Apply an enhanced Lee speckle filter.
         dem_matching: Attempt to co-register the image to the DEM.
         include_dem: Include the DEM GeoTIFF in the output package.

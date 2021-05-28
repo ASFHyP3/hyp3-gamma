@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.authors="ASF APD/Tools Team <uaf-asf-apd@alaska.e
 LABEL org.opencontainers.image.licenses="BSD-3-Clause"
 LABEL org.opencontainers.image.url="https://github.com/ASFHyP3/hyp3-gamma"
 LABEL org.opencontainers.image.source="https://github.com/ASFHyP3/hyp3-gamma"
-# LABEL org.opencontainers.image.documentation=""
+LABEL org.opencontainers.image.documentation="https://hyp3-docs.asf.alaska.edu"
 
 # Dynamic lables to define at build time via `docker build --label`
 # LABEL org.opencontainers.image.created=""
@@ -27,7 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
     libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
     python3-dev python3-h5py python3-netcdf4 \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
+    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget git && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
@@ -37,12 +37,9 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
     python3 -m pip install --no-cache-dir GDAL==2.2.3 statsmodels==0.9 pandas==0.23
 
-ARG S3_PYPI_HOST
-ARG SDIST_SPEC
-
-RUN python3 -m pip install --no-cache-dir hyp3_gamma${SDIST_SPEC} \
-    --trusted-host "${S3_PYPI_HOST}" \
-    --extra-index-url "http://${S3_PYPI_HOST}"
+COPY . /hyp3-gamma/
+RUN  python3 -m pip install --no-cache-dir /hyp3-gamma \
+    && rm -rf /hyp3-gamma
 
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
@@ -64,6 +61,24 @@ ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/
 ENV GAMMA_RASTER=BMP
 
 WORKDIR /home/conda/
+
+## ASF TOOLS
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
+    && bash Mambaforge-Linux-x86_64.sh -b \
+    && rm -f Mambaforge-Linux-x86_64.sh \
+    && echo PATH="/home/conda/mambaforge/bin":$PATH >> .profile \
+    && echo ". /home/conda/mambaforge/etc/profile.d/conda.sh" >> .profile
+
+RUN conda --version \
+    && conda config --set auto_activate_base false
+
+# FIXME: dev branch and cached stale clone
+RUN git clone https://github.com/ASFHyP3/asf-tools.git \
+    && mamba env create -f asf-tools/environment.yml \
+    && mamba clean -afy
+
+RUN conda run -n asf-tools python -m pip install --no-cache-dir ./asf-tools \
+    && rm -rf ./asf-tools
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
