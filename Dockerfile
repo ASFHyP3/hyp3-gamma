@@ -40,9 +40,6 @@ RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
 COPY . /hyp3-gamma/
 RUN  python3 -m pip install --no-cache-dir /hyp3-gamma
 
-ARG S3_PYPI_HOST
-ARG SDIST_SPEC
-
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
 
