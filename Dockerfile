@@ -27,7 +27,7 @@ RUN apt-get update && apt-get upgrade -y && \
     libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
     libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
     python3-dev python3-h5py python3-netcdf4 \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget git && \
+    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget && \
     apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir --upgrade pip setuptools wheel
 
@@ -76,7 +76,7 @@ RUN conda --version \
 ADD --chown=${CONDA_UID}:${CONDA_GID} \
     https://github.com/ASFHyP3/asf-tools/archive/refs/heads/global-hand.tar.gz /home/conda/asf-tools.tar.gz
 
-RUN tar -zxvf asf-tools.tar.gz \
+RUN tar -zxvf asf-tools.tar.gz --strip-components=1 --one-top-level=asf-tools \
     && mamba env create -f asf-tools/environment.yml \
     && mamba clean -afy
 
