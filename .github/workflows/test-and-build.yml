@@ -136,7 +136,7 @@ jobs:
           export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           export CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)
           echo "Building ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_}"
-          docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
+          # docker pull ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test || true
           docker build --no-cache \
                 -t ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
                 --label org.opencontainers.image.created="${CI_JOB_TIMESTAMP}" \

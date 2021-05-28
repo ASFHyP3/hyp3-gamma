@@ -177,8 +177,8 @@ def water_map():
     execute(f'conda run -n  asf-tools water_map {product_name}/{product_name}_WM.tif '
             f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_VH.tif '
             f'--max-vv-threshold {args.max_vv_threshold} --max-vh-threshold {args.max_vh_threshold} '
-            f'-hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction}'
-            f' --membership-threshold {args.membership_threshold}')
+            f'--hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction} '
+            f'--membership-threshold {args.membership_threshold}', uselogging=True)
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 
