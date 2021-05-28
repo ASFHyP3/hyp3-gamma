@@ -74,9 +74,8 @@ RUN conda --version \
 
 RUN git clone https://github.com/ASFHyP3/asf-tools.git \
     && mamba env create -f asf-tools/environment.yml
+
 RUN conda run -n asf-tools python -m pip install ./asf-tools
-
-
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
