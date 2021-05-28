@@ -72,8 +72,8 @@ RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mamba
 RUN conda --version \
     && conda config --set auto_activate_base false
 
-# FIXME: Branch and cached stale clone
-RUN git clone -b global-hand https://github.com/ASFHyP3/asf-tools.git \
+# FIXME: dev branch and cached stale clone
+RUN git clone https://github.com/ASFHyP3/asf-tools.git \
     && mamba env create -f asf-tools/environment.yml \
     && mamba clean -afy
 
