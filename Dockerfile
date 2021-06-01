@@ -69,6 +69,8 @@ RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mamba
     && echo PATH="/home/conda/mambaforge/bin":$PATH >> .profile \
     && echo ". /home/conda/mambaforge/etc/profile.d/conda.sh" >> .profile
 
+ENV PATH=$PATH:/home/conda/mambaforge/bin
+
 RUN conda --version \
     && conda config --set auto_activate_base false
 
