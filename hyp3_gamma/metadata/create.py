@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from hyp3_metadata import rtc, insar
+from hyp3_metadata import insar, rtc
 
 
 def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,
@@ -25,7 +25,7 @@ def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name:
 
 
 def create_metadata_file_set_insar(product_dir, granule_name_ref, granule_name_sec, processing_date, looks, dem_name,
-                     plugin_name, plugin_version, processor_name, processor_version):
+                                   plugin_name, plugin_version, processor_name, processor_version):
     payload = insar.marshal_metadata(
         product_dir,
         granule_name_ref,

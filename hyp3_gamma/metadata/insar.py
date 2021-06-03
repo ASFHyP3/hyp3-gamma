@@ -8,9 +8,7 @@ from osgeo import gdal
 
 import hyp3_metadata
 from hyp3_metadata import data
-from hyp3_metadata.util import get_projection, get_thumbnail_encoded_string, render_template, \
-    strip_polarization, get_granule_type
-from hyp3_metadata.rtc import get_dem_template_id
+from hyp3_metadata.util import get_granule_type, get_projection, get_thumbnail_encoded_string, render_template
 
 
 class InSarMetadataWriter:
@@ -45,7 +43,8 @@ class InSarMetadataWriter:
     def create_readme(self) -> Path:
         reference_file = self.dir / f'{self.file_name}_amp.tif'
 
-        return self.create_metadata_file(self.payload, 'insar/readme.md.txt.j2', reference_file, out_ext='README.md.txt',
+        return self.create_metadata_file(self.payload, 'insar/readme.md.txt.j2', reference_file,
+                                         out_ext='README.md.txt',
                                          strip_ext=True, name_only=True)
 
     def create_amp_xml(self) -> Path:
@@ -53,7 +52,7 @@ class InSarMetadataWriter:
         return self.create_metadata_file(self.payload, 'insar/amp_tif.xml.j2', reference_file)
 
     def create_coherence_xml(self) -> Path:
-        reference_file = self.dir /f'{self.file_name}_corr.tif'
+        reference_file = self.dir / f'{self.file_name}_corr.tif'
         return self.create_metadata_file(self.payload, 'insar/corr_tif.xml.j2', reference_file)
 
     def create_dem_tif_xml(self) -> Path:
@@ -121,11 +120,9 @@ class InSarMetadataWriter:
 
 def decode_product(product_name):
     product_parts = product_name.split('_')
-    user_options = product_parts[-2]
     return {
         'pol': product_parts[3][:2]
     }
-
 
 
 def marshal_metadata(product_dir, granule_name_ref, granule_name_sec, processing_date, looks, dem_name,

@@ -9,8 +9,8 @@ from osgeo import gdal
 
 import hyp3_metadata
 from hyp3_metadata import data
-from hyp3_metadata.util import get_projection, get_thumbnail_encoded_string, render_template, \
-    strip_polarization, get_polarizations, get_granule_type
+from hyp3_metadata.util import get_granule_type, get_polarizations, get_projection, get_thumbnail_encoded_string, \
+    render_template, strip_polarization
 
 
 class RtcMetadataWriter:

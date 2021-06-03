@@ -72,5 +72,3 @@ def get_thumbnail_encoded_string(reference_file: Path, size: Tuple[int, int] = (
     data = BytesIO()
     image.save(data, format='JPEG')
     return b64encode(data.getvalue()).decode()
-
-
