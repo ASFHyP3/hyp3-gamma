@@ -4,7 +4,8 @@ from pathlib import Path
 from dateutil.parser import parse as dt_parse
 
 from hyp3_metadata import __version__, create_metadata_file_set_rtc
-from hyp3_metadata.util import SUPPORTED_DEMS, populate_example_data
+from hyp3_metadata.util import SUPPORTED_DEMS
+from hyp3_metadata.rtc import populate_example_data
 
 
 def main():

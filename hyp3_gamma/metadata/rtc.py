@@ -1,11 +1,16 @@
+import shutil
 from copy import deepcopy
+from datetime import datetime
+from glob import glob
 from pathlib import Path
 from typing import List, Optional
 
 from osgeo import gdal
 
-from hyp3_metadata.util import get_dem_template_id, get_projection, get_thumbnail_encoded_string, render_template, \
-    strip_polarization
+import hyp3_metadata
+from hyp3_metadata import data
+from hyp3_metadata.util import get_projection, get_thumbnail_encoded_string, render_template, \
+    strip_polarization, get_polarizations, get_granule_type
 
 
 class RtcMetadataWriter:
@@ -113,3 +118,54 @@ class RtcMetadataWriter:
             f.write(content)
 
         return output_file
+
+
+def get_dem_template_id(dem_name: str) -> Optional[str]:
+    if dem_name.startswith('EU'):
+        return 'eu'
+    if dem_name.startswith('GIMP'):
+        return 'gimp'
+    if dem_name.startswith('IFSAR'):
+        return 'ifsar'
+    if dem_name.startswith('NED'):
+        return 'ned'
+    if dem_name.startswith('REMA'):
+        return 'rema'
+    if dem_name.startswith('SRTM'):
+        return 'srtm'
+    if dem_name == 'GLO-30':
+        return 'cop'
+
+
+def decode_product(product_name: str) -> dict:
+    product_parts = product_name.split('_')
+    user_options = product_parts[-2]
+
+    return {
+        'pixel_spacing': int(product_parts[-4][-2:]),
+        'radiometry': 'gamma-0' if user_options[0] == 'g' else 'sigma-0',
+        'scale': 'power' if user_options[1] == 'p' else 'amplitude',
+        'masked': False if user_options[2] == 'u' else True,
+        'filter_applied': False if user_options[3] == 'n' else True,
+        'clipped': False if user_options[4] == 'e' else True,
+        'matching': False if user_options[5] == 'd' else True,
+        'polarizations': get_polarizations(product_parts[-5][:2]),
+    }
+
+
+def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
+                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
+    payload = locals()
+    payload['metadata_version'] = hyp3_metadata.__version__
+
+    payload.update(decode_product(product_dir.name))
+
+    payload.update(get_granule_type(granule_name))
+
+    return payload
+
+
+def populate_example_data(product_dir: Path):
+    product_files = glob(str(Path(data.__file__).parent / 'rtc' / 'rtc*'))
+    for f in product_files:
+        shutil.copy(f, product_dir / f'{Path(f).name.replace("rtc", product_dir.name)}')
