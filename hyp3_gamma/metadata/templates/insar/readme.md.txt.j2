@@ -148,7 +148,7 @@ The text file is not tagged; it has a .txt extension on the base filename.
 ----------------
 ## 8. Look Vector Maps
 
-Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from 0 (east) to pi/2 (north).
+Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from -pi/2 (south) to pi/2 (north), with east being 0. Angles are expressed in radians, referencing the look direction back towards the sensor, and are calculated from a horizontal elevation plane at each pixel.
 
 *These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
@@ -265,6 +265,7 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 ### Unwrapping
 
+ - cc_wave      # Estimate interferometric coherence
  - adf          # Adaptive spectral filtering for complex interferograms
  - rasmph_pwr   # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
  - rascc        # Generate 8-bit raster graphics image of correlation coefficient
