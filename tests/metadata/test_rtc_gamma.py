@@ -6,7 +6,7 @@ import hyp3_metadata.rtc
 import hyp3_metadata.util
 from hyp3_metadata import create
 from hyp3_metadata import rtc
-from hyp3_metadata.util import SUPPORTED_DEMS
+from hyp3_metadata.rtc import SUPPORTED_DEMS
 
 
 def test_create_rtc_gamma_readme(rtc_product_dir):

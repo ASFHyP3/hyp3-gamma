@@ -5,8 +5,8 @@ ASF InSAR Data Package (GAMMA)
 This folder contains SAR Interferometry (InSAR) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ pixel_spacing|int }} m.
 
 The source granules for this InSAR product are:
- - Reference: {{ granule_name_ref }}
- - Secondary: {{ granule_name_sec }}
+ - Reference: {{ reference_granule_name }}
+ - Secondary: {{ secondary_granule_name }}
 
 Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
@@ -46,11 +46,11 @@ Please refer to the ASF Sentinel-1 InSAR Product Guide for in-depth guidance on 
 
 When using this data as an image in a publication such as journal papers, articles, presentations, posters, and websites, please include the following credit with the image (portions in square brackets are optional):
 
-    [InSAR product processed by ]ASF DAAC HyP3 {{ processing_date.year }}[ using {{processor_name}} software]. Contains modified Copernicus Sentinel data {{ granule_name_sec[17:21] }}, processed by ESA.
+    [InSAR product processed by ]ASF DAAC HyP3 {{ processing_date.year }}[ using {{processor_name}} software]. Contains modified Copernicus Sentinel data {{ secondary_granule_name[17:21] }}, processed by ESA.
 
 When using this data in a manuscript and/or crediting datasets used for analysis, an acknowledgement including the software versions may be appropriate:
 
-    ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. Contains modified Copernicus Sentinel data {{ granule_name_sec[17:21] }}, processed by ESA.
+    ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. Contains modified Copernicus Sentinel data {{ secondary_granule_name[17:21] }}, processed by ESA.
 
 DOIs are also provided for citation when discussing the HyP3 software or plugins:
 * HyP3 processing environment, DOI: [10.5281/zenodo.3962581](https://doi.org/10.5281/zenodo.3962581)

@@ -9,8 +9,10 @@ from osgeo import gdal
 
 import hyp3_metadata
 from hyp3_metadata import data
-from hyp3_metadata.util import get_granule_type, get_polarizations, get_projection, get_thumbnail_encoded_string, \
-    render_template, strip_polarization
+from hyp3_metadata import util
+
+
+SUPPORTED_DEMS = ['EU_DEM_V11', 'GIMP', 'IFSAR', 'NED13', 'NED1', 'NED2', 'REMA', 'SRTMGL1', 'SRTMGL3', 'GLO-30']
 
 
 class RtcMetadataWriter:
@@ -105,14 +107,14 @@ class RtcMetadataWriter:
         payload = deepcopy(payload)
         info = gdal.Info(str(reference_file), format='json')
         payload['pixel_spacing'] = info['geoTransform'][1]
-        payload['projection'] = get_projection(info['coordinateSystem']['wkt'])
+        payload['projection'] = util.get_projection(info['coordinateSystem']['wkt'])
 
-        payload['thumbnail_encoded_string'] = get_thumbnail_encoded_string(reference_file)
+        payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file)
 
-        content = render_template(template, payload)
+        content = util.render_template(template, payload)
         out_name = reference_file.name if not strip_ext else reference_file.stem
         if strip_pol:
-            out_name = strip_polarization(out_name)
+            out_name = util.strip_polarization(out_name)
         output_file = reference_file.parent / f'{out_name}.{out_ext}'
         with open(output_file, 'w') as f:
             f.write(content)
@@ -149,7 +151,7 @@ def decode_product(product_name: str) -> dict:
         'filter_applied': False if user_options[3] == 'n' else True,
         'clipped': False if user_options[4] == 'e' else True,
         'matching': False if user_options[5] == 'd' else True,
-        'polarizations': get_polarizations(product_parts[-5][:2]),
+        'polarizations': util.get_polarizations(product_parts[-5][:2]),
     }
 
 
@@ -160,7 +162,7 @@ def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, proces
 
     payload.update(decode_product(product_dir.name))
 
-    payload.update(get_granule_type(granule_name))
+    payload.update(util.get_granule_type(granule_name))
 
     return payload
 
@@ -169,3 +171,5 @@ def populate_example_data(product_dir: Path):
     product_files = glob(str(Path(data.__file__).parent / 'rtc' / 'rtc*'))
     for f in product_files:
         shutil.copy(f, product_dir / f'{Path(f).name.replace("rtc", product_dir.name)}')
+
+

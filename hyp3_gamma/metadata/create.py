@@ -24,12 +24,12 @@ def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name:
     return writer.create_metadata_file_set()
 
 
-def create_metadata_file_set_insar(product_dir, granule_name_ref, granule_name_sec, processing_date, looks, dem_name,
-                                   plugin_name, plugin_version, processor_name, processor_version):
+def create_metadata_file_set_insar(product_dir, reference_granule_name, secondary_granule_name, processing_date, looks,
+                                   dem_name, plugin_name, plugin_version, processor_name, processor_version):
     payload = insar.marshal_metadata(
         product_dir,
-        granule_name_ref,
-        granule_name_sec,
+        reference_granule_name,
+        secondary_granule_name,
         processing_date,
         looks,
         dem_name,

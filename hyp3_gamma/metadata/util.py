@@ -8,8 +8,6 @@ from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
 from osgeo import osr
 
-SUPPORTED_DEMS = ['EU_DEM_V11', 'GIMP', 'IFSAR', 'NED13', 'NED1', 'NED2', 'REMA', 'SRTMGL1', 'SRTMGL3', 'GLO-30']
-
 
 def get_environment() -> Environment:
     env = Environment(

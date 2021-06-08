@@ -6,11 +6,11 @@ from hyp3_metadata import create
 from hyp3_metadata import insar
 
 
-def test_create_rtc_gamma_readme(insar_product_dir):
+def test_create_insar_gamma_readme(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -29,8 +29,8 @@ def test_create_rtc_gamma_readme(insar_product_dir):
 def test_create_amp_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -49,8 +49,8 @@ def test_create_amp_xml(insar_product_dir):
 def test_create_coherence_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -69,8 +69,8 @@ def test_create_coherence_xml(insar_product_dir):
 def test_create_dem_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -89,8 +89,8 @@ def test_create_dem_xml(insar_product_dir):
 def test_create_los_displacement_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -109,8 +109,8 @@ def test_create_los_displacement_xml(insar_product_dir):
 def test_create_look_vector_xmls(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -132,8 +132,8 @@ def test_create_look_vector_xmls(insar_product_dir):
 def test_create_browse_xmls(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -155,8 +155,8 @@ def test_create_browse_xmls(insar_product_dir):
 def test_unwrapped_phase_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -175,8 +175,8 @@ def test_unwrapped_phase_xml(insar_product_dir):
 def test_vertical_displacement_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -195,8 +195,8 @@ def test_vertical_displacement_xml(insar_product_dir):
 def test_wrapped_phase_xml(insar_product_dir):
     payload = hyp3_metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
@@ -215,8 +215,8 @@ def test_wrapped_phase_xml(insar_product_dir):
 def test_rtc_gamma_all_files(insar_product_dir):
     files = create.create_metadata_file_set_insar(
         product_dir=insar_product_dir,
-        granule_name_ref='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
-        granule_name_sec='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks='20x4',
         dem_name='GLO-30',
