@@ -116,7 +116,7 @@ For more information on citing the dataset, please refer to the README file dist
 {% endblock %}
 {% block dataLineage %}
         <dataLineage>
-            <statement>{{ dataLineage }}
+            <statement>{% block dataLineageStatement %}{% endblock %}
             </statement>
         </dataLineage>
 {% endblock %}
