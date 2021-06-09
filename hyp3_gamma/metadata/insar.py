@@ -1,5 +1,6 @@
 import shutil
 from copy import deepcopy
+from datetime import datetime
 from glob import glob
 from pathlib import Path
 from typing import List, Optional
@@ -17,7 +18,7 @@ class InSarMetadataWriter:
         self.product_dir = payload['product_dir']
         self.product_name = payload['product_dir'].name
 
-    def create_metadata_file_set(self):
+    def create_metadata_file_set(self) -> List[dict]:
         files = []
         generators = [
             self.create_readme,
@@ -118,15 +119,16 @@ class InSarMetadataWriter:
         return output_file
 
 
-def decode_product(product_name):
+def decode_product(product_name: str) -> dict:
     product_parts = product_name.split('_')
     return {
         'pol': product_parts[3][:2]
     }
 
 
-def marshal_metadata(product_dir, reference_granule_name, secondary_granule_name, processing_date, looks, dem_name,
-                     plugin_name, plugin_version, processor_name, processor_version):
+def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
+                                   processing_date: datetime, looks: int, dem_name: str, plugin_name: str,
+                                   plugin_version: str, processor_name: str, processor_version: str) -> dict:
     payload = locals()
     payload['metadata_version'] = hyp3_metadata.__version__
     payload['granule_type'] = util.get_granule_type(reference_granule_name)['granule_type']

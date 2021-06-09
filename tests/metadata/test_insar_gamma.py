@@ -212,7 +212,7 @@ def test_wrapped_phase_xml(insar_product_dir):
     assert output_file.exists()
 
 
-def test_rtc_gamma_all_files(insar_product_dir):
+def test_insar_gamma_all_files(insar_product_dir):
     files = create.create_metadata_file_set_insar(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
