@@ -57,9 +57,7 @@ def strip_polarization(file_name: str) -> str:
     return re.sub(r'_(VV|VH|HH|HV)', '', file_name)
 
 
-def get_thumbnail_encoded_string(reference_file: Path, size: Tuple[int, int] = (200, 200)) -> str:
-    browse_file = reference_file.with_suffix('.png')
-    browse_file = browse_file.parent / strip_polarization(browse_file.name)
+def get_thumbnail_encoded_string(browse_file: Path, size: Tuple[int, int] = (200, 200)) -> str:
     if not browse_file.exists():
         return ''
 

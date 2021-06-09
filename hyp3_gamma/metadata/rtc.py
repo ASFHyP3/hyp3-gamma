@@ -109,7 +109,9 @@ class RtcMetadataWriter:
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = util.get_projection(info['coordinateSystem']['wkt'])
 
-        payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file)
+        browse_file = reference_file.with_suffix('.png')
+        browse_file = browse_file.parent / util.strip_polarization(browse_file.name)
+        payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(browse_file)
 
         content = util.render_template(template, payload)
         out_name = reference_file.name if not strip_ext else reference_file.stem

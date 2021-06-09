@@ -218,18 +218,18 @@ def test_thumbnail_reference_file_is_browse(test_data_folder):
 
 
 def test_thumbnail_reference_file_is_pol(test_data_folder):
-    reference_file = test_data_folder / 'rtc' / 'rtc_VV.png'
+    reference_file = test_data_folder / 'rtc' / 'rtc.png'
     encoded_string = hyp3_metadata.util.get_thumbnail_encoded_string(reference_file)
     assert len(encoded_string) == 844
 
-    reference_file = test_data_folder / 'rtc' / 'rtc_VH.png'
+    reference_file = test_data_folder / 'rtc' / 'rtc.png'
     encoded_string = hyp3_metadata.util.get_thumbnail_encoded_string(reference_file)
     assert len(encoded_string) == 844
 
 
 def test_thumbnail_reference_file_is_dem(test_data_folder):
-    reference_file = test_data_folder / 'rtc' / 'rtc_dem.tif'
-    encoded_string = hyp3_metadata.util.get_thumbnail_encoded_string(reference_file)
+    browse_file = test_data_folder / 'rtc' / 'rtc_dem.png'
+    encoded_string = hyp3_metadata.util.get_thumbnail_encoded_string(browse_file)
     assert len(encoded_string) == 844
 
 
