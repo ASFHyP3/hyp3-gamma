@@ -127,7 +127,7 @@ def decode_product(product_name: str) -> dict:
 
 
 def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
-                                   processing_date: datetime, looks: int, dem_name: str, plugin_name: str,
+                                   processing_date: datetime, looks: str, dem_name: str, plugin_name: str,
                                    plugin_version: str, processor_name: str, processor_version: str) -> dict:
     payload = locals()
     payload['metadata_version'] = hyp3_metadata.__version__

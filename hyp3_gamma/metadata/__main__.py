@@ -30,7 +30,7 @@ def main():
     rtc_parser.set_defaults(func=rtc_metadata)
 
     # INSAR Arguments
-    insar_parser = subparsers.add_parser('rtc')
+    insar_parser = subparsers.add_parser('insar')
     insar_parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     insar_parser.add_argument('-o', '--output-dir', default='.', type=Path,
                               help='Generate the example products in this directory')
@@ -44,9 +44,9 @@ def main():
                               default='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
                               help='Secondary granule used to generate the INSAR product')
     insar_parser.add_argument('--processing-date', default='2020-01-01T00:00:00+00:00', type=dt_parse)
-    insar_parser.add_argument('--looks', default=1, type=int,
+    insar_parser.add_argument('--looks', default='20', type=str,
                               help='Number of azimuth looks taken when generating the RTC product')
-    insar_parser.set_defaults(func=rtc_metadata)
+    insar_parser.set_defaults(func=insar_metadata)
 
     args = parser.parse_args()
     args.func(args)

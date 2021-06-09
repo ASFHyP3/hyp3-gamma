@@ -25,7 +25,7 @@ def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name:
 
 
 def create_metadata_file_set_insar(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
-                                   processing_date: datetime, looks: int, dem_name: str, plugin_name: str,
+                                   processing_date: datetime, looks: str, dem_name: str, plugin_name: str,
                                    plugin_version: str, processor_name: str, processor_version: str) -> List[Path]:
     payload = insar.marshal_metadata(
         product_dir=product_dir,
