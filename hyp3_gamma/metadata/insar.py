@@ -108,6 +108,8 @@ class InSarMetadataWriter:
 
         if reference_file.suffix == '.png':
             payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file)
+        else:
+            payload['thumbnail_encoded_string'] = ''
 
         content = util.render_template(template, payload)
         out_name = reference_file.name if not strip_ext else reference_file.stem
