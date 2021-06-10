@@ -102,6 +102,7 @@ class InSarMetadataWriter:
 
         payload = deepcopy(payload)
         info = gdal.Info(str(reference_file), format='json')
+        payload['reference_file'] = reference_file
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = util.get_projection(info['coordinateSystem']['wkt'])
 
