@@ -107,7 +107,7 @@ class InSarMetadataWriter:
         payload['projection'] = util.get_projection(info['coordinateSystem']['wkt'])
 
         if reference_file.suffix == '.png':
-            payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file)
+            payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file.name)
         else:
             payload['thumbnail_encoded_string'] = ''
 
