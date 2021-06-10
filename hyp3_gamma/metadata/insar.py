@@ -102,12 +102,12 @@ class InSarMetadataWriter:
 
         payload = deepcopy(payload)
         info = gdal.Info(str(reference_file), format='json')
-        payload['reference_file'] = reference_file
+        payload['reference_file'] = reference_file.name
         payload['pixel_spacing'] = info['geoTransform'][1]
         payload['projection'] = util.get_projection(info['coordinateSystem']['wkt'])
 
         if reference_file.suffix == '.png':
-            payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file.name)
+            payload['thumbnail_encoded_string'] = util.get_thumbnail_encoded_string(reference_file)
         else:
             payload['thumbnail_encoded_string'] = ''
 
