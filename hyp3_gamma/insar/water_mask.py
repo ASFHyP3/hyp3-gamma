@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import numpy as np
 
 from hyp3lib import saa_func_lib as saa
 from osgeo import gdal, ogr, osr
@@ -88,7 +89,7 @@ def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1)
     return mask
 
 
-def apply_water_mask(tiffile, outfile, safe_dir, maskval=0, band=1):
+def apply_water_mask(tiffile, outfile, safe_dir, maskval=None, band=1):
     """
     Given a tiffile input, create outfile, filling in all water areas with the maskval.
     """
@@ -107,6 +108,10 @@ def apply_water_mask(tiffile, outfile, safe_dir, maskval=0, band=1):
     logging.info("Applying water body mask")
     mask = get_water_mask(tiffile, upper_left, lower_right, trans[1], safe_dir)
     saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask)
+    if not maskval or maskval == 0:
+        finfo = np.finfo(data.dtype)
+        maskval = float(finfo.min)
+
     data[mask == 0] = maskval
     saa.write_gdal_file("final_dem.tif", trans, proj, data)
 
@@ -129,8 +134,9 @@ if __name__ == '__main__':
 
     parser.add_argument('tiffile', help='Name of tif file to mask')
     parser.add_argument('outfile', help='Name of output masked file')
-    parser.add_argument('-m', '--mask_value', help='Mask value to apply; default 0', type=float,
-                        default=0)
+    parser.add_argument('safedir', help='path of safe_dir')
+    parser.add_argument('-m', '--mask_value', help='Mask value to apply; default None', type=float,
+                        default=None)
     args = parser.parse_args()
 
     logFile = "apply_water_mask_{}_log.txt".format(os.getpid())
@@ -139,4 +145,4 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
 
-    apply_water_mask(args.tiffile, args.outfile, mask_value=args.mask_value)
+    apply_water_mask(args.tiffile, args.outfile, args.safedir, maskval=args.mask_value)

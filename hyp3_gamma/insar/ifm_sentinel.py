@@ -324,8 +324,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     burst_tab1, burst_tab2 = get_burst_overlaps(reference_file, secondary_file)
 
     log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
-    shutil.move(burst_tab1, reference_date_short)
-    shutil.move(burst_tab2, secondary_date_short)
+    shutil.move(burst_tab1, "{}/{}".format(reference_date_short, burst_tab1))
+    shutil.move(burst_tab2, "{}/{}".format(secondary_date_short, burst_tab2))
 
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")

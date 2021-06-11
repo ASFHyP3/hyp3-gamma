@@ -15,4 +15,4 @@ def get_dem_file_gamma(dem_image: str, dem_par: str, safe_dir: str, pixel_size: 
             apply_water_mask(dem_tif.name, "tmp_masked_file.tif", safe_dir)
             shutil.move("tmp_masked_file.tif", dem_tif.name)
         execute(f'dem_import {dem_tif.name} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
-                f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 0', uselogging=True)
+                f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - - -', uselogging=True)
