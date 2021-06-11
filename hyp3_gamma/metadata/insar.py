@@ -31,6 +31,7 @@ class InSarMetadataWriter:
             self.create_unwrapped_phase_xml,
             self.create_vertical_displacement_xml,
             self.create_wrapped_phase_xml,
+            self.create_inc_map_xml,
         ]
         for generator in generators:
             output = generator()
@@ -93,6 +94,10 @@ class InSarMetadataWriter:
     def create_wrapped_phase_xml(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_wrapped_phase.tif'
         return self.create_metadata_file(self.payload, 'insar/wrapped_phase_tif.xml.j2', reference_file)
+
+    def create_inc_map_xml(self) -> Path:
+        reference_file = self.product_dir / f'{self.product_name}_inc_map.tif'
+        return self.create_metadata_file(self.payload, 'insar/inc_map_tif.xml.j2', reference_file)
 
     @classmethod
     def create_metadata_file(cls, payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
