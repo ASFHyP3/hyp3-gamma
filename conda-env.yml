@@ -19,7 +19,7 @@ dependencies:
   # For running
   - gdal
   - hyp3lib>=1.6.7,<2
-  - hyp3_metadata>=1.2.0
+  - hyp3_metadata>=1.2.1
   - importlib_metadata
   - lxml
   - numpy

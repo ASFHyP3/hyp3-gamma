@@ -8,6 +8,7 @@ import re
 import shutil
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from secrets import token_hex
 
 from hyp3_metadata import create_metadata_file_set_insar
@@ -18,8 +19,10 @@ from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
+from hyp3lib.system import gamma_version
 from lxml import etree
 
+import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
