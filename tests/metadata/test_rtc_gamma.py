@@ -4,8 +4,7 @@ import pytest
 
 import hyp3_metadata.rtc
 import hyp3_metadata.util
-from hyp3_metadata import create
-from hyp3_metadata import rtc
+from hyp3_metadata import create_metadata_file_set_rtc, rtc
 from hyp3_metadata.rtc import SUPPORTED_DEMS
 
 
@@ -179,7 +178,7 @@ def test_rtc_gamma_rgb(rtc_product_dir):
 
 
 def test_rtc_gamma_all_files(rtc_product_dir):
-    files = create.create_metadata_file_set_rtc(
+    files = create_metadata_file_set_rtc(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
         dem_name='SRTMGL1',
