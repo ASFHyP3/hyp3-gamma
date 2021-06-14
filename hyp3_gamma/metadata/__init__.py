@@ -3,7 +3,7 @@
 # FIXME: Python 3.8+ this should be `from importlib.metadata...`
 from importlib_metadata import PackageNotFoundError, version
 
-from hyp3_metadata.create import create_metadata_file_set_rtc
+from hyp3_metadata.create import create_metadata_file_set_rtc, create_metadata_file_set_insar
 
 try:
     __version__ = version(__name__)
