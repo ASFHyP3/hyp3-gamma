@@ -7,9 +7,10 @@ import os
 import re
 import shutil
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from secrets import token_hex
 
+from hyp3_metadata import create_metadata_file_set_insar
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
@@ -379,7 +380,19 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
-    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
+
+    create_metadata_file_set_insar(
+        product_dir=Path(product_name),
+        reference_granule_name=reference_file,
+        secondary_granule_name=secondary_file,
+        processing_date=datetime.now(timezone.utc),
+        looks=f'{alooks}x{rlooks}',
+        dem_name='GLO-30',
+        plugin_name=hyp3_gamma.__name__,
+        plugin_version=hyp3_gamma.__version__,
+        processor_name='GAMMA',
+        processor_version=gamma_version(),
+    )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
