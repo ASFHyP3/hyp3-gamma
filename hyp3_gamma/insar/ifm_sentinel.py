@@ -382,7 +382,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
-
     create_metadata_file_set_insar(
         product_dir=Path(product_name),
         reference_granule_name=reference_file,
