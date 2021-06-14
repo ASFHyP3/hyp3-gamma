@@ -14,4 +14,4 @@ except PackageNotFoundError:
           'Or, to just get the version number use:\n'
           '   python setup.py --version')
 
-__all__ = ['__version__', 'create_metadata_file_set_rtc']
+__all__ = ['__version__', 'create_metadata_file_set_rtc', 'create_metadata_file_set_insar']
