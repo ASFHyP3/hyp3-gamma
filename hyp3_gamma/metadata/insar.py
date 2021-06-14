@@ -74,7 +74,7 @@ class InSarMetadataWriter:
         ]
         return output_files
 
-    def create_browse_xmls(self) -> Path:
+    def create_browse_xmls(self) -> List[Path]:
         reference_file_col = self.product_dir / f'{self.product_name}_color_phase.png'
         reference_file_unw = self.product_dir / f'{self.product_name}_unw_phase.png'
         output_files = [
