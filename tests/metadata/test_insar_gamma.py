@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import hyp3_metadata.rtc
+
 import hyp3_metadata.util
 from hyp3_metadata import create
 from hyp3_metadata import insar
@@ -100,9 +100,9 @@ def test_create_los_displacement_xml(insar_product_dir):
         processor_version='20191203',
     )
     writer = insar.InSarMetadataWriter(payload)
-    output_file = writer.create_dem_tif_xml()
+    output_file = writer.create_los_displacement_xml()
     assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_dem.tif.xml'
+           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_los_disp.tif.xml'
     assert output_file.exists()
 
 
