@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 import hyp3_metadata.util
-from hyp3_metadata import create
-from hyp3_metadata import insar
+from hyp3_metadata import create_metadata_file_set_insar, insar
 
 
 def test_create_insar_gamma_readme(insar_product_dir):
@@ -233,7 +232,7 @@ def test_inc_map_xml(insar_product_dir):
 
 
 def test_insar_gamma_all_files(insar_product_dir):
-    files = create.create_metadata_file_set_insar(
+    files = create_metadata_file_set_insar(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
