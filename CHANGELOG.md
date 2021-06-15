@@ -7,7 +7,13 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-##[4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
+## [4.7.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.0...v4.7.0)
+
+### Changed 
+* Upgraded to hyp3-metadata [v0.4.2](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#042) from v0.2.0
+
+
+## [4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
 
 ### Added
 * `water_map` entrypoint to create a water map product
