@@ -292,7 +292,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     secondary_date = secondary_file[17:32]
     secondary_date_short = secondary_file[17:25]
     igramName = "{}_{}".format(reference_date, secondary_date)
-
     if "IW_SLC__" not in reference_file:
         raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
     if "IW_SLC__" not in secondary_file:
@@ -382,10 +381,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
+    reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
+    secondary_granule = os.path.splitext(os.path.basename(secondary_file))[0]
+
     create_metadata_file_set_insar(
         product_dir=Path(product_name),
-        reference_granule_name=reference_file,
-        secondary_granule_name=secondary_file,
+        reference_granule_name=reference_granule,
+        secondary_granule_name=secondary_granule,
         processing_date=datetime.now(timezone.utc),
         looks=f'{rlooks}x{alooks}',
         dem_name='GLO-30',
