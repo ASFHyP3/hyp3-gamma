@@ -387,7 +387,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         reference_granule_name=reference_file,
         secondary_granule_name=secondary_file,
         processing_date=datetime.now(timezone.utc),
-        looks=f'{alooks}x{rlooks}',
+        looks=f'{rlooks}x{alooks}',
         dem_name='GLO-30',
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
