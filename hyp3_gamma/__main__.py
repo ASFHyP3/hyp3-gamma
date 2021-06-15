@@ -116,8 +116,8 @@ def insar():
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
     product_name = insar_sentinel_gamma(
-        reference_file=reference_granule,
-        secondary_file=secondary_granule,
+        reference_file=Path(reference_granule).name,
+        secondary_file=Path(secondary_granule).name,
         alooks=alooks,
         rlooks=rlooks,
         include_dem=args.include_dem,
