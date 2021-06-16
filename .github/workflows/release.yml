@@ -19,7 +19,6 @@ jobs:
         uses: docker://antonyurchenko/git-release:latest
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
-          ALLOW_TAG_PREFIX: "true"
           RELEASE_NAME_PREFIX: "HyP3 GAMMA "
 
       - name: Attempt fast-forward develop from master
