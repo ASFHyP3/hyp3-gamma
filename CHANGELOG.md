@@ -15,7 +15,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `scale` parameter to `rtc_sentinel.rtc_sentinel_gamma` now accepts `decibel`
 
 ### Changed
-* Upgraded to hyp3-metadata [v1.2.1](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#121)
+* Upgraded to hyp3-metadata [v1.2.2](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#122)
   from v1.1.0
 
 ## [4.5.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.0...v4.5.1)
