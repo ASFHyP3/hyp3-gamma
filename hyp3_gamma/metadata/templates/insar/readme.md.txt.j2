@@ -89,7 +89,7 @@ The files generated in this process include:
 ----------------
 ## 1. Wrapped Interferogram
 
-The wrapped interferogram is output in both a georeferenced PNG and KMZ format by default, and the full GeoTIFF file can also be optionally included. Because the fringes are on a wrapped 2-pi scale rather than representing continuous values, a wrapped interferogram tends to be most useful as a color visualization. This product displays deformation in multiples of half of the sensor wavelength, so areas with fringes that are very close together indicate greater amounts of deformation in the line-of-sight direction from the sensor.
+The wrapped interferogram is output in both a georeferenced PNG and KMZ format by default, and the full GeoTIFF file can also be optionally included. Because the fringes are on a wrapped 2-pi scale rather than representing continuous phase difference values, a wrapped interferogram tends to be most useful as a color visualization. This product displays deformation in multiples of half of the sensor wavelength, so areas with fringes that are very close together indicate greater amounts of deformation in the line-of-sight direction from the sensor.
 
 The wrapped interferogram image is generated from the interferogram phase prior to unwrapping. The PNG and KMZ files are tagged with _color_phase, and are 2048 pixels wide. The optional GeoTIFF is tagged with _wrapped_phase.tif
 
@@ -98,7 +98,7 @@ The wrapped interferogram image is generated from the interferogram phase prior 
 ----------------
 ## 2. Unwrapped Interferogram
 
-The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. It relies on having a reference point beyond the area of deformation, and is most effective when there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
+The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. It relies on having a reference point beyond the area of deformation, and is most effective when there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
 
 The GeoTIFF contains the unwrapped phase difference values for each pixel, corresponding to the change in distance along the line of sight of the sensor. Positive values indicate movement away from the sensor (caused by subsidence or lateral movement away from the sensor) and negative values indicate movement towards the sensor (uplift or lateral movement towards the sensor). Note that deformation often includes both vertical and horizontal components, and additional processing or external reference data is required to calculate the relative contributions of vertical and lateral movement.
 
@@ -134,7 +134,7 @@ The coherence map is tagged with _corr.tif
 ----------------
 ## 6. Amplitude Image
 
-The amplitude GeoTIFF indicates the calibrated radiometric backscatter from the reference granule in sigma-nought power. The image is terrain corrected using a geometric correction, but not radiometrically corrected. For more informative amplitude data, order Radiometric Terrain Corrected (RTC) products for your area of interest.
+The amplitude GeoTIFF displays the calibrated radiometric backscatter (intensity) values of the reference granule in sigma-nought power. The image is terrain corrected using a geometric correction, but not radiometrically corrected. For more informative amplitude data, order Radiometric Terrain Corrected (RTC) products for your area of interest.
 
 The amplitude image is tagged with _amp.tif
 
@@ -155,7 +155,7 @@ Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the
 ----------------
 ## 9. Incidence Angle Map
 
-The local incidence angle is defined as the angle between the incident radar signal and the local surface normal. The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
 
 *This file is optional. Select the "Include Inc. Angle Map" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
