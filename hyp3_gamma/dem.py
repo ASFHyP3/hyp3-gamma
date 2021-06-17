@@ -138,7 +138,3 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             nodataval = min_value_datatype(dem_file_paths[0])
                  
             gdal.Translate(output_name, tmp_output, noData = nodataval)
-            
-            #nodataval = min_value_datatype(dem_file_paths[0])
-            #gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
-            #          targetAlignedPixels=True, resampleAlg='cubic', multithread=True, dstNodata = nodataval)
