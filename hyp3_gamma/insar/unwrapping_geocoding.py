@@ -3,6 +3,9 @@
 import argparse
 import logging
 import os
+import numpy as np
+
+from osgeo import gdal
 
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
@@ -10,12 +13,55 @@ from hyp3lib.getParameter import getParameter
 log = logging.getLogger(__name__)
 
 
+def get_minimum_value_gamma_dtype(gammadtype):
+    """
+    gamma datatype  data type:
+             0: RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
+             1: SHORT integer (2 bytes/value)
+             2: FLOAT (4 bytes/value)
+             3: SCOMPLEX (short complex, 4 bytes/value)
+             4: FCOMPLEX (float complex, 8 bytes/value)
+             5: BYTE
+
+    """
+    if gammadtype in [0, 5]:
+        dt = np.int8
+        return np.iinfo(dt).min
+    elif gammadtype in [1]:
+        dt = np.int16
+        return np.iinfo(dt).min        
+    elif gammadtype in [2,3]:
+        dt = np.float32
+        return np.finfo(dt).min
+    else:
+        dt = np.float64
+        return np.finfo(dt).min
+
+def setnodata(file, nodata):
+    """
+    The geotiff produced by gamma package always has 0.0 as nodata value. This confuses users. 
+    This function changes the nodata value in the geotiff file.
+    """
+    ds = gdal.Open(file, gdal.GA_Update)
+    for i in range(1, ds.RasterCount + 1):
+        band = ds.GetRasterBand(i)
+        band_data = band.ReadAsArray()
+        mask = band.GetMaskBand()
+        mask_data = mask.ReadAsArray()
+        band_data[mask_data == 0] = nodata        
+        band.WriteArray(band_data)
+        band.SetNoDataValue(float(nodata))
+    del ds
+
+    
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
 
 def data2geotiff(inname, outname, dempar, type_):
-    execute(f"data2geotiff {dempar} {inname} {type_} {outname}", uselogging=True)
+    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
+    nodata = get_minimum_value_gamma_dtype(type_)
+    setnodata(outname, nodata)
 
 
 def create_phase_from_complex(incpx, outfloat, width):

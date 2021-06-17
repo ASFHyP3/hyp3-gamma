@@ -93,14 +93,14 @@ def apply_water_mask(tiffile, outfile, safe_dir, maskval=None, band=1):
     """
     Given a tiffile input, create outfile, filling in all water areas with the maskval.
     """
-
-    logging.info(f"Using mask value of {maskval}")
     tif_info = gdal.Info(tiffile, format='json')
     upper_left = tif_info['cornerCoordinates']['upperLeft']
     lower_right = tif_info['cornerCoordinates']['lowerRight']
 
     src_ds = gdal.Open(tiffile)
-    data = src_ds.GetRasterBand(band).ReadAsArray()
+    src_band = src_ds.GetRasterBand(band)
+    src_nodata = src_band.GetNoDataValue()
+    data = src_band.ReadAsArray()
     proj = src_ds.GetProjection()
     trans = src_ds.GetGeoTransform()
     del src_ds
@@ -108,11 +108,22 @@ def apply_water_mask(tiffile, outfile, safe_dir, maskval=None, band=1):
     logging.info("Applying water body mask")
     mask = get_water_mask(tiffile, upper_left, lower_right, trans[1], safe_dir)
     saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask)
-    if not maskval or maskval == 0:
-        finfo = np.finfo(data.dtype)
-        maskval = float(finfo.min)
+    
+    if maskval:
+        if maskval == 0:
+            finfo = np.finfo(data.dtype)
+            maskval = float(finfo.min)
+    else:
+        if src_nodata:
+            maskval = src_nodata
+        else:
+            finfo = np.finfo(data.dtype)
+            maskval = float(finfo.min)
 
     data[mask == 0] = maskval
+
+    logging.info(f"Using mask value of {maskval}")
+
     saa.write_gdal_file("final_dem.tif", trans, proj, data)
 
     dst_ds = gdal.GetDriverByName('GTiff').Create(

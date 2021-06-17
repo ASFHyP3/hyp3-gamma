@@ -1,3 +1,4 @@
+import os
 import json
 from pathlib import Path
 from subprocess import PIPE, run
@@ -5,7 +6,9 @@ from tempfile import TemporaryDirectory
 from typing import Generator, List
 
 from hyp3lib import DemError
-from osgeo import gdal, ogr
+from osgeo import gdal, ogr, gdal_array 
+
+import numpy as np
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -79,6 +82,21 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
             shifted_file_paths.append(file_path)
     return shifted_file_paths
 
+def min_value_datatype(file):
+    """get the minimun value of the data type in the geotiff file
+    Args:
+        file: geotiff file name
+    return:
+        min_val: minimum value of the data type in the geotiff file
+    """
+    ds = gdal.Open(file)
+    dt = gdal_array.GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
+    v = np.array([1], dtype = dt)
+    if isinstance(v[0], np.floating):
+        return np.finfo(dt).min
+    else:
+        return np.iinfo(dt).min
+    
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry
@@ -110,5 +128,17 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+
+            tmp_output = os.path.join(temp_path, 'tmp_output')
+
+
+            gdal.Warp(tmp_output, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
+
+            nodataval = min_value_datatype(dem_file_paths[0])
+                 
+            gdal.Translate(output_name, tmp_output, noData = nodataval)
+            
+            #nodataval = min_value_datatype(dem_file_paths[0])
+            #gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+            #          targetAlignedPixels=True, resampleAlg='cubic', multithread=True, dstNodata = nodataval)
