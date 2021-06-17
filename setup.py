@@ -32,7 +32,7 @@ setup(
     install_requires=[
         'gdal',
         'hyp3lib>=1.6.7,<2',
-        'hyp3_metadata>=1.2.2',
+        'hyp3_metadata>=1.2.3',
         'importlib_metadata',
         'lxml',
         'numpy',
