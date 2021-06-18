@@ -16,11 +16,11 @@ jobs:
           token: ${{ secrets.TOOLS_BOT_PAK }}
 
       - name: Create Release
-        uses: docker://antonyurchenko/git-release:latest
+        uses: docker://antonyurchenko/git-release:v3.5.0
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
-          ALLOW_TAG_PREFIX: "true"
           RELEASE_NAME_PREFIX: "HyP3 GAMMA "
+          ALLOW_TAG_PREFIX: true
 
       - name: Attempt fast-forward develop from master
         run: |
