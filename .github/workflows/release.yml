@@ -22,21 +22,21 @@ jobs:
           RELEASE_NAME_PREFIX: "HyP3 GAMMA "
           ALLOW_TAG_PREFIX: true
 
-      - name: Attempt fast-forward develop from master
+      - name: Attempt fast-forward develop from main
         run: |
           git fetch --prune
           git checkout develop && git pull --ff-only
-          git merge --ff-only origin/master
+          git merge --ff-only origin/main
           git push
 
-      - name: Open PR to bring master back to develop
+      - name: Open PR to bring main back to develop
         if: ${{ failure() }}
         uses: repo-sync/pull-request@v2
         with:
-          source_branch: master
+          source_branch: main
           destination_branch: develop
           pr_title: Pulling ${{ github.ref }} into default
-          pr_body: Fast-forward of master to default failed!
+          pr_body: Fast-forward of main to default failed!
           pr_assignee: ${{ github.actor }}
           pr_label: tools-bot
           pr_draft: false

@@ -3,11 +3,11 @@ name: Test and build
 on:
   push:
     branches:
-      - master
+      - main
       - develop
   pull_request:
     branches:
-      - master
+      - main
       - develop
 
 env:
@@ -46,7 +46,7 @@ jobs:
           token: ${{ secrets.TOOLS_BOT_PAK }}
 
       - name: Get associated PR
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: helaili/github-graphql-action@2.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
@@ -58,7 +58,7 @@ jobs:
           sha: ${{ github.sha }}
 
       - name: Get PR labels
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: helaili/github-graphql-action@2.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
@@ -69,7 +69,7 @@ jobs:
           name: hyp3-gamma
 
       - name: Upload a Build Artifact
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: query-responces
@@ -86,7 +86,7 @@ jobs:
           python -m pip install bump2version
 
       - name: Tag version
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           git fetch origin +refs/tags/*:refs/tags/*
           git config user.email "UAF-asf-apd@alaska.edu"
@@ -154,7 +154,7 @@ jobs:
           docker push ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:test
 
       - name: Add latest tag
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           export SDIST_VERSION=${{ needs.tag-version.outputs.SDIST_VERSION }}
           docker tag ${HYP3_REGISTRY}/${GITHUB_REPOSITORY##*/}:${SDIST_VERSION/+/_} \
