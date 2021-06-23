@@ -24,6 +24,8 @@ from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 
+from hyp3_gamma.insar.water_mask import get_water_mask, apply_water_mask
+
 log = logging.getLogger(__name__)
 
 
@@ -373,6 +375,15 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
     unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+
+    if water_masking:
+        mask = None
+        tiffiles = glob.glob("./*.tif")
+        for tiffile in tiffiles:
+            if mask is None:
+                mask = get_water_mask(tiffile, reference_file, mask_value=1)
+            apply_water_mask(tiffile, reference_file, mask=mask)    
+
 
     #  Generate metadata
     log.info("Collecting metadata and output files")

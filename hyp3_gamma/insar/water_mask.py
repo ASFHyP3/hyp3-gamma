@@ -53,11 +53,22 @@ def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
     return
 
 
-def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1):
+def get_water_mask(in_tif, safe_dir, mask_value=1):
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK'
+    tif_info = gdal.Info(in_tif, format='json')
+    upper_left = tif_info['cornerCoordinates']['upperLeft']
+    lower_right = tif_info['cornerCoordinates']['lowerRight']
 
+    src_ds = gdal.Open(in_tif)
+    src_band = src_ds.GetRasterBand(1)
+    src_nodata = src_band.GetNoDataValue()
+    data = src_band.ReadAsArray()
+    proj = src_ds.GetProjection()
+    trans = src_ds.GetGeoTransform()
+    del src_ds
     xmin, ymax = upper_left
     xmax, ymin = lower_right
+    res = trans[1]
 
     shape_file = f'{mask_location}/GSHHG/GSHHS_f_L1.shp'
     reproj_shape_file = 'reproj_shape_file.shp'
@@ -85,55 +96,29 @@ def get_water_mask(in_tif, upper_left, lower_right, res, safe_dir, mask_value=1)
     dst_ds.FlushCache()
     mask = dst_ds.GetRasterBand(1).ReadAsArray()
     del dst_ds
-
+    # save the mask file
+    saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask)
     return mask
 
 
-def apply_water_mask(tiffile, outfile, safe_dir, maskval=None, band=1):
+def apply_water_mask(tiffile, safe_dir, mask = None):
     """
-    Given a tiffile input, create outfile, filling in all water areas with the maskval.
+    Given a tiffile input, update the tiffile by filling in all water areas with the maskval.
     """
-    tif_info = gdal.Info(tiffile, format='json')
-    upper_left = tif_info['cornerCoordinates']['upperLeft']
-    lower_right = tif_info['cornerCoordinates']['lowerRight']
-
-    src_ds = gdal.Open(tiffile)
-    src_band = src_ds.GetRasterBand(band)
-    src_nodata = src_band.GetNoDataValue()
-    data = src_band.ReadAsArray()
-    proj = src_ds.GetProjection()
-    trans = src_ds.GetGeoTransform()
-    del src_ds
-
+    src_ds = gdal.Open(tiffile, gdal.GA_Update)
     logging.info("Applying water body mask")
-    mask = get_water_mask(tiffile, upper_left, lower_right, trans[1], safe_dir)
-    saa.write_gdal_file_byte("final_mask.tif", trans, proj, mask)
-    
-    if maskval:
-        if maskval == 0:
-            finfo = np.finfo(data.dtype)
-            maskval = float(finfo.min)
-    else:
-        if src_nodata:
-            maskval = src_nodata
-        else:
-            finfo = np.finfo(data.dtype)
-            maskval = float(finfo.min)
+    if mask is None:
+        mask = get_water_mask(tiffile, safe_dir, mask_value=1)
 
-    data[mask == 0] = maskval
-
-    logging.info(f"Using mask value of {maskval}")
-
-    saa.write_gdal_file("final_dem.tif", trans, proj, data)
-
-    dst_ds = gdal.GetDriverByName('GTiff').Create(
-        outfile, data.shape[1], data.shape[0], band, gdal.GDT_Float32
-    )
-    dst_ds.SetProjection(proj)
-    dst_ds.SetGeoTransform(trans)
-    dst_ds.GetRasterBand(1).WriteArray(data)
-    dst_ds.GetRasterBand(1).SetNoDataValue(maskval)
-    del dst_ds
+    # mask raster
+    for i in range(src_ds.RasterCount):
+        out_band = src_ds.GetRasterBand(i+1)
+        out_data = out_band.ReadAsArray()
+        no_data_value = out_band.GetNoDataValue()
+        out_data[ mask == 0] = no_data_value
+        out_band.WriteArray(out_data)
+    # close dataset and flush cache
+    del src_ds
 
 
 if __name__ == '__main__':
