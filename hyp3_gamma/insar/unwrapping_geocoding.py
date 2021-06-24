@@ -6,9 +6,8 @@ import os
 
 import numpy as np
 from hyp3lib.execute import execute
-from osgeo import gdal
-
 from hyp3lib.getParameter import getParameter
+from osgeo import gdal
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ def get_minimum_value_gamma_dtype(gammadtype):
         return np.iinfo(dt).min
     elif gammadtype in [1]:
         dt = np.int16
-        return np.iinfo(dt).min     
+        return np.iinfo(dt).min    
     elif gammadtype in [2, 3]:
         dt = np.float32
         return np.finfo(dt).min
@@ -50,7 +49,7 @@ def setnodata(file, nodata):
         band_data = band.ReadAsArray()
         mask = band.GetMaskBand()
         mask_data = mask.ReadAsArray()
-        band_data[mask_data == 0] = nodata       
+        band_data[mask_data == 0] = nodata      
         band.WriteArray(band_data)
         band.SetNoDataValue(float(nodata))
     del ds
