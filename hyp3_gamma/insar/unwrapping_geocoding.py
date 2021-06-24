@@ -6,10 +6,11 @@ import os
 
 import numpy as np
 
-from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
-
 from osgeo import gdal
+
+from hyp3lib.execute import execute
+
+from hyp3lib.getParameter import getParameter
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def setnodata(file, nodata):
         band.SetNoDataValue(float(nodata))
     del ds
 
-  
+
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 

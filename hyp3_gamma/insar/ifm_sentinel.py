@@ -23,7 +23,7 @@ from hyp3_gamma.insar.create_metadata_insar_gamma import create_readme_file
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
-from hyp3_gamma.insar.water_mask import  apply_water_mask, get_water_mask
+from hyp3_gamma.insar.water_mask import apply_water_mask, get_water_mask
 
 log = logging.getLogger(__name__)
 

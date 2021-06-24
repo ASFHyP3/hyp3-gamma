@@ -4,13 +4,10 @@ from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import Generator, List
+import numpy as np
+from osgeo import gdal,gdal_array,ogr
 
 from hyp3lib import DemError
-
-import numpy as np
-
-from osgeo import gdal,gdal_array,ogr 
-
 from hyp3_gamma.util import GDALConfigManager
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
@@ -100,7 +97,7 @@ def min_value_datatype(file):
         return np.iinfo(dt).min
 
 
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float=30.0):
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
@@ -134,10 +131,9 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
             tmp_output = os.path.join(temp_path, 'tmp_output')
 
-
             gdal.Warp(tmp_output, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
             nodataval = min_value_datatype(dem_file_paths[0])
-                 
+                
             gdal.Translate(output_name, tmp_output, noData=nodataval)
