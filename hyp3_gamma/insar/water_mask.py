@@ -3,9 +3,9 @@
 import argparse
 import logging
 import os
-import numpy as np
 
 from hyp3lib import saa_func_lib as saa
+
 from osgeo import gdal, ogr, osr
 
 from hyp3_gamma.dem import get_geometry_from_kml
@@ -61,8 +61,6 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
 
     src_ds = gdal.Open(in_tif)
     src_band = src_ds.GetRasterBand(1)
-    src_nodata = src_band.GetNoDataValue()
-    data = src_band.ReadAsArray()
     proj = src_ds.GetProjection()
     trans = src_ds.GetGeoTransform()
     del src_ds
@@ -101,9 +99,11 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     return mask
 
 
-def apply_water_mask(tiffile, safe_dir, mask = None):
+def apply_water_mask(tiffile, safe_dir, mask=None):
     """
+
     Given a tiffile input, update the tiffile by filling in all water areas with the maskval.
+
     """
     src_ds = gdal.Open(tiffile, gdal.GA_Update)
     logging.info("Applying water body mask")
@@ -115,7 +115,7 @@ def apply_water_mask(tiffile, safe_dir, mask = None):
         out_band = src_ds.GetRasterBand(i+1)
         out_data = out_band.ReadAsArray()
         no_data_value = out_band.GetNoDataValue()
-        out_data[ mask == 0] = no_data_value
+        out_data[mask == 0] = no_data_value
         out_band.WriteArray(out_data)
     # close dataset and flush cache
     del src_ds

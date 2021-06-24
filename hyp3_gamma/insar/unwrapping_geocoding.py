@@ -3,14 +3,16 @@
 import argparse
 import logging
 import os
-import numpy as np
 
-from osgeo import gdal
+import numpy as np
 
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
+from osgeo import gdal
+
 log = logging.getLogger(__name__)
+
 
 def get_minimum_value_gamma_dtype(gammadtype):
     """
@@ -29,17 +31,20 @@ def get_minimum_value_gamma_dtype(gammadtype):
     elif gammadtype in [1]:
         dt = np.int16
         return np.iinfo(dt).min        
-    elif gammadtype in [2,3]:
+    elif gammadtype in [2, 3]:
         dt = np.float32
         return np.finfo(dt).min
     else:
         dt = np.float64
         return np.finfo(dt).min
 
+
 def setnodata(file, nodata):
     """
+
     The geotiff produced by gamma package always has 0.0 as nodata value. This confuses users. 
     This function changes the nodata value in the geotiff file.
+
     """
     ds = gdal.Open(file, gdal.GA_Update)
     for i in range(1, ds.RasterCount + 1):
@@ -52,7 +57,7 @@ def setnodata(file, nodata):
         band.SetNoDataValue(float(nodata))
     del ds
 
-    
+  
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
@@ -153,7 +158,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     geocode_back("{}.los.disp".format(ifgname), "{}.los.disp.geo".format(ifgname), width, lt, demw, demn, 0)
 
     create_phase_from_complex("{}.adf.geo".format(ifgf), "{}.adf.geo.phase".format(ifgf), width)
-
 
     data2geotiff(mmli + ".geo", mmli + ".geo.tif", dempar, 2)
     data2geotiff(smli + ".geo", smli + ".geo.tif", dempar, 2)

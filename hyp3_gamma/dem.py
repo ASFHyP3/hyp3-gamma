@@ -1,14 +1,15 @@
-import os
 import json
+import os
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import Generator, List
 
 from hyp3lib import DemError
-from osgeo import gdal, ogr, gdal_array 
 
 import numpy as np
+
+from osgeo import gdal,gdal_array,ogr 
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -82,6 +83,7 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
             shifted_file_paths.append(file_path)
     return shifted_file_paths
 
+
 def min_value_datatype(file):
     """get the minimun value of the data type in the geotiff file
     Args:
@@ -91,14 +93,14 @@ def min_value_datatype(file):
     """
     ds = gdal.Open(file)
     dt = gdal_array.GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
-    v = np.array([1], dtype = dt)
+    v = np.array([1], dtype=dt)
     if isinstance(v[0], np.floating):
         return np.finfo(dt).min
     else:
         return np.iinfo(dt).min
-    
 
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
+
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float=30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
@@ -138,4 +140,4 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
             nodataval = min_value_datatype(dem_file_paths[0])
                  
-            gdal.Translate(output_name, tmp_output, noData = nodataval)
+            gdal.Translate(output_name, tmp_output, noData=nodataval)
