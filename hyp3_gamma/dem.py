@@ -7,7 +7,7 @@ from typing import Generator, List
 
 import numpy as np
 from hyp3lib import DemError
-from osgeo import gdal, gdal_array, ogr 
+from osgeo import gdal, gdal_array, ogr
 
 from hyp3_gamma.util import GDALConfigManager
 

@@ -381,7 +381,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         for tiffile in tiffiles:
             if mask is None:
                 mask = get_water_mask(tiffile, reference_file, mask_value=1)
-            apply_water_mask(tiffile, reference_file, mask=mask)  
+            apply_water_mask(tiffile, reference_file, mask=mask) 
 
     #  Generate metadata
     log.info("Collecting metadata and output files")
