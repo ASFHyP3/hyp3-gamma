@@ -28,7 +28,7 @@ def get_minimum_value_gamma_dtype(gammadtype):
         return np.iinfo(dt).min
     elif gammadtype in [1]:
         dt = np.int16
-        return np.iinfo(dt).min  
+        return np.iinfo(dt).min
     elif gammadtype in [2, 3]:
         dt = np.float32
         return np.finfo(dt).min
