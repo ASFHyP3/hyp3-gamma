@@ -180,7 +180,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         shutil.copy(inName, outName)
 
     if water_masking:
-        inName = "final_mask.tif"
+        inName = "final_water_mask.tif"
         outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
@@ -376,11 +376,9 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
 
     if water_masking:
-        mask = None
         tiffiles = glob.glob("./*.tif")
+        mask = get_water_mask(tiffiles[0], reference_file, mask_value=1)
         for tiffile in tiffiles:
-            if mask is None:
-                mask = get_water_mask(tiffile, reference_file, mask_value=1)
             apply_water_mask(tiffile, reference_file, mask=mask)
 
     #  Generate metadata

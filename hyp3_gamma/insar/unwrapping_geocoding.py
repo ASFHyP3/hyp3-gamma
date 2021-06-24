@@ -12,30 +12,31 @@ from osgeo import gdal
 log = logging.getLogger(__name__)
 
 
-def get_minimum_value_gamma_dtype(gammadtype):
+def get_minimum_value_for_gamma_dtype(dtype):
+    """Get the minimum numeric value for a GAMMA data type
+  
+    GAMMA provides these data types:
+    * 0: RASTER 8 or 24 bit uncompressed raster image, SUN (`*.ras`), BMP:(`*.bmp`), or TIFF: (`*.tif`)
+    * 1: SHORT integer (2 bytes/value)
+    * 2: FLOAT (4 bytes/value)
+    * 3: SCOMPLEX (short complex, 4 bytes/value)
+    * 4: FCOMPLEX (float complex, 8 bytes/value)
+    * 5: BYTE
     """
-    gamma datatype  data type:
-             0: RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
-             1: SHORT integer (2 bytes/value)
-             2: FLOAT (4 bytes/value)
-             3: SCOMPLEX (short complex, 4 bytes/value)
-             4: FCOMPLEX (float complex, 8 bytes/value)
-             5: BYTE
-
-    """
-    if gammadtype in [0, 5]:
-        dt = np.int8
-        return np.iinfo(dt).min
-    elif gammadtype in [1]:
-        dt = np.int16
-        return np.iinfo(dt).min
-    elif gammadtype in [2, 3]:
-        dt = np.float32
-        return np.finfo(dt).min
-    else:
-        dt = np.float64
-        return np.finfo(dt).min
-
+    dtype_map = {
+        0: np.int8,
+        1: np.int16,
+        2: np.float32,
+        3: np.float32,
+        4: np.float64,
+        5: np.int8,
+    }
+    try:
+        return np.iinfo(dtype_map[dtype]).min
+    except ValueError:
+        return np.finfo(dtype_map[dtype]).min
+    except KeyError:
+        raise ValueError(f'Unknown GAMMA data type: {dtype}')
 
 def setnodata(file, nodata):
     """
@@ -61,7 +62,7 @@ def geocode_back(inname, outname, width, lt, demw, demn, type_):
 
 def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
-    nodata = get_minimum_value_gamma_dtype(type_)
+    nodata = get_minimum_value_for_gamma_dtype(type_)
     setnodata(outname, nodata)
 
 
