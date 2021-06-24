@@ -49,7 +49,7 @@ def setnodata(file, nodata):
         band_data = band.ReadAsArray()
         mask = band.GetMaskBand()
         mask_data = mask.ReadAsArray()
-        band_data[mask_data == 0] = nodata    
+        band_data[mask_data == 0] = nodata
         band.WriteArray(band_data)
         band.SetNoDataValue(float(nodata))
     del ds
