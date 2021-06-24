@@ -5,10 +5,8 @@ import logging
 import os
 
 import numpy as np
-
-from osgeo import gdal
-
 from hyp3lib.execute import execute
+from osgeo import gdal
 
 from hyp3lib.getParameter import getParameter
 
@@ -31,7 +29,7 @@ def get_minimum_value_gamma_dtype(gammadtype):
         return np.iinfo(dt).min
     elif gammadtype in [1]:
         dt = np.int16
-        return np.iinfo(dt).min        
+        return np.iinfo(dt).min     
     elif gammadtype in [2, 3]:
         dt = np.float32
         return np.finfo(dt).min
@@ -42,8 +40,7 @@ def get_minimum_value_gamma_dtype(gammadtype):
 
 def setnodata(file, nodata):
     """
-
-    The geotiff produced by gamma package always has 0.0 as nodata value. This confuses users. 
+    The output geotiff files produced by gamma package always has 0.0 as nodata value.
     This function changes the nodata value in the geotiff file.
 
     """
@@ -53,7 +50,7 @@ def setnodata(file, nodata):
         band_data = band.ReadAsArray()
         mask = band.GetMaskBand()
         mask_data = mask.ReadAsArray()
-        band_data[mask_data == 0] = nodata        
+        band_data[mask_data == 0] = nodata       
         band.WriteArray(band_data)
         band.SetNoDataValue(float(nodata))
     del ds

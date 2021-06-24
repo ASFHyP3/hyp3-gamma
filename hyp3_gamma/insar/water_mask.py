@@ -59,7 +59,6 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     lower_right = tif_info['cornerCoordinates']['lowerRight']
 
     src_ds = gdal.Open(in_tif)
-    src_band = src_ds.GetRasterBand(1)
     proj = src_ds.GetProjection()
     trans = src_ds.GetGeoTransform()
     del src_ds
