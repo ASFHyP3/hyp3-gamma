@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 def get_minimum_value_for_gamma_dtype(dtype):
     """Get the minimum numeric value for a GAMMA data type
-  
+
     GAMMA provides these data types:
     * 0: RASTER 8 or 24 bit uncompressed raster image, SUN (`*.ras`), BMP:(`*.bmp`), or TIFF: (`*.tif`)
     * 1: SHORT integer (2 bytes/value)
@@ -37,6 +37,7 @@ def get_minimum_value_for_gamma_dtype(dtype):
         return np.finfo(dtype_map[dtype]).min
     except KeyError:
         raise ValueError(f'Unknown GAMMA data type: {dtype}')
+
 
 def setnodata(file, nodata):
     """

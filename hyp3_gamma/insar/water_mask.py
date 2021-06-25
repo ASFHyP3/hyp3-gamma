@@ -100,7 +100,7 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
 def apply_water_mask(tiffile, safe_dir, outfile=None, mask=None, maskval=None):
     """
 
-    Given a tiffile input, fill the masked pixels with NoDataValue of the file. 
+   Given a tiffile input, fill the masked pixels with NoDataValue of the file.
 
     """
     if outfile:
@@ -144,7 +144,6 @@ def main():
     logging.info("Starting run")
 
     apply_water_mask(args.tiffile, args.safedir, outfile=args.outfile, maskval=args.mask_value)
-
 
     if __name__ == '__main__':
         main()

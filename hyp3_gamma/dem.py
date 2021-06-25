@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
@@ -91,7 +90,7 @@ def min_value_datatype(file):
         min_val: minimum value of the data type in the geotiff file
     """
     ds = gdal.Open(file)
-    dtype = gdal_array.GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
+    dtype = GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
     try:
         np.finfo(dtype).min
     except ValueError:
