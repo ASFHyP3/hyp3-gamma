@@ -103,6 +103,9 @@ def apply_water_mask(tiffile, safe_dir, outfile=None, mask=None, maskval=None):
    Given a tiffile input, fill the masked pixels with NoDataValue of the file.
 
     """
+    if mask is None:
+        mask = get_water_mask(tiffile, safe_dir, maskval=1)
+
     if outfile:
         shutil.copyfile(tiffile, outfile)
     else:
@@ -110,9 +113,7 @@ def apply_water_mask(tiffile, safe_dir, outfile=None, mask=None, maskval=None):
 
     src_ds = gdal.Open(outfile, gdal.GA_Update)
     logging.info("Applying water body mask")
-    if mask is None:
-        mask = get_water_mask(tiffile, safe_dir, maskval=1)
-
+    
     # mask raster
     for i in range(src_ds.RasterCount):
         out_band = src_ds.GetRasterBand(i+1)

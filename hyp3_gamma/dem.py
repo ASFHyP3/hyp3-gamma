@@ -92,9 +92,9 @@ def min_value_datatype(file):
     ds = gdal.Open(file)
     dtype = GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
     try:
-        np.finfo(dtype).min
+        return np.finfo(dtype).min
     except ValueError:
-        np.iinfo(dtype).min
+        return np.iinfo(dtype).min
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
