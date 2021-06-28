@@ -148,7 +148,7 @@ The digital elevation file contains the terrain height for the scenes being proc
 ----------------
 ## 11. Water Mask
 
-The water mask specifies, pixel-by-pixel, where large waterbodies exist in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 are included in the InSAR processing. This mask is applied to the DEM prior to running InSAR jobs, effectively clipping out the water, as areas with DEM heights of 0 are considered invalid for InSAR processing. The water mask is stored as a byte-valued GeoTIFF file and is included in the product package when water masking is applied.
+The water mask specifies, pixel-by-pixel, where large waterbodies exist in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 255 are included in the InSAR processing. This mask is applied to the output geotiff files, effectively clipping out the water. The water mask is stored as a byte-valued GeoTIFF file and is included in the product package when water masking is applied.
 
 The water mask is not precise; land is buffered to reduce the possibility of near-shore features being excluded while reducing the impact of phase-unwrapping errors over large expanses of water. Only oceans, seas, and very large inland waterbodies are masked.
 
