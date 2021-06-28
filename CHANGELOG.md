@@ -9,7 +9,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [unreleased]
 
 ### Added
-* Option to apply water masking to the DEM before processing
+* Option to apply water masking to output geotiff files produced by gamma processing
+  * define the nodata value (minimum_value_datatype) to the dem.tif
+    and apply this dem.tif to gamma processing
   * `water_masking` parameter to `ifm_sentinel.insar_sentinel_gamma` function
   * `--apply-watger-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
