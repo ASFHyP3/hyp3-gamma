@@ -7,9 +7,11 @@ import os
 import re
 import shutil
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 from secrets import token_hex
 
+from hyp3_metadata import create_metadata_file_set_insar
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
@@ -17,9 +19,10 @@ from hyp3lib.getParameter import getParameter
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
+from hyp3lib.system import gamma_version
 from lxml import etree
 
-from hyp3_gamma.insar.create_metadata_insar_gamma import create_readme_file
+import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
@@ -297,7 +300,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     secondary_date = secondary_file[17:32]
     secondary_date_short = secondary_file[17:25]
     igramName = "{}_{}".format(reference_date, secondary_date)
-
     if "IW_SLC__" not in reference_file:
         raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
     if "IW_SLC__" not in secondary_file:
@@ -392,7 +394,21 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem, water_masking)
 
-    create_readme_file(reference_file, secondary_file, f'{product_name}/{product_name}.README.md.txt', pixel_spacing)
+    reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
+    secondary_granule = os.path.splitext(os.path.basename(secondary_file))[0]
+
+    create_metadata_file_set_insar(
+        product_dir=Path(product_name),
+        reference_granule_name=reference_granule,
+        secondary_granule_name=secondary_granule,
+        processing_date=datetime.now(timezone.utc),
+        looks=f'{rlooks}x{alooks}',
+        dem_name='GLO-30',
+        plugin_name=hyp3_gamma.__name__,
+        plugin_version=hyp3_gamma.__version__,
+        processor_name='GAMMA',
+        processor_version=gamma_version(),
+    )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)

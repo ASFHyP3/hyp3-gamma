@@ -16,11 +16,17 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * `--apply-watger-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
 
-##[4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
+## [4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
 
 ### Added
-* Option to output decibel of power RTC product
-  * `--scale` parameter provides choice of power, decibel, or amplitude
+* `water_map` entrypoint to create a water map product
+* Option to output decibel scaled RTC products
+  * `--scale` parameter to `rtc` entrypoint now accepts `decibel`
+  * `scale` parameter to `rtc_sentinel.rtc_sentinel_gamma` now accepts `decibel`
+
+### Changed
+* Upgraded to hyp3-metadata [v1.2.3](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#123)
+  from v1.1.0
 
 ## [4.5.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.0...v4.5.1)
 

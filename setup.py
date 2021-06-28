@@ -32,7 +32,7 @@ setup(
     install_requires=[
         'gdal',
         'hyp3lib>=1.6.7,<2',
-        'hyp3_metadata>=1.1.0',
+        'hyp3_metadata>=1.2.3',
         'importlib_metadata',
         'lxml',
         'numpy',
@@ -56,6 +56,7 @@ setup(
             'ifm_sentinel.py = hyp3_gamma.insar.ifm_sentinel:main',
             'interf_pwr_s1_lt_tops_proc.py = hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc:main',
             'unwrapping_geocoding.py = hyp3_gamma.insar.unwrapping_geocoding:main',
+            'water_map = hyp3_gamma.__main__:water_map',
         ]
     },
 
