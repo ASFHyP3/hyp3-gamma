@@ -1,6 +1,6 @@
 <!--
 Please provide any additional description/context not captured in `CHANGELOG.md`
-and indicate any upstream packages/projects this is relevant to, including their
+and indicate any downstream packages/projects this is relevant to, including their
 associated issues and/or pull requests
 -->
 
@@ -12,6 +12,5 @@ associated issues and/or pull requests
   * minor -- Minor changes to the API that do not break current workflows
   * patch -- Patches and bugfixes for the current version that do not break current workflows
   * bumpless -- Changes to documentation, CI/CD pipelines, etc. that don't affect the software's version
-- [ ] (If applicable) Updated the dependencies and indicated any downstream changes that are required
 - [ ] (If applicable) Added/updated documentation for these changes
 - [ ] (If applicable) Added/updated tests for these changes
