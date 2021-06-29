@@ -40,6 +40,10 @@ setup(
 
     extras_require={
         'develop': [
+            'flake8',
+            'flake8-import-order',
+            'flake8-blind-except',
+            'flake8-builtins',
             'pytest',
             'pytest-cov',
             'pytest-console-scripts',
