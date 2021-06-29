@@ -1,6 +1,6 @@
 <!--
 Please provide any additional description/context not captured in `CHANGELOG.md`
-and indicate any downstream packages/projects this is relevant to, including their
+and indicate any other packages/projects this is relevant to, including their
 associated issues and/or pull requests
 -->
 
