@@ -12,6 +12,9 @@ setup(
     long_description_content_type='text/markdown',
 
     url='https://github.com/ASFHyP3/hyp3-gamma',
+    project_urls={
+        'Documentation': 'https://hyp3-docs.asf.alaska.edu',
+    },
 
     author='ASF APD/Tools Team',
     author_email='uaf-asf-apd@alaska.edu',
