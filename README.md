@@ -12,7 +12,7 @@ Ubuntu 18.0.4 is recommended for GAMMA support.
    ```
    git clone git@github.com:ASFHyP3/hyp3-gamma.git
    cd hyp3-gamma
-   conda env create -f conda-env.yml
+   conda env create -f environment.yml
    conda activate hyp3-gamma
    python -m pip install -e .[develop]
    ```

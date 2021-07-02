@@ -374,13 +374,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+    unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=rlooks, alooks=alooks, water_masking=water_masking)
 
-    if water_masking:
-        tiffiles = glob.glob("./*.tif")
-        mask = get_water_mask(tiffiles[0], reference_file, mask_value=1)
-        for tiffile in tiffiles:
-            apply_water_mask(tiffile, reference_file, mask=mask)
+    #if water_masking:
+    #    tiffiles = glob.glob("./*.tif")
+    #    mask = get_water_mask(tiffiles[0], reference_file, mask_value=1)
+    #    for tiffile in tiffiles:
+    #        apply_water_mask(tiffile, reference_file, mask=mask)
 
     #  Generate metadata
     log.info("Collecting metadata and output files")

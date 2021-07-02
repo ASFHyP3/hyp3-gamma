@@ -22,7 +22,6 @@ jobs:
           flake8 --max-line-length=120 --import-order-style=pycharm --statistics \
               --application-import-names hyp3_gamma
 
-
   gitleaks:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +31,6 @@ jobs:
 
       - name: Scan for secrets with gitleaks
         uses: zricethezav/gitleaks-action@master
-
 
   trufflehog:
     runs-on: ubuntu-latest
@@ -45,13 +43,4 @@ jobs:
         with:
           python-version: 3.x
 
-      - name: Install dependencies
-        run: |
-          python -m pip install trufflehog gitdb2=="2.*"
-
-      - name: Scan for secrets with trufflehog
-        run: |
-          git fetch origin +refs/tags/*:refs/tags/*
-          export LAST_TAG_HASH=$(git show-ref --hash -- $(git describe --abbrev=0))
-          trufflehog --regex --entropy True --since_commit "${LAST_TAG_HASH}" \
-              --exclude_paths .trufflehog.txt file://"${PWD}"
+      - uses: ASFHyP3/actions/trufflehog@main
