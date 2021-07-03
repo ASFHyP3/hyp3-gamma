@@ -5,7 +5,6 @@ import logging
 import os
 import shutil
 
-from hyp3lib import saa_func_lib as saa
 from osgeo import gdal, ogr, osr
 
 from hyp3_gamma.dem import get_geometry_from_kml
