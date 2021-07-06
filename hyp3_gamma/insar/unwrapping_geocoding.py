@@ -86,21 +86,21 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
     tmp_mask ='tmp_mask'
     os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
     #2--bmp
-    geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
+    #geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
     #0--bmp
-    data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
-    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
+    #data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
+    #mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
     #read final_water_mask.tif 
-    #ds =gdal.Open("final_water_mask.tif")
-    #water_band = ds.GetRasterBand(1)
-    #water_data = water_band.ReadAsArray()
-    #del ds
+    ds =gdal.Open("final_water_mask.tif")
+    water_band = ds.GetRasterBand(1)
+    water_data = water_band.ReadAsArray()
+    del ds
     # read the original mask file 
     in_im = Image.open("{}.bmp".format(tmp_mask))
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
     # create water_mask.bmp file
-    water_im = Image.fromarray(mask)
+    water_im = Image.fromarray(water_data)
     water_im.putpalette(in_palette)
     water_bmp_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask.bmp")
     water_im.save(water_bmp_file)
@@ -119,7 +119,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
     out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
     out_im.save(out_file)
 
-    return out_file, mask
+    return out_file, water_data
 
 
 def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, alooks=2, trimode=0,
