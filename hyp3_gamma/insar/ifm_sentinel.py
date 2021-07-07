@@ -296,6 +296,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     reference_date_short = reference_file[17:25]
     secondary_date = secondary_file[17:32]
     secondary_date_short = secondary_file[17:25]
+    output = reference_date_short + "_" + secondary_date_short
     igramName = "{}_{}".format(reference_date, secondary_date)
     if "IW_SLC__" not in reference_file:
         raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
@@ -360,8 +361,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     else:
         log.info("Found azimuth offset of {}!".format(offset))
 
-    output = reference_date_short + "_" + secondary_date_short
-
+    #output = reference_date_short + "_" + secondary_date_short
     log.info("Starting s1_coreg_overlap")
     execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True)
@@ -371,7 +371,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+    unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=rlooks, alooks=alooks)
 
     #  Generate metadata
     log.info("Collecting metadata and output files")

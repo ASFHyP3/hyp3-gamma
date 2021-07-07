@@ -6,6 +6,7 @@ import os
 
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
+from hyp3_gamma.insar.water_mask import get_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -22,11 +23,30 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
+def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
+    """
+    createwater_mask based on the cc_mask_file
+    """
+    tmp_mask ='tmp_mask'
+
+    os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
+    #2--bmp
+    geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
+    #0--bmp
+    data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
+    # create final_water_mask.tif file
+    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
+
+    return mask
+
+
+def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6):
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
+    reference = reference_file[17:25]
+    secondary = secondary_file[17:25]
     ifgname = "{}_{}".format(reference, secondary)
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
@@ -43,6 +63,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     width = getParameter(offit, "interferogram_width")
     mwidth = getParameter(mmli + ".par", "range_samples")
+    #mlines = getParameter(mmli + ".par", "azimuth_lines")
     swidth = getParameter(smli + ".par", "range_samples")
     demw = getParameter(dempar, "width")
     demn = getParameter(dempar, "nlines")
@@ -68,6 +89,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
             f" - - - {ifgname}.adf.cc.ras", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
+
+    # create water mask based on the adf.cc_mask.bmp
+    _ = create_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar, reference_file)
 
     execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
             f" - - {npatr} {npata}", uselogging=True)
