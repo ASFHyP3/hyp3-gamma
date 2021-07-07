@@ -43,6 +43,24 @@ def get_minimum_value_for_gamma_dtype(dtype):
         raise ValueError(f'Unknown GAMMA data type: {dtype}')
 
 
+def setnodata(file, nodata):
+    """
+    The output geotiff files produced by gamma package always has 0.0 as nodata value.
+    This function changes the nodata value in the geotiff file.
+
+    """
+    ds = gdal.Open(file, gdal.GA_Update)
+    for i in range(1, ds.RasterCount + 1):
+        band = ds.GetRasterBand(i)
+        band_data = band.ReadAsArray()
+        mask = band.GetMaskBand()
+        mask_data = mask.ReadAsArray()
+        band_data[mask_data == 0] = nodata
+        band.WriteArray(band_data)
+        band.SetNoDataValue(float(nodata))
+    del ds
+
+
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
@@ -52,8 +70,9 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
 
 
 def data2geotiff(inname, outname, dempar, type_):
+    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
     nodata = get_minimum_value_for_gamma_dtype(type_)
-    execute(f"data2geotiff {dempar} {inname} {type_} {outname} {nodata}", uselogging=True)
+    setnodata(outname, nodata)
 
 
 def create_phase_from_complex(incpx, outfloat, width):
