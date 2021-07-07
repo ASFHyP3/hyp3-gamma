@@ -82,7 +82,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
     """
     mask = create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir)
     # read the original mask file 
-    in_im = Image.open("{}.bmp".format(cc_mask_file))
+    in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
     # create water_mask.bmp file
