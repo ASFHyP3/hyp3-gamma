@@ -43,24 +43,6 @@ def get_minimum_value_for_gamma_dtype(dtype):
         raise ValueError(f'Unknown GAMMA data type: {dtype}')
 
 
-def setnodata(file, nodata):
-    """
-    The output geotiff files produced by gamma package always has 0.0 as nodata value.
-    This function changes the nodata value in the geotiff file.
-
-    """
-    ds = gdal.Open(file, gdal.GA_Update)
-    for i in range(1, ds.RasterCount + 1):
-        band = ds.GetRasterBand(i)
-        band_data = band.ReadAsArray()
-        mask = band.GetMaskBand()
-        mask_data = mask.ReadAsArray()
-        band_data[mask_data == 0] = nodata
-        band.WriteArray(band_data)
-        band.SetNoDataValue(float(nodata))
-    del ds
-
-
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
@@ -70,56 +52,60 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
 
 
 def data2geotiff(inname, outname, dempar, type_):
-    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
     nodata = get_minimum_value_for_gamma_dtype(type_)
-    setnodata(outname, nodata)
+    execute(f"data2geotiff {dempar} {inname} {type_} {outname} {nodata}", uselogging=True)
 
 
 def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir):
+def create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir):
     """
-    combine cc_mask with water_mask
+    createwater_mask based on the cc_mask_file
     """
     tmp_mask ='tmp_mask'
     os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
-    #2--bmp
-    #geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
-    #0--bmp
-    #data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
-    #mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
-    #read final_water_mask.tif 
-    ds =gdal.Open("final_water_mask.tif")
-    water_band = ds.GetRasterBand(1)
-    water_data = water_band.ReadAsArray()
-    del ds
+    # 2--bmp
+    geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
+    # 0--bmp
+    data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
+    # create final_water_mask.tif file
+    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
+
+    return mask
+
+
+def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir):
+    """combine cc_mask with water_mask
+
+    """
+    mask = create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir)
     # read the original mask file 
-    in_im = Image.open("{}.bmp".format(tmp_mask))
+    in_im = Image.open("{}.bmp".format(cc_mask_file))
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
     # create water_mask.bmp file
-    water_im = Image.fromarray(water_data)
+    water_im = Image.fromarray(mask)
     water_im.putpalette(in_palette)
     water_bmp_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask.bmp")
     water_im.save(water_bmp_file)
-    #map water_mask.bmp file to SAR coordinators
+    # map water_mask.bmp file to SAR coordinators
     water_mask_bmp_sar_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask_sar.bmp")
     geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
-    #read water_mask_bmp_sar_file
+    # read water_mask_bmp_sar_file
     water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
     water_mask_sar_data = np.array(water_mask_sar_im)
 
-    #combine two masks
+    # combine two masks
     in_data[water_mask_sar_data == 0] = 0
     out_im = Image.fromarray(in_data)
     out_im.putpalette(in_palette)
     out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
     out_im.save(out_file)
 
-    return out_file, water_data
+    return out_file, mask
 
 
 def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, alooks=2, trimode=0,
@@ -171,11 +157,15 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
             f" - - - {ifgname}.adf.cc.ras", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
+
     if water_masking:
+        # create and apply water mask
         out_file, mask = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt, demw, demn, dempar, reference_file)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
             f" - - {npatr} {npata}", uselogging=True)
     else:
+        # create water mask only
+        _ = create_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar, reference_file)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
             f" - - {npatr} {npata}", uselogging=True)
 
@@ -243,7 +233,6 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
 
     if water_masking:
         tiffiles = glob.glob("./*.tif")
-        #mask = get_water_mask(tiffiles[0], reference_file, mask_value=1)
         for tiffile in tiffiles:
             apply_water_mask(tiffile, reference_file, mask=mask)
 

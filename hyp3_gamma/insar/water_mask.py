@@ -85,15 +85,12 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     dst_ds = gdal.GetDriverByName('GTiff').Create('final_water_mask.tif', ncols, nrows, 1, gdal.GDT_Byte)
     dst_rb = dst_ds.GetRasterBand(1)
     dst_rb.Fill(0)
-    #dst_rb.SetNoDataValue(0)
     dst_ds.SetGeoTransform(geotransform)
     dst_ds.SetProjection(proj)
     _ = gdal.RasterizeLayer(dst_ds, [1], src_lyr, burn_values=[mask_value])
     dst_ds.FlushCache()
     mask = dst_ds.GetRasterBand(1).ReadAsArray()
     del dst_ds
-    # save the mask file
-    #saa.write_gdal_file_byte("final_water_mask.tif", trans, proj, mask)
     return mask
 
 
