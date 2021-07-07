@@ -26,14 +26,14 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     """createwater_mask based on the cc_mask_file
-    
+
     """
-    tmp_mask ='tmp_mask'
+    tmp_mask = 'tmp_mask'
 
     os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
-    #2--bmp
+    # 2--bmp
     geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
-    #0--bmp
+    # 0--bmp
     data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
     # create final_water_mask.tif file
     mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
@@ -64,7 +64,6 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
 
     width = getParameter(offit, "interferogram_width")
     mwidth = getParameter(mmli + ".par", "range_samples")
-    #mlines = getParameter(mmli + ".par", "azimuth_lines")
     swidth = getParameter(smli + ".par", "range_samples")
     demw = getParameter(dempar, "width")
     demn = getParameter(dempar, "nlines")

@@ -88,7 +88,7 @@ def min_value_datatype(file):
         file: geotiff file name
     return:
         min_val: minimum value of the data type in the geotiff file
-        
+
     """
     ds = gdal.Open(file)
     dtype = GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)

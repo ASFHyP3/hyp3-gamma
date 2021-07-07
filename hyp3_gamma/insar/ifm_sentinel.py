@@ -361,7 +361,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     else:
         log.info("Found azimuth offset of {}!".format(offset))
 
-    #output = reference_date_short + "_" + secondary_date_short
     log.info("Starting s1_coreg_overlap")
     execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True)
