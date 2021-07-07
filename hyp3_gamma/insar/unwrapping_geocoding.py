@@ -6,6 +6,7 @@ import os
 
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
+
 from hyp3_gamma.insar.water_mask import get_water_mask
 
 log = logging.getLogger(__name__)
@@ -24,8 +25,8 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 
 def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
-    """
-    createwater_mask based on the cc_mask_file
+    """createwater_mask based on the cc_mask_file
+    
     """
     tmp_mask ='tmp_mask'
 
