@@ -6,15 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.6.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.1...v4.6.2)
-
-### Changed
-* Upgraded to hyp3-lib [1.6.8](https://github.com/ASFHyP3/hyp3-lib/releases/tag/v1.6.8) from [1.6.7](https://github.com/ASFHyP3/hyp3-lib/releases/tag/v1.6.7)
 
 ## [4.6.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.0...v4.6.1)
 
 ### Changed
 * `conda-env.yml` has been renamed to `environment.yml` in-line with community practice
+* Upgraded to hyp3-lib [v1.6.8](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#168) from v1.6.7
 
 ## [4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
 
