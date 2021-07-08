@@ -12,6 +12,9 @@ setup(
     long_description_content_type='text/markdown',
 
     url='https://github.com/ASFHyP3/hyp3-gamma',
+    project_urls={
+        'Documentation': 'https://hyp3-docs.asf.alaska.edu',
+    },
 
     author='ASF APD/Tools Team',
     author_email='uaf-asf-apd@alaska.edu',
@@ -31,7 +34,7 @@ setup(
 
     install_requires=[
         'gdal',
-        'hyp3lib>=1.6.7,<2',
+        'hyp3lib>=1.6.8,<2',
         'hyp3_metadata>=1.2.3',
         'importlib_metadata',
         'lxml',
@@ -40,6 +43,10 @@ setup(
 
     extras_require={
         'develop': [
+            'flake8',
+            'flake8-import-order',
+            'flake8-blind-except',
+            'flake8-builtins',
             'pytest',
             'pytest-cov',
             'pytest-console-scripts',

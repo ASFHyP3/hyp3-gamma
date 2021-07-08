@@ -1,0 +1,46 @@
+name: Tag version
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TOOLS_BOT_PAK }}
+
+      - name: Get associated PR
+        uses: helaili/github-graphql-action@2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
+        with:
+          query: .github/queries/associated-pr.query.yml
+          outputFile: pr.json
+          owner: ${{ github.repository_owner }}
+          name: ${{ github.event.repository.name }}
+          sha: ${{ github.sha }}
+
+      - name: Get PR labels
+        uses: helaili/github-graphql-action@2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOOLS_BOT_PAK }}
+        with:
+          query: .github/queries/pr-labels.query.yml
+          outputFile: labels.json
+          owner: ${{ github.repository_owner }}
+          name: ${{ github.event.repository.name }}
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.x
+
+      - name: Tag version
+        uses: ASFHyP3/actions/bump-version@main
+        with:
+          user: tools-bot
+          email: UAF-asf-apd@alaska.edu

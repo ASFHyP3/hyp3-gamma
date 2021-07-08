@@ -1,4 +1,5 @@
 name: Changelog updated?
+
 on:
   pull_request:
     types:
@@ -7,8 +8,9 @@ on:
       - unlabeled
       - synchronize
     branches:
-      - master
+      - main
       - develop
+
 jobs:
   changelog-udated:
     runs-on: ubuntu-latest
