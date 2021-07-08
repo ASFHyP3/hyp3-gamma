@@ -5,8 +5,9 @@ from zipfile import ZipFile
 from hyp3lib.fetch import download_file
 from hyp3lib.scene import get_download_url
 from osgeo import gdal
-from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
 import numpy as np
+from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
+
 
 log = logging.getLogger(__name__)
 gdal.UseExceptions()

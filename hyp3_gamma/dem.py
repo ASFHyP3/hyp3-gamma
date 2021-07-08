@@ -4,10 +4,8 @@ from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import Generator, List
 
-import numpy as np
 from hyp3lib import DemError
 from osgeo import gdal, ogr
-from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
 
 from hyp3_gamma.util import GDALConfigManager, min_value_datatype
 

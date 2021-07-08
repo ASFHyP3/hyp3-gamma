@@ -8,8 +8,8 @@ import os
 import numpy as np
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-from osgeo import gdal
 from PIL import Image
+from osgeo import gdal
 
 from hyp3_gamma.insar.water_mask import apply_water_mask, get_water_mask
 
@@ -83,7 +83,7 @@ def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     """
     createwater_mask based on the cc_mask_file
     """
-    tmp_mask ='tmp_mask'
+    tmp_mask = 'tmp_mask'
     os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
     # 2--bmp
     geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
@@ -100,7 +100,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
 
     """
     mask = create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir)
-    # read the original mask file 
+    # read the original mask file
     in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
@@ -179,14 +179,15 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
 
     if water_masking:
         # create and apply water mask
-        out_file, mask = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt, demw, demn, dempar, reference_file)
+        out_file, mask = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
+                                            demw, demn, dempar, reference_file)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-            f" - - {npatr} {npata}", uselogging=True)
+                f" - - {npatr} {npata}", uselogging=True)
     else:
         # create water mask only
         _ = create_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar, reference_file)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-            f" - - {npatr} {npata}", uselogging=True)
+                f" - - {npatr} {npata}", uselogging=True)
 
     execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
             f" - {ifgname}.adf.unw.ras", uselogging=True)

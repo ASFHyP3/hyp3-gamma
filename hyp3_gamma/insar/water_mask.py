@@ -5,11 +5,10 @@ import logging
 import os
 import shutil
 
-#from hyp3lib import saa_func_lib as saa
 from osgeo import gdal, ogr, osr
 
-from hyp3_gamma.util import min_value_datatype
 from hyp3_gamma.dem import get_geometry_from_kml
+from hyp3_gamma.util import min_value_datatype
 
 
 def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
@@ -130,7 +129,7 @@ def apply_water_mask(tiffile, outfile=None, mask=None, maskval=None):
                 if not src_nodataval:
                     out_band.SetNoDataValue(nodata)
 
-        except:
+        except Exception as e:
             pass
 
         # close dataset and flush cache
