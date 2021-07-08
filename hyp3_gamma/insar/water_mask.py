@@ -129,7 +129,7 @@ def apply_water_mask(tiffile, outfile=None, mask=None, maskval=None):
                 if not src_nodataval:
                     out_band.SetNoDataValue(nodata)
 
-        except Exception as e:
+        except Exception:
             pass
 
         # close dataset and flush cache

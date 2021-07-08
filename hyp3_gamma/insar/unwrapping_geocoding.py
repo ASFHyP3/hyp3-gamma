@@ -6,9 +6,9 @@ import logging
 import os
 
 import numpy as np
+from PIL import Image
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-from PIL import Image
 from osgeo import gdal
 
 from hyp3_gamma.insar.water_mask import apply_water_mask, get_water_mask
