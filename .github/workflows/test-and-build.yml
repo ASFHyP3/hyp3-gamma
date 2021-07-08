@@ -44,7 +44,6 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           mamba-version: "*"
-          python-version: 3.9
           activate-environment: hyp3-gamma
           environment-file: environment.yml
 
