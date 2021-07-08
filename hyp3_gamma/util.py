@@ -5,6 +5,8 @@ from zipfile import ZipFile
 from hyp3lib.fetch import download_file
 from hyp3lib.scene import get_download_url
 from osgeo import gdal
+from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
+import numpy as np
 
 log = logging.getLogger(__name__)
 gdal.UseExceptions()
@@ -64,3 +66,18 @@ def set_pixel_as_point(tif_file, shift_origin=False):
         transform[3] += transform[5] / 2
         ds.SetGeoTransform(transform)
     del ds
+
+
+def min_value_datatype(file):
+    """get the minimun value of the data type in the geotiff file
+    Args:
+        file: geotiff file name
+    return:
+        min_val: minimum value of the data type in the geotiff file
+    """
+    ds = gdal.Open(file)
+    dtype = GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
+    try:
+        return np.finfo(dtype).min
+    except ValueError:
+        return np.iinfo(dtype).min

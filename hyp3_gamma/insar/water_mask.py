@@ -5,9 +5,10 @@ import logging
 import os
 import shutil
 
-from hyp3lib import saa_func_lib as saa
+#from hyp3lib import saa_func_lib as saa
 from osgeo import gdal, ogr, osr
 
+from hyp3_gamma.util import min_value_datatype
 from hyp3_gamma.dem import get_geometry_from_kml
 
 
@@ -52,7 +53,7 @@ def reproject_shapefile(tif_file, inshape, outshape, safe_dir):
     return
 
 
-def get_water_mask(in_tif, safe_dir, mask_value=1):
+def get_water_mask(in_tif, safe_dir, maskval=1):
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK'
     tif_info = gdal.Info(in_tif, format='json')
     upper_left = tif_info['cornerCoordinates']['upperLeft']
@@ -87,21 +88,19 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     dst_rb.Fill(0)
     dst_ds.SetGeoTransform(geotransform)
     dst_ds.SetProjection(proj)
-    _ = gdal.RasterizeLayer(dst_ds, [1], src_lyr, burn_values=[mask_value])
+    _ = gdal.RasterizeLayer(dst_ds, [1], src_lyr, burn_values=[maskval])
     dst_ds.FlushCache()
     mask = dst_ds.GetRasterBand(1).ReadAsArray()
     del dst_ds
     return mask
 
 
-def apply_water_mask(tiffile, safe_dir, outfile=None, mask=None, maskval=None):
+def apply_water_mask(tiffile, outfile=None, mask=None, maskval=None):
     """
 
    Given a tiffile input, fill the masked pixels with NoDataValue of the file.
 
     """
-    if mask is None:
-        mask = get_water_mask(tiffile, safe_dir, maskval=1)
 
     if outfile:
         shutil.copyfile(tiffile, outfile)
@@ -111,16 +110,31 @@ def apply_water_mask(tiffile, safe_dir, outfile=None, mask=None, maskval=None):
     src_ds = gdal.Open(outfile, gdal.GA_Update)
     logging.info("Applying water body mask")
 
-    # mask raster
-    for i in range(src_ds.RasterCount):
-        out_band = src_ds.GetRasterBand(i+1)
-        out_data = out_band.ReadAsArray()
-        no_data_value = out_band.GetNoDataValue()
-        if no_data_value:
-            out_data[mask == 0] = no_data_value
-        out_band.WriteArray(out_data)
-    # close dataset and flush cache
-    del src_ds
+    if mask is not None:
+        src_band = src_ds.GetRasterBand(1)
+        src_nodataval = src_band.GetNoDataValue()
+
+        if not src_nodataval:
+            if maskval:
+                nodata = maskval
+            else:
+                nodata = min_value_datatype(tiffile)
+        else:
+            nodata = src_nodataval
+        try:
+            for i in range(src_ds.RasterCount):
+                out_band = src_ds.GetRasterBand(i+1)
+                out_data = out_band.ReadAsArray()
+                out_data[mask == 0] = nodata
+                out_band.WriteArray(out_data)
+                if not src_nodataval:
+                    out_band.SetNoDataValue(nodata)
+
+        except:
+            pass
+
+        # close dataset and flush cache
+        del src_ds
 
 
 def main():
@@ -141,8 +155,8 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.info("Starting run")
-
-    apply_water_mask(args.tiffile, args.safedir, outfile=args.outfile, maskval=args.mask_value)
+    mask = get_water_mask(args.tiffile, args.safedir, mask_value=args.mask_value)
+    apply_water_mask(args.tiffile, outfile=args.outfile, mask=mask, maskval=args.mask_value)
 
     if __name__ == '__main__':
         main()

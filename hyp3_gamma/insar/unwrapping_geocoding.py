@@ -79,7 +79,7 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir):
+def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     """
     createwater_mask based on the cc_mask_file
     """
@@ -90,7 +90,7 @@ def create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe
     # 0--bmp
     data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
     # create final_water_mask.tif file
-    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, mask_value=1)
+    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, maskval=1)
 
     return mask
 
@@ -99,7 +99,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
     """combine cc_mask with water_mask
 
     """
-    mask = create_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir)
+    mask = create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir)
     # read the original mask file 
     in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
@@ -251,9 +251,9 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
     log.info("-------------------------------------------------")
 
     if water_masking:
-        tiffiles = glob.glob("./*.tif")
+        tiffiles = glob.glob("./[0-9]*.tif")
         for tiffile in tiffiles:
-            apply_water_mask(tiffile, reference_file, mask=mask)
+            apply_water_mask(tiffile, mask=mask)
 
 
 def main():

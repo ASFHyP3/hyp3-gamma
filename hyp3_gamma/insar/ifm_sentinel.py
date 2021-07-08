@@ -148,6 +148,11 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
+    inName = "final_water_mask.tif"
+    outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
+    if os.path.isfile(inName):
+        shutil.copy(inName, outName)
+
     inName = "{}.cc.geo.tif".format(output)
     outName = "{}_corr.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
@@ -179,11 +184,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     if include_inc_map:
         inName = "{}.inc.tif".format(output)
         outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
-        shutil.copy(inName, outName)
-
-    if water_masking:
-        inName = "final_water_mask.tif"
-        outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_look_vectors:
@@ -298,6 +298,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     reference_date_short = reference_file[17:25]
     secondary_date = secondary_file[17:32]
     secondary_date_short = secondary_file[17:25]
+    reference = reference_date_short
+    secondary = secondary_date_short
     output = reference_date_short + "_" + secondary_date_short
     igramName = "{}_{}".format(reference_date, secondary_date)
     if "IW_SLC__" not in reference_file:
@@ -331,8 +333,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     shutil.move(burst_tab2, f'{secondary_date_short}/{burst_tab2}')
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")
-    reference = reference_date_short
-    secondary = secondary_date_short
 
     os.chdir(reference)
     SLC_copy_S1_fullSW(wrk, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
