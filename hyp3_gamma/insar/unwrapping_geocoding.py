@@ -251,10 +251,10 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
 
-    if water_masking:
-        tiffiles = glob.glob("./[0-9]*.tif")
-        for tiffile in tiffiles:
-            apply_water_mask(tiffile, mask=mask)
+    # if water_masking:
+    #    tiffiles = glob.glob("./[0-9]*.tif")
+    #    for tiffile in tiffiles:
+    #        apply_water_mask(tiffile, mask=mask)
 
 
 def main():
