@@ -1,7 +1,6 @@
 """Unwrap and geocode Sentinel-1 INSAR products from GAMMA"""
 
 import argparse
-import glob
 import logging
 import os
 
@@ -11,7 +10,7 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
-from hyp3_gamma.insar.water_mask import apply_water_mask, get_water_mask
+from hyp3_gamma.insar.water_mask import get_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -250,11 +249,6 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
-
-    # if water_masking:
-    #    tiffiles = glob.glob("./[0-9]*.tif")
-    #    for tiffile in tiffiles:
-    #        apply_water_mask(tiffile, mask=mask)
 
 
 def main():

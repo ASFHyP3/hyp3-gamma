@@ -120,17 +120,14 @@ def apply_water_mask(tiffile, outfile=None, mask=None, maskval=None):
                 nodata = min_value_datatype(tiffile)
         else:
             nodata = src_nodataval
-        try:
-            for i in range(src_ds.RasterCount):
-                out_band = src_ds.GetRasterBand(i+1)
-                out_data = out_band.ReadAsArray()
-                out_data[mask == 0] = nodata
-                out_band.WriteArray(out_data)
-                if not src_nodataval:
-                    out_band.SetNoDataValue(nodata)
 
-        except Exception:
-            pass
+        for i in range(src_ds.RasterCount):
+            out_band = src_ds.GetRasterBand(i+1)
+            out_data = out_band.ReadAsArray()
+            out_data[mask == 0] = nodata
+            out_band.WriteArray(out_data)
+            if not src_nodataval:
+                out_band.SetNoDataValue(nodata)
 
         # close dataset and flush cache
         del src_ds
