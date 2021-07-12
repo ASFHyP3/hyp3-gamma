@@ -23,7 +23,7 @@ python -m hyp3_metadata rtc
 python -m hyp3_metadata insar
 ```
 which will generate an RTC or InSAR example product containing all of its supported
-metadata files. You can use a number of options to tune the the example product
+metadata files. You can use a number of options to tune the example product
 (e.g., the DEM used) or where the product files are generated; see either
 ```
 python -m hyp3_metadata rtc --help
