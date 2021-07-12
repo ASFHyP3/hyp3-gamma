@@ -82,6 +82,7 @@ The files generated in this process include:
 8. Look Vector maps (GeoTIFFs) - *Optional*
 9. Incidence Angle map (GeoTIFF) - *Optional*
 10. DEM used to process the data (GeoTIFF) - *Optional*
+11. Water Mask (GeoTIFF)
 
 *See below for detailed descriptions of each of the product files.*
 
@@ -177,6 +178,15 @@ The DEM used for this product is {{ dem_name }}, which has a native pixel spacin
 *Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
 
 {% endif %}
+----------------
+## 11. Water Mask
+
+The water mask specifies, pixel-by-pixel, the presence of coastal waters beyond 3 km of the shoreline in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 can be included in InSAR processing workflows. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
+
+The water mask is not precise; the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) shoreline data is buffered to 3 km to reduce the possibility of near-shore features being excluded while still being a useful tool for masking out phase unwrapping artifacts over water.
+
+Note that applying the mask after phase unwrapping does not prevent unwrapping errors caused by the inclusion of water pixels as valid data during the phase unwrapping process. An option to apply this water mask as a conditional mask for phase unwrapping is under development.
+
 *************
 # InSAR Processing #
 

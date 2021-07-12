@@ -1,0 +1,29 @@
+{% extends 'insar/insar.xml.j2' %}
+{% block idPurp %}
+This is the water mask for the InSAR products generated from a pair of Sentinel-1 {{ granule_type }} granules. Values of 0 indicate water, and pixels over land have a value of 1. It is an 8-bit unsigned integer GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
+{% endblock %}
+{% block idAbs %}
+&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the water mask for the InSAR products generated from a pair of Sentinel-1 {{ granule_type }} granules. The mask was generated based on the GSHHG shoreline map with a 3-km buffer applied to reduce the chance that land may be excluded. Inland waters are not masked. Pixels over water have a value of 0, while pixels over land have a value of 1. It has been projected to {{ projection }} coordinates, and has a pixel spacing of {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ reference_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ secondary_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Global Self-consistent, Hierarchical, High-resolution Geography Database (GSHHG) provides global shoreline data, and the L1 (boundary between ocean and land) and L5 (boundary between ocean and Antarctic ice) datasets were used as inputs to generate this buffered mask. More information about the GSHHG is available at &lt;/SPAN&gt;&lt;A href="http://www.soest.hawaii.edu/wessel/gshhg/" target="_blank" &gt;&lt;SPAN&gt;http://www.soest.hawaii.edu/wessel/gshhg/&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+{% endblock %}
+{% block dataLineageStatement %}
+The water mask is generated from shoreline data in the Global Self-consistent, Hierarchical, High-resolution Geography Database (GSHHG), buffered 3 km out from shore.
+{% endblock %}
+
+******************
+
+{# Begin idAbs READABLE - not to be included in the xml template
+This is the water mask for the InSAR products generated from a pair of Sentinel-1 {{ granule_type }} granules. The mask was generated based on the GSHHG shoreline map with a 3-km buffer applied to reduce the chance that land may be excluded. Inland waters are not masked. Pixels over water have a value of 0, while pixels over land have a value of 1. It has been projected to {{ projection }} coordinates, and has a pixel spacing of {{ pixel_spacing|int }} m.
+
+Reference Scene: {{ reference_granule_name }}
+Secondary Scene: {{ secondary_granule_name }}
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+The Global Self-consistent, Hierarchical, High-resolution Geography Database (GSHHG) provides global shoreline data, and the L1 (boundary between ocean and land) and L5 (boundary between ocean and Antarctic ice) datasets were used as inputs to generate this buffered mask. More information about the GSHHG is available at http://www.soest.hawaii.edu/wessel/gshhg/.
+
+Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+End idAbs READABLE - not to be included in the xml template
+#}
