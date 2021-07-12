@@ -18,13 +18,15 @@ not possible to preview your changes live, especially in an ArcGIS environment.
 You can generate an example set of metadata to preview your changes by running:
 
 ```
-python -m hyp3_metadata
+python -m hyp3_metadata rtc
+python -m hyp3_metadata insar
 ```
 which will generate an example product containing all of its supported metadata
 files. You can use a number of options to tune generation options (e.g., the DEM
 used) or where the product files are generated; see
 ```
-python -m hyp3_metadata --help
+python -m hyp3_metadata rtc --help
+python -m hyp3_metadata insar --help
 ```
 for usage details. 
 
