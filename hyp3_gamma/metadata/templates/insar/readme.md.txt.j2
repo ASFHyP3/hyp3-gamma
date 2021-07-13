@@ -80,7 +80,7 @@ The files generated in this process include:
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
 8. Look Vector maps (GeoTIFFs) - *Optional*
-9. Incidence Angle map (GeoTIFF) - *Optional*
+9. Incidence Angle maps (GeoTIFFs) - *Optional*
 10. DEM used to process the data (GeoTIFF) - *Optional*
 11. Water Mask (GeoTIFF)
 
@@ -157,11 +157,15 @@ Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the
 *These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
-## 9. Incidence Angle Map
+## 9. Incidence Angle Maps
 
-The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
+There are two incidence angle maps generated for InSAR products.
 
-*This file is optional. Select the "Include Inc. Angle Map" option in the On Demand HyP3 Processing Options to include it in the product package.*
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene. This raster is tagged with _inc_map.tif
+
+The ellipsoid incidence angle indicates the angle between the incident radar beam and the direction perpendicular to the WGS84 ellipsoid model. It does not take terrain into account, and is suitable for use in atmospheric correction workflows. This raster is tagged with _inc_map_ell.tif
+
+*These files are optional. Select the "Include Inc. Angle Maps" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
 ## 10. DEM used to process the data
