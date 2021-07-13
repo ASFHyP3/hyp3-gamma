@@ -185,7 +185,7 @@ The DEM used for this product is {{ dem_name }}, which has a native pixel spacin
 ----------------
 ## 11. Water Mask
 
-The water mask specifies, pixel-by-pixel, the presence of coastal waters beyond 3 km of the shoreline in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 can be included in InSAR processing workflows. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
+The water mask identifies coastal waters beyond 3 km of the shoreline. These areas are assigned a pixel value of 0. All remaining pixels (land, inland waters, land ice, and near-shore coastal areas) have a value of 1. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
 
 The water mask is not precise; the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) shoreline data is buffered to 3 km to reduce the possibility of near-shore features being excluded while still being a useful tool for masking out phase unwrapping artifacts over water.
 
