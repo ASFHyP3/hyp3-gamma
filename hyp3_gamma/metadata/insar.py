@@ -98,7 +98,7 @@ class InSarMetadataWriter:
 
     def create_inc_map_xml(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_inc_map.tif'
-        return self.create_metadata_file(self.payload, 'insar/inc_map_tif.xml.j2', reference_file)
+        return self.create_metadata_file(self.payload, 'insar/inc_map_ell_tif.xml.j2', reference_file)
 
     def create_water_mask_xml(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_water_mask.tif'
