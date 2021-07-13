@@ -183,6 +183,10 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         inName = "{}.inc.tif".format(output)
         outName = "{}_inc_map.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
+        inName = "{}.inc_ellips.tif".format(output)
+        outName = "{}_inc_ellips_map.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+
 
     if include_look_vectors:
         inName = "{}.lv_theta.tif".format(output)
@@ -293,10 +297,10 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     wrk = os.getcwd()
     reference_date = reference_file[17:32]
-    reference_date_short = reference_file[17:25]
+    reference = reference_file[17:25]
     secondary_date = secondary_file[17:32]
-    secondary_date_short = secondary_file[17:25]
-    output = reference_date_short + "_" + secondary_date_short
+    secondary = secondary_file[17:25]
+    output = reference + "_" + secondary
     igramName = "{}_{}".format(reference_date, secondary_date)
     if "IW_SLC__" not in reference_file:
         raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
@@ -306,7 +310,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     pol = get_copol(reference_file)
     log.info("Processing the {} polarization".format(pol))
 
-    #  Ingest the data files into gamma format
+    # Ingest the data files into gamma format
     log.info("Starting par_S1_SLC")
     orbit_files = []
     for granule in (reference_file, secondary_file):
@@ -314,7 +318,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         par_s1_slc_single(granule, pol, os.path.abspath(orbit_file))
         orbit_files.append(orbit_file)
 
-    #  Fetch the DEM file
+    # Fetch the DEM file
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
@@ -323,15 +327,12 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Figure out which bursts overlap between the two swaths
     burst_tab1, burst_tab2 = get_burst_overlaps(reference_file, secondary_file)
-
     log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
-    shutil.move(burst_tab1, f'{reference_date_short}/{burst_tab1}')
-    shutil.move(burst_tab2, f'{secondary_date_short}/{burst_tab2}')
+    shutil.move(burst_tab1, f'{reference}/{burst_tab1}')
+    shutil.move(burst_tab2, f'{secondary}/{burst_tab2}')
+
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")
-    reference = reference_date_short
-    secondary = secondary_date_short
-
     os.chdir(reference)
     SLC_copy_S1_fullSW(wrk, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
     os.chdir("..")
@@ -372,7 +373,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Starting phase unwrapping and geocoding")
     unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=rlooks, alooks=alooks)
 
-    #  Generate metadata
+    # Generate metadata
     log.info("Collecting metadata and output files")
 
     os.chdir(wrk)
