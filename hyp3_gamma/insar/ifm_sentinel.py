@@ -187,7 +187,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         outName = "{}_inc_ellips_map.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-
     if include_look_vectors:
         inName = "{}.lv_theta.tif".format(output)
         outName = "{}_lv_theta.tif".format(os.path.join(prod_dir, long_output))
