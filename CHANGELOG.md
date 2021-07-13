@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.2...v4.6.3)
+
+### Added
+* create and output the incidence ellipsoidal angle geotiff file in the product
+
+
 ## [4.6.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.1...v4.6.2)
 
 ### Added
