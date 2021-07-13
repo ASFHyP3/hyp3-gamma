@@ -32,6 +32,7 @@ class InSarMetadataWriter:
             self.create_vertical_displacement_xml,
             self.create_wrapped_phase_xml,
             self.create_inc_map_xml,
+            self.create_inc_map_ell_xml,
             self.create_water_mask_xml,
         ]
         for generator in generators:
