@@ -7,7 +7,6 @@ from typing import Generator, List
 import numpy as np
 from hyp3lib import DemError
 from osgeo import gdal, ogr
-from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -82,22 +81,6 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-def min_value_datatype(file):
-    """get the minimun value of the data type in the geotiff file
-    Args:
-        file: geotiff file name
-    return:
-        min_val: minimum value of the data type in the geotiff file
-
-    """
-    ds = gdal.Open(file)
-    dtype = GDALTypeCodeToNumericTypeCode(ds.GetRasterBand(1).DataType)
-    try:
-        return np.finfo(dtype).min
-    except ValueError:
-        return np.iinfo(dtype).min
-
-
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry
 
@@ -129,9 +112,6 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
 
-            tmp_tif = temp_path / 'tmp.tif'
-            gdal.Warp(str(tmp_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+            gdal.Warp(str(output_name), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-            nodataval = min_value_datatype(dem_file_paths[0])
-            gdal.Translate(output_name, str(tmp_tif), noData=nodataval)
