@@ -4,7 +4,6 @@ from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 from typing import Generator, List
 
-import numpy as np
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
@@ -114,4 +113,3 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
             gdal.Warp(str(output_name), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-
