@@ -17,6 +17,10 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 * create and output the water mask geotiff file in the product
 
+### Changed
+* Upgraded to hyp3-metadata [v1.2.4](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#124)
+  from v1.2.3
+
 ## [4.6.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.0...v4.6.1)
 
 ### Changed
