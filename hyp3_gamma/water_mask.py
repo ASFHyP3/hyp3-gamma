@@ -27,4 +27,3 @@ def create_water_mask(input_tif: str, output_tif: str):
     gdal.Rasterize(dst_ds, mask_location, burnValues=[1])
 
     del src_ds, dst_ds
-    return output_tif
