@@ -1,3 +1,4 @@
+import numpy as np
 from osgeo import gdal
 
 from hyp3_gamma import water_mask
@@ -5,7 +6,7 @@ from hyp3_gamma import water_mask
 gdal.UseExceptions()
 
 
-def test_create_water_mask(tmp_path, test_data_dir):
+def test_create_water_mask_with_no_water(tmp_path, test_data_dir):
     input_tif = str(test_data_dir / 'test_geotiff.tif')
     output_tif = str(tmp_path / 'water_mask.tif')
     water_mask.create_water_mask(input_tif, output_tif)
@@ -17,3 +18,31 @@ def test_create_water_mask(tmp_path, test_data_dir):
     assert info['bands'][0]['minimum'] == 1
     assert info['bands'][0]['maximum'] == 1
     assert info['metadata']['']['AREA_OR_POINT'] == 'Area'
+
+
+def test_create_water_mask_with_water_and_land(tmp_path, test_data_dir):
+    input_tif = str(test_data_dir / 'water_mask_input.tif')
+    output_tif = str(tmp_path / 'water_mask.tif')
+    water_mask.create_water_mask(input_tif, output_tif)
+
+    info = gdal.Info(output_tif, format='json')
+    assert info['geoTransform'] == [199880.0, 80.0, 0.0, 1753560.0, 0.0, -80.0]
+    assert info['bands'][0]['type'] == 'Byte'
+    assert info['metadata']['']['AREA_OR_POINT'] == 'Point'
+
+    ds = gdal.Open(str(output_tif))
+    data = ds.GetRasterBand(1).ReadAsArray()
+    expected = np.array([
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ])
+    assert np.array_equal(data, expected)
+    del ds
