@@ -60,6 +60,7 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     src_ds = gdal.Open(in_tif)
     proj = src_ds.GetProjection()
     trans = src_ds.GetGeoTransform()
+    metadata = src_ds.GetMetadata()
     del src_ds
     xmin, ymax = upper_left
     xmax, ymin = lower_right
@@ -86,7 +87,7 @@ def get_water_mask(in_tif, safe_dir, mask_value=1):
     dst_rb.Fill(0)
     dst_ds.SetGeoTransform(geotransform)
     dst_ds.SetProjection(proj)
-    dst_ds.SetMetadata({'AREA_OR_POINT': 'Point'})
+    dst_ds.SetMetadata(metadata)
     _ = gdal.RasterizeLayer(dst_ds, [1], src_lyr, burn_values=[mask_value])
     dst_ds.FlushCache()
     mask = dst_ds.GetRasterBand(1).ReadAsArray()
