@@ -35,7 +35,7 @@ setup(
     install_requires=[
         'gdal',
         'hyp3lib>=1.6.8,<2',
-        'hyp3_metadata>=1.2.3',
+        'hyp3_metadata>=1.2.4',
         'importlib_metadata',
         'lxml',
         'numpy',
@@ -64,7 +64,6 @@ setup(
             'interf_pwr_s1_lt_tops_proc.py = hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc:main',
             'unwrapping_geocoding.py = hyp3_gamma.insar.unwrapping_geocoding:main',
             'water_map = hyp3_gamma.__main__:water_map',
-            'mask_water_bodies.py = hyp3_gamma.insar.water_mask:main',
         ]
     },
 
