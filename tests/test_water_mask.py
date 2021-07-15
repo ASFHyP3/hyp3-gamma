@@ -16,3 +16,4 @@ def test_create_water_mask(tmp_path, test_data_dir):
     assert info['bands'][0]['type'] == 'Byte'
     assert info['bands'][0]['minimum'] == 1
     assert info['bands'][0]['maximum'] == 1
+    assert info['metadata']['']['AREA_OR_POINT'] == 'Area'
