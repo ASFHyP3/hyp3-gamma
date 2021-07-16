@@ -15,7 +15,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [4.6.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.1...v4.6.2)
 
 ### Added
-* create and output the water mask geotiff file in the product
+* InSAR products now include a land/water mask GeoTIFF and a corresponding ArcGIS metadata xml file
 
 ### Changed
 * Upgraded to hyp3-metadata [v1.2.4](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#124)
