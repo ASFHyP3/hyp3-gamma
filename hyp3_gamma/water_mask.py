@@ -1,6 +1,8 @@
 """Create and apply a water body mask"""
 from osgeo import gdal
 
+from hyp3_gamma.util import GDALConfigManager
+
 gdal.UseExceptions()
 
 
@@ -24,6 +26,7 @@ def create_water_mask(input_tif: str, output_tif: str):
     dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
-    gdal.Rasterize(dst_ds, mask_location, burnValues=[1])
+    with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='TRUE'):
+        gdal.Rasterize(dst_ds, mask_location, burnValues=[1])
 
     del src_ds, dst_ds
