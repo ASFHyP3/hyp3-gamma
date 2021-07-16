@@ -85,7 +85,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
-    # create ellipsiodal incident angle
     execute(f"gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell")
 
     log.info("-------------------------------------------------")
