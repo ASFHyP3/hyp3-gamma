@@ -7,6 +7,8 @@ import os
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
+from hyp3_gamma.water_mask import create_water_mask
+
 log = logging.getLogger(__name__)
 
 
@@ -22,11 +24,13 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
+def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6):
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
+    reference = reference_file[17:25]
+    secondary = secondary_file[17:25]
     ifgname = "{}_{}".format(reference, secondary)
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
@@ -114,7 +118,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("{}.sim_unw.geo".format(ifgname), "{}.sim_unw.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("{}.adf.unw.geo".format(ifgname), "{}.adf.unw.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("{}.adf.unw.geo.bmp".format(ifgname), "{}.adf.unw.geo.bmp.tif".format(ifgname), dempar, 0)
-    data2geotiff("{}.adf.geo.phase".format(ifgf), "{}.adf.geo.tif".format(ifgf), dempar, 2)
+    data2geotiff("{}.adf.geo.phase".format(ifgf), "{}.adf.geo.tif".format(ifgf), dempar, 2)    
     data2geotiff("{}.adf.bmp.geo".format(ifgf), "{}.adf.bmp.geo.tif".format(ifgf), dempar, 0)
     data2geotiff("{}.cc.geo".format(ifgname), "{}.cc.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("{}.adf.cc.geo".format(ifgname), "{}.adf.cc.geo.tif".format(ifgname), dempar, 2)
@@ -129,6 +133,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
+
+    create_water_mask("{}.adf.unw.geo".format(ifgname), reference_file, 'water_mask.tif')
 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")

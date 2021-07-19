@@ -26,7 +26,6 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
-from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -160,8 +159,9 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
+    inName = "water_mask.tif"
     outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
-    create_water_mask(inName, outName)
+    shutil.copy(inName, outName)
 
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
@@ -370,7 +370,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+    unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=rlooks, alooks=alooks)
 
     #  Generate metadata
     log.info("Collecting metadata and output files")
