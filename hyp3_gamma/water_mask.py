@@ -4,6 +4,7 @@ from affine import Affine
 import fiona
 import pyproj
 import geopandas as gpd
+from shapely.geometry import shape, Polygon
 
 gdal.UseExceptions()
 
@@ -41,35 +42,46 @@ def get_corners_lonlat(ref_file):
     from_crs = pyproj.crs.CRS(ds.GetProjection())    
     to_crs = pyproj.crs.CRS('EPSG:4326')
     proj = pyproj.Transformer.from_crs(from_crs, to_crs, always_xy=True)
-    x, y = calc_ij_coord(gt, 0, 0)
-    ul_x, ul_y = proj.transform(x, y)
+    ul_x, ul_y = calc_ij_coord(gt, 0, 0)
+    ul_lon, ul_lat = proj.transform(ul_x, ul_y)
 
-    x, y = calc_ij_coord(gt, xsize, 0)
-    ur_x, ur_y = proj.transform(x, y)
+    ur_x, ur_y = calc_ij_coord(gt, xsize, 0)
+    ur_lon, ur_lat = proj.transform(ur_x, ur_y)
 
-    x, y = calc_ij_coord(gt, xsize, ysize)
-    lr_x, lr_y = proj.transform(x, y)
+    lr_x, lr_y = calc_ij_coord(gt, xsize, ysize)
+    lr_lon, lr_lat = proj.transform(lr_x, lr_y)
 
-    x, y = calc_ij_coord(gt, 0, ysize)
-    ll_x, ll_y = proj.transform(x, y)
+    ll_x, ll_y = calc_ij_coord(gt, 0, ysize)
+    ll_lon, ll_lat = proj.transform(ll_x, ll_y)
 
-    corners = ((ul_x, ul_y),(ur_x, ur_y),(lr_x, lr_y),(ll_x, ll_y))
-    return corners 
+    corners_xy = ((ul_x, ul_y),(ur_x, ur_y),(lr_x, lr_y),(ll_x, ll_y))
+
+    corners_ll = ((ul_lon, ul_lat),(ur_lon, ur_lat),(lr_lon, lr_lat),(ll_lon, ll_lat))
+
+    return corners_xy, corners_ll 
 
 
 def reprojshapefile2(in_shp_file, ref_file, out_shp_file):
     """reproject in_shap_file to the same crs as that defined in the ref_file. reprojected shapefile is out_shp_file.
     """
-    ref = gdal.Open(ref_file)
-    corners = get_corners_lonlat(ref_file)
-    bbox = (corners[3][0], corners[3][1], corners[1][0], corners[1][1])
-
-    shp = gpd.read_file(in_shp_file, bbox=bbox)
+    # read the global shapefile and reproject to the same projection as the ref_file
+    shp = gpd.read_file(in_shp_file)
     ref = gdal.Open(ref_file)
     ref_crs = ref.GetProjection()
-
     shp_proj = shp.to_crs(ref_crs)
-    shp_proj.to_file(out_shp_file)
+    shp_proj.to_file('glb_proj.shp')
+    
+    # mask with extent of the ref_file
+    corners_xy,_ = get_corners_lonlat(ref_file)
+    geom = Polygon(corners_xy)
+    poly = gpd.GeoDataFrame(index=[0], crs=ref_crs, geometry=[geom])
+    poly.to_file("extent.shp")
+
+    # read the extent.shp and use it to mask the glb_proj.shp, 
+    # mask shapefile in the projection coordinate to avoid the problem of crossing of the antimeridaim.
+    poly_back =gpd.read_file("extent.shp")
+    shp_out = gpd.read_file("glb_proj.shp", mask=poly_back)
+    shp_out.to_file(out_shp_file)
 
 
 def create_water_mask(input_tif: str, output_tif: str):
@@ -86,7 +98,7 @@ def create_water_mask(input_tif: str, output_tif: str):
         output_tif: Path for the output GeoTIFF
     """
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/GSHHS_f_L1.shp'
-
+    mask_location = "GSHHS_f_L1.shp"
     reprojshapefile2(mask_location, input_tif, 'reproj.shp')
 
     src_ds = gdal.Open(input_tif)
