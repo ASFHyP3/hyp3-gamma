@@ -35,7 +35,7 @@ COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
-    python3 -m pip install --no-cache-dir GDAL==2.2.3 pandas==0.23
+    python3 -m pip install --no-cache-dir GDAL==2.2.3
 
 COPY . /hyp3-gamma/
 RUN  python3 -m pip install --no-cache-dir /hyp3-gamma \
