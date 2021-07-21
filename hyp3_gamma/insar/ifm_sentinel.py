@@ -26,6 +26,7 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +159,9 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     inName = "{}.adf.unw.geo.tif".format(output)
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
+
+    outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
+    create_water_mask(inName, outName)
 
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
@@ -319,9 +323,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     burst_tab1, burst_tab2 = get_burst_overlaps(reference_file, secondary_file)
 
     log.info("Finished calculating overlap - in directory {}".format(os.getcwd()))
-    shutil.move(burst_tab1, reference_date_short)
-    shutil.move(burst_tab2, secondary_date_short)
-
+    shutil.move(burst_tab1, f'{reference_date_short}/{burst_tab1}')
+    shutil.move(burst_tab2, f'{secondary_date_short}/{burst_tab2}')
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")
     reference = reference_date_short

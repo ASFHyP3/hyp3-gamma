@@ -19,12 +19,8 @@ env:
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    outputs:
-      SDIST_VERSION: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -38,25 +34,25 @@ jobs:
           python -m pip install .[develop]
           pytest --cov=hyp3_gamma
 
-      - name: Determine SDIST_VERSION
-        id: version
+  dockerize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          activate-environment: hyp3-gamma
+          environment-file: environment.yml
+
+      - name: set environment variables
         shell: bash -l {0}
         run: |
           git fetch origin +refs/tags/*:refs/tags/*
           export SDIST_VERSION=$(python setup.py --version)
-          echo "::set-output name=version::${SDIST_VERSION/+/_}"
-
-
-  dockerize:
-    runs-on: ubuntu-latest
-    needs: pytest
-    env:
-      SDIST_VERSION: ${{ needs.pytest.outputs.SDIST_VERSION }}
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: set environment variables
-        run: |
+          echo "SDIST_VERSION=${SDIST_VERSION/+/_}" >> $GITHUB_ENV
           echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
