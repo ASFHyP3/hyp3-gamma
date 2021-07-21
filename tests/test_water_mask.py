@@ -35,7 +35,7 @@ def test_split_geometry_on_antimeridian():
                 [-180.0, 55.0],
                 [-170.0, 55.0],
             ]],
-        ]
+        ],
     }
 
     geometry = {
