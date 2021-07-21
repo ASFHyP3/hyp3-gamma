@@ -1,10 +1,18 @@
 """Create and apply a water body mask"""
+import json
+from subprocess import PIPE, run
 from tempfile import NamedTemporaryFile
 
 import geopandas
 from osgeo import gdal
 
 gdal.UseExceptions()
+
+
+def split_geometry_on_antimeridian(geometry: dict):
+    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout', '/vsistdin/']
+    geojson_str = run(cmd, input=json.dumps(geometry).encode(), stdout=PIPE, check=True).stdout
+    return json.loads(geojson_str)['features'][0]['geometry']
 
 
 def create_water_mask(input_tif: str, output_tif: str):
@@ -30,6 +38,8 @@ def create_water_mask(input_tif: str, output_tif: str):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_tif, format='json')['wgs84Extent']
+    extent = split_geometry_on_antimeridian(extent)
+
     mask = geopandas.read_file(mask_location, mask=extent)
     with NamedTemporaryFile() as temp_file:
         mask.to_file(temp_file.name, driver='GeoJSON')
