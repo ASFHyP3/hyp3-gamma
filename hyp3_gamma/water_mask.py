@@ -1,6 +1,6 @@
 """Create and apply a water body mask"""
 import json
-from subprocess import PIPE, run
+import subprocess
 from tempfile import NamedTemporaryFile
 
 import geopandas
@@ -10,8 +10,9 @@ gdal.UseExceptions()
 
 
 def split_geometry_on_antimeridian(geometry: dict):
+    geometry_as_bytes = json.dumps(geometry).encode()
     cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout', '/vsistdin/']
-    geojson_str = run(cmd, input=json.dumps(geometry).encode(), stdout=PIPE, check=True).stdout
+    geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
