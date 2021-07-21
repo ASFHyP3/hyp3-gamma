@@ -8,8 +8,8 @@ gdal.UseExceptions()
 
 def test_split_geometry_on_antimeridian():
     geometry = {
-        "type": "Polygon",
-        "coordinates": [[
+        'type': 'Polygon',
+        'coordinates': [[
             [170, 50],
             [175, 55],
             [-170, 55],
@@ -39,8 +39,8 @@ def test_split_geometry_on_antimeridian():
     }
 
     geometry = {
-        "type": "Polygon",
-        "coordinates": [[
+        'type': 'Polygon',
+        'coordinates': [[
             [150, 50],
             [155, 55],
             [-150, 55],
