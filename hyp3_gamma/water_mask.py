@@ -1,16 +1,26 @@
 """Create and apply a water body mask"""
+import json
+import subprocess
+from tempfile import NamedTemporaryFile
+
+import geopandas
 from osgeo import gdal
 
-from hyp3_gamma.util import GDALConfigManager
-
 gdal.UseExceptions()
+
+
+def split_geometry_on_antimeridian(geometry: dict):
+    geometry_as_bytes = json.dumps(geometry).encode()
+    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/', '/vsistdin/']
+    geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
+    return json.loads(geojson_str)['features'][0]['geometry']
 
 
 def create_water_mask(input_tif: str, output_tif: str):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
-    The water mask is assembled from GSHHG v2.3.7 Level 1 (boundary between land and ocean, except Antarctica) at full
-    resolution. To learn more, visit https://www.soest.hawaii.edu/pwessel/gshhg/
+    The water mask is assembled from GSHHG v2.3.7 Levels 1, 2, and 5 at full resolution. To learn more, visit
+    https://www.soest.hawaii.edu/pwessel/gshhg/
 
     Shoreline data is buffered to 3 km to reduce the possibility of near-shore features being excluded. Pixel values of
     1 indicate land and 0 indicate water.
@@ -20,13 +30,20 @@ def create_water_mask(input_tif: str, output_tif: str):
         output_tif: Path for the output GeoTIFF
     """
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/GSHHS_f_L1.shp'
+
     src_ds = gdal.Open(input_tif)
 
     dst_ds = gdal.GetDriverByName('GTiff').Create(output_tif, src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GDT_Byte)
     dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
-    with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='TRUE'):
-        gdal.Rasterize(dst_ds, mask_location, burnValues=[1])
+
+    extent = gdal.Info(input_tif, format='json')['wgs84Extent']
+    extent = split_geometry_on_antimeridian(extent)
+
+    mask = geopandas.read_file(mask_location, mask=extent)
+    with NamedTemporaryFile() as temp_file:
+        mask.to_file(temp_file.name, driver='GeoJSON')
+        gdal.Rasterize(dst_ds, temp_file.name, burnValues=[1])
 
     del src_ds, dst_ds
