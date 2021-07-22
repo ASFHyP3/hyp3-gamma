@@ -15,7 +15,7 @@ def test_get_geometry_from_kml(test_data_dir):
         'type': 'Polygon',
         'coordinates': [[
             [-154.0, 71.0],
-            [- 147.0, 71.0],
+            [-147.0, 71.0],
             [-146.0, 70.0],
             [-153.0, 69.0],
             [-154.0, 71.0],
