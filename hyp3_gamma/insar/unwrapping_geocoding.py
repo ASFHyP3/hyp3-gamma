@@ -12,7 +12,7 @@ from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
-from hyp3_gamma.util import get_minimum_value_for_gamma_dtype, setnodata
+
 log = logging.getLogger(__name__)
 
 
@@ -26,8 +26,6 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
 
 def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
-    nodata = get_minimum_value_for_gamma_dtype(type_)
-    setnodata(outname, nodata)
 
 
 def create_phase_from_complex(incpx, outfloat, width):
