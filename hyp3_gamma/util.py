@@ -69,8 +69,8 @@ def set_pixel_as_point(tif_file, shift_origin=False):
     del ds
 
 
-def min_value_datatype(file):
-    """get the minimun value of the data type in the geotiff file
+def get_minimum_value_for_gdal_datatype(file):
+    """get the minimum value of the data type in the geotiff file
     Args:
         file: geotiff file name
     return:
@@ -82,3 +82,48 @@ def min_value_datatype(file):
         return np.finfo(dtype).min
     except ValueError:
         return np.iinfo(dtype).min
+
+
+def get_minimum_value_for_gamma_dtype(dtype):
+    """Get the minimum numeric value for a GAMMA data type
+
+    GAMMA provides these data types:
+    * 0: RASTER 8 or 24 bit uncompressed raster image, SUN (`*.ras`), BMP:(`*.bmp`), or TIFF: (`*.tif`)
+    * 1: SHORT integer (2 bytes/value)
+    * 2: FLOAT (4 bytes/value)
+    * 3: SCOMPLEX (short complex, 4 bytes/value)
+    * 4: FCOMPLEX (float complex, 8 bytes/value)
+    * 5: BYTE
+    """
+    dtype_map = {
+        0: np.int8,
+        1: np.int16,
+        2: np.float32,
+        3: np.float32,
+        4: np.float64,
+        5: np.int8,
+    }
+    try:
+        return np.iinfo(dtype_map[dtype]).min
+    except ValueError:
+        return np.finfo(dtype_map[dtype]).min
+    except KeyError:
+        raise ValueError(f'Unknown GAMMA data type: {dtype}')
+
+
+def setnodata(file, nodata):
+    """
+    The output geotiff files produced by gamma package always has 0.0 as nodata value.
+    This function changes the nodata value in the geotiff file.
+
+    """
+    ds = gdal.Open(file, gdal.GA_Update)
+    for i in range(1, ds.RasterCount + 1):
+        band = ds.GetRasterBand(i)
+        band_data = band.ReadAsArray()
+        mask = band.GetMaskBand()
+        mask_data = mask.ReadAsArray()
+        band_data[mask_data == 0] = nodata
+        band.WriteArray(band_data)
+        band.SetNoDataValue(float(nodata))
+    del ds

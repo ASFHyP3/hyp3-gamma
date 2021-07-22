@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 
+from tempfile import TemporaryDirectory
 import numpy as np
 from PIL import Image
 from hyp3lib.execute import execute
@@ -11,53 +12,8 @@ from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
-
+from hyp3_gamma.util import get_minimum_value_for_gamma_dtype, setnodata
 log = logging.getLogger(__name__)
-
-
-def get_minimum_value_for_gamma_dtype(dtype):
-    """Get the minimum numeric value for a GAMMA data type
-
-    GAMMA provides these data types:
-    * 0: RASTER 8 or 24 bit uncompressed raster image, SUN (`*.ras`), BMP:(`*.bmp`), or TIFF: (`*.tif`)
-    * 1: SHORT integer (2 bytes/value)
-    * 2: FLOAT (4 bytes/value)
-    * 3: SCOMPLEX (short complex, 4 bytes/value)
-    * 4: FCOMPLEX (float complex, 8 bytes/value)
-    * 5: BYTE
-    """
-    dtype_map = {
-        0: np.int8,
-        1: np.int16,
-        2: np.float32,
-        3: np.float32,
-        4: np.float64,
-        5: np.int8,
-    }
-    try:
-        return np.iinfo(dtype_map[dtype]).min
-    except ValueError:
-        return np.finfo(dtype_map[dtype]).min
-    except KeyError:
-        raise ValueError(f'Unknown GAMMA data type: {dtype}')
-
-
-def setnodata(file, nodata):
-    """
-    The output geotiff files produced by gamma package always has 0.0 as nodata value.
-    This function changes the nodata value in the geotiff file.
-
-    """
-    ds = gdal.Open(file, gdal.GA_Update)
-    for i in range(1, ds.RasterCount + 1):
-        band = ds.GetRasterBand(i)
-        band_data = band.ReadAsArray()
-        mask = band.GetMaskBand()
-        mask_data = mask.ReadAsArray()
-        band_data[mask_data == 0] = nodata
-        band.WriteArray(band_data)
-        band.SetNoDataValue(float(nodata))
-    del ds
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -82,14 +38,17 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     """
     createwater_mask based on the cc_mask_file
     """
-    tmp_mask = 'tmp_mask'
-    os.system('cp {} {}.bmp'.format(cc_mask_file, tmp_mask))
-    # 2--bmp
-    geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
-    # 0--bmp
-    data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
-    # create water_mask.tif file
-    create_water_mask("{}_geo.tif".format(tmp_mask), 'water_mask.tif')
+    with TemporaryDirectory() as temp_dir:
+        #os.system('cp {} {}/{}.bmp'.format(cc_mask_file, temp_dir.name, tmp_mask))
+        os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
+        # 2--bmp
+        #geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
+        geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
+        # 0--bmp
+        #data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
+        data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
+        # create water_mask.tif file
+        create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
     ds = gdal.Open('water_mask.tif')
     band = ds.GetRasterBand(1)
     mask = band.ReadAsArray()
@@ -105,27 +64,28 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
 
-    # get mask data and save it into the water_mask.bmp file
-    mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
-    water_im = Image.fromarray(mask)
-    water_im.putpalette(in_palette)
-    water_bmp_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask.bmp")
-    water_im.save(water_bmp_file)
+    with TemporaryDirectory() as temp_dir:
+        # get mask data and save it into the water_mask.bmp file
+        mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
+        water_im = Image.fromarray(mask)
+        water_im.putpalette(in_palette)
+        water_bmp_file = f'{temp_dir}/water_mask.bmp'
+        water_im.save(water_bmp_file)
 
-    # map water_mask.bmp file to SAR coordinators
-    water_mask_bmp_sar_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask_sar.bmp")
-    geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
+        # map water_mask.bmp file to SAR coordinators
+        water_mask_bmp_sar_file =f'{temp_dir}/water_mask_sar.bmp'
+        geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
-    # read water_mask_bmp_sar_file
-    water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
-    water_mask_sar_data = np.array(water_mask_sar_im)
+        # read water_mask_bmp_sar_file
+        water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
+        water_mask_sar_data = np.array(water_mask_sar_im)
 
-    # combine two masks and output combined_mask.bmp
-    in_data[water_mask_sar_data == 0] = 0
-    out_im = Image.fromarray(in_data)
-    out_im.putpalette(in_palette)
-    out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
-    out_im.save(out_file)
+        # combine two masks and output combined_mask.bmp
+        in_data[water_mask_sar_data == 0] = 0
+        out_im = Image.fromarray(in_data)
+        out_im.putpalette(in_palette)
+        out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
+        out_im.save(out_file)
 
     return out_file
 

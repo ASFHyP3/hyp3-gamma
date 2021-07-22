@@ -149,7 +149,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    inName = "final_water_mask.tif"
+    inName = "water_mask.tif"
     outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
@@ -167,10 +167,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
-    inName ="water_mask.tif"
-    outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
-    shutil.copy(inName, outName)
-    
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
@@ -379,7 +375,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=rlooks, alooks=alooks,
+    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
                          water_masking=water_masking)
 
     # Generate metadata

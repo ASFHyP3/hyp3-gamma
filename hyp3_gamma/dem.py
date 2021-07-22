@@ -7,7 +7,7 @@ from typing import Generator, List
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
-from hyp3_gamma.util import GDALConfigManager, min_value_datatype
+from hyp3_gamma.util import GDALConfigManager, get_minimum_value_for_gdal_datatype
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
 
@@ -116,5 +116,5 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             gdal.Warp(str(tmp_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
-            nodataval = min_value_datatype(dem_file_paths[0])
+            nodataval = get_minimum_value_for_gdal_datatype(dem_file_paths[0])
             gdal.Translate(output_name, str(tmp_tif), noData=nodataval)
