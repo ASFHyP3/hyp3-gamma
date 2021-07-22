@@ -2,7 +2,7 @@
 ASF InSAR Data Package (GAMMA)
 ==============================
 
-This folder contains SAR Interferometry (InSAR) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. They are projected to {{ projection }}, and the pixel spacing is {{ pixel_spacing|int }} m.
+This folder contains SAR Interferometry (InSAR) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. Files are projected to {{ projection }}, and the pixel spacing is {{ pixel_spacing|int }} m.
 
 The source granules for this InSAR product are:
  - Reference: {{ reference_granule_name }}
@@ -79,8 +79,8 @@ The files generated in this process include:
 5. Coherence Map (GeoTIFF)
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
-8. Look Vector maps (GeoTIFFs) - *Optional*
-9. Incidence Angle map (GeoTIFF) - *Optional*
+8. Look Vector Maps (GeoTIFFs) - *Optional*
+9. Incidence Angle Maps (GeoTIFFs) - *Optional*
 10. DEM used to process the data (GeoTIFF) - *Optional*
 11. Water Mask (GeoTIFF)
 
@@ -157,11 +157,15 @@ Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the
 *These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
-## 9. Incidence Angle Map
+## 9. Incidence Angle Maps
 
-The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene.
+There are two incidence angle maps generated for InSAR products.
 
-*This file is optional. Select the "Include Inc. Angle Map" option in the On Demand HyP3 Processing Options to include it in the product package.*
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene. This raster is tagged with _inc_map.tif
+
+The ellipsoid incidence angle indicates the angle in radians between the incident radar beam and the direction perpendicular to the WGS84 ellipsoid model. It does not take terrain into account, and is suitable for use in atmospheric correction workflows. This raster is tagged with _inc_map_ell.tif
+
+*These files are optional. Select the "Include Inc. Angle Maps" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
 ## 10. DEM used to process the data
@@ -181,7 +185,7 @@ The DEM used for this product is {{ dem_name }}, which has a native pixel spacin
 ----------------
 ## 11. Water Mask
 
-The water mask specifies, pixel-by-pixel, the presence of coastal waters beyond 3 km of the shoreline in the corresponding InSAR product. Pixel values of 0 indicate areas that should be masked out, while areas with a pixel value of 1 can be included in InSAR processing workflows. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
+The water mask identifies coastal waters beyond 3 km of the shoreline. These areas are assigned a pixel value of 0. All remaining pixels (land, inland waters, land ice, and near-shore coastal areas) have a value of 1. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
 
 The water mask is not precise; the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) shoreline data is buffered to 3 km to reduce the possibility of near-shore features being excluded while still being a useful tool for masking out phase unwrapping artifacts over water.
 
