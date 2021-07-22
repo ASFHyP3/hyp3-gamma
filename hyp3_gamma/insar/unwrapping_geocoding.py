@@ -10,7 +10,7 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
-from hyp3_gamma.insar.water_mask import get_water_mask
+from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
+def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     """
     createwater_mask based on the cc_mask_file
     """
@@ -88,26 +88,30 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
     # 0--bmp
     data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
-    # create final_water_mask.tif file
-    mask = create_water_mask("{}_geo.tif".format(tmp_mask))
-
+    # create water_mask.tif file
+    create_water_mask("{}_geo.tif".format(tmp_mask), 'water_mask.tif')
+    ds = gdal.Open('water_mask.tif')
+    band = ds.GetRasterBand(1)
+    mask = band.ReadAsArray()
+    del ds
     return mask
 
 
-def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, safe_dir):
+def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
     """combine cc_mask with water_mask
-
     """
-    mask = create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir)
     # read the original mask file
     in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
-    # create water_mask.bmp file
+
+    # get mask data and save it into the water_mask.bmp file
+    mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
     water_im = Image.fromarray(mask)
     water_im.putpalette(in_palette)
     water_bmp_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask.bmp")
     water_im.save(water_bmp_file)
+
     # map water_mask.bmp file to SAR coordinators
     water_mask_bmp_sar_file = os.path.join(os.path.dirname(cc_mask_file), "water_mask_sar.bmp")
     geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
@@ -116,23 +120,21 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar, saf
     water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
     water_mask_sar_data = np.array(water_mask_sar_im)
 
-    # combine two masks
+    # combine two masks and output combined_mask.bmp
     in_data[water_mask_sar_data == 0] = 0
     out_im = Image.fromarray(in_data)
     out_im.putpalette(in_palette)
     out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
     out_im.save(out_file)
 
-    return out_file, mask
+    return out_file
 
 
-def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, alooks=2, trimode=0,
+def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6, water_masking=False):
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
-    reference = reference_file[17:25]
-    secondary = secondary_file[17:25]
     ifgname = "{}_{}".format(reference, secondary)
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
@@ -178,13 +180,13 @@ def unwrapping_geocoding(reference_file, secondary_file, step="man", rlooks=10, 
 
     if water_masking:
         # create and apply water mask
-        out_file, mask = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
-                                            demw, demn, dempar, reference_file)
+        out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
+                                            demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
     else:
         # create water mask only
-        _ = create_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar, reference_file)
+        _ = get_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
 

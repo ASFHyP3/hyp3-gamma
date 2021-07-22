@@ -167,9 +167,10 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
+    inName ="water_mask.tif"
     outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
-    create_water_mask(inName, outName)
-
+    shutil.copy(inName, outName)
+    
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
         outName = "{}_wrapped_phase.tif".format(os.path.join(prod_dir, long_output))
