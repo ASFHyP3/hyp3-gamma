@@ -78,7 +78,7 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
+def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     """
     createwater_mask based on the cc_mask_file
     """
@@ -89,7 +89,7 @@ def create_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar, safe_dir):
     # 0--bmp
     data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
     # create final_water_mask.tif file
-    mask = get_water_mask("{}_geo.tif".format(tmp_mask), safe_dir, maskval=1)
+    mask = create_water_mask("{}_geo.tif".format(tmp_mask))
 
     return mask
 
