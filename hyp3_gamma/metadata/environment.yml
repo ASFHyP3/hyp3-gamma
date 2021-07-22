@@ -1,0 +1,21 @@
+name: hyp3-metadata-templates
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - pip
+  # For packaging, and testing
+  - setuptools
+  - setuptools_scm
+  - wheel
+  - pytest
+  - pytest-cov
+  # For running
+  - importlib_metadata
+  - jinja2
+  - gdal
+  - pillow
+  - python-dateutil
+  - pip:
+    # for packaging and testing
+    - s3pypi
