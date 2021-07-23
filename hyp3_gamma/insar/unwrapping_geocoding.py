@@ -136,7 +136,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     if water_masking:
         # create and apply water mask
         out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
-                                    demw, demn, dempar)
+                demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
     else:
