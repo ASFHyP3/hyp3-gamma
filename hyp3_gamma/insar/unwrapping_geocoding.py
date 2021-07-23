@@ -68,7 +68,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
         water_im.save(water_bmp_file)
 
         # map water_mask.bmp file to SAR coordinators
-        water_mask_bmp_sar_file =f'{temp_dir}/water_mask_sar.bmp'
+        water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
         # read water_mask_bmp_sar_file
@@ -136,7 +136,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     if water_masking:
         # create and apply water mask
         out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
-                                        demw, demn, dempar)
+                                    demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
     else:
