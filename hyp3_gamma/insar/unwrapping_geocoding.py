@@ -3,8 +3,8 @@
 import argparse
 import logging
 import os
-
 from tempfile import TemporaryDirectory
+
 import numpy as np
 from PIL import Image
 from hyp3lib.execute import execute
@@ -37,13 +37,10 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     createwater_mask based on the cc_mask_file
     """
     with TemporaryDirectory() as temp_dir:
-        #os.system('cp {} {}/{}.bmp'.format(cc_mask_file, temp_dir.name, tmp_mask))
         os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
         # 2--bmp
-        #geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
         geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
         # 0--bmp
-        #data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
         data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
         # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
@@ -139,7 +136,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     if water_masking:
         # create and apply water mask
         out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
-                                            demw, demn, dempar)
+                                        demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
     else:

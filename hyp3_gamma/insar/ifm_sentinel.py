@@ -26,7 +26,6 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
-from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
 
