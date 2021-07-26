@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.2...v4.6.3)
+
+### Added
+* InSAR products now include an ellipsoidal incidence angle GeoTIFF (in addition to local incidence angle) when
+  selecting the `include_inc_map` option.
+
+### Changed
+* Upgraded to hyp3-metadata [v1.2.5](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#125)
+  from v1.2.4
+
 ## [4.6.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.1...v4.6.2)
 
 ### Added
