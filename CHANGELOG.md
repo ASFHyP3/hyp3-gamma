@@ -17,8 +17,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [4.6.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.2...v4.6.3)
 
 ### Added
-* InSAR products now include an ellipsoidal incidence angle GeoTIFF (in addition to local incidence angle) when
-  selecting the `include_inc_map` option.
+* InSAR products now include an ellipsoidal incidence angle GeoTIFF (in addition to local incidence angle) when selecting the `include_inc_map` option
 
 ### Changed
 * Upgraded to hyp3-metadata [v1.2.5](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#125)
@@ -37,7 +36,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 * `conda-env.yml` has been renamed to `environment.yml` in-line with community practice
-
 * Upgraded to hyp3-lib [v1.6.8](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#168) from v1.6.7
 
 ## [4.6.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
