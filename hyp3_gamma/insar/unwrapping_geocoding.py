@@ -85,6 +85,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
+    execute(f"gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell")
+
     log.info("-------------------------------------------------")
     log.info("            End unwrapping")
     log.info("-------------------------------------------------")
@@ -124,7 +126,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("{}.los.disp.bmp.geo".format(ifgname), "{}.los.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.los.disp.geo".format(ifgname), "{}.los.disp.geo.org.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/inc", "{}.inc.tif".format(ifgname), dempar, 2)
-
+    data2geotiff("inc_ell", "{}.inc_ell.tif".format(ifgname), dempar, 2)
     execute(f"look_vector {mmli}.par {offit} {dempar} {dem} lv_theta lv_phi", uselogging=True)
 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
