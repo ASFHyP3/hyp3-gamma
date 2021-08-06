@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -19,23 +19,24 @@ LABEL org.opencontainers.image.documentation="https://hyp3-docs.asf.alaska.edu"
 ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=true
 
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
-    build-essential curl gcc gdal-bin \
-    gimp gnuplot gnuplot-data gnuplot-qt libblas-dev libblas3 \
-    libfftw3-dev libgdal-dev libgdal20 \
-    libgtk2.0-bin libgtk2.0-common libgtk2.0-dev \
-    libhdf5-100 libhdf5-dev liblapack-dev liblapack3 \
-    python3-dev python3-h5py python3-netcdf4 \
-    python3-matplotlib python3-pip python3-scipy tcsh unzip vim wget git && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && pip3 install --no-cache-dir --upgrade pip setuptools wheel
+RUN apt update && apt upgrade -y
 
-COPY GAMMA_SOFTWARE-20191203 /usr/local/GAMMA_SOFTWARE-20191203/
+# 2. Install the FFTW3 libraries
+RUN apt install -y libfftw3-3 libfftw3-dev libfftw3-single3
+# 3. Install Gnuplot and GIMP programs
+RUN apt install -y gnuplot gnuplot-data gimp
+# 4. Install the GDAL library
+RUN apt install -y gdal-bin libgdal-dev
+# 5. Install the HDF5 library (required for COSMO/SKYMED and ICEYE data)
+RUN apt install -y libhdf5-dev libhdf5-103
+# 6. Install LAPACK and BLAS libraries (for Gamma Software LAT package only)
+RUN apt install -y libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc
+# 9. Installation of Python 3
+RUN apt install -y python3-numpy python3-matplotlib python3-scipy python3-shapely
 
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal && \
-    python3 -m pip install --no-cache-dir GDAL==2.2.3
+RUN apt install -y python3-pip wget git
+
+COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
 
 COPY . /hyp3-gamma/
 RUN  python3 -m pip install --no-cache-dir /hyp3-gamma \
@@ -50,20 +51,22 @@ RUN groupadd -g "${CONDA_GID}" --system conda && \
 USER ${CONDA_UID}
 SHELL ["/bin/bash", "-l", "-c"]
 ENV PYTHONDONTWRITEBYTECODE=true
-ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-20191203
+ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-20210701
 ENV MSP_HOME=$GAMMA_HOME/MSP
 ENV ISP_HOME=$GAMMA_HOME/ISP
 ENV DIFF_HOME=$GAMMA_HOME/DIFF
 ENV DISP_HOME=$GAMMA_HOME/DISP
 ENV LAT_HOME=$GAMMA_HOME/LAT
 ENV PATH=$PATH:$MSP_HOME/bin:$ISP_HOME/bin:$DIFF_HOME/bin:$LAT_HOME/bin:$DISP_HOME/bin
-ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts
+ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts:$DISP_HOME/scripts
+ENV OS=linux64
 ENV GAMMA_RASTER=BMP
+ENV HDF5_DISABLE_VERSION_CHECK=1
 
 WORKDIR /home/conda/
 
 ## ASF TOOLS
-RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
+RUN wget --progress=dot:mega https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
     && bash Mambaforge-Linux-x86_64.sh -b \
     && rm -f Mambaforge-Linux-x86_64.sh \
     && echo PATH="/home/conda/mambaforge/bin":$PATH >> .profile \
