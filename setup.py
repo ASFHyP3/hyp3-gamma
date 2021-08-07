@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
 
-    python_requires='~=3.6',
+    python_requires='~=3.8',
 
     install_requires=[
         'gdal',
