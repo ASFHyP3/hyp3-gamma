@@ -37,7 +37,6 @@ setup(
         'geopandas',
         'hyp3lib>=1.6.8,<2',
         'hyp3_metadata>=1.2.5',
-        'importlib_metadata',
         'lxml',
         'numpy',
     ],
