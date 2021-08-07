@@ -4,7 +4,7 @@ HyP3 plugin for SAR processing with GAMMA
 
 ## Developer Setup
 
-Ubuntu 20.0.4 is recommended for GAMMA support.
+Ubuntu 20.04 is recommended for GAMMA support.
 
 1. Install GAMMA
 1. Install [conda](https://docs.conda.io/en/latest/miniconda.html)
