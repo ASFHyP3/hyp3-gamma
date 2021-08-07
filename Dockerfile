@@ -39,14 +39,14 @@ RUN apt install -y python3-pip wget git
 COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
 
 COPY . /hyp3-gamma/
-RUN  python3 -m pip install --no-cache-dir /hyp3-gamma \
+RUN python3 -m pip install --no-cache-dir /hyp3-gamma \
     && rm -rf /hyp3-gamma
 
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
 
 RUN groupadd -g "${CONDA_GID}" --system conda && \
-    useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m  -s /bin/bash conda
+    useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m -s /bin/bash conda
 
 USER ${CONDA_UID}
 SHELL ["/bin/bash", "-l", "-c"]
