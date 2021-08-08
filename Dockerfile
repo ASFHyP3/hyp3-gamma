@@ -19,24 +19,22 @@ LABEL org.opencontainers.image.documentation="https://hyp3-docs.asf.alaska.edu"
 ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=true
 
-RUN apt update && apt upgrade -y
-
-# 2. Install the FFTW3 libraries
-RUN apt install -y libfftw3-3 libfftw3-dev libfftw3-single3
-# 3. Install Gnuplot and GIMP programs
-RUN apt install -y gnuplot gnuplot-data gimp
-# 4. Install the GDAL library
-RUN apt install -y gdal-bin libgdal-dev
-# 5. Install the HDF5 library (required for COSMO/SKYMED and ICEYE data)
-RUN apt install -y libhdf5-dev libhdf5-103
-# 6. Install LAPACK and BLAS libraries (for Gamma Software LAT package only)
-RUN apt install -y libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc
-# 9. Installation of Python 3
-RUN apt install -y python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely
-# GAMMA scripts require csh/tcsh
-RUN apt install -y tcsh
-
-RUN apt install -y python3-pip wget git
+RUN apt update \
+    && apt upgrade -y \
+    && apt install -y --no-install-recommends \
+         # GAMMA requirements per sections 2-6, 9 of the Linux installation guide
+         libfftw3-3 libfftw3-dev libfftw3-single3 \
+         gnuplot gnuplot-data gimp \
+         gdal-bin libgdal-dev \
+         libhdf5-dev libhdf5-103 \
+         libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc \
+         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely \
+         # GAMMA scripts require csh/tcsh
+         tcsh \
+         # Additional installs
+         python3-pip wget git vim \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
 
@@ -47,12 +45,14 @@ RUN python3 -m pip install --no-cache-dir /hyp3-gamma \
 ARG CONDA_GID=1000
 ARG CONDA_UID=1000
 
-RUN groupadd -g "${CONDA_GID}" --system conda && \
-    useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m -s /bin/bash conda
+RUN groupadd -g "${CONDA_GID}" --system conda \
+    && useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m -s /bin/bash conda
 
 USER ${CONDA_UID}
 SHELL ["/bin/bash", "-l", "-c"]
 ENV PYTHONDONTWRITEBYTECODE=true
+
+# GAMMA environment variables per section 1 of the Linux installation guide
 ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-20210701
 ENV MSP_HOME=$GAMMA_HOME/MSP
 ENV ISP_HOME=$GAMMA_HOME/ISP
