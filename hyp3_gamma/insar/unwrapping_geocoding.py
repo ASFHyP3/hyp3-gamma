@@ -57,22 +57,20 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
-    execute(f"rascc {ifgname}.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.cc.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.cc {mmli} {width} - - - - - - - cc.cm {ifgname}.cc.ras", uselogging=True)
 
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    execute(f"rascc {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.adf.cc.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.adf.cc {mmli} {width} - - - - - - - cc.cm {ifgname}.adf.cc.ras", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
     execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
             f" - - {npatr} {npata}", uselogging=True)
 
-    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - - - - {ifgname}.adf.unw.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - - 1 rmg.cm {ifgname}.adf.unw.ras", uselogging=True)
 
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.vert.disp 1", uselogging=True)
