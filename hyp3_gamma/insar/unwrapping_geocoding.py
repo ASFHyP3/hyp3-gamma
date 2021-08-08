@@ -72,8 +72,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
             f" - - {npatr} {npata}", uselogging=True)
 
-    execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
-            f" - {ifgname}.adf.unw.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - - - - {ifgname}.adf.unw.ras", uselogging=True)
 
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.vert.disp 1", uselogging=True)
