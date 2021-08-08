@@ -57,13 +57,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
-    execute(f"rasdt_pwr {ifgname}.cc {mmli} {width} - - - - - - - cc.cm {ifgname}.cc.ras", uselogging=True)
-
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
-
-    execute(f"rasdt_pwr {ifgname}.adf.cc {mmli} {width} - - - - - - - cc.cm {ifgname}.adf.cc.ras", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
