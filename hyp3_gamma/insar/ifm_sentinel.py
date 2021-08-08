@@ -363,7 +363,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     output = f"{reference}_{secondary}"
 
     log.info("Starting s1_coreg_overlap")
-    execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
+    execute(f"ScanSAR_coreg_overlap.py SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True)
 
     log.info("Starting interf_pwr_s1_lt_tops_proc.py 3")

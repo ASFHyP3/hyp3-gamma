@@ -32,7 +32,7 @@ RUN apt install -y libhdf5-dev libhdf5-103
 # 6. Install LAPACK and BLAS libraries (for Gamma Software LAT package only)
 RUN apt install -y libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc
 # 9. Installation of Python 3
-RUN apt install -y python3-numpy python3-matplotlib python3-scipy python3-shapely
+RUN apt install -y python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely
 
 RUN apt install -y python3-pip wget git
 
@@ -60,6 +60,7 @@ ENV LAT_HOME=$GAMMA_HOME/LAT
 ENV PATH=$PATH:$MSP_HOME/bin:$ISP_HOME/bin:$DIFF_HOME/bin:$LAT_HOME/bin:$DISP_HOME/bin
 ENV PATH=$PATH:$MSP_HOME/scripts:$ISP_HOME/scripts:$DIFF_HOME/scripts:$LAT_HOME/scripts:$DISP_HOME/scripts
 ENV OS=linux64
+ENV PYTHONPATH=.:$GAMMA_HOME:$PYTHONPATH
 ENV HDF5_DISABLE_VERSION_CHECK=1
 
 WORKDIR /home/conda/
