@@ -33,6 +33,8 @@ RUN apt install -y libhdf5-dev libhdf5-103
 RUN apt install -y libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc
 # 9. Installation of Python 3
 RUN apt install -y python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely
+# GAMMA scripts require csh/tcsh
+RUN apt install -y tcsh
 
 RUN apt install -y python3-pip wget git
 
