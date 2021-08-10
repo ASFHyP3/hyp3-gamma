@@ -46,6 +46,8 @@ def main():
     insar_parser.add_argument('--processing-date', default='2020-01-01T00:00:00+00:00', type=dt_parse)
     insar_parser.add_argument('--looks', default='20x4', type=str,
                               help='Number of azimuth looks taken when generating the RTC product')
+    insar_parser.add_argument('--water-mask-applied', action='store_true',
+                              help='Water mask was applied when generating the InSAR product')
     insar_parser.set_defaults(func=insar_metadata)
 
     args = parser.parse_args()
@@ -83,6 +85,7 @@ def insar_metadata(args):
         secondary_granule_name=args.secondary_granule_name,
         processing_date=args.processing_date,
         looks=args.looks,
+        water_mask_applied=args.water_mask_applied,
         dem_name='GLO-30',
         plugin_name='hyp3_gamma',
         plugin_version='X.Y.Z',
