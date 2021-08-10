@@ -54,7 +54,7 @@ def test_get_product_name():
             'S1A_OPER_AUX_POEORB_OPOD_20160616T121500_V20160526T225943_20160528T005943.EOF',
         ],
         'pixel_spacing': 80,
-        'water_mask': False,
+        'apply_water_mask': False,
     }
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1AA_20160527T014319_20160714T014322_VVP048_INT80_G_ueF_[0-9A-F]{4}$', name)
@@ -67,7 +67,7 @@ def test_get_product_name():
             'S1A_OPER_AUX_POEORB_OPOD_20160616T121500_V20160526T225943_20160528T005943.EOF',
         ],
         'pixel_spacing': 40,
-        'water_mask': True,
+        'apply_water_mask': True,
     }
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1BA_20200918T073646_20200906T073646_HHR012_INT40_G_weF_[0-9A-F]{4}$', name)

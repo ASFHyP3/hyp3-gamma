@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 * Option to apply water masking to the unwrapped_phase calculation in the gamma processing 
-  * `water_masking` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `apply_water_mask` parameter to `ifm_sentinel.insar_sentinel_gamma` function
   * `--apply-watger-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
 
