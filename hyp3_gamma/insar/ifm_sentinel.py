@@ -399,6 +399,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         processing_date=datetime.now(timezone.utc),
         looks=f'{rlooks}x{alooks}',
         dem_name='GLO-30',
+        water_mask_applied=apply_water_mask,
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
