@@ -104,7 +104,11 @@ The GeoTIFF contains the unwrapped phase difference values for each pixel, corre
 
 Phase unwrapping is most effective when the reference point is beyond the area of deformation and there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
 
-It is important to be aware that phase unwrapping errors can and do occur. In addition, no atmospheric correction has been applied to this interferogram. While SAR signals can penetrate clouds, atmospheric conditions can delay the transmission of the signal, resulting in phase differences between acquisition that can look like surface deformation signals. In some cases, atmospheric models can be used to remove these impacts. Time series analysis may also be helpful for identifying and correcting both unwrapping errors and atmospheric impacts.
+It is important to be aware that phase unwrapping errors can and do occur.
+
+One potential source of error is the presence of extensive surface water (coastal areas or large inland waterbodies). In some cases, signal returns over surface water meet the coherence and amplitude threshold criteria, even though measurements over water should not be coherent. When this happens, phase unwrapping can occur over expanses of water, leading to unexpected phase jumps over land. Consider selecting the "Apply Water Mask" option when processing InSAR in areas with significant surface water. This option edits the phase unwrapping validity mask so that pixels over water are given a value of 0 (not valid for phase unwrapping). The water mask used for this process is always included in the product package, even if it is not applied to the process, and is described below (item 11). This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
+
+No atmospheric correction has been applied to this interferogram. While SAR signals can penetrate clouds, atmospheric conditions can delay the transmission of the signal, resulting in phase differences between acquisition that can look like surface deformation signals. Use caution when interpreting single interferograms. In some cases, atmospheric models can be used to remove these impacts. Time series analysis may also be helpful for identifying and correcting both unwrapping errors and atmospheric impacts.
 
 The unwrapped interferogram files are tagged with _unw_phase, and the _unw_phase.tif file contains the data values. The PNG and KMZ files are both 2048 pixels wide.
 
@@ -112,6 +116,8 @@ The unwrapped interferogram files are tagged with _unw_phase, and the _unw_phase
 ## 3. Line-of-Sight Displacement Map
 
 The LOS displacement map is in GeoTIFF format and converts the unwrapped differential phase into measurements of ground movement in meters along the look vector (line-of-sight). Positive values indicate movement towards the sensor (such as uplift), while negative values indicate movement away from the sensor (such as subsidence).
+
+Note that the displacement maps will be impacted by any atmospheric effects or phase unwrapping errors (including over water) that are present in the unwrapped interferogram. Use caution when interpreting deformation maps generated from a single interferograms. Consider selecting the option to "Apply Water Mask" if the product contains coastal waters or large inland waterbodies. This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
 
 The LOS displacement map is tagged with _los_disp.tif
 
@@ -123,6 +129,8 @@ The LOS displacement map is tagged with _los_disp.tif
 GAMMA software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. The height map is transformed from the radar geometry (slant range/Doppler) using a DEM and resampled to the WGS84 ellipsoid to output an orthorectified product.
 
 Note that in cases where displacement has both a vertical and a horizontal component to the change, the assumptions used to generate height may not be correct. Time series analysis or external data sources may be necessary to generate reliable displacement maps that take into consideration the relative influences of horizontal and vertical movement.
+
+The displacement maps will be impacted by any atmospheric effects or phase unwrapping errors (including over water) that are present in the unwrapped interferogram. Use caution when interpreting deformation maps generated from a single interferograms. Consider selecting the option to "Apply Water Mask" if the product contains coastal waters or large inland waterbodies. This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
 
 Values are in meters, with positive values indicating uplift and negative values indicating subsidence.
 
@@ -189,7 +197,7 @@ The water mask identifies coastal waters and major inland waterbodies beyond 3 k
 
 The water mask is not precise; the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) L1, L2 and L5 shoreline data is buffered out 3 km to reduce the possibility of near-shore features being excluded while still being a useful tool for masking out phase unwrapping artifacts over water.
 
-Note that applying the mask after phase unwrapping does not prevent unwrapping errors caused by the inclusion of water pixels as valid data during the phase unwrapping process. An option to apply this water mask as a conditional mask for phase unwrapping is under development.
+Note that applying the mask after phase unwrapping does not prevent unwrapping errors caused by the inclusion of water pixels as valid data during the phase unwrapping process. When submitting InSAR jobs for processing, there is an option to "Apply Water Mask". Selecting this option uses the water mask to adjust the validity mask used for phase unwrapping. This prevents phase unwrapping from occurring over large expanses of water, which can lead to unexpected phase jumps in the unwrapped outputs. This mask {{ "was" if water_mask_applied else "was not" }} applied during phase unwrapping. Refer to the Unwrapped Interferogram description above (item 2) for more information.
 
 *************
 # InSAR Processing #
@@ -277,7 +285,7 @@ The detailed process, including the calls to GAMMA software, is as follows:
  - adf          # Adaptive spectral filtering for complex interferograms
  - rasmph_pwr   # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
  - rascc        # Generate 8-bit raster graphics image of correlation coefficient
- - rascc_mask   # Generate phase unwrapping validity mask using correlation and intensity
+ - rascc_mask   # Generate phase unwrapping validity mask using correlation and intensity (and water mask if selected)
  - mcf          # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
  - rasrmg       # Generate 8-bit raster graphics image from unwrapped phase and intensity data
  - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
