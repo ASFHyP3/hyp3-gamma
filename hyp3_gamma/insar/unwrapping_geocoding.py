@@ -42,7 +42,7 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
         geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
         # 0--bmp
         data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
-        # create apply_water_mask.tif file
+        # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
     ds = gdal.Open('water_mask.tif')
     band = ds.GetRasterBand(1)
@@ -60,14 +60,14 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
     in_palette = in_im.getpalette()
 
     with TemporaryDirectory() as temp_dir:
-        # get mask data and save it into the apply_water_mask.bmp file
+        # get mask data and save it into the water_mask.bmp file
         mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
         water_im = Image.fromarray(mask)
         water_im.putpalette(in_palette)
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
         water_im.save(water_bmp_file)
 
-        # map apply_water_mask.bmp file to SAR coordinators
+        # map water_mask.bmp file to SAR coordinators
         water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
