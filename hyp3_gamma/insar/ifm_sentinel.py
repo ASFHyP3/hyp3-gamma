@@ -195,10 +195,10 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         shutil.copy(inName, outName)
 
     makeAsfBrowse("{}.diff0.man.adf.bmp.geo.tif".format(output),
-                  "{}_color_phase".format(os.path.join(prod_dir, long_output)))
+                  "{}_color_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
     makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(output),
-                  "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
+                  "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
 def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
