@@ -1,12 +1,12 @@
 from datetime import datetime
 
 
-import hyp3_metadata.util
-from hyp3_metadata import create_metadata_file_set_insar, insar
+import hyp3_gamma.metadata.util
+from hyp3_gamma.metadata import create_metadata_file_set_insar, insar
 
 
 def test_create_insar_gamma_readme(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -27,7 +27,7 @@ def test_create_insar_gamma_readme(insar_product_dir):
 
 
 def test_create_amp_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -48,7 +48,7 @@ def test_create_amp_xml(insar_product_dir):
 
 
 def test_create_coherence_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -69,7 +69,7 @@ def test_create_coherence_xml(insar_product_dir):
 
 
 def test_create_dem_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -90,7 +90,7 @@ def test_create_dem_xml(insar_product_dir):
 
 
 def test_create_los_displacement_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -111,7 +111,7 @@ def test_create_los_displacement_xml(insar_product_dir):
 
 
 def test_create_look_vector_xmls(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -135,7 +135,7 @@ def test_create_look_vector_xmls(insar_product_dir):
 
 
 def test_create_browse_xmls(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -159,7 +159,7 @@ def test_create_browse_xmls(insar_product_dir):
 
 
 def test_unwrapped_phase_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -180,7 +180,7 @@ def test_unwrapped_phase_xml(insar_product_dir):
 
 
 def test_vertical_displacement_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -201,7 +201,7 @@ def test_vertical_displacement_xml(insar_product_dir):
 
 
 def test_wrapped_phase_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -222,7 +222,7 @@ def test_wrapped_phase_xml(insar_product_dir):
 
 
 def test_inc_map_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -243,7 +243,7 @@ def test_inc_map_xml(insar_product_dir):
 
 
 def test_inc_map_ell_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
@@ -264,7 +264,7 @@ def test_inc_map_ell_xml(insar_product_dir):
 
 
 def test_water_mask_xml(insar_product_dir):
-    payload = hyp3_metadata.insar.marshal_metadata(
+    payload = hyp3_gamma.metadata.insar.marshal_metadata(
         product_dir=insar_product_dir,
         reference_granule_name='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
         secondary_granule_name='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',

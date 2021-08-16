@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from hyp3_metadata import insar, rtc
+from hyp3_gamma.metadata import insar, rtc
 
 
 def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime,

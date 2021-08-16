@@ -11,7 +11,7 @@ from osgeo import osr
 
 def get_environment() -> Environment:
     env = Environment(
-        loader=PackageLoader('hyp3_metadata', 'templates'),
+        loader=PackageLoader('hyp3_gamma.metadata', 'templates'),
         autoescape=select_autoescape(['html.j2', 'xml.j2']),
         undefined=StrictUndefined,
         trim_blocks=True,

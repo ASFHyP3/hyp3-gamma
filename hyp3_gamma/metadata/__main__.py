@@ -3,7 +3,8 @@ from pathlib import Path
 
 from dateutil.parser import parse as dt_parse
 
-from hyp3_metadata import __version__, create, insar, rtc
+from hyp3_gamma import __version__
+from hyp3_gamma.metadata import create, insar, rtc
 
 
 def main():

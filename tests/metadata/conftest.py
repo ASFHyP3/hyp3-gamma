@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from hyp3_metadata import data
-from hyp3_metadata.insar import populate_example_data as populate_insar
-from hyp3_metadata.rtc import populate_example_data as populate_rtc
+from hyp3_gamma.metadata import data
+from hyp3_gamma.metadata.insar import populate_example_data as populate_insar
+from hyp3_gamma.metadata.rtc import populate_example_data as populate_rtc
 
 
 @pytest.fixture()

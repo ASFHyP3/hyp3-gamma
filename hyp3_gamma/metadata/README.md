@@ -1,10 +1,10 @@
-# HyP3 Metadata Templates
+# HyP3 GAMMA Metadata Templates
 
-Package for generating HyP3 products' metadata.
+Package for generating HyP3 GAMMA products' metadata.
 
-The goal is for each process to have a README text file, which gives an overview
+The goal is for each product to have a README text file, which gives an overview
 of the product, including a list of all the files contained in the product zip
-file with brief summaries for each file. In addition, some processes have
+file with brief summaries for each file. In addition, some products have
 individual xml files for each of the raster files contained in the product
 archive. They have been designed and formatted to display correctly in the
 ArcGIS metadata environment (Item Description in ArcGIS Desktop, and Metadata
@@ -19,15 +19,15 @@ To preview your changes, you can generate an example set of metadata for an RTC
 or InSAR product by running either:
 
 ```
-python -m hyp3_metadata rtc
-python -m hyp3_metadata insar
+python -m hyp3_gamma.metadata rtc
+python -m hyp3_gamma.metadata insar
 ```
 which will generate an RTC or InSAR example product containing all of its supported
 metadata files. You can use a number of options to tune the example product
 (e.g., the DEM used) or where the product files are generated; see either
 ```
-python -m hyp3_metadata rtc --help
-python -m hyp3_metadata insar --help
+python -m hyp3_gamma.metadata rtc --help
+python -m hyp3_gamma.metadata insar --help
 ```
 for usage details. 
 
@@ -39,14 +39,14 @@ hand.
 
 If you have a current HyP3 product and would like re-generate the metadata for
 the product, you can do so using the `create_metadata_file_set_*` functions in
-`hyp3_metadata.create`. For example, in a python interpreter, you can create the
+`hyp3_gamma.metadata.create`. For example, in a python interpreter, you can create the
 metadata for an RTC product:
 
 ```python
 from datetime import datetime
 from pathlib import Path
 
-from hyp3_metadata.create import create_metadata_file_set_rtc
+from hyp3_gamma.metadata.create import create_metadata_file_set_rtc
 
 PRODUCT_DIR = Path('./S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2')
 SOURCE_GRANULE = 'S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8'

@@ -7,9 +7,9 @@ from typing import List, Optional
 
 from osgeo import gdal
 
-import hyp3_metadata
-from hyp3_metadata import data
-from hyp3_metadata import util
+import hyp3_gamma.metadata
+from hyp3_gamma.metadata import data
+from hyp3_gamma.metadata import util
 
 
 class InSarMetadataWriter:
@@ -149,7 +149,6 @@ def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_g
                      processing_date: datetime, looks: str, dem_name: str, water_mask_applied: bool,
                      plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
     payload = locals()
-    payload['metadata_version'] = hyp3_metadata.__version__
     payload['granule_type'] = util.get_granule_type(reference_granule_name)['granule_type']
     payload['num_looks'] = looks
     payload['num_looks_range'] = looks[:2]
