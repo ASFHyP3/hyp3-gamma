@@ -1,0 +1,104 @@
+name: Test and build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  HYP3_REGISTRY: 845172464411.dkr.ecr.us-west-2.amazonaws.com
+  AWS_REGION: us-west-2
+  AWS_ACCESS_KEY_ID: ${{ secrets.V2_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          activate-environment: hyp3-gamma
+          environment-file: environment.yml
+
+      - name: Pytest in conda environment
+        shell: bash -l {0}
+        run: |
+          python -m pip install .[develop]
+          pytest --cov=hyp3_gamma
+
+  dockerize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          activate-environment: hyp3-gamma
+          environment-file: environment.yml
+
+      - name: set environment variables
+        shell: bash -l {0}
+        run: |
+          git fetch origin +refs/tags/*:refs/tags/*
+          export SDIST_VERSION=$(python setup.py --version)
+          echo "SDIST_VERSION=${SDIST_VERSION/+/_}" >> $GITHUB_ENV
+          echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Fetch GAMMA
+        run: |
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
+          tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
+
+      - name: Build, tag, and push image to Amazon ECR
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          no-cache: true
+          push: true
+          tags: |
+            ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
+          labels: |
+            org.opencontainers.image.created=${{ env.CI_JOB_TIMESTAMP }}
+            org.opencontainers.image.version=${{ env.SDIST_VERSION }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Add test tag
+        if: github.ref == 'refs/heads/develop'
+        uses: akhilerm/tag-push-action@v1.0.0
+        with:
+          src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
+          dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:test
+
+      - name: Add latest tag
+        if: github.ref == 'refs/heads/main'
+        uses: akhilerm/tag-push-action@v1.0.0
+        with:
+          src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
+          dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:latest
+
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout ${HYP3_REGISTRY}

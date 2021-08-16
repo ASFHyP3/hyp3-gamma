@@ -1,0 +1,26 @@
+name: hyp3-gamma
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.6
+  - pip
+  # For packaging, and testing
+  - flake8
+  - flake8-import-order
+  - flake8-blind-except
+  - flake8-builtins
+  - setuptools
+  - setuptools_scm
+  - wheel
+  - pytest
+  - pytest-console-scripts
+  - pytest-cov
+  # For running
+  - gdal
+  - geopandas
+  - hyp3lib>=1.6.8,<2
+  - hyp3_metadata>=1.2.5
+  - importlib_metadata
+  - lxml
+  - numpy
