@@ -85,7 +85,6 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM. The output GeoTIFF covers the input geometry
     buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
-    Also nodata value is set as the minimum value of the datatype.
 
     Args:
         output_name: Path for the output GeoTIFF
