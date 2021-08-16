@@ -11,7 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 * Option to apply water masking to the unwrapped_phase calculation in the gamma processing 
   * `apply_water_mask` parameter to `ifm_sentinel.insar_sentinel_gamma` function
-  * `--apply-watger-mask` parameter to `insar` entrypoint
+  * `--apply-water-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
 
 ## [4.6.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.2...v4.6.3)
