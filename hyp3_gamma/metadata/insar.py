@@ -7,7 +7,6 @@ from typing import List, Optional
 
 from osgeo import gdal
 
-import hyp3_gamma.metadata
 from hyp3_gamma.metadata import data
 from hyp3_gamma.metadata import util
 
