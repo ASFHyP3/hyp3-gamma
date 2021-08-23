@@ -81,9 +81,9 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
-    """Create a DEM mosaic GeoTIFF covering a given geometry
+    """Create a DEM mosaic GeoTIFF covering a given geometry.
 
-    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM.  The output GeoTIFF covers the input geometry
+    The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM. The output GeoTIFF covers the input geometry
     buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
 
     Args:
