@@ -40,6 +40,7 @@ setup(
         'importlib_metadata',
         'lxml',
         'numpy',
+        'pillow',
     ],
 
     extras_require={
