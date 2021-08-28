@@ -197,10 +197,10 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         shutil.copy(inName, outName)
 
     makeAsfBrowse("{}.diff0.man.adf.bmp.geo.tif".format(output),
-                  "{}_color_phase".format(os.path.join(prod_dir, long_output)))
+                  "{}_color_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
     makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(output),
-                  "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
+                  "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
 def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
@@ -365,7 +365,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     output = f"{reference}_{secondary}"
 
     log.info("Starting s1_coreg_overlap")
-    execute(f"S1_coreg_overlap SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
+    execute(f"ScanSAR_coreg_overlap.py SLC1_tab SLC2R_tab {output} {output}.off.it {output}.off.it.corrected",
             uselogging=True)
 
     log.info("Starting interf_pwr_s1_lt_tops_proc.py 3")

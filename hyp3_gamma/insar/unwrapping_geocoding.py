@@ -121,15 +121,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
-    execute(f"rascc {ifgname}.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.cc.ras", uselogging=True)
-
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
-
-    execute(f"rascc {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.adf.cc.ras", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
@@ -144,18 +138,13 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
                 f" - - {npatr} {npata}", uselogging=True)
 
-    execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
-            f" - {ifgname}.adf.unw.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - - 1 rmg.cm {ifgname}.adf.unw.ras", uselogging=True)
 
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.vert.disp 1", uselogging=True)
 
-    execute(f"rashgt {ifgname}.vert.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
-
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.los.disp 0", uselogging=True)
-
-    execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
     execute(f"gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell")
 
@@ -176,9 +165,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     geocode_back("{}.adf.bmp".format(ifgf), "{}.adf.bmp.geo".format(ifgf), width, lt, demw, demn, 2)
     geocode_back("{}.cc".format(ifgname), "{}.cc.geo".format(ifgname), width, lt, demw, demn, 0)
     geocode_back("{}.adf.cc".format(ifgname), "{}.adf.cc.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.vert.disp.bmp".format(ifgname), "{}.vert.disp.bmp.geo".format(ifgname), width, lt, demw, demn, 2)
     geocode_back("{}.vert.disp".format(ifgname), "{}.vert.disp.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.los.disp.bmp".format(ifgname), "{}.los.disp.bmp.geo".format(ifgname), width, lt, demw, demn, 2)
     geocode_back("{}.los.disp".format(ifgname), "{}.los.disp.geo".format(ifgname), width, lt, demw, demn, 0)
 
     create_phase_from_complex("{}.adf.geo".format(ifgf), "{}.adf.geo.phase".format(ifgf), width)
@@ -193,9 +180,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("{}.cc.geo".format(ifgname), "{}.cc.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("{}.adf.cc.geo".format(ifgname), "{}.adf.cc.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/demseg", "{}.dem.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.vert.disp.bmp.geo".format(ifgname), "{}.vert.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.vert.disp.geo".format(ifgname), "{}.vert.disp.geo.org.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.los.disp.bmp.geo".format(ifgname), "{}.los.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.los.disp.geo".format(ifgname), "{}.los.disp.geo.org.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/inc", "{}.inc.tif".format(ifgname), dempar, 2)
     data2geotiff("inc_ell", "{}.inc_ell.tif".format(ifgname), dempar, 2)
