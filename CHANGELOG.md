@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.8.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.7.0...v4.8.0)
+
+### Changed
+* Upgraded to the latest available [GAMMA software](https://www.gamma-rs.ch/software) version and related dependencies
+  * GAMMA software `20210701` from `20191209`
+  * Ubuntu 20.04 from 18.04
+  * Python 3.8.10 from 3.6.9
+  * GDAL 3.0.4 from 2.2.3
+
 ## [4.7.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.3...v4.7.0)
 
 ### Added
