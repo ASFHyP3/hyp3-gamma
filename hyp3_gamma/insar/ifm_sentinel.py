@@ -26,7 +26,6 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
-from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +121,7 @@ def timedetla_in_days(delta):
     return round(total_seconds/seconds_in_a_day)
 
 
-def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80):
+def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=80, apply_water_mask=False):
     plat1 = reference_name[2]
     plat2 = secondary_name[2]
 
@@ -136,15 +135,21 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
     pol1 = reference_name[15:16]
     pol2 = secondary_name[15:16]
     orb = least_precise_orbit_of(orbit_files)
+    mask = 'w' if apply_water_mask else 'u'
     product_id = token_hex(2).upper()
 
-    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_ueF_{product_id}'
+    return f'S1{plat1}{plat2}_{datetime1}_{datetime2}_{pol1}{pol2}{orb}{days:03}_INT{pixel_spacing}_G_{mask}eF_' \
+           f'{product_id}'
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "water_mask.tif"
+    outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
 
     inName = "{}.cc.geo.tif".format(output)
@@ -159,9 +164,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     inName = "{}.adf.unw.geo.tif".format(output)
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
     shutil.copy(inName, outName)
-
-    outName = "{}_water_mask.tif".format(os.path.join(prod_dir, long_output))
-    create_water_mask(inName, outName)
 
     if include_wrapped_phase:
         inName = "{}.diff0.man.adf.geo.tif".format(output)
@@ -290,7 +292,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
                          include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
-                         include_dem=False):
+                         include_dem=False, apply_water_mask=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -371,7 +373,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+                         apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -380,7 +383,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Move the outputs to the product directory
     pixel_spacing = int(alooks) * 20
-    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing)
+    product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, apply_water_mask)
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
@@ -395,6 +398,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         processing_date=datetime.now(timezone.utc),
         looks=f'{rlooks}x{alooks}',
         dem_name='GLO-30',
+        water_mask_applied=apply_water_mask,
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
@@ -423,6 +427,7 @@ def main():
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
     parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
+    parser.add_argument("-m", action="store_true", help="Apply water mask")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
@@ -431,7 +436,7 @@ def main():
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
                          include_look_vectors=args.l, include_los_displacement=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
-                         include_dem=args.d)
+                         include_dem=args.d, apply_water_mask=args.m)
 
 
 if __name__ == "__main__":

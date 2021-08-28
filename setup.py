@@ -36,9 +36,10 @@ setup(
         'gdal',
         'geopandas',
         'hyp3lib>=1.6.8,<2',
-        'hyp3_metadata>=1.2.5',
+        'hyp3_metadata>=1.3',
         'lxml',
         'numpy',
+        'pillow',
     ],
 
     extras_require={
