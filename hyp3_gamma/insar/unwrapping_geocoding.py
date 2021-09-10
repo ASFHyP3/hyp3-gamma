@@ -4,10 +4,44 @@ import argparse
 import logging
 import os
 
+from PIL import Image
+import numpy as np
+
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
 log = logging.getLogger(__name__)
+
+
+def get_first_valid_mask_pixel(inname):
+    """
+    input: validity mask file in bmp format
+    return: ref_i, ref_j
+    """
+    im = Image.open(inname)
+    data = np.asarray(im)
+    idx = np.where(data > 0)
+    ref_i, ref_j = idx[0][0], idx[1][0]
+    return ref_i, ref_j
+
+
+def convert_coord_from_sar_map(inname, width, lt, demw, demn, ref_i, ref_j):
+    """
+    inputs: row -i, col-j in SAR space, get its related row and col in map space
+    """
+    im = Image.open(inname)
+    data = np.asarray(im)
+    data[:, :] = 0
+    data[ref_i, ref_j] = 1
+    outfile = "tmp_mask.bmp"
+    im_out = Image.fromarray(data)
+    im_out.save(outfile)
+    # convert tmp_mask.bmp from SAR
+    geocode_back("tmp_mask.bmp", "tmp_mask.geo.bmp", width, lt, demw, demn, 2)
+    im_map = Image.open("tmp_mask.geo.bmp")
+    data_map = np.asarray(im_map)
+    (row, col) = np.where(data_map == 1)
+    return row[0], col[0]
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -31,6 +65,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
     smli = secondary + ".mli"
+    init_flg = 0
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -69,8 +104,19 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
+    ref_line, ref_sample = get_first_valid_mask_pixel(f"{ifgname}.adf.cc_mask.bmp")
+
+    row, col = convert_coord_from_sar_map(f"{ifgname}.adf.cc_mask.bmp", width, lt, demw, demn, ref_line,
+                                          ref_sample)
+
+    print(f"row {row}, col {col} in map space")
+
+    # execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
+    #        f" - - {npatr} {npata}", uselogging=True)
+
     execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-            f" - - {npatr} {npata}", uselogging=True)
+            f" - - {npatr} {npata} - {ref_sample} {ref_line} {init_flg}", uselogging=True)
+
 
     execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
             f" - {ifgname}.adf.unw.ras", uselogging=True)
@@ -136,6 +182,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
 
+    return ref_line, ref_sample, row, col
 
 def main():
     """Main entrypoint"""

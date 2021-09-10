@@ -201,7 +201,8 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)))
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source,
+                        ref_line, ref_sample, ref_row, ref_col):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -284,6 +285,10 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
+        f.write('Reference Point_l: %s\n' % ref_line)
+        f.write('Reference Point_s: %s\n' % ref_sample)
+        f.write('Reference Point_row: %s\n' % ref_row)
+        f.write('Reference Point_col: %s\n' % ref_col)
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
 
@@ -371,7 +376,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
+    ref_line, ref_sample, ref_row, ref_col = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -402,7 +407,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
-    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
+    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
+                        dem_source, ref_line, ref_sample, ref_row, ref_col)
 
     log.info("Done!!!")
     return product_name
