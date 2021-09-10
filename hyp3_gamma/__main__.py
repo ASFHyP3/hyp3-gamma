@@ -93,7 +93,7 @@ def insar():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
-    parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
+    parser.add_argument('--include-displacement_maps', type=string_is_true, default=False)
     parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--apply-water-mask', type=string_is_true, default=False)
@@ -123,7 +123,7 @@ def insar():
         rlooks=rlooks,
         include_dem=args.include_dem,
         include_look_vectors=args.include_look_vectors,
-        include_los_displacement=args.include_los_displacement,
+        include_displacement_maps=args.include_displacement_maps,
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
         apply_water_mask=args.apply_water_mask,

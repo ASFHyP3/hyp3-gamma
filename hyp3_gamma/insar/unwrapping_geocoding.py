@@ -34,7 +34,7 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     """
-    createwater_mask based on the cc_mask_file
+    create water_mask based on the cc_mask_file
     """
     with TemporaryDirectory() as temp_dir:
         os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
