@@ -93,7 +93,7 @@ def insar():
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
-    parser.add_argument('--include-displacement_maps', type=string_is_true, default=False)
+    parser.add_argument('--include-displacement-maps', type=string_is_true, default=False)
     parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--apply-water-mask', type=string_is_true, default=False)

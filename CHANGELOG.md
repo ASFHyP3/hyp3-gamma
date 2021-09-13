@@ -10,6 +10,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [4.9.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.9.0...v4.9.1)
 
 ### Changed
+* Change the include_los_displacement to the include_displacement_maps option. When users choose the option, 
+  the hyp3-gamma outputs both the line of sight (los) and the vertical (vert) displacements.
 * InSAR readme and xml templates have been updated to reflect the change in displacement map options and to include more information on adjusting unwrapped phase and displacement map values relative to a user-selected reference point.
 * Updated the URL for the [Copernicus DEM](https://spacedata.copernicus.eu/explore-more/news-archive/-/asset_publisher/Ye8egYeRPLEs/blog/id/434960) information webpage.
 
