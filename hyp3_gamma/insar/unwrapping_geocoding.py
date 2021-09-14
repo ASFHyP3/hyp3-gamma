@@ -57,7 +57,7 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
-                         npatr=1, npata=1, alpha=0.6):
+                         npatr=1, npata=1, alpha=0.6, ref_azlin=0, ref_rpix=0):
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
@@ -65,7 +65,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
     smli = secondary + ".mli"
-    init_flg = 0
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -104,19 +103,10 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    ref_line, ref_sample = get_first_valid_mask_pixel(f"{ifgname}.adf.cc_mask.bmp")
-
-    row, col = convert_coord_from_sar_map(f"{ifgname}.adf.cc_mask.bmp", width, lt, demw, demn, ref_line,
-                                          ref_sample)
-
-    print(f"row {row}, col {col} in map space")
-
-    # execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-    #        f" - - {npatr} {npata}", uselogging=True)
+    row, col = convert_coord_from_sar_map(f"{ifgname}.adf.cc_mask.bmp", width, lt, demw, demn, ref_azlin, ref_rpix)
 
     execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-            f" - - {npatr} {npata} - {ref_sample} {ref_line} {init_flg}", uselogging=True)
-
+            f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 0", uselogging=True)
 
     execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
             f" - {ifgname}.adf.unw.ras", uselogging=True)
@@ -182,7 +172,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
 
-    return ref_line, ref_sample, row, col
 
 def main():
     """Main entrypoint"""
