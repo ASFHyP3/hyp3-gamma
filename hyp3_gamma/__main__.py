@@ -96,6 +96,7 @@ def insar():
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
     parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
+    parser.add_argument('--apply-water-mask', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
@@ -125,6 +126,7 @@ def insar():
         include_los_displacement=args.include_los_displacement,
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
+        apply_water_mask=args.apply_water_mask,
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)

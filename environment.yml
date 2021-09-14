@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.6
+  - python=3.8
   - pip
   # For packaging, and testing
   - flake8
@@ -20,7 +20,7 @@ dependencies:
   - gdal
   - geopandas
   - hyp3lib>=1.6.8,<2
-  - hyp3_metadata>=1.2.5
-  - importlib_metadata
+  - hyp3_metadata>=1.3
   - lxml
   - numpy
+  - pillow
