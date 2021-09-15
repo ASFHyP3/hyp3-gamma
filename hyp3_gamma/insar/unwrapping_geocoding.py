@@ -4,9 +4,9 @@ import argparse
 import logging
 import os
 from tempfile import TemporaryDirectory
+
 import numpy as np
 from PIL import Image
-
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
