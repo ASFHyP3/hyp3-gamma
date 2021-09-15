@@ -6,8 +6,8 @@ import logging
 import os
 import re
 import shutil
-import sys
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from secrets import token_hex
@@ -164,7 +164,7 @@ def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
 
         return coord_lst
 
-    cmd=['sarpix_coord', in_mli_par, '-']
+    cmd = ['sarpix_coord', in_mli_par, '-']
     coord = {}
     if in_dem_par:
         cmd1 = cmd.copy()
@@ -335,8 +335,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source,
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
-        f.write('Reference Point_sar_l: %s\n' % ref_azlin)
-        f.write('Reference Point_sar_s: %s\n' % ref_rpix)
+        f.write('Reference Point_sar_azlin: %s\n' % ref_azlin)
+        f.write('Reference Point_sar_rpix: %s\n' % ref_rpix)
         f.write('Reference Point_map_lat: %s\n' % ref_lat)
         f.write('Reference Point_map_lon: %s\n' % ref_lon)
         f.write('Unwrapping threshold: none\n')
@@ -464,7 +464,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
     in_mli_par = f"{reference}.mli.par"
-    in_dem_par = f"DEM/demseg.par"
+    in_dem_par = "DEM/demseg.par"
 
     coords = get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
 

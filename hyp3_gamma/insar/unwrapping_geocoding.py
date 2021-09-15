@@ -9,7 +9,7 @@ from PIL import Image
 
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-# from osgeo import gdal
+from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
 
