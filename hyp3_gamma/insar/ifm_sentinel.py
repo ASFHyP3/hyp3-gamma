@@ -383,7 +383,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Starting phase unwrapping and geocoding")
 
     coords = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                         apply_water_mask=apply_water_mask)
+                                  apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")

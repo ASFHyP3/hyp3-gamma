@@ -2,8 +2,8 @@
 
 import argparse
 import logging
-import subprocess
 import os
+import subprocess
 from tempfile import TemporaryDirectory
 
 import numpy as np
