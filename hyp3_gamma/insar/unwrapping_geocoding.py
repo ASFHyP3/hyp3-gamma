@@ -6,7 +6,6 @@ import subprocess
 import os
 from tempfile import TemporaryDirectory
 
-import pyproj
 import numpy as np
 from PIL import Image
 from hyp3lib.execute import execute
@@ -16,18 +15,6 @@ from osgeo import gdal
 from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
-
-
-def get_first_valid_mask_pixel(inname):
-    """
-    input: validity mask file in bmp format
-    return: ref_i, ref_j
-    """
-    im = Image.open(inname)
-    data = np.asarray(im)
-    idx = np.where(data > 0)
-    ref_i, ref_j = idx[0][0], idx[1][0]
-    return ref_i, ref_j
 
 
 def get_valid_mask_pixel(inname):
@@ -56,102 +43,43 @@ def get_valid_mask_pixel(inname):
     return ref_i, ref_j
 
 
-def ij2coord(gt, x_pixel, y_line):
-    x = gt[0] + x_pixel * gt[1] + y_line * gt[2]
-    y = gt[3] + x_pixel * gt[4] + y_line * gt[5]
-    return x, y
-
-
-def projcoord2lonlat(dataset, x, y):
-    """
-    covert x,y of dataset's projected coord to longitude and latitude
-    """
-    dst = dataset.GetSpatialRef()
-    dstproj4 = dst.ExportToProj4()
-    ct2 = pyproj.Proj(dstproj4)
-    lon, lat = ct2(x, y, inverse=True)
-    return lon, lat
-
-
-def convert_coord_from_sar_map(inname, dempar, width, lt, demw, demn, ref_i, ref_j):
-    """
-    inputs: inname--mask file in bmp format
-            row -i, col-j in SAR space, get its related row and col in map space
-    """
-    im = Image.open(inname)
-    data = np.asarray(im)
-    data[:, :] = 0
-    data[ref_i, ref_j] = 1
-    outfile = "tmp_mask.bmp"
-    im_out = Image.fromarray(data)
-    im_out.save(outfile)
-    # convert tmp_mask.bmp from SAR
-    geocode_back("tmp_mask.bmp", "tmp_mask.geo.bmp", width, lt, demw, demn, 2)
-    data2geotiff("tmp_mask.geo.bmp", "tmp_mask.geo.bmp.tif", dempar, 0)
-    # im_map = Image.open("tmp_mask.geo.bmp")
-    # data_map = np.asarray(im_map)
-    # (row, col) = np.where(data_map == 1)
-
-    ds =gdal.Open("tmp_mask.geo.bmp.tif")
-    gt = ds.GetGeoTransform()
-    band = ds.GetRasterBand(1)
-    data = band.ReadAsArray()
-    (row, col) = np.where(data == 1)
-    y_line = row[0]
-    x_pixel = col[0]
-    x, y = ij2coord(gt, x_pixel, y_line)
-    lon, lat = projcoord2lonlat(ds, x, y)
-    del ds
-    coords={"row_s": ref_i, "col_s": ref_j, "row_m": y_line, "col_m": x_pixel, "y": y, "x": x, "lat": lat, "lon": lon}
-
-    return coords
-
-
 def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
-
     """
     inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
     returns: coords={"row_s":row_s,"col_s":col_s,"row_m":row_m,"col_m":col_m,"x":x,"y":y,"lat":lat,"lon":lon}
     """
-
     def _coord_lst(cmd):
-
         coord_txt = subprocess.run(cmd, capture_output=True, text=True)
-
         lst = coord_txt.stdout.split('\n')
-
         coord_str = [s for s in lst if "selected" in s]
-
         coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
-
         coord_lst = [float(s) for s in coord_lst]
-
         return coord_lst
 
     cmd = ['sarpix_coord', in_mli_par, '-']
-    coord = {}
+    coords = {}
     if in_dem_par:
         cmd1 = cmd.copy()
         cmd1.extend([in_dem_par])
         cmd1.extend([str(ref_azlin), str(ref_rpix)])
         coord_lst = _coord_lst(cmd1)
-        coord["row_s"], coord["col_s"], coord["row_m"], coord["col_m"], coord["y"], coord["x"] = \
+        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
 
         cmd2 = cmd.copy()
         cmd2.extend(['-'])
         cmd2.extend([str(ref_azlin), str(ref_rpix)])
         coord_lst = _coord_lst(cmd2)
-        coord["lat"], coord["lon"] = coord_lst[2], coord_lst[3]
+        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
     else:
         cmd.extend(['-'])
         cmd.extend([str(ref_azlin), str(ref_rpix)])
         coord_lst = _coord_lst(cmd)
-        coord["row_s"], coord["col_s"], coord["row_m"], coord["col_m"], coord["y"], coord["x"] = \
+        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], None, None, None, None
-        coord["lat"], coord["lon"] = coord_lst[2], coord_lst[3]
+        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
 
-    return coord
+    return coords
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -168,40 +96,6 @@ def data2geotiff(inname, outname, dempar, type_):
 
 def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
-
-
-def get_first_valid_unw_pixel(adf, adf_cc, adf_cc_mask, adf_unw, dempar, width, lines, lt, demw, demn):
-    execute(f"mcf {adf} {adf_cc} {adf_cc_mask} {adf_unw} {width} 0 0 0"
-            f" - - 1 1 - 0 0 0", uselogging=True)
-    geocode_back(adf_unw, "adf_unw_geo", width, lt, demw, demn, 0)
-    data2geotiff("adf_unw_geo", "adf_unw_geo.tif", dempar, 2)
-    # read the bmp file
-    ds = gdal.Open("adf_unw_geo.tif")
-    band = ds.GetRasterBand(1)
-    data = band.ReadAsArray()
-    mskband = band.GetMaskBand()
-    mskdata = mskband.ReadAsArray()
-
-    #im = Image.open("adf_unw_geo.bmp")
-    #data = np.asarray(im)
-    ch = (data > 0) & (mskdata == 255)
-    idx = np.where(ch == True)
-    ref_i, ref_j = idx[0][-1], idx[1][-1]
-    ref_val = data[ref_i, ref_j]
-    data[:, :] = 0
-    data[ref_i, ref_j] = 1
-    outfile = "tmp_unw_geo.bmp"
-    im_out = Image.fromarray(data)
-    im_out = im_out.convert('L')
-    im_out.save(outfile)
-
-    geocode("tmp_unw_geo.bmp", "tmp_unw_sar.bmp", demw, lt, width, lines, 2)
-    im = Image.open("tmp_unw_sar.bmp")
-    data = np.asarray(im)
-    idx = np.where(data == 1)
-    ref_azlin, ref_rpix = idx[0][0], idx[1][0]
-
-    return ref_azlin, ref_rpix
 
 
 def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
@@ -267,9 +161,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
     smli = secondary + ".mli"
-    ref_azlin = 0
-    ref_rpix = 0
-
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -281,7 +172,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         log.error("ERROR: Unable to find offset file {}".format(offit))
 
     width = getParameter(offit, "interferogram_width")
-    lines = getParameter(offit, "interferogram_azimuth_lines")
     mwidth = getParameter(mmli + ".par", "range_samples")
     mlines = getParameter(mmli + ".par", "azimuth_lines")
     swidth = getParameter(smli + ".par", "range_samples")
@@ -304,17 +194,10 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    ref_azlin, ref_rpix = get_first_valid_mask_pixel(f"{ifgname}.adf.cc_mask.bmp")
-
     ref_azlin, ref_rpix = get_valid_mask_pixel(f"{ifgname}.adf.cc_mask.bmp")
-
-    # ref_azlin, ref_rpix = get_first_valid_unw_pixel(f"{ifgf}.adf", f"{ifgname}.adf.cc", f"{ifgname}.adf.cc_mask.bmp",
-    #                                                f"adf_unw", dempar, width, lines, lt, demw, demn)
 
     coords = get_coords(f"{mmli}.par", ref_azlin, ref_rpix, dempar)
 
-    # coords = convert_coord_from_sar_map(f"{ifgname}.adf.cc_mask.bmp", dempar, width, lt,
-    #                                    demw, demn, ref_azlin, ref_rpix)
     if apply_water_mask:
         # create and apply water mask
         out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt, demw, demn, dempar)
@@ -383,6 +266,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("-------------------------------------------------")
 
     return coords
+
 
 def main():
     """Main entrypoint"""
