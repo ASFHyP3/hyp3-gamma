@@ -6,7 +6,6 @@ import logging
 import os
 import re
 import shutil
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -143,53 +142,6 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
            f'{product_id}'
 
 
-def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
-
-    """
-    inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
-    returns: (x, y, lat, lon)
-    """
-
-    def _coord_lst(cmd):
-
-        coord_txt = subprocess.run(cmd, capture_output=True, text=True)
-
-        lst = coord_txt.stdout.split('\n')
-
-        coord_str = [s for s in lst if "selected" in s]
-
-        coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
-
-        coord_lst = [float(s) for s in coord_lst]
-
-        return coord_lst
-
-    cmd = ['sarpix_coord', in_mli_par, '-']
-    coord = {}
-    if in_dem_par:
-        cmd1 = cmd.copy()
-        cmd1.extend([in_dem_par])
-        cmd1.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd1)
-        coord["row_s"], coord["col_s"], coord["row_m"], coord["col_m"], coord["y"], coord["x"] = \
-            coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
-
-        cmd2 = cmd.copy()
-        cmd2.extend(['-'])
-        cmd2.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd2)
-        coord["lat"], coord["lon"] = coord_lst[2], coord_lst[3]
-    else:
-        cmd.extend(['-'])
-        cmd.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd)
-        coord["row_s"], coord["col_s"], coord["row_m"], coord["col_m"], coord["y"], coord["x"] = \
-            coord_lst[0], coord_lst[1], None, None, None, None
-        coord["lat"], coord["lon"] = coord_lst[2], coord_lst[3]
-
-    return coord
-
-
 def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
@@ -251,8 +203,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source,
-                        ref_azlin, ref_rpix, ref_lat, ref_lon):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -335,10 +286,14 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source,
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
-        f.write('Reference Point_sar_azlin: %s\n' % ref_azlin)
-        f.write('Reference Point_sar_rpix: %s\n' % ref_rpix)
-        f.write('Reference Point_map_lat: %s\n' % ref_lat)
-        f.write('Reference Point_map_lon: %s\n' % ref_lon)
+        f.write('Reference Point_sar_azlin: %s\n' % coords["row_s"])
+        f.write('Reference Point_sar_rpix: %s\n' % coords["col_s"])
+        f.write('Reference Point_map_row: %s\n' % coords["row_m"])
+        f.write('Reference Point_map_col: %s\n' % coords["col_m"])
+        f.write('Reference Point_map_y: %s\n' % coords["y"])
+        f.write('Reference Point_map_x: %s\n' % coords["x"])
+        f.write('Reference Point_map_lat: %s\n' % coords["lat"])
+        f.write('Reference Point_map_lon: %s\n' % coords["lon"])
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
 
@@ -427,10 +382,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
 
-    # use (0,0) in SAR space as the reference point
-    ref_azlin, ref_rpix = 0, 0
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                         apply_water_mask=apply_water_mask, ref_azlin=ref_azlin, ref_rpix=ref_rpix)
+    coords = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+                         apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -463,13 +416,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
-    in_mli_par = f"{reference}.mli.par"
-    in_dem_par = "DEM/demseg.par"
-
-    coords = get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
-
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
-                        dem_source, coords["row_s"], coords["col_s"], coords["lat"], coords["lon"])
+                        dem_source, coords)
 
     log.info("Done!!!")
     return product_name
