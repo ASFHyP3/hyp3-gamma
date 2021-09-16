@@ -27,8 +27,6 @@ def get_valid_mask_pixel(inname):
     breaker = False
     for i in range(1, rows-2):
         for j in range(1, cols-2):
-            # five points
-            points = np.array([data[i, j-1], data[i, j], data[i, j+1], data[i-1, j], data[i+1, j]])
             # nine points
             points = np.array([data[i-1, j-1], data[i-1, j], data[i-1, j+1],
                                data[i, j-1], data[i, j], data[i, j+1],
