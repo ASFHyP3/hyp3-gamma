@@ -17,30 +17,6 @@ from hyp3_gamma.water_mask import create_water_mask
 log = logging.getLogger(__name__)
 
 
-def get_valid_mask_pixel(inname):
-    im = Image.open(inname)
-    data = np.asarray(im)
-    rows, cols = data.shape
-    thr_val = 0.5*data.max()
-    ref_i = 0
-    ref_j = 0
-    breaker = False
-    for i in range(1, rows-2):
-        for j in range(1, cols-2):
-            # nine points
-            points = np.array([data[i-1, j-1], data[i-1, j], data[i-1, j+1],
-                               data[i, j-1], data[i, j], data[i, j+1],
-                               data[i+1, j-1], data[i+1, j], data[i+1, j+1]])
-            if np.all(points > thr_val):
-                ref_i = i
-                ref_j = j
-                breaker = True
-                break
-        if breaker:
-            break
-    return ref_i, ref_j
-
-
 def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
     """
     inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
@@ -192,7 +168,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    ref_azlin, ref_rpix = get_valid_mask_pixel(f"{ifgname}.adf.cc_mask.bmp")
+    # default reference point in SAR space
+    ref_azlin, ref_rpix = 0, 0
 
     coords = get_coords(f"{mmli}.par", ref_azlin, ref_rpix, dempar)
 
