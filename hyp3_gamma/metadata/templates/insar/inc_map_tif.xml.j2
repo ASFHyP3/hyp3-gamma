@@ -1,0 +1,31 @@
+{% extends 'insar/insar.xml.j2' %}
+{% block idPurp %}
+This is the local incidence angle map for the reference granule from a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. Cell values are calculated based on a reference DEM and metadata from the {{ granule_type }}, and indicate the local incidence angle in radians. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
+{% endblock %}
+{% block idAbs %}
+&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the local incidence angle map generated for the reference granule from a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians. These values are calculated using a reference DEM and metadata from the reference {{ granule_type }}. It has been projected to {{ projection }} coordinates, and has a pixel spacing of {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ reference_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ secondary_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;This product was generated using the &lt;/SPAN&gt;&lt;A href="https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198" target="_blank" &gt;&lt;SPAN&gt;Copernicus DEM GLO-30&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; to calculate the incidence angle values. Refer to the product README file for more information about the Copernicus DEM. The DEM is downsampled to twice the pixel spacing of the output product ({{ 2 * pixel_spacing|int }} m) to smooth it in preparation for use in InSAR processing, and the incidence angle map is generated from that downsampled DEM. It is then oversampled by a factor of two to match the pixel spacing of the output InSAR product.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+{% endblock %}
+{% block dataLineageStatement %}
+The incidence angle map is generated from the DEM and metadata from the reference scene using GAMMA's GC_map_mod program.
+
+For a detailed description of InSAR processing using GAMMA software, refer to the readme file included with the product package.
+{% endblock %}
+
+******************
+
+{# Begin idAbs READABLE - not to be included in the xml template
+This is the local incidence angle map generated for the reference granule from a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians. These values are calculated using a reference DEM and information from the reference {{ granule_type }}. It has been projected to {{ projection }} coordinates, and has a pixel spacing of {{ pixel_spacing|int }} m.
+
+Reference Scene: {{ reference_granule_name }}
+Secondary Scene: {{ secondary_granule_name }}
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+This product was generated using the [Copernicus DEM GLO-30](https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198) to calculate the incidence angle values. The DEM is downsampled to twice the pixel spacing of the output product ({{ pixel_spacing|int }} m) in preparation for use in InSAR processing, and the incidence angle map is generated from that downsampled DEM. It is then oversampled by a factor of two to match the pixel spacing of the output InSAR product. Refer to the product README file for more information about the DEM.
+
+Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+End idAbs READABLE - not to be included in the xml template
+#}

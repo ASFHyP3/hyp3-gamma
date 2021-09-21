@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from secrets import token_hex
 
-from hyp3_metadata import create_metadata_file_set_insar
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
@@ -26,6 +25,7 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.metadata import create_metadata_file_set_insar
 
 log = logging.getLogger(__name__)
 

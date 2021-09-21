@@ -1,0 +1,136 @@
+{% extends 'arc.xml.j2' %}
+{% block scaleRange %}
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+{% endblock %}
+{% block dataIdInfo %}
+    <dataIdInfo>
+        <idPurp>This is a copy of the DEM used to process a pair of Sentinel-1 {{ granule_type }} granules to an InSAR product using GAMMA software. The pixel values indicate the elevation in meters, with a geoid correction applied. The source DEM is the Copernicus DEM GLO-30, downsampled to twice the pixel spacing of the output product to smooth the DEM for use in processing, then resampled again to match the {{ pixel_spacing|int }}-m output pixel spacing of the InSAR product. It is a 32-bit float GeoTIFF projected to {{ projection }}.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is a copy of the DEM used to process a pair of Sentinel-1 {{ granule_type }} granules to an InSAR product using GAMMA software. The pixel values indicate the elevation in meters, with a geoid correction applied. The source DEM is the Copernicus DEM GLO-30, which has a native pixel spacing of 30 m. Before being used in processing, it is downsampled to twice the pixel spacing of the output product to smooth the DEM, then resampled again after processing so that the pixel spacing of the output GeoTIFF will match the {{ pixel_spacing|int }}-m output pixel spacing of the InSAR product. It is a 32-bit float GeoTIFF projected to {{ projection }}.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ reference_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ secondary_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;InSAR processing requires a DEM in order to remove the impact of topographic phase on the interferogram. The source DEM tiles were downloaded from the Copernicus Digital Elevation Model (DEM) GLO-30 Public collection managed by Sinergise, which is available for download at &lt;/SPAN&gt;&lt;A href="https://registry.opendata.aws:443/copernicus-dem/" target="_blank" &gt;&lt;SPAN&gt;https://registry.opendata.aws/copernicus-dem/&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;. A geoid correction is applied to the source DEM values in preparation for use in InSAR processing, so the height values in this file will differ from the source DEM values. &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Copernicus DEM GLO-30 is a global Digital Surface Model (DSM) at 30-m pixel spacing derived from the WorldDEM. The WorldDEM is based on radar satellite data acquired by the TanDEM-X mission, which was funded by the German Aerospace Center (DLR) and Airbus Defence and Space, and edited to flatten water bodies, provide consistent flow of rivers, and apply corrections to shore/coastlines and special features. &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For an overview of this DEM resource, visit &lt;/SPAN&gt;&lt;A href="https://spacedata.copernicus.eu:443/fr/dataset-details?articleId=394198" target="_blank" &gt;&lt;SPAN&gt;https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;. The product handbook is available at &lt;/SPAN&gt;&lt;A href="https://spacedata.copernicus.eu/documents/20126/0/GEO1988-CopernicusDEM-SPE-002_ProductHandbook_I1.00.pdf" target="_blank" &gt;&lt;SPAN&gt;https://spacedata.copernicus.eu/documents/20126/0/GEO1988-CopernicusDEM-SPE-002_ProductHandbook_I1.00.pdf&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        </idAbs>
+        <idCredit>Produced using Copernicus WorldDEM-30 Copr. DLR e.V. 2010-2014 and Copr. Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.
+        </idCredit>
+        <idCitation xmlns="">
+            <date>
+                <pubDate>{{ processing_date.isoformat(timespec='seconds') }}</pubDate>
+            </date>
+            <citRespParty xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="007"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+            </citRespParty>
+            <resTitle></resTitle>
+        </idCitation>
+        <searchKeys>
+            <keyword>Alaska Satellite Facility</keyword>
+            <keyword>ASF</keyword>
+            <keyword>Synthetic Aperture Radar</keyword>
+            <keyword>SAR</keyword>
+            <keyword>Interferometric SAR</keyword>
+            <keyword>InSAR</keyword>
+            <keyword>Digital Elevation Model</keyword>
+            <keyword>DEM</keyword>
+            <keyword>Sentinel-1</keyword>
+        </searchKeys>
+        <dataLang>
+            <languageCode value="eng"/>
+            <countryCode value="US"/>
+        </dataLang>
+        <dataChar>
+            <CharSetCd value="004"/>
+        </dataChar>
+        <idPoC xmlns="">
+            <rpOrgName>ESA - European Space Agency</rpOrgName>
+            <role>
+                <RoleCd value="010"/>
+            </role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType=""><country></country>
+                    <eMailAdd>EOSupport@Copernicus.esa.int</eMailAdd>
+                </cntAddress>
+            </rpCntInfo>
+            <rpIndName>Copernicus Services Coordinated Interface (SCI)</rpIndName>
+        </idPoC>
+        <resMaint xmlns="">
+            <maintFreq>
+                <MaintFreqCd value="009"/>
+            </maintFreq>
+        </resMaint>
+        <resConst>
+            <Consts xmlns="">
+                <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;</useLimit>
+            </Consts>
+        </resConst>
+        <envirDesc>This product was generated by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</envirDesc>
+        <idPoC xmlns="">
+            <rpIndName>Sinergise Limited</rpIndName>
+            <rpOrgName>SINERGISE LABORATORY FOR GEOGRAPHICAL INFORMATION SYSTEMS, LTD.</rpOrgName>
+            <role><RoleCd value="005"></RoleCd></role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType="both">
+                    <delPoint>Cvetkova ulica 29</delPoint>
+                    <city>Ljubljana</city>
+                    <postCode>SI-1000</postCode>
+                    <eMailAdd>info@sinergise.com</eMailAdd>
+                    <country>SI</country>
+                </cntAddress>
+                <cntPhone><voiceNum tddtty="">+386 (1) 320-61-50</voiceNum></cntPhone>
+            </rpCntInfo>
+        </idPoC>
+        <suppInfo>https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198</suppInfo>
+        <tpCat>
+            <TopicCatCd value="006"/>
+        </tpCat>
+    </dataIdInfo>
+{% endblock %}
+{% block dataLineage %}
+        <dataLineage>
+            <statement>The input DEM is downloaded from the Copernicus Digital Elevation Model (DEM) dataset available in the Registry of Open Data on AWS, managed by Sinergise. A mosaic is generated from the necessary DEM tiles, then reprojected to the appropriate UTM Zone and pixel size. The GAMMA dem_import utility is used to apply a geoid correction. The DEM is downsampled from 30 m to twice the pixel spacing of the InSAR product before it is used in processing, then resampled again when the GeoTIFF is generated so that the pixel spacing of the DEM and the InSAR output products are the same.</statement>
+        </dataLineage>
+{% endblock %}
+{% block refSysInfo %}
+    <refSysInfo>
+        <RefSystem dimension="horizontal"/>
+    </refSysInfo>
+{% endblock %}
+{% block contInfo %}
+    <contInfo>
+        <ImgDesc xmlns="">
+            <attDesc>elevation</attDesc>
+            <trianInd>False</trianInd>
+            <radCalDatAv>False</radCalDatAv>
+            <camCalInAv>False</camCalInAv>
+            <filmDistInAv>False</filmDistInAv>
+            <lensDistInAv>False</lensDistInAv>
+            <contentTyp>
+                <ContentTypCd value="001"/>
+            </contentTyp>
+            <covDim>
+                <Band xmlns="">
+                    <seqID>
+                        <aName>C-band</aName>
+                        <attributeType>
+                            <aName>SAR</aName>
+                        </attributeType>
+                    </seqID>
+                </Band>
+            </covDim>
+        </ImgDesc>
+    </contInfo>
+{% endblock %}

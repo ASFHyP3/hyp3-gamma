@@ -1,0 +1,61 @@
+{% extends 'insar/insar.xml.j2' %}
+{% block idPurp %}
+This is the wrapped interferogram for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The fringes represent phase difference values on a wrapped 2-pi scale, with pixel values ranging from negative pi to pi. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m. It was processed from the SLC using {{ num_looks }} looks ({{ num_looks_range }} looks in the range direction and {{ num_looks_azimuth }} looks in the azimuth direction).
+{% endblock %}
+{% block idAbs %}
+&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the wrapped interferogram for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the wrapped phase difference values (on a 2-pi scale) of the interferogram prior to unwrapping. The file is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m. It was processed from the SLC using {{ num_looks }} looks ({{ num_looks_range }} looks in the range direction and {{ num_looks_azimuth }} looks in the azimuth direction).&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ reference_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ secondary_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Because the values are on a wrapped 2-pi scale rather than representing continuous phase difference values, a wrapped interferogram tends to be most useful as a color visualization. Each fringe (one cycle through the color ramp) indicates line-of-sight displacement equivalent to half the sensor wavelength. The Sentinel-1 SAR sensor has a wavelength of 5.6 cm, so each fringe would represent a line-of-sight displacement of 2.8 cm. Fringes that are very close together indicate greater amounts of deformation than wider fringes.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;A browse image, tagged with color_phase.png, is also included in the product package. It is a resampled medium-resolution version of this dataset with the backscatter intensity incorporated in the background to give topographic context to the displacement. The fringes have a pre-set color ramp applied, which can make them easier to count than in a black-and-white rendering, but the amplitude background and lower resolution of the browse can make fringes difficult to distinguish in areas of high deformation.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;No atmospheric corrections have been applied to this interferogram. Use caution when looking at a single interferogram, as atmospheric effects can easily be misinterpreted as surface deformation. While SAR signals can penetrate clouds, atmospheric conditions can delay the transmission of the signal. This results in phase differences that can look like surface deformation signals, but are actually driven by differences in the atmospheric conditions between the pair of acquisitions used to generate the interferogram. Consider applying an atmospheric model to correct for atmospheric delay, or examining other InSAR pairs that bracket the same event but were acquired on different dates to determine if atmospheric effects are driving the phase differences.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;To view this GeoTIFF in ArcGIS with a color ramp similar to the one applied to the browse, open the symbology properties for the layer (or click on the color ramp in the TOC) and apply a color ramp that utilizes a wide range of the spectrum. For ArcGIS Pro, the Bathymetry color ramp in inverse order most closely replicates the GAMMA color ramp, but the Spectral (Continuous) color ramp also works well. In ArcMap, the Spectrum-Full Bright color ramp works well.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+{% endblock %}
+{% block dataLineageStatement %}
+The wrapped phase interferogram is generated prior to the phase unwrapping step (step 8) during InSAR processing.
+
+The basic steps in InSAR processing are as follows:
+
+*Pre-Processing*
+1. Ingest SLC data into GAMMA format
+2. Get DEM file covering the area, apply geoid correction and resample/reproject as required
+3. Calculate overlapping bursts for input scenes
+4. Mosaic swaths and bursts together
+
+*InSAR Processing*
+5. Prepare initial look-up table and simulated unwrapped image
+    - Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+    - Simulate unwrapped interferometric phase using DEM height, and deformation rate using orbit state vectors
+6. Interferogram creation, matching, refinement
+    - Initial co-registration with look-up table
+    - Iterative co-registration with look-up table
+    - Removal of curved earth and topographic phase
+7. Determine a co-registration offset based on the burst overlap (spectral diversity method)
+    - Single iteration co-registration with look-up table
+8. Phase unwrapping and coherence map generation
+9. Generation of displacement maps from unwrapped differential phase
+
+*Post-Processing*
+10. Generation of geocoded GeoTIFF outputs
+
+For a detailed description of InSAR processing using GAMMA software, refer to the readme file included with the product package.
+{% endblock %}
+
+
+{#
+Begin idAbs READABLE - not to be included in the xml template
+This is the wrapped interferogram for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the wrapped phase difference values (on a 2-pi scale) of the interferogram prior to unwrapping. The file is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m. It was processed from the SLC using {{ num_looks }} looks ({{ num_looks_range }} looks in the range direction and {{ num_looks_azimuth }} looks in the azimuth direction).
+
+Reference Scene: {{ reference_granule_name }}
+Secondary Scene: {{ secondary_granule_name }}
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+Because the values are on a wrapped 2-pi scale rather than representing continuous phase difference values, a wrapped interferogram tends to be most useful as a color visualization. Each fringe (one cycle through the color ramp) indicates line-of-sight displacement equivalent to half the sensor wavelength. The Sentinel-1 SAR sensor has a wavelength of 5.6 cm, so each fringe would represent a line-of-sight displacement of 2.8 cm. Fringes that are very close together indicate greater amounts of deformation than wider fringes.
+
+A browse image, tagged with color_phase.png, is also included in the product package. It is a resampled medium-resolution version of this dataset with the backscatter intensity incorporated in the background to give topographic context to the displacement. The fringes have a pre-set color ramp applied, which can make them easier to count than in a black-and-white rendering, but the amplitude background and lower resolution of the browse can make fringes difficult to distinguish in areas of high deformation.
+
+No atmospheric corrections have been applied to this interferogram. Use caution when looking at a single interferogram, as atmospheric effects can easily be misinterpreted as surface deformation. While SAR signals can penetrate clouds, atmospheric conditions can delay the transmission of the signal. This results in phase differences that can look like surface deformation signals, but are actually driven by differences in the atmospheric conditions between the pair of acquisitions used to generate the interferogram. Consider applying an atmospheric model to correct for atmospheric delay, or examining other InSAR pairs that bracket the same event but were acquired on different dates to determine if atmospheric effects are driving the phase differences.
+
+To view this GeoTIFF in ArcGIS with a color ramp similar to the one applied to the browse, open the symbology properties for the layer (or click on the color ramp in the TOC) and apply a color ramp that utilizes a wide range of the spectrum. For ArcGIS Pro, the Bathymetry color ramp in inverse order most closely replicates the GAMMA color ramp, but the Spectral (Continuous) color ramp also works well. In ArcMap, the Spectrum-Full Bright color ramp works well.
+
+Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+End idAbs READABLE - not to be included in the xml template
+#}

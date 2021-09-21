@@ -1,0 +1,28 @@
+{% extends 'insar/insar.xml.j2' %}
+{% block idPurp %}
+This is the phi look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the SAR look vector orientation angle at each map pixel, ranging from -pi/2 (south) to pi/2 (north), with east being 0. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
+{% endblock %}
+{% block idAbs %}
+&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the phi look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The look vector orientation angle is defined as the angle between the East direction and the projection of the look vector (pointing back towards the sensor) on the horizontal surface plane. The pixel values indicate the SAR look vector orientation angle at each map pixel, with values of 0 indicating east, and ranging from to pi/2 (north) to -pi/2 (south), expressed in radians. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Reference Scene: {{ reference_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Secondary Scene: {{ secondary_granule_name }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;An important use of look vectors expressed in map geometry is the interpretation of 3D surface deformation. The main application is monitoring landslides and glaciers, where there is the assumption of motion along the gradient of the topographic height. Differential interferometry permits the deformation component in the SAR look direction to be estimated using the displacement component in the look direction and the direction angles (elevation theta and orientation phi) in the map geometry. The GAMMA program dispmap_vec can be used to perform these estimations.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/" target="_blank" &gt;&lt;SPAN&gt;InSAR Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand InSAR products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+{% endblock %}
+{% block dataLineageStatement %}
+The phi look vector map is generated from the SLC parameter file using GAMMA's look_vector program. Refer to the product readme file for details on the InSAR processing workflow.
+{% endblock %}
+
+
+{# Begin idAbs READABLE - not to be included in the xml template
+This is the phi look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The look vector orientation angle is defined as the angle between the East direction and the projection of the look vector (pointing back towards the sensor) on the horizontal surface plane. The pixel values indicate the SAR look vector orientation angle at each map pixel, with values of 0 indicating east, and ranging from to pi/2 (north) to -pi/2 (south), expressed in radians. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
+
+Reference Scene: {{ reference_granule_name }}
+Secondary Scene: {{ secondary_granule_name }}
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+An important use of look vectors expressed in map geometry is the interpretation of 3D surface deformation. The main application is monitoring landslides and glaciers, where there is the assumption of motion along the gradient of the topographic height. Differential interferometry permits the deformation component in the SAR look direction to be estimated using the displacement component in the look direction and the direction angles (elevation theta and orientation phi) in the map geometry. The GAMMA program dispmap_vec can be used to perform these estimations.
+
+Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
+End idAbs READABLE - not to be included in the xml template
+#}
