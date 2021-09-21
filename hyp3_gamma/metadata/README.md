@@ -122,12 +122,3 @@ the Editor > Code Style > XML settings. For example, save an Edit scheme, which
 keeps the indentation settings (i.e. Indent: 4, Continuation Indent: 8), and a 
 Write scheme, which sets both to 0. Note that the line break settings in the hard
 wrap section become more important when using the return character approach.
-
-
-
-
-
-
-
-
-
