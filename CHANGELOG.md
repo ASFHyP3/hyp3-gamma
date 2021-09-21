@@ -6,18 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.7.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.3...v4.7.0)
+
+## [4.9.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.8.0...v4.9.0)
 
 ### Added
 * `hyp3_metadata` [v1.3.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#130)
   has been merged into HyP3 GAMMA at `hyp3_gamma.metadata` generating HyP3 GAMMA products' metadata.
-  See the [metadata README](hyp3_gamma/metadata/README.md) for usage. 
+  See the [metadata README](hyp3_gamma/metadata/README.md) for usage.
+
+## [4.8.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.7.0...v4.8.0)
+
+### Changed
+* Upgraded to the latest available [GAMMA software](https://www.gamma-rs.ch/software) version and related dependencies
+  * GAMMA software `20210701` from `20191209`
+  * Ubuntu 20.04 from 18.04
+  * Python 3.8.10 from 3.6.9
+  * GDAL 3.0.4 from 2.2.3
+
+## [4.7.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.3...v4.7.0)
+
+### Added
+* Option to apply water masking to the unwrapped_phase calculation in the gamma processing 
+  * `apply_water_mask` parameter to `ifm_sentinel.insar_sentinel_gamma` function
+  * `--apply-water-mask` parameter to `insar` entrypoint
+  * `-m` parameter to `ifm_sentinel.py` script
 
 ## [4.6.3](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.2...v4.6.3)
 
 ### Added
-* InSAR products now include an ellipsoidal incidence angle GeoTIFF (in addition to local incidence angle) when
-  selecting the `include_inc_map` option.
+* InSAR products now include an ellipsoidal incidence angle GeoTIFF (in addition to local incidence angle)
+  when selecting the `include_inc_map` option
 
 ### Changed
 * Upgraded to hyp3-metadata [v1.2.5](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#125)
