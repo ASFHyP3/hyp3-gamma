@@ -1,0 +1,319 @@
+{% from 'macros.j2' import dem_blurb, dem_pixel_spacing %}
+ASF InSAR Data Package (GAMMA)
+==============================
+
+This folder contains SAR Interferometry (InSAR) products and their associated files. This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. Files are projected to {{ projection }}, and the pixel spacing is {{ pixel_spacing|int }} m.
+
+The source granules for this InSAR product are:
+ - Reference: {{ reference_granule_name }}
+ - Secondary: {{ secondary_granule_name }}
+
+Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
+
+The product folder is named using the following convention:
+S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh_pponnn_INTzz_u_def_ssss
+x:          Sentinel-1 Mission (A or B) of reference granule
+y:          Sentinel-1 Mission (A or B) of secondary granule
+aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
+bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
+gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
+hhhhhh:     Start Time of Acquisition (HHMMSS) of secondary granule
+pp:         Polarization Type: Vertical (VV) or Horizontal (HH)
+o:          Orbit Type: Precise (P), Restituted (R), or Original Predicted (O)
+nnn:        Time separation in days between reference and secondary granules
+zz:         Pixel Spacing in meters
+u:          Software Package Used: GAMMA (G)
+d:          Unmasked (u) or Water Masked (w)
+e:          Entire Area (e) or Clipped Area (c)
+f:          Swath Number: 1, 2, 3, or Full (F)
+ssss:       Product ID
+
+----------------
+### Pixel Spacing ###
+
+When ordering InSAR On Demand products, users can choose between 20x4 looks or 10x2 looks, which drives the resolution and pixel spacing of the output products. The first number indicates the number of looks in range, the second is the number of looks in azimuth.
+
+The output product pixel spacing depends on the number of looks in azimuth:
+pixel spacing = 20 * azimuth looks
+
+Products with 20x4 looks have a pixel spacing of 80 m, while those with 10x2 looks have a pixel spacing of 40 m.
+
+----------------
+### Using this data ###
+
+Please refer to the ASF Sentinel-1 InSAR Product Guide for in-depth guidance on the use of this dataset:
+* https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/
+
+When using this data as an image in a publication such as journal papers, articles, presentations, posters, and websites, please include the following credit with the image (portions in square brackets are optional):
+
+    [InSAR product processed by ]ASF DAAC HyP3 {{ processing_date.year }}[ using {{processor_name}} software]. Contains modified Copernicus Sentinel data {{ secondary_granule_name[17:21] }}, processed by ESA.
+
+When using this data in a manuscript and/or crediting datasets used for analysis, an acknowledgement including the software versions may be appropriate:
+
+    ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}. Contains modified Copernicus Sentinel data {{ secondary_granule_name[17:21] }}, processed by ESA.
+
+DOIs are also provided for citation when discussing the HyP3 software or plugins:
+* HyP3 processing environment, DOI: [10.5281/zenodo.3962581](https://doi.org/10.5281/zenodo.3962581)
+* HyP3 GAMMA plugin, DOI: [10.5281/zenodo.3962936](https://doi.org/10.5281/zenodo.3962936)
+
+For information on GAMMA SAR software, please see: https://gamma-rs.ch/
+
+----------------
+*Consider opening this document in a Markdown editor/viewer for easier reading.*
+----------------
+Interferometric SAR (InSAR) uses the phase differences from repeat passes over the same area to identify regions where the distance between the sensor and the earth's surface has changed. This allows for the detection and quantification of deformation or movement.
+
+Note that the imaging surface will vary depending on the sensor wavelength. Because Sentinel-1 is a C-band sensor, the waves will not penetrate very deeply into vegetation. The imagery likely represents the top of the canopy in densely vegetated areas rather than the actual terrain. In addition, vegetated areas tend to have low coherence, because plants can grow or move from one acquisition to the next. Use caution when generating interferograms for areas with extensive/dense vegetation cover.
+
+A digital elevation model is required for processing InSAR. The DEM used for this particular product is the Copernicus GLO-30 Public DEM, which has a native resolution of 1 arc second (about 30 meters). This DEM is a global Digital Surface Model (DSM) derived from the WorldDEM. The WorldDEM is based on radar satellite data acquired by the TanDEM-X mission, which was funded by the German Aerospace Center (DLR) and Airbus Defence and Space, and edited to flatten water bodies, provide consistent flow of rivers, and apply corrections to shore/coastlines and special features. For an overview of the dataset, visit https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198. The product handbook is available at https://spacedata.copernicus.eu/documents/20126/0/GEO1988-CopernicusDEM-SPE-002_ProductHandbook_I1.00.pdf.
+
+***************
+# Product Contents #
+
+The files generated in this process include:
+
+1. Wrapped Interferogram (PNG images, KMZ file, GeoTIFF (*optional*))
+2. Unwrapped Interferogram (GeoTIFF, PNG images, KMZ file)
+3. Line-of-Sight Displacement Map (GeoTIFF) - *Optional*
+4. Vertical Displacement Map (GeoTIFF)
+5. Coherence Map (GeoTIFF)
+6. Amplitude Image (GeoTIFF)
+7. Parameter Documentation (Text File)
+8. Look Vector Maps (GeoTIFFs) - *Optional*
+9. Incidence Angle Maps (GeoTIFFs) - *Optional*
+10. DEM used to process the data (GeoTIFF) - *Optional*
+11. Water Mask (GeoTIFF)
+
+*See below for detailed descriptions of each of the product files.*
+
+----------------
+## 1. Wrapped Interferogram
+
+The wrapped interferogram is output in both a georeferenced PNG and KMZ format by default, and the full GeoTIFF file can also be optionally included. Because the fringes are on a wrapped 2-pi scale rather than representing continuous phase difference values, a wrapped interferogram tends to be most useful as a color visualization. This product displays deformation in multiples of half of the sensor wavelength, so areas with fringes that are very close together indicate greater amounts of deformation in the line-of-sight direction from the sensor.
+
+The wrapped interferogram image is generated from the interferogram phase prior to unwrapping. The PNG and KMZ files are tagged with _color_phase, and are 2048 pixels wide. The optional GeoTIFF is tagged with _wrapped_phase.tif
+
+*The GeoTIFF version of the wrapped interferogram is optional. Select the "Include Wrapped Phase" option in the On Demand HyP3 Processing Options to include it in the product package.*
+
+----------------
+## 2. Unwrapped Interferogram
+
+The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. The Minimum Cost Flow (MCF) approach was used for phase unwrapping this product, and the reference point was set to the top left corner of the image.
+
+The GeoTIFF contains the unwrapped phase difference values for each pixel, corresponding to the change in distance along the line of sight of the sensor. Positive values indicate movement away from the sensor (caused by subsidence or lateral movement away from the sensor) and negative values indicate movement towards the sensor (uplift or lateral movement towards the sensor). Note that deformation often includes both vertical and horizontal components, and additional processing or external reference data is required to calculate the relative contributions of vertical and lateral movement.
+
+Phase unwrapping is most effective when the reference point is beyond the area of deformation and there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
+
+It is important to be aware that phase unwrapping errors can and do occur.
+
+One potential source of error is the presence of extensive surface water (coastal areas or large inland waterbodies). In some cases, signal returns over surface water meet the coherence and amplitude threshold criteria, even though measurements over water should not be coherent. When this happens, phase unwrapping can occur over expanses of water, leading to unexpected phase jumps over land. Consider selecting the "Apply Water Mask" option when processing InSAR in areas with significant surface water. This option edits the phase unwrapping validity mask so that pixels over water are given a value of 0 (not valid for phase unwrapping). The water mask used for this process is always included in the product package, even if it is not applied to the process, and is described below (item 11). This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
+
+No atmospheric correction has been applied to this interferogram. While SAR signals can penetrate clouds, atmospheric conditions can delay the transmission of the signal, resulting in phase differences between acquisition that can look like surface deformation signals. Use caution when interpreting single interferograms. In some cases, atmospheric models can be used to remove these impacts. Time series analysis may also be helpful for identifying and correcting both unwrapping errors and atmospheric impacts.
+
+The unwrapped interferogram files are tagged with _unw_phase, and the _unw_phase.tif file contains the data values. The PNG and KMZ files are both 2048 pixels wide.
+
+----------------
+## 3. Line-of-Sight Displacement Map
+
+The LOS displacement map is in GeoTIFF format and converts the unwrapped differential phase into measurements of ground movement in meters along the look vector (line-of-sight). Positive values indicate movement towards the sensor (such as uplift), while negative values indicate movement away from the sensor (such as subsidence).
+
+Note that the displacement maps will be impacted by any atmospheric effects or phase unwrapping errors (including over water) that are present in the unwrapped interferogram. Use caution when interpreting deformation maps generated from a single interferograms. Consider selecting the option to "Apply Water Mask" if the product contains coastal waters or large inland waterbodies. This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
+
+The LOS displacement map is tagged with _los_disp.tif
+
+*This file is optional. Select the "Include LOS Displacement" option in the On Demand HyP3 Processing Options to include it in the product package.*
+
+----------------
+## 4. Vertical Displacement Map
+
+GAMMA software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. The height map is transformed from the radar geometry (slant range/Doppler) using a DEM and resampled to the WGS84 ellipsoid to output an orthorectified product.
+
+Note that in cases where displacement has both a vertical and a horizontal component to the change, the assumptions used to generate height may not be correct. Time series analysis or external data sources may be necessary to generate reliable displacement maps that take into consideration the relative influences of horizontal and vertical movement.
+
+The displacement maps will be impacted by any atmospheric effects or phase unwrapping errors (including over water) that are present in the unwrapped interferogram. Use caution when interpreting deformation maps generated from a single interferograms. Consider selecting the option to "Apply Water Mask" if the product contains coastal waters or large inland waterbodies. This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
+
+Values are in meters, with positive values indicating uplift and negative values indicating subsidence.
+
+The vertical displacement map is tagged with _vert_disp.tif
+
+----------------
+## 5. Coherence Map
+
+The spectra of the two images used for InSAR must overlap well enough to generate interferometric fringes. Areas without common overlap must be filtered out prior to InSAR generation. The correlation indicates the accuracy of the phase information, or the visibility of fringes. Areas with low correlation will have noisier phase. The magnitude of the correlation is commonly referred to as coherence. The coherence map is output as a GeoTIFF with values ranging from 0 to 1; the larger the number, the higher the coherence (and the better the correlation).
+
+The coherence map is tagged with _corr.tif
+
+----------------
+## 6. Amplitude Image
+
+The amplitude GeoTIFF displays the calibrated radiometric backscatter (intensity) values of the reference granule in sigma-nought power. The image is terrain corrected using a geometric correction, but not radiometrically corrected. For more informative amplitude data, order Radiometric Terrain Corrected (RTC) products for your area of interest.
+
+The amplitude image is tagged with _amp.tif
+
+----------------
+## 7. Parameter Documentation
+
+The text file included with the product lists the key processing parameters used, including the full granule names, baseline length, number of looks, output resolution, and source DEM information.
+
+The text file is not tagged; it has a .txt extension on the base filename.
+
+----------------
+## 8. Look Vector Maps
+
+Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from -pi/2 (south) to pi/2 (north), with east being 0. Angles are expressed in radians, referencing the look direction back towards the sensor, and are calculated from a horizontal elevation plane at each pixel.
+
+*These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
+
+----------------
+## 9. Incidence Angle Maps
+
+There are two incidence angle maps generated for InSAR products.
+
+The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene. This raster is tagged with _inc_map.tif
+
+The ellipsoid incidence angle indicates the angle in radians between the incident radar beam and the direction perpendicular to the WGS84 ellipsoid model. It does not take terrain into account, and is suitable for use in atmospheric correction workflows. This raster is tagged with _inc_map_ell.tif
+
+*These files are optional. Select the "Include Inc. Angle Maps" option in the On Demand HyP3 Processing Options to include them in the product package.*
+
+----------------
+## 10. DEM used to process the data
+
+This is a copy of the Digital Elevation Model (DEM) layer used for processing. This layer is tagged with _dem.tif, and is a 32-bit float GeoTIFF.
+
+The source DEM has a geoid correction applied before it is used for processing, so height values in this file will differ from the source DEM. The DEM is down-sampled to twice the pixel spacing of the desired InSAR output pixel spacing to smooth it before processing. As such, an 80-m InSAR product requires the DEM to be down-sampled to a pixel spacing of 160 m. It is provided in the same pixel spacing/alignment and projected to the same UTM Zone as the interferogram files.
+
+*This file is optional. Select the "Include DEM" option in the On Demand HyP3 Processing Options to include it in the product package.*
+
+The DEM used for this product is {{ dem_name }}, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}
+
+{% if dem_blurb(dem_name) %}
+*Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
+
+{% endif %}
+----------------
+## 11. Water Mask
+
+The water mask identifies coastal waters and major inland waterbodies beyond 3 km of the shoreline. These areas are assigned a pixel value of 0. All remaining pixels (land, small inland waterbodies, land ice, and near-shore coastal areas) have a value of 1. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
+
+The water mask is not precise; the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) L1, L2 and L5 shoreline data is buffered out 3 km to reduce the possibility of near-shore features being excluded while still being a useful tool for masking out phase unwrapping artifacts over water.
+
+Note that applying the mask after phase unwrapping does not prevent unwrapping errors caused by the inclusion of water pixels as valid data during the phase unwrapping process. When submitting InSAR jobs for processing, there is an option to "Apply Water Mask". Selecting this option uses the water mask to adjust the validity mask used for phase unwrapping. This prevents phase unwrapping from occurring over large expanses of water, which can lead to unexpected phase jumps in the unwrapped outputs. This mask {{ "was" if water_mask_applied else "was not" }} applied during phase unwrapping. Refer to the Unwrapped Interferogram description above (item 2) for more information.
+
+*************
+# InSAR Processing #
+
+The basic steps in InSAR processing are as follows:
+
+*Pre-Processing*
+1. Ingest SLC data into GAMMA format
+2. Get DEM file covering the area, apply geoid correction and resample/reproject as required
+3. Calculate overlapping bursts for input scenes
+4. Mosaic swaths and bursts together
+
+*InSAR Processing*
+5. Prepare initial look-up table and simulated unwrapped image
+    - Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+    - Simulate unwrapped interferometric phase using DEM height, and deformation rate using orbit state vectors
+6. Interferogram creation, matching, refinement
+    - Initial co-registration with look-up table
+    - Iterative co-registration with look-up table
+    - Removal of curved earth and topographic phase
+7. Determine a co-registration offset based on the burst overlap (spectral diversity method)
+    - Single iteration co-registration with look-up table
+8. Phase unwrapping and coherence map generation
+9. Generation of displacement maps from unwrapped differential phase
+
+*Post-Processing*
+10. Generation of geocoded GeoTIFF outputs
+
+----------------
+The detailed process, including the calls to GAMMA software, is as follows:
+
+## Ingest ##
+
+ - par_s1_slc    # Read in SLC information
+ - S1_OPOD_vec   # Update state vectors with precision state vectors
+
+## Interferogram creation/matching/refinement ##
+
+### Initial Step
+
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - rdc_trans       # Derive lookup table for SLC/MLI co-registration (considering terrain heights)
+ - phase_sim_orb   # Simulate unwrapped interferometric phase using DEM height and deformation rate using orbit state vectors
+
+### Create Interferogram
+
+ - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+
+### Iterate Offset Calculations
+
+ *Repeat three times:*
+
+ - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+ - offset_add      # Add range and azimuth offset polynomial coefficients
+
+### Check for Convergence
+
+ Azimuth offset cannot exceed 0.02 pixels
+
+### Perform Enhanced Spectral Diversity Refinement
+
+ - S1_coreg_overlap   # Determine co-registration offset based on the burst overlap
+
+### Perform Final Matching
+
+ - SLC_interp_lt_S1_TOPS # Resample TOPS (IW mode) SLC using a lookup table and SLC offset polynomials for refinement
+ - create_offset   # Create and update ISP offset and interferogram parameter files
+ - offset_pwr      # Offset estimation between SLC images using intensity cross-correlation
+ - offset_fit      # Range and azimuth offset polynomial estimation
+ - SLC_diff_intf   # Differential interferogram generation from co-registered SLCs and a simulated interferogram
+
+## Unwrapping and Geocoding ##
+
+### Unwrapping
+
+ - cc_wave      # Estimate interferometric coherence
+ - adf          # Adaptive spectral filtering for complex interferograms
+ - rasmph_pwr   # Generate 8-bit raster graphics image of the phase of complex data combined with intensity data
+ - rascc        # Generate 8-bit raster graphics image of correlation coefficient
+ - rascc_mask   # Generate phase unwrapping validity mask using correlation and intensity (and water mask if selected)
+ - mcf          # Phase unwrapping using Minimum Cost Flow (MCF) and triangulation
+ - rasrmg       # Generate 8-bit raster graphics image from unwrapped phase and intensity data
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Line-Of-Sight
+ - dispmap      # Conversion of unwrapped differential phase to displacement map (m) - Vertical
+
+### Post-Processing
+
+ - geocode_back   # Geocoding of image data using lookup table values
+ - data2geotiff   # Convert geocoded data with DEM parameter file to GeoTIFF format
+
+*************
+# The Sentinel-1 mission #
+
+The Sentinel-1 satellite constellation is part of the Copernicus Earth Observation program, coordinated by the European Space Agency (ESA) on behalf of the European Commission (EC). Sentinel-1 satellites carry C-band Synthetic Aperture Radar (SAR) instruments for global, around-the-clock imagery, even through cloud cover. The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle, but are offset 180 degrees in order to repeat passes every 6 days.
+
+More information about the mission is available at:
+https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at:
+https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1
+
+*************
+For assistance, contact the Alaska Satellite Facility:
+uso@asf.alaska.edu
+907-474-5041
+
+Contact the HyP3 development team directly at:
+https://hyp3-docs.asf.alaska.edu/contact/
+
+-------------
+Metadata version: {{ plugin_version }}

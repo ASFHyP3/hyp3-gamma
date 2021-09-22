@@ -1,0 +1,42 @@
+{% macro dem_pixel_spacing(dem_name) %}
+    {% if dem_name == 'EU_DEM_V11' -%}
+        1 arc second (about 30 meters)
+    {%- elif dem_name == 'GIMP' -%}
+        1 arc second (about 30 meters)
+    {%- elif dem_name == 'IFSAR' -%}
+        5 meters
+    {%- elif dem_name == 'NED13' -%}
+        1/3 arc seconds (about 10 meters)
+    {%- elif dem_name == 'NED1' -%}
+        1 arc second (about 30 meters)
+    {%- elif dem_name == 'NED2' -%}
+        2 arc seconds (about 60 meters)
+    {%- elif dem_name == 'REMA' -%}
+        1 arc second (about 30 meters)
+    {%- elif dem_name == 'SRTMGL1' -%}
+        1 arc second (about 30 meters)
+    {%- elif dem_name == 'SRTMGL3' -%}
+        3 arc seconds (about 90 meters)
+    {%- elif dem_name == 'GLO-30' -%}
+        1 arc second (about 30 meters)
+    {%- else -%}
+        UNKNOWN
+    {%- endif %}
+{% endmacro %}
+{% macro dem_blurb(dem_name) %}
+    {% if dem_name.startswith('EU') -%}
+        The EU-DEM combines data from a variety of sources, including the ASTER DEM, the SRTM, and Russian topographic maps. For more information and to access the full EU-DEM dataset, refer to https://land.copernicus.eu/imagery-in-situ/eu-dem/eu-dem-v1.1.
+    {%- elif dem_name.startswith('GIMP') -%}
+        The GIMP DEM was constructed by combining ASTER and SPOT 5 DEMs over the ice sheet periphery and margin with AVHRR photoclinometry for the interior and far north, and calibrating the data to approximate mean ICESat/GLAS elevations from 2003 to 2009. For more information and to access the full GIMP dataset, refer to https://nsidc.org/data/nsidc-0645.
+    {%- elif dem_name.startswith('IFSAR') -%}
+        The U.S. Geological Survey (USGS) National Geospatial Program (NGP) developed the Alaska Mapping Initiative (AMI) to collaborate with State and other Federal partners in Alaska to acquire 3-dimensional elevation data to improve statewide topographic mapping products. AMI attained Interferometric Synthetic Aperture Radar (IfSAR) data to generate Digital Elevation Models (DEMs). This radar mapping technology is an effective tool for collecting data under challenging circumstances such as cloud cover, extreme weather conditions, rugged terrain, and remote locations. Airborne IfSAR data were flown over south-central Alaska in summer 2010 and over northwestern Alaska in 2012. IfSAR data was used to generate a Digital Surface Model (DSM) that provides elevation values of landscape features on the earth's surface. This topographic product contains the height of the highest surface on the ground including vegetation, man-made structures, and bare earth. For more information and to access the full IfSAR DEM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-interferometric-synthetic-aperture-radar.
+    {%- elif dem_name.startswith('NED') -%}
+        The National Elevation Dataset (NED) provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. For more information, refer to https://pubs.er.usgs.gov/publication/70201572. To download the data, visit https://viewer.nationalmap.gov/basic and expand the Elevation Products (3DEP) section.
+    {%- elif dem_name.startswith('REMA') -%}
+        The REMA DEM was constructed from hundreds of thousands of individual stereoscopic Digital Elevation Models extracted from pairs of submeter-resolution DigitalGlobe satellite imagery acquired between 2009 and 2017, and vertically registered to altimetry measurements from Cryosat-2 and ICESat. For more information and to access the full REMA dataset at the original 8-meter resolution, refer to https://www.pgc.umn.edu/data/rema/.
+    {%- elif dem_name.startswith('SRTM') -%}
+        The SRTM was flown aboard the space shuttle Endeavour February 11-22, 2000. The National Aeronautics and Space Administration (NASA) and the National Geospatial-Intelligence Agency (NGA) participated in an international project to acquire radar data which were used to create the first near-global set of land elevations. For more information and to access the full SRTM dataset, refer to https://www.usgs.gov/centers/eros/science/usgs-eros-archive-digital-elevation-shuttle-radar-topography-mission-srtm-1-arc?qt-science_center_objects=0#qt-science_center_objects.
+    {%- elif dem_name == 'GLO-30' -%}
+        The Copernicus DEM GLO-30 is a global Digital Surface Model (DSM) derived from the WorldDEM. The WorldDEM is based on radar satellite data acquired by the TanDEM-X mission, which was funded by the German Aerospace Center (DLR) and Airbus Defence and Space, and edited to flatten water bodies, provide consistent flow of rivers, and apply corrections to shore/coastlines and special features. For an overview of the dataset, visit https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198. The product handbook is available at https://spacedata.copernicus.eu/documents/20126/0/GEO1988-CopernicusDEM-SPE-002_ProductHandbook_I1.00.pdf.
+    {%- endif %}
+{% endmacro %}
