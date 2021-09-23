@@ -142,6 +142,17 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
            f'{product_id}'
 
 
+def get_pass(file):
+    """
+    input: the annotation xml file
+    return: ascending/descending
+    example input file: ./annotation/s1a-iw1-slc-vh-20150320t232109-20150320t232137-005122-00672a-001.xml
+    """
+    tree = etree.parse(file)
+    root = tree.getroot()
+    return root[2][0][0].text
+
+
 def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
@@ -226,6 +237,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
     center_slant_range = center_slant_range.split()[0]
     far_slant_range = getParameter(parfile, 'far_range_slc')
     far_slant_range = far_slant_range.split()[0]
+    metafile = glob.glob("{}/annotation/*.xml".format(reference_file))[0]
+    scending = get_pass(metafile)
 
     with open("baseline.log") as f:
         for line in f:
@@ -268,6 +281,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
     with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
+        f.write('Pass Direction: %s\n' % scending)
         f.write('Baseline: %s\n' % baseline)
         f.write('UTCtime: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
