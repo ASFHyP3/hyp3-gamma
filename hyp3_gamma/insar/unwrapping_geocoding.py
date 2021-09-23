@@ -17,7 +17,7 @@ from hyp3_gamma.water_mask import create_water_mask
 log = logging.getLogger(__name__)
 
 
-def coords_from_sarpix_coord(in_mli_par, ref_azlin=0, ref_rpix=0, in_dem_par=None):
+def coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
 
     cmd = ['sarpix_coord', in_mli_par, '-']
     if in_dem_par:
@@ -41,14 +41,14 @@ def get_coords(in_mli_par, ref_azlin=0, ref_rpix=0, in_dem_par=None):
 
     coords = {}
     if in_dem_par:
-        coord_lst = coords_from_sarpix_coord(in_mli_par, in_dem_par=in_dem_par)
+        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par=in_dem_par)
         coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
 
-        coord_lst = coords_from_sarpix_coord(in_mli_par)
+        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix)
         coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
     else:
-        coord_lst = coords_from_sarpix_coord(in_mli_par)
+        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix)
         coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], None, None, None, None
         coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
@@ -135,6 +135,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     offit = "{}.off.it".format(ifgname)
     mmli = reference + ".mli"
     smli = secondary + ".mli"
+    ref_azlin = 0
+    ref_rpix = 0
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -168,7 +170,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    coords = get_coords(f"{mmli}.par", in_demp_par=dempar)
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
 
     if apply_water_mask:
         # create and apply water mask
