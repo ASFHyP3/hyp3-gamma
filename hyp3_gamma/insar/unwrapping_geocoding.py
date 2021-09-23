@@ -17,38 +17,38 @@ from hyp3_gamma.water_mask import create_water_mask
 log = logging.getLogger(__name__)
 
 
-def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
+def coords_from_sarpix_coord(in_mli_par, ref_azlin=0, ref_rpix=0, in_dem_par=None):
+
+    cmd = ['sarpix_coord', in_mli_par, '-']
+    if in_dem_par:
+        cmd.extend([in_dem_par, str(ref_azlin), str(ref_rpix)])
+    else:
+        cmd.extend(['-', str(ref_azlin), str(ref_rpix)])
+
+    coord_txt = subprocess.run(cmd, capture_output=True, text=True)
+    lst = coord_txt.stdout.split('\n')
+    coord_str = [s for s in lst if "selected" in s]
+    coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
+    coord_lst = [float(s) for s in coord_lst]
+    return coord_lst
+
+
+def get_coords(in_mli_par, ref_azlin=0, ref_rpix=0, in_dem_par=None):
     """
     inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
     returns: coords={"row_s":row_s,"col_s":col_s,"row_m":row_m,"col_m":col_m,"x":x,"y":y,"lat":lat,"lon":lon}
     """
-    def _coord_lst(cmd):
-        coord_txt = subprocess.run(cmd, capture_output=True, text=True)
-        lst = coord_txt.stdout.split('\n')
-        coord_str = [s for s in lst if "selected" in s]
-        coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
-        coord_lst = [float(s) for s in coord_lst]
-        return coord_lst
 
-    cmd = ['sarpix_coord', in_mli_par, '-']
     coords = {}
     if in_dem_par:
-        cmd1 = cmd.copy()
-        cmd1.extend([in_dem_par])
-        cmd1.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd1)
+        coord_lst = coords_from_sarpix_coord(in_mli_par, in_dem_par=in_dem_par)
         coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
 
-        cmd2 = cmd.copy()
-        cmd2.extend(['-'])
-        cmd2.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd2)
+        coord_lst = coords_from_sarpix_coord(in_mli_par)
         coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
     else:
-        cmd.extend(['-'])
-        cmd.extend([str(ref_azlin), str(ref_rpix)])
-        coord_lst = _coord_lst(cmd)
+        coord_lst = coords_from_sarpix_coord(in_mli_par)
         coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
             coord_lst[0], coord_lst[1], None, None, None, None
         coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
@@ -168,10 +168,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    # default reference point in SAR space
-    ref_azlin, ref_rpix = 0, 0
-
-    coords = get_coords(f"{mmli}.par", ref_azlin, ref_rpix, dempar)
+    coords = get_coords(f"{mmli}.par", in_demp_par=dempar)
 
     if apply_water_mask:
         # create and apply water mask
