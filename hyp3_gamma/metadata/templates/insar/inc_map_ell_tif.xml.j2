@@ -20,8 +20,6 @@ Reference Scene: {{ reference_granule_name }}
 Secondary Scene: {{ secondary_granule_name }}
 Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
-This product was generated using the [Copernicus DEM GLO-30](https://spacedata.copernicus.eu/fr/dataset-details?articleId=394198) to calculate the incidence angle values. The DEM is downsampled to twice the pixel spacing of the output product ({{ pixel_spacing|int }} m) in preparation for use in InSAR processing, and the incidence angle map is generated from that downsampled DEM. It is then oversampled by a factor of two to match the pixel spacing of the output InSAR product. Refer to the product README file for more information about the DEM.
-
 Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
 
 The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
