@@ -72,10 +72,10 @@ A digital elevation model is required for processing InSAR. The DEM used for thi
 
 The files generated in this process include:
 
-1. Wrapped Interferogram (PNG images, KMZ file, GeoTIFF (*optional*))
-2. Unwrapped Interferogram (GeoTIFF, PNG images, KMZ file)
+1. Wrapped Interferogram (PNG image, KMZ file, GeoTIFF (*optional*))
+2. Unwrapped Interferogram (GeoTIFF, PNG image, KMZ file)
 3. Line-of-Sight Displacement Map (GeoTIFF) - *Optional*
-4. Vertical Displacement Map (GeoTIFF)
+4. Vertical Displacement Map (GeoTIFF) - *Optional*
 5. Coherence Map (GeoTIFF)
 6. Amplitude Image (GeoTIFF)
 7. Parameter Documentation (Text File)
@@ -98,11 +98,15 @@ The wrapped interferogram image is generated from the interferogram phase prior 
 ----------------
 ## 2. Unwrapped Interferogram
 
-The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. The Minimum Cost Flow (MCF) approach was used for phase unwrapping this product, and the reference point was set to the top left corner of the image.
+The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. The Minimum Cost Flow (MCF) approach was used for phase unwrapping this product, and the reference point was set to the first point of the combined scene in SAR space. For ascending scenes, this will be the lower left corner of the interferogram when viewed in map space; for descending scenes, this will be the upper right corner.
 
 The GeoTIFF contains the unwrapped phase difference values for each pixel, corresponding to the change in distance along the line of sight of the sensor. Positive values indicate movement away from the sensor (caused by subsidence or lateral movement away from the sensor) and negative values indicate movement towards the sensor (uplift or lateral movement towards the sensor). Note that deformation often includes both vertical and horizontal components, and additional processing or external reference data is required to calculate the relative contributions of vertical and lateral movement.
 
-Phase unwrapping is most effective when the reference point is beyond the area of deformation and there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
+Phase unwrapping is most effective when the reference point is beyond the area of deformation and there are not any areas with deformation greater than half the sensor wavelength within the space of a single fringe. Because choosing an optimal reference point requires knowledge of the site characteristics and examination of the interferogram, it is not practical in an automated, global workflow. By default, the first point of the combined scene is used as the reference point for ASF's On Demand InSAR products.
+
+Because unwrapped phase differences and displacement values are calculated relative to the reference point, you may wish to apply a correction to the image so that the range of values are more appropriate for your study area or application. Refer to the Phase Unwrapping Reference Point section of the InSAR Product Guide (https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/#phase-unwrapping-reference-point) for guidance on applying a correction to this raster relative to a different reference point.
+
+In regions of large-magnitude deformations or extremely steep topography, the fringes may be too close together to resolve, or one fringe may actually represent a jump of multiple phase wraps. GAMMA software uses algorithms to detect phase inconsistencies and treat them appropriately, but some deformations may still be too large to generate reliable data.
 
 It is important to be aware that phase unwrapping errors can and do occur.
 
@@ -115,18 +119,18 @@ The unwrapped interferogram files are tagged with _unw_phase, and the _unw_phase
 ----------------
 ## 3. Line-of-Sight Displacement Map
 
-The LOS displacement map is in GeoTIFF format and converts the unwrapped differential phase into measurements of ground movement in meters along the look vector (line-of-sight). Positive values indicate movement towards the sensor (such as uplift), while negative values indicate movement away from the sensor (such as subsidence).
+The LOS displacement map is in GeoTIFF format and converts the unwrapped differential phase into measurements of ground movement in meters along the look vector (line-of-sight). Positive values indicate movement towards the sensor (such as uplift), while negative values indicate movement away from the sensor (such as subsidence). Because displacement values are calculated relative to the phase unwrapping reference point, the values in the map may not be appropriate. In some cases, it may be necessary to select a different reference point and apply a correction to the image to generate values that are relative to a more appropriate reference value. See the Unwrapped Interferogram description (Section 2 above) for more information.
 
 Note that the displacement maps will be impacted by any atmospheric effects or phase unwrapping errors (including over water) that are present in the unwrapped interferogram. Use caution when interpreting deformation maps generated from a single interferograms. Consider selecting the option to "Apply Water Mask" if the product contains coastal waters or large inland waterbodies. This product {{ "had" if water_mask_applied else "did not have" }} a water mask applied during the phase unwrapping process.
 
 The LOS displacement map is tagged with _los_disp.tif
 
-*This file is optional. Select the "Include LOS Displacement" option in the On Demand HyP3 Processing Options to include it in the product package.*
+*This file is optional. Select the "Include Displacement Maps" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
 ## 4. Vertical Displacement Map
 
-GAMMA software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. The height map is transformed from the radar geometry (slant range/Doppler) using a DEM and resampled to the WGS84 ellipsoid to output an orthorectified product.
+GAMMA software generates a vertical displacement GeoTIFF from the unwrapped differential phase measurements under the assumption that the displacement is entirely in the vertical direction. Because displacement values are calculated relative to the phase unwrapping reference point, the values in the map may not be appropriate. In some cases, it may be necessary to select a different reference point and apply a correction to the image to generate values that are relative to a more appropriate reference value. See the Unwrapped Interferogram description (Section 2 above) for more information.
 
 Note that in cases where displacement has both a vertical and a horizontal component to the change, the assumptions used to generate height may not be correct. Time series analysis or external data sources may be necessary to generate reliable displacement maps that take into consideration the relative influences of horizontal and vertical movement.
 
@@ -135,6 +139,8 @@ The displacement maps will be impacted by any atmospheric effects or phase unwra
 Values are in meters, with positive values indicating uplift and negative values indicating subsidence.
 
 The vertical displacement map is tagged with _vert_disp.tif
+
+*This file is optional. Select the "Include Displacement Maps" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
 ----------------
 ## 5. Coherence Map
@@ -162,6 +168,8 @@ The text file is not tagged; it has a .txt extension on the base filename.
 
 Two look vector maps are output with as GeoTIFFs. The lv_theta map indicates the SAR look vector elevation angle at each map pixel, ranging from -pi/2 (down) to pi/2 (up). The lv_phi map indicates the SAR look vector orientation angle at each map pixel, ranging from -pi/2 (south) to pi/2 (north), with east being 0. Angles are expressed in radians, referencing the look direction back towards the sensor, and are calculated from a horizontal elevation plane at each pixel.
 
+The lv_theta map is required for applying atmospheric corrections, and for calculating vertical displacement values relative to a new phase unwrapping reference point.
+
 *These files are optional. Select the "Include Look Vectors" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
 ----------------
@@ -171,7 +179,7 @@ There are two incidence angle maps generated for InSAR products.
 
 The local incidence angle is defined as the angle between the incident radar signal and the local surface normal (direction perpendicular to the ground surface, determined from the DEM). The output is a GeoTIFF giving the local incidence angle in radians for each pixel in the scene. This raster is tagged with _inc_map.tif
 
-The ellipsoid incidence angle indicates the angle in radians between the incident radar beam and the direction perpendicular to the WGS84 ellipsoid model. It does not take terrain into account, and is suitable for use in atmospheric correction workflows. This raster is tagged with _inc_map_ell.tif
+The ellipsoid incidence angle indicates the angle in radians between the incident radar beam and the direction perpendicular to the WGS84 ellipsoid model. It does not take terrain into account. This raster is tagged with _inc_map_ell.tif
 
 *These files are optional. Select the "Include Inc. Angle Maps" option in the On Demand HyP3 Processing Options to include them in the product package.*
 
