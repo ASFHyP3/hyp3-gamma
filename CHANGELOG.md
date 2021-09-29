@@ -11,7 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 * An `--include-displacement-maps` argument to the `insar` entrypoint which will cause both the
-  line-of-site and vertical displacement maps to be included.
+  line-of-sight and vertical displacement maps to be included.
 
 ### Changed
 * The `include_los_displacement` parameter to `insar_sentinel_gamma` in `hyp3_gamma.insar.ifm_sentinel`
