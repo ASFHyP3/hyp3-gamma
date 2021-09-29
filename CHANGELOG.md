@@ -26,7 +26,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Deprecated
 * The `--include-los-displacment` argument to the `insar` entrypoint is depreciated and may be removed
   at any time. `--include-displacement-maps` should be used instead as setting either option to `true`
-  will cause both the line-of-site and vertical displacement maps to be included.
+  will cause both the line-of-sight and vertical displacement maps to be included.
 
 ## [4.9.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.8.0...v4.9.0)
 
