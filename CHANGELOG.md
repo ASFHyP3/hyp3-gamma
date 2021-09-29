@@ -7,13 +7,26 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [4.9.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.9.0...v4.9.1)
+## [5.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.9.0...v5.0.0)
+
+### Added
+* An `--include-displacement-maps` argument to the `insar` entrypoint which will cause both the
+  line-of-site and vertical displacement maps to be included.
 
 ### Changed
-* Change the include_los_displacement to the include_displacement_maps option. When users choose the option, 
-  the hyp3-gamma outputs both the line of sight (los) and the vertical (vert) displacements.
-* InSAR readme and xml templates have been updated to reflect the change in displacement map options and to include more information on adjusting unwrapped phase and displacement map values relative to a user-selected reference point.
-* Updated the URL for the [Copernicus DEM](https://spacedata.copernicus.eu/explore-more/news-archive/-/asset_publisher/Ye8egYeRPLEs/blog/id/434960) information webpage.
+* The `include_los_displacement` parameter to `insar_sentinel_gamma` in `hyp3_gamma.insar.ifm_sentinel`
+  has changed to `include_displacement_maps`. Now, both the line-of-sight displacement and the vertical
+  displacement maps will be included if this option is set to `True`.
+* InSAR README and XML templates have been updated to reflect the change in displacement map options
+  and to include more information on adjusting unwrapped phase and displacement map values relative
+  to a user-selected reference point.
+* Updated the URL for the [Copernicus DEM](https://spacedata.copernicus.eu/explore-more/news-archive/-/asset_publisher/Ye8egYeRPLEs/blog/id/434960)
+  information webpage.
+
+### Deprecated
+* The `--include-los-displacment` argument to the `insar` entrypoint is depreciated and may be removed
+  at any time. `--include-displacement-maps` should be used instead as setting either option to `true`
+  will cause both the line-of-site and vertical displacement maps to be included.
 
 ## [4.9.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.8.0...v4.9.0)
 
