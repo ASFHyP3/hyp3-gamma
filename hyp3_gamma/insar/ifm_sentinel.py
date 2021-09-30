@@ -142,7 +142,7 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
            f'{product_id}'
 
 
-def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
+def move_output_files(output, reference, prod_dir, long_output, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
@@ -156,10 +156,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_corr.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
-
-    inName = "{}.vert.disp.geo.org.tif".format(output)
-    outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
-    shutil.copy(inName, outName)
 
     inName = "{}.adf.unw.geo.tif".format(output)
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
@@ -175,9 +171,12 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if include_los_displacement:
+    if include_displacement_maps:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+        inName = "{}.vert.disp.geo.org.tif".format(output)
+        outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_inc_map:
@@ -291,7 +290,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
-                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
+                         include_displacement_maps=False, include_wrapped_phase=False, include_inc_map=False,
                          include_dem=False, apply_water_mask=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
@@ -385,7 +384,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     pixel_spacing = int(alooks) * 20
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, apply_water_mask)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
+    move_output_files(output, reference, product_name, product_name, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
     reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
@@ -425,7 +424,7 @@ def main():
     parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
     parser.add_argument("-i", action="store_true", help="Create local and ellipsoidal incidence angle maps")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
-    parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
+    parser.add_argument("-s", action="store_true", help="Create both line of sight and vertical displacement files")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-m", action="store_true", help="Apply water mask")
     args = parser.parse_args()
@@ -434,7 +433,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
-                         include_look_vectors=args.l, include_los_displacement=args.s,
+                         include_look_vectors=args.l, include_displacement_maps=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
                          include_dem=args.d, apply_water_mask=args.m)
 

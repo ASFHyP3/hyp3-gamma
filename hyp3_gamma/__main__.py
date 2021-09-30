@@ -94,12 +94,16 @@ def insar():
     parser.add_argument('--include-dem', type=string_is_true, default=False)
     parser.add_argument('--include-look-vectors', type=string_is_true, default=False)
     parser.add_argument('--include-los-displacement', type=string_is_true, default=False)
+    parser.add_argument('--include-displacement-maps', type=string_is_true, default=False)
     parser.add_argument('--include-wrapped-phase', type=string_is_true, default=False)
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--apply-water-mask', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
     parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
+
+    # TODO: Remove `--include-los-displacement` and this logic once it's no longer supported by the HyP3 API
+    args.include_displacement_maps = args.include_displacement_maps | args.include_los_displacement
 
     args.granules = [item for sublist in args.granules for item in sublist]
     if len(args.granules) != 2:
@@ -123,7 +127,7 @@ def insar():
         rlooks=rlooks,
         include_dem=args.include_dem,
         include_look_vectors=args.include_look_vectors,
-        include_los_displacement=args.include_los_displacement,
+        include_displacement_maps=args.include_displacement_maps,
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
         apply_water_mask=args.apply_water_mask,
