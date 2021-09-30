@@ -24,7 +24,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   information webpage.
 
 ### Deprecated
-* The `--include-los-displacment` argument to the `insar` entrypoint is depreciated and may be removed
+* The `--include-los-displacment` argument to the `insar` entrypoint is deprecated and may be removed
   at any time. `--include-displacement-maps` should be used instead as setting either option to `true`
   will cause both the line-of-sight and vertical displacement maps to be included.
 
