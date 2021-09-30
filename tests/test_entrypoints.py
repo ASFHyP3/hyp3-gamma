@@ -26,7 +26,7 @@ def test_insar_passthrough(script_runner):
         'hyp3_gamma', '++process', 'insar', '--help')
     assert ret.success
     assert 'insar' in ret.stdout
-    assert '--include-los-displacement' in ret.stdout
+    assert '--include-displacement-maps' in ret.stdout
 
 
 def test_insar(script_runner):
