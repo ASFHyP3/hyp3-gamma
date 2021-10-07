@@ -5,7 +5,6 @@ import logging
 import os
 import subprocess
 from tempfile import TemporaryDirectory
-import json
 
 import numpy as np
 from PIL import Image
@@ -146,7 +145,7 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     return mask
 
 
-def convert_from_sar_2_map(in_file, out_geotiff, width, lt, demw, demn, type_):
+def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
 
     geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
 
