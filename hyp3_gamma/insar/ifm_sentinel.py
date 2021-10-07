@@ -203,7 +203,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords, ref_point_info):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -286,6 +286,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
+        f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
         f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
         f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
         f.write('Row of the reference point in MAP: %s\n' % coords["row_m"])
@@ -382,7 +383,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
 
-    coords = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+    coords, ref_point_info = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
                                   apply_water_mask=apply_water_mask)
 
     # Generate metadata
@@ -417,7 +418,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
-                        dem_source, coords)
+                        dem_source, coords, ref_point_info)
 
     log.info("Done!!!")
     return product_name
