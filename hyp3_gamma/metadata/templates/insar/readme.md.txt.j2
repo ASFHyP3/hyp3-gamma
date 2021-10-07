@@ -98,7 +98,7 @@ The wrapped interferogram image is generated from the interferogram phase prior 
 ----------------
 ## 2. Unwrapped Interferogram
 
-The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. The Minimum Cost Flow (MCF) approach was used for phase unwrapping this product, and the reference point was set to the location of the pixel with the highest coherence value, in SAR space.
+The unwrapped interferogram uses a reference point to convert the wrapped 2-pi scale into a continuous scale (of multiples of pi), and is the most important and complicated step in InSAR processing. The Minimum Cost Flow (MCF) approach was used for phase unwrapping this product, and the reference point was set to the location of the pixel with the highest coherence value.
 
 The GeoTIFF contains the unwrapped phase difference values for each pixel, corresponding to the change in distance along the line of sight of the sensor. Positive values indicate movement away from the sensor (caused by subsidence or lateral movement away from the sensor) and negative values indicate movement towards the sensor (uplift or lateral movement towards the sensor). Note that deformation often includes both vertical and horizontal components, and additional processing or external reference data is required to calculate the relative contributions of vertical and lateral movement.
 
