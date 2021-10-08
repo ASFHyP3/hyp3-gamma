@@ -1,0 +1,36 @@
+{% extends 'arc.xml.j2' %}
+{% block scaleRange %}
+        <scaleRange>
+            <minScale>150000000</minScale>
+            <maxScale>5000</maxScale>
+        </scaleRange>
+{% endblock %}
+{% block refSysInfo %}
+    <refSysInfo>
+        <RefSystem dimension="horizontal"/>
+    </refSysInfo>
+{% endblock %}
+{% block contInfo %}
+    <contInfo>
+        <ImgDesc xmlns="">
+            <attDesc>elevation</attDesc>
+            <contentTyp>
+                <ContentTypCd value="001"/>
+            </contentTyp>
+            <trianInd>False</trianInd>
+            <radCalDatAv>False</radCalDatAv>
+            <camCalInAv>False</camCalInAv>
+            <filmDistInAv>False</filmDistInAv>
+            <lensDistInAv>False</lensDistInAv>
+            <covDim>
+                <Band xmlns="">
+                    <valUnit>
+                        <UOM gmlID="" type="">
+                            <unitSymbol>m</unitSymbol>
+                        </UOM>
+                    </valUnit>
+                </Band>
+            </covDim>
+        </ImgDesc>
+    </contInfo>
+{% endblock %}

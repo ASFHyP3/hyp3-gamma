@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [5.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.9.0...v5.0.0)
+
+### Added
+* An `--include-displacement-maps` argument to the `insar` entrypoint which will cause both the
+  line-of-sight and vertical displacement maps to be included.
+
+### Changed
+* The `include_los_displacement` parameter to `insar_sentinel_gamma` in `hyp3_gamma.insar.ifm_sentinel`
+  has changed to `include_displacement_maps`. Now, both the line-of-sight displacement and the vertical
+  displacement maps will be included if this option is set to `True`.
+* InSAR README and XML templates have been updated to reflect the change in displacement map options
+  and to include more information on adjusting unwrapped phase and displacement map values relative
+  to a user-selected reference point.
+* Updated the URL for the [Copernicus DEM](https://spacedata.copernicus.eu/explore-more/news-archive/-/asset_publisher/Ye8egYeRPLEs/blog/id/434960)
+  information webpage.
+
+### Deprecated
+* The `--include-los-displacment` argument to the `insar` entrypoint is deprecated and may be removed
+  at any time. `--include-displacement-maps` should be used instead as setting either option to `true`
+  will cause both the line-of-sight and vertical displacement maps to be included.
+
+## [4.9.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.8.0...v4.9.0)
+
+### Added
+* `hyp3_metadata` [v1.3.0](https://github.com/ASFHyP3/hyp3-metadata-templates/blob/develop/CHANGELOG.md#130)
+  has been merged into HyP3 GAMMA at `hyp3_gamma.metadata` generating HyP3 GAMMA products' metadata.
+  See the [metadata README](hyp3_gamma/metadata/README.md) for usage.
+
 ## [4.8.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.7.0...v4.8.0)
 
 ### Changed

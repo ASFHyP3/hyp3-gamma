@@ -64,3 +64,15 @@ hyp3_gamma ++process insar --username ${EDL_USERNAME} --password ${EDL_PASSWORD}
     S1A_IW_SLC__1SDV_20200203T172103_20200203T172122_031091_03929B_3048 \
     S1A_IW_SLC__1SDV_20200110T172104_20200110T172123_030741_03864E_A996
 ```
+
+### Example product metadata
+
+The `hyp3_gamma.matadata` subpackage can generate an example set of product metadata
+for each of the supported product types. E.g.:
+
+```
+python -m hyp3_gamma.metadata rtc
+python -m hyp3_gamma.metadata insar
+```
+
+For detailed usage, see [the metadata README](hyp3_gamma/metadata/README.md).
