@@ -18,6 +18,7 @@ def test_create_insar_gamma_readme(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_readme()
@@ -39,6 +40,7 @@ def test_create_amp_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_amp_xml()
@@ -60,6 +62,7 @@ def test_create_coherence_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_coherence_xml()
@@ -81,6 +84,7 @@ def test_create_dem_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_dem_tif_xml()
@@ -102,6 +106,7 @@ def test_create_los_displacement_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_los_displacement_xml()
@@ -123,6 +128,7 @@ def test_create_look_vector_xmls(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_files = writer.create_look_vector_xmls()
@@ -147,6 +153,7 @@ def test_create_browse_xmls(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_files = writer.create_browse_xmls()
@@ -171,6 +178,7 @@ def test_unwrapped_phase_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_unwrapped_phase_xml()
@@ -192,6 +200,7 @@ def test_vertical_displacement_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_vertical_displacement_xml()
@@ -213,6 +222,7 @@ def test_wrapped_phase_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_wrapped_phase_xml()
@@ -234,6 +244,7 @@ def test_inc_map_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_inc_map_xml()
@@ -255,6 +266,7 @@ def test_inc_map_ell_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_inc_map_ell_xml()
@@ -276,6 +288,7 @@ def test_water_mask_xml(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_water_mask_xml()
@@ -297,6 +310,7 @@ def test_insar_gamma_all_files(insar_product_dir):
         plugin_version='2.3.0',
         processor_name='GAMMA',
         processor_version='20191203',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
     )
     assert files == [
         insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1.README.md.txt',

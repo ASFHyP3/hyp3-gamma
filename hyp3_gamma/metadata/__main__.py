@@ -91,7 +91,9 @@ def insar_metadata(args):
         plugin_name='hyp3_gamma',
         plugin_version='X.Y.Z',
         processor_name='GAMMA',
-        processor_version='YYYYMMDD')
+        processor_version='YYYYMMDD',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
+    )
 
 
 if __name__ == '__main__':

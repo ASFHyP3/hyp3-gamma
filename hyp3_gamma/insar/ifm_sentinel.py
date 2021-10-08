@@ -412,6 +412,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
+        ref_point_coords=coords,
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
