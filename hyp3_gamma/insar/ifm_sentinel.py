@@ -19,7 +19,7 @@ from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from hyp3lib.system import gamma_version
-from lxml import etree
+from lxml import etree, objectify
 
 import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
@@ -142,15 +142,42 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
            f'{product_id}'
 
 
-def get_pass(file):
+def get_orbit_parameters(reference_file):
     """
-    input: the annotation xml file
-    return: ascending/descending
-    example input file: ./annotation/s1a-iw1-slc-vh-20150320t232109-20150320t232137-005122-00672a-001.xml
+    input: manifest.safe in the reference.safe directory
+    return: {"orbitnumber": orbitnumber, "relative_orbitnumber":relative_orbitnumber,
+    "cyclenumber":cyclenumber, "pass_direction":pass_direction}
     """
-    tree = etree.parse(file)
-    root = tree.getroot()
-    return root[2][0][0].text
+
+    file = os.path.join(reference_file, 'manifest.safe')
+
+    if os.path.exists(file):
+        with open(file, 'rb') as f:
+            xml = f.read()
+            root = objectify.fromstring(xml)
+
+            meta = root.find('metadataSection')
+
+            xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData
+
+            orbit = xmldata.find('safe:orbitReference', root.nsmap)
+
+            orbitnumber = orbit.find('safe:orbitNumber', root.nsmap)
+
+            relative_orbitnumber = orbit.find('safe:relativeOrbitNumber', root.nsmap)
+
+            cyclenumber = orbit.find('safe:cycleNumber', root.nsmap)
+
+            pass_direction = orbit.find('safe:extension',root.nsmap).find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
+
+            orbit_par = {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
+                         "cyclenumber": cyclenumber, "pass_direction":pass_direction}
+
+    else:
+        orbit_par = {"orbitnumber": None, "relative_orbitnumber": None,
+                     "cyclenumber": None, "pass_direction": None}
+
+    return orbit_par
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_displacement_maps, include_look_vectors,
@@ -236,8 +263,6 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
     center_slant_range = center_slant_range.split()[0]
     far_slant_range = getParameter(parfile, 'far_range_slc')
     far_slant_range = far_slant_range.split()[0]
-    metafile = glob.glob("{}/annotation/*.xml".format(reference_file))[0]
-    scending = get_pass(metafile)
 
     with open("baseline.log") as f:
         for line in f:
@@ -274,13 +299,16 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
                 s = re.split(r'\s+', t[1])
                 heading = float(s[1])
 
+    orbit_parameters = get_orbit_parameters(reference_file)
+
     reference_file = reference_file.replace(".SAFE", "")
     secondary_file = secondary_file.replace(".SAFE", "")
 
     with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
-        f.write('Pass Direction: %s\n' % scending)
+        f.write('Pass Direction: %s\n' % orbit_parameters["pass_direction"])
+        f.write('Orbit Number: %s\n' % orbit_parameters["orbitnumber"])
         f.write('Baseline: %s\n' % baseline)
         f.write('UTC time: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
