@@ -168,10 +168,11 @@ def get_orbit_parameters(reference_file):
 
             cyclenumber = orbit.find('safe:cycleNumber', root.nsmap)
 
-            pass_direction = orbit.find('safe:extension',root.nsmap).find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
+            pass_direction = orbit.find('safe:extension', root.nsmap).\
+                find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
 
             orbit_par = {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
-                         "cyclenumber": cyclenumber, "pass_direction":pass_direction}
+                         "cyclenumber": cyclenumber, "pass_direction": pass_direction}
 
     else:
         orbit_par = {"orbitnumber": None, "relative_orbitnumber": None,
