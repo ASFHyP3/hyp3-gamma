@@ -3,8 +3,9 @@
 import argparse
 import logging
 import os
-
+import subprocess
 from tempfile import TemporaryDirectory
+
 import numpy as np
 from PIL import Image
 from hyp3lib.execute import execute
@@ -12,8 +13,47 @@ from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
-from hyp3_gamma.util import get_minimum_value_for_gamma_dtype, setnodata
+
 log = logging.getLogger(__name__)
+
+
+def get_coords(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
+    """
+    inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
+    returns: coords={"row_s":row_s,"col_s":col_s,"row_m":row_m,"col_m":col_m,"x":x,"y":y,"lat":lat,"lon":lon}
+    """
+    def _coord_lst(cmd):
+        coord_txt = subprocess.run(cmd, capture_output=True, text=True)
+        lst = coord_txt.stdout.split('\n')
+        coord_str = [s for s in lst if "selected" in s]
+        coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
+        coord_lst = [float(s) for s in coord_lst]
+        return coord_lst
+
+    cmd = ['sarpix_coord', in_mli_par, '-']
+    coords = {}
+    if in_dem_par:
+        cmd1 = cmd.copy()
+        cmd1.extend([in_dem_par])
+        cmd1.extend([str(ref_azlin), str(ref_rpix)])
+        coord_lst = _coord_lst(cmd1)
+        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
+            coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
+
+        cmd2 = cmd.copy()
+        cmd2.extend(['-'])
+        cmd2.extend([str(ref_azlin), str(ref_rpix)])
+        coord_lst = _coord_lst(cmd2)
+        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
+    else:
+        cmd.extend(['-'])
+        cmd.extend([str(ref_azlin), str(ref_rpix)])
+        coord_lst = _coord_lst(cmd)
+        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
+            coord_lst[0], coord_lst[1], None, None, None, None
+        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
+
+    return coords
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -26,8 +66,6 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
 
 def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
-    nodata = get_minimum_value_for_gamma_dtype(type_)
-    setnodata(outname, nodata)
 
 
 def create_phase_from_complex(incpx, outfloat, width):
@@ -36,16 +74,13 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     """
-    createwater_mask based on the cc_mask_file
+    create water_mask based on the cc_mask_file
     """
     with TemporaryDirectory() as temp_dir:
-        #os.system('cp {} {}/{}.bmp'.format(cc_mask_file, temp_dir.name, tmp_mask))
         os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
         # 2--bmp
-        #geocode_back("{}.bmp".format(tmp_mask), "{}_geo.bmp".format(tmp_mask), mwidth, lt, demw, demn, 2)
         geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
         # 0--bmp
-        #data2geotiff("{}_geo.bmp".format(tmp_mask), "{}_geo.tif".format(tmp_mask), dempar, 0)
         data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
         # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
@@ -73,7 +108,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
         water_im.save(water_bmp_file)
 
         # map water_mask.bmp file to SAR coordinators
-        water_mask_bmp_sar_file =f'{temp_dir}/water_mask_sar.bmp'
+        water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
         # read water_mask_bmp_sar_file
@@ -91,7 +126,8 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
 
 
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
-                         npatr=1, npata=1, alpha=0.6, water_masking=False):
+                         npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
+
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
@@ -126,42 +162,36 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
 
-    execute(f"rascc {ifgname}.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.cc.ras", uselogging=True)
-
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    execute(f"rascc {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 .1 .9"
-            f" - - - {ifgname}.adf.cc.ras", uselogging=True)
-
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
 
-    if water_masking:
+    # default reference point in SAR space
+    ref_azlin, ref_rpix = 0, 0
+
+    coords = get_coords(f"{mmli}.par", ref_azlin, ref_rpix, dempar)
+
+    if apply_water_mask:
         # create and apply water mask
-        out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt,
-                                            demw, demn, dempar)
+        out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt, demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                f" - - {npatr} {npata}", uselogging=True)
+                f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 0", uselogging=True)
     else:
         # create water mask only
         _ = get_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar)
         execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-                f" - - {npatr} {npata}", uselogging=True)
+                f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 0", uselogging=True)
 
-    execute(f"rasrmg {ifgname}.adf.unw {mmli} {width} 1 1 0 1 1 0.33333 1.0 .35 0.0"
-            f" - {ifgname}.adf.unw.ras", uselogging=True)
+    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
+            uselogging=True)
 
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.vert.disp 1", uselogging=True)
 
-    execute(f"rashgt {ifgname}.vert.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
-
     execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
             f" - {ifgname}.los.disp 0", uselogging=True)
-
-    execute(f"rashgt {ifgname}.los.disp - {width} 1 1 0 1 1 0.028", uselogging=True)
 
     execute(f"gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell")
 
@@ -182,9 +212,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     geocode_back("{}.adf.bmp".format(ifgf), "{}.adf.bmp.geo".format(ifgf), width, lt, demw, demn, 2)
     geocode_back("{}.cc".format(ifgname), "{}.cc.geo".format(ifgname), width, lt, demw, demn, 0)
     geocode_back("{}.adf.cc".format(ifgname), "{}.adf.cc.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.vert.disp.bmp".format(ifgname), "{}.vert.disp.bmp.geo".format(ifgname), width, lt, demw, demn, 2)
     geocode_back("{}.vert.disp".format(ifgname), "{}.vert.disp.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.los.disp.bmp".format(ifgname), "{}.los.disp.bmp.geo".format(ifgname), width, lt, demw, demn, 2)
     geocode_back("{}.los.disp".format(ifgname), "{}.los.disp.geo".format(ifgname), width, lt, demw, demn, 0)
 
     create_phase_from_complex("{}.adf.geo".format(ifgf), "{}.adf.geo.phase".format(ifgf), width)
@@ -199,9 +227,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("{}.cc.geo".format(ifgname), "{}.cc.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("{}.adf.cc.geo".format(ifgname), "{}.adf.cc.geo.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/demseg", "{}.dem.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.vert.disp.bmp.geo".format(ifgname), "{}.vert.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.vert.disp.geo".format(ifgname), "{}.vert.disp.geo.org.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.los.disp.bmp.geo".format(ifgname), "{}.los.disp.geo.tif".format(ifgname), dempar, 0)
     data2geotiff("{}.los.disp.geo".format(ifgname), "{}.los.disp.geo.org.tif".format(ifgname), dempar, 2)
     data2geotiff("DEM/inc", "{}.inc.tif".format(ifgname), dempar, 2)
     data2geotiff("inc_ell", "{}.inc_ell.tif".format(ifgname), dempar, 2)
@@ -213,6 +239,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
+
+    return coords
 
 
 def main():

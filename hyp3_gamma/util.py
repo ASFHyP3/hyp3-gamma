@@ -2,12 +2,9 @@ import logging
 import os
 from zipfile import ZipFile
 
-import numpy as np
 from hyp3lib.fetch import download_file
 from hyp3lib.scene import get_download_url
 from osgeo import gdal
-from osgeo.gdal_array import GDALTypeCodeToNumericTypeCode
-
 
 log = logging.getLogger(__name__)
 gdal.UseExceptions()

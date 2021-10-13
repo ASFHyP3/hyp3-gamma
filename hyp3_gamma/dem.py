@@ -7,7 +7,7 @@ from typing import Generator, List
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
-from hyp3_gamma.util import GDALConfigManager, get_minimum_value_for_gdal_datatype
+from hyp3_gamma.util import GDALConfigManager
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
 
@@ -85,7 +85,6 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM. The output GeoTIFF covers the input geometry
     buffered by 0.15 degrees, is projected to the UTM zone of the geometry centroid, and has a pixel size of 30m.
-    Also nodata value is set as the minimum value of the datatype.
 
     Args:
         output_name: Path for the output GeoTIFF
@@ -111,10 +110,5 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-
-            tmp_tif = temp_path / 'tmp.tif'
-            gdal.Warp(str(tmp_tif), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
-
-            nodataval = get_minimum_value_for_gdal_datatype(dem_file_paths[0])
-            gdal.Translate(output_name, str(tmp_tif), noData=nodataval)

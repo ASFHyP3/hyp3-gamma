@@ -126,7 +126,7 @@ def insar():
         include_los_displacement=args.include_los_displacement,
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
-        water_masking=args.apply_water_mask,
+        apply_water_mask=args.apply_water_mask,
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)

@@ -27,19 +27,19 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
     ],
 
-    python_requires='~=3.6',
+    python_requires='~=3.8',
 
     install_requires=[
         'gdal',
         'geopandas',
         'hyp3lib>=1.6.8,<2',
-        'hyp3_metadata>=1.2.4',
-        'importlib_metadata',
+        'hyp3_metadata>=1.3',
         'lxml',
         'numpy',
+        'pillow',
     ],
 
     extras_require={

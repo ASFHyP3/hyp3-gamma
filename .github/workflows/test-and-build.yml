@@ -69,8 +69,8 @@ jobs:
 
       - name: Fetch GAMMA
         run: |
-          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz .
-          tar -zxvf GAMMA_SOFTWARE-20191203-PATCHED_MSP_ISP_DIFF_LAT.linux64_ubuntu1804.tar.gz
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20210701_MSP_ISP_DIFF_LAT.linux64_ubuntu2004.tar.gz .
+          tar -zxvf GAMMA_SOFTWARE-20210701_MSP_ISP_DIFF_LAT.linux64_ubuntu2004.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
         uses: docker/build-push-action@v2
