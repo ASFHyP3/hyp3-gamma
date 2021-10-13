@@ -118,14 +118,15 @@ def setnodata(file, nodata):
 
     """
     ds = gdal.Open(file, gdal.GA_Update)
-    for i in range(1, ds.RasterCount + 1):
-        band = ds.GetRasterBand(i)
-        band_data = band.ReadAsArray()
-        def_nodata = band.GetNoDataValue()
-        mask = band.GetMaskBand()
-        mask_data = mask.ReadAsArray()
-        if def_nodata == 0.0:
-                band_data[mask_data == 0] = nodata
-                band.WriteArray(band_data)
-                band.SetNoDataValue(float(nodata))
+    def_nodata = ds.GetRasterBand(1).GetNoDataValue()
+    if def_nodata == 0.0:
+        for i in range(1, ds.RasterCount + 1):
+            band = ds.GetRasterBand(i)
+            band_data = band.ReadAsArray()
+            mask = band.GetMaskBand()
+            mask_data = mask.ReadAsArray()
+            band_data[mask_data == 0] = nodata
+            band.WriteArray(band_data)
+            band.SetNoDataValue(float(nodata))
+
     del ds
