@@ -111,7 +111,7 @@ def get_minimum_value_for_gamma_dtype(dtype):
         raise ValueError(f'Unknown GAMMA data type: {dtype}')
 
 
-def setnodata(file, nodata):
+def set_nodata(file, nodata):
     """
     The output geotiff files produced by gamma package always has 0.0 as nodata value.
     This function changes the nodata value in the geotiff file.
