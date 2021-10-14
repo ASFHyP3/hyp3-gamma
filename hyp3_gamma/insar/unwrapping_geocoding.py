@@ -39,12 +39,13 @@ def coords_from_sapix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_d
     with (row_s,col_s)in SAR space, and the rest of the coordinates in MAP space
     """
     cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix)]
+    log.info(f'Running command: {" ".join(cmd)}')
     result = subprocess.run(cmd, capture_output=True, text=True)
     coord_log_lines = result.stdout.splitlines()
 
     selected_coords = [line for line in coord_log_lines if "selected" in line]
-    # TODO: Cleanup -- need an example first
-    coord_lst = ' '.join(selected_coords[0].split()).split(" ")[:-1]
+    log.info(f'Selected sarpix coordinates: {selected_coords[0]}')
+    coord_lst = selected_coords[0].split()[:-1]
     coord_lst = [float(s) for s in coord_lst]
     return coord_lst
 
