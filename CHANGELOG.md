@@ -7,10 +7,22 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [5.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.1...v5.0.1)
+
+### Added
+* The reference point coordinate information (in both SAR and map space) has been
+  added to the `.txt` parameter file in InSAR products
+
+### Changed
+* The highest coherent pixel will be used as the starting point when unwrapping during InSAR
+  processing
+
+
 ## [5.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.0...v5.0.1)
 
 ### Changed
-* InSAR readme and unwrapped phase png xml templates have been updated to include more information about the fringe pattern in the unwrapped phase browse images
+* InSAR readme and unwrapped phase png xml templates have been updated to include more information
+  about the fringe pattern in the unwrapped phase browse images
 
 ## [5.0.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.9.0...v5.0.0)
 
