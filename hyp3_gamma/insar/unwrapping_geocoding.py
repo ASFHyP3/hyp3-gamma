@@ -17,68 +17,59 @@ from hyp3_gamma.water_mask import create_water_mask
 log = logging.getLogger(__name__)
 
 
-def get_ref_point_info():
-    with open("mcf.log") as f:
-        txt = f.readlines()
-        ref = [n for n in txt if "phase at reference point:" in n]
-        ref_offset = float(ref[0].split(" ")[-2])
-        init = [n for n in txt if "phase initialization flag:" in n]
-        glb_offset = float(init[0].split(" ")[-2])
-        init_flg = int(init[0].split(" ")[3])
+def get_ref_point_info(log_text: str):
+    log_lines = log_text.splitlines()
+
+    ref = [line for line in log_lines if "phase at reference point:" in line]
+    ref_offset = float(ref[0].split(" ")[-2])
+
+    init = [line for line in log_lines if "phase initialization flag:" in line]
+    glb_offset = float(init[0].split(" ")[-2])
+    init_flg = int(init[0].split(" ")[3])
+
     return {"initflg": init_flg, "refoffset": ref_offset, "glboffset": glb_offset}
 
 
-def coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par=None):
+def coords_from_sapix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_dem_par: str) -> list:
+    """
+    Will return list of 6 coordinates if in_dem_par file is provided:
+        row_s, col_s, row_m, col_m, y, x
+    otherwise will return 4 coordinates:
+        row_s, col_s, lat, lon
+    with (row_s,col_s)in SAR space, and the rest of the coordinates in MAP space
+    """
+    cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix)]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    coord_log_lines = result.stdout.splitlines()
 
-    cmd = ['sarpix_coord', in_mli_par, '-']
-    if in_dem_par:
-        cmd.extend([in_dem_par, str(ref_azlin), str(ref_rpix)])
-    else:
-        cmd.extend(['-', str(ref_azlin), str(ref_rpix)])
-
-    coord_txt = subprocess.run(cmd, capture_output=True, text=True)
-    lst = coord_txt.stdout.split('\n')
-    coord_str = [s for s in lst if "selected" in s]
-    coord_lst = ' '.join(coord_str[0].split()).split(" ")[: -1]
+    selected_coords = [line for line in coord_log_lines if "selected" in line]
+    # TODO: Cleanup -- need an example first
+    coord_lst = ' '.join(selected_coords[0].split()).split(" ")[:-1]
     coord_lst = [float(s) for s in coord_lst]
     return coord_lst
 
 
-def coords_from_coord_sarpix(in_mli_par, lat: float, lon: float, hgt=0.0, in_dem_par=None):
-    cmd = ['coord_to_sarpix', in_mli_par, '-']
-    if in_dem_par:
-        cmd.extend([in_dem_par, str(lat), str(lon), str(hgt)])
-    else:
-        cmd.extend(['-', str(lat), str(lon), str(hgt)])
-    coord_txt = subprocess.run(cmd, capture_output=True, text=True)
-    lst = coord_txt.stdout.split('\n')
-    coord_str = [s for s in lst if "SLC/MLI range, azimuth pixel (int):" in s]
-    coord_lst = ' '.join(coord_str[0].split()).split(" ")
-    ref_azlin = int(coord_lst[-1])
-    ref_rpix = int(coord_lst[-2])
-
-    return ref_azlin, ref_rpix
-
-
-def get_coords(in_mli_par, ref_azlin=0, ref_rpix=0, in_dem_par=None):
+def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_par: str = None) -> dict:
     """
-    inputs: mil.par, dempar, reference point  in SAR space (ref_azlin, ref_rpix)
-    returns: coords={"row_s":row_s,"col_s":col_s,"row_m":row_m,"col_m":col_m,"x":x,"y":y,"lat":lat,"lon":lon}
+    Args:
+        in_mli_par: GAMMA MLI par file
+        ref_azlin: Reference azimuth line
+        ref_rpix:  Reference range pixel
+        in_dem_par: GAMMA DEM par file
+
+    Returns:
+        coordinates dictionary with row_s, col_s, lat, lon coordinates. Additionally, if
+        in_dem_par is provided, coords will have row_m, col_m, y, and x.
     """
+    row_s, col_s, lat, lon = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, '_')
+    coords = {"row_s": row_s, "col_s": col_s, "lat": lat, "lon": lon}
 
-    coords = {}
     if in_dem_par:
-        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par=in_dem_par)
-        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
-            coord_lst[0], coord_lst[1], coord_lst[2], coord_lst[3], coord_lst[4], coord_lst[5]
-
-        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix)
-        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
-    else:
-        coord_lst = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix)
-        coords["row_s"], coords["col_s"], coords["row_m"], coords["col_m"], coords["y"], coords["x"] = \
-            coord_lst[0], coord_lst[1], None, None, None, None
-        coords["lat"], coords["lon"] = coord_lst[2], coord_lst[3]
+        _, _, row_m, col_m, y, x = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
+        coords["row_m"] = row_m
+        coords["col_m"] = col_m
+        coords["y"] = y
+        coords["x"] = x
 
     return coords
 
@@ -96,18 +87,19 @@ def read_bmp(file):
 
 
 def ref_point_with_max_cc(fcc: str, fmask: str, mlines: int, mwidth: int):
-    data_cc = read_bin(fcc, mlines, mwidth)
     data_mk = read_bmp(fmask)
-    indexes = np.where(data_mk == data_mk.max())
-    tmp_cc = data_cc[indexes]
-    idx = np.where(data_cc == tmp_cc.max())
-    if idx[0].size == 0:
-        ref_i = 0
-        ref_j = 0
-    else:
+    data_mk_max = data_mk.max()
+    data_mk = np.ma.masked_values(data_mk, data_mk_max)
+
+    data_cc = read_bin(fcc, mlines, mwidth)
+    data_cc_max = data_cc[data_mk.mask].max()
+    idx = np.where(data_cc == data_cc_max)
+    if idx:
         ref_i = idx[0][0]
         ref_j = idx[1][0]
-    return ref_i, ref_j
+        return ref_i, ref_j
+
+    return 0, 0
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -239,10 +231,10 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", out_file, int(mlines), int(mwidth))
 
-    execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-            f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1 | tee mcf.log", uselogging=True)
+    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
+                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
-    ref_point_info = get_ref_point_info()
+    ref_point_info = get_ref_point_info(mcf_log)
 
     coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
 
