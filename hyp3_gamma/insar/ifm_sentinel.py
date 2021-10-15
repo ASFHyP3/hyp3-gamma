@@ -165,10 +165,10 @@ def get_orbit_parameters(reference_file):
                 find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
 
             return {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
-                         "cyclenumber": cyclenumber, "pass_direction": pass_direction}
+                    "cyclenumber": cyclenumber, "pass_direction": pass_direction}
 
     return {"orbitnumber": None, "relative_orbitnumber": None,
-                     "cyclenumber": None, "pass_direction": None}
+            "cyclenumber": None, "pass_direction": None}
 
 
 def move_output_files(output, reference, prod_dir, long_output, include_displacement_maps, include_look_vectors,
