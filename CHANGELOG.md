@@ -12,8 +12,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 * Ascending/descending and orbit number information have been added to the '*.txt' parameter file in InSAR products
 
-## [5.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.1...v5.1.0)
-
 ### Added
 * The reference point coordinate information (in both SAR and map space) has been
   added to the `.txt` parameter file in InSAR products
