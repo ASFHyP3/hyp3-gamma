@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from secrets import token_hex
 
-from hyp3_metadata import create_metadata_file_set_insar
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
@@ -26,6 +25,7 @@ import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.metadata import create_metadata_file_set_insar
 
 log = logging.getLogger(__name__)
 
@@ -157,31 +157,23 @@ def get_orbit_parameters(reference_file):
             root = objectify.fromstring(xml)
 
             meta = root.find('metadataSection')
-
             xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData
-
             orbit = xmldata.find('safe:orbitReference', root.nsmap)
 
             orbitnumber = orbit.find('safe:orbitNumber', root.nsmap)
-
             relative_orbitnumber = orbit.find('safe:relativeOrbitNumber', root.nsmap)
-
             cyclenumber = orbit.find('safe:cycleNumber', root.nsmap)
-
             pass_direction = orbit.find('safe:extension', root.nsmap).\
                 find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
 
-            orbit_par = {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
-                         "cyclenumber": cyclenumber, "pass_direction": pass_direction}
+            return {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
+                    "cyclenumber": cyclenumber, "pass_direction": pass_direction}
 
-    else:
-        orbit_par = {"orbitnumber": None, "relative_orbitnumber": None,
-                     "cyclenumber": None, "pass_direction": None}
-
-    return orbit_par
+    return {"orbitnumber": None, "relative_orbitnumber": None,
+            "cyclenumber": None, "pass_direction": None}
 
 
-def move_output_files(output, reference, prod_dir, long_output, include_los_displacement, include_look_vectors,
+def move_output_files(output, reference, prod_dir, long_output, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
     outName = "{}_amp.tif".format(os.path.join(prod_dir, long_output))
@@ -195,10 +187,6 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
     outName = "{}_corr.tif".format(os.path.join(prod_dir, long_output))
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
-
-    inName = "{}.vert.disp.geo.org.tif".format(output)
-    outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
-    shutil.copy(inName, outName)
 
     inName = "{}.adf.unw.geo.tif".format(output)
     outName = "{}_unw_phase.tif".format(os.path.join(prod_dir, long_output))
@@ -214,9 +202,12 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
         outName = "{}_dem.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
-    if include_los_displacement:
+    if include_displacement_maps:
         inName = "{}.los.disp.geo.org.tif".format(output)
         outName = "{}_los_disp.tif".format(os.path.join(prod_dir, long_output))
+        shutil.copy(inName, outName)
+        inName = "{}.vert.disp.geo.org.tif".format(output)
+        outName = "{}_vert_disp.tif".format(os.path.join(prod_dir, long_output))
         shutil.copy(inName, outName)
 
     if include_inc_map:
@@ -242,7 +233,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_los_disp
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords, ref_point_info):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -312,7 +303,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('Pass Direction: %s\n' % orbit_parameters["pass_direction"])
         f.write('Orbit Number: %s\n' % orbit_parameters["orbitnumber"])
         f.write('Baseline: %s\n' % baseline)
-        f.write('UTCtime: %s\n' % utctime)
+        f.write('UTC time: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
         f.write('Spacecraft height: %s\n' % height)
         f.write('Earth radius at nadir: %s\n' % erad_nadir)
@@ -329,20 +320,21 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
-        f.write('Reference Point_sar_azlin: %s\n' % coords["row_s"])
-        f.write('Reference Point_sar_rpix: %s\n' % coords["col_s"])
-        f.write('Reference Point_map_row: %s\n' % coords["row_m"])
-        f.write('Reference Point_map_col: %s\n' % coords["col_m"])
-        f.write('Reference Point_map_y: %s\n' % coords["y"])
-        f.write('Reference Point_map_x: %s\n' % coords["x"])
-        f.write('Reference Point_map_lat: %s\n' % coords["lat"])
-        f.write('Reference Point_map_lon: %s\n' % coords["lon"])
+        f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
+        f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
+        f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
+        f.write('Row of the reference point in MAP: %s\n' % coords["row_m"])
+        f.write('Column of the reference point in MAP: %s\n' % coords["col_m"])
+        f.write('Y of the reference point in MAP: %s\n' % coords["y"])
+        f.write('X of the reference point in MAP: %s\n' % coords["x"])
+        f.write('Latitude of the reference point: %s\n' % coords["lat"])
+        f.write('Longitude of the reference point: %s\n' % coords["lon"])
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
-                         include_los_displacement=False, include_wrapped_phase=False, include_inc_map=False,
+                         include_displacement_maps=False, include_wrapped_phase=False, include_inc_map=False,
                          include_dem=False, apply_water_mask=False):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
@@ -425,8 +417,8 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
 
-    coords = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                                  apply_water_mask=apply_water_mask)
+    coords, ref_point_info = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+                                                  apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -437,7 +429,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     pixel_spacing = int(alooks) * 20
     product_name = get_product_name(reference_file, secondary_file, orbit_files, pixel_spacing, apply_water_mask)
     os.mkdir(product_name)
-    move_output_files(output, reference, product_name, product_name, include_los_displacement, include_look_vectors,
+    move_output_files(output, reference, product_name, product_name, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
     reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
@@ -455,12 +447,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
+        ref_point_coords=coords,
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
-                        dem_source, coords)
+                        dem_source, coords, ref_point_info)
 
     log.info("Done!!!")
     return product_name
@@ -479,7 +472,7 @@ def main():
     parser.add_argument("-d", action="store_true", help="Add DEM file to product bundle")
     parser.add_argument("-i", action="store_true", help="Create local and ellipsoidal incidence angle maps")
     parser.add_argument("-l", action="store_true", help="Create look vector theta and phi files")
-    parser.add_argument("-s", action="store_true", help="Create line of sight displacement file")
+    parser.add_argument("-s", action="store_true", help="Create both line of sight and vertical displacement files")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-m", action="store_true", help="Apply water mask")
     args = parser.parse_args()
@@ -488,7 +481,7 @@ def main():
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
-                         include_look_vectors=args.l, include_los_displacement=args.s,
+                         include_look_vectors=args.l, include_displacement_maps=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
                          include_dem=args.d, apply_water_mask=args.m)
 

@@ -1,0 +1,88 @@
+{% extends 'dem/dem.xml.j2' %}
+{% from 'macros.j2' import dem_pixel_spacing %}
+{% block dataIdInfo %}
+    <dataIdInfo>
+        <idPurp>This file is the DEM used in the radiometric terrain correction process (using GAMMA software) for a granule of {{ granule_type }} SAR data from the Sentinel-1 mission. Cell values indicate the elevation in meters, and have been resampled to a pixel spacing of {{ pixel_spacing|int }} m. To access actual {{ scale }} values, refer to the VV/VH/HV/HH TIFF files included in the same folder as this image.</idPurp>
+        <idAbs>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;This is the digital elevation model used in the radiometric terrain correction process for a granule of {{ granule_description }} ({{ granule_type }}) Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency). The granule was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}, and the extent of the DEM is clipped to the size needed for full granule coverage, or to the extent of the available DEM data if full coverage is not available. The DEM was reprojected to {{ projection }}, and the pixel spacing was resampled from the native DEM pixel spacing to {{ pixel_spacing|int }} m.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The best DEM publicly available for each granule is used in the RTC process, so different granules may be processed using different source DEM layers. This granule used {{ dem_name }} as the source DEM: the National Elevation Dataset, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The National Elevation Dataset (NED) was historically the primary elevation data product produced and distributed by the USGS. The NED provides the best available public domain raster elevation data of the conterminous United States, Alaska, Hawaii, and territorial islands in a seamless format. The NED is derived from diverse source data, processed to a common coordinate system and unit of vertical measure. Note that the NED has now been incorporated into the 3DEP program, which includes both the lower-resolution seamless products (NED), and higher-resolution elevation data (currently only available for some regions). &lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;For more information on the 3DEP program, refer to &lt;/SPAN&gt;&lt;A href="https://www.usgs.gov/core-science-systems/ngp/3dep" target="_blank" &gt;&lt;SPAN&gt;https://www.usgs.gov/core-science-systems/ngp/3dep&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;. For more information about the NED, refer to &lt;/SPAN&gt;&lt;A href="https://pubs.er.usgs.gov/publication/70201572" target="_blank" &gt;&lt;SPAN&gt;https://pubs.er.usgs.gov/publication/70201572&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;. To download NED products, visit &lt;/SPAN&gt;&lt;A href="https://viewer.nationalmap.gov/basic" target="_blank" &gt;&lt;SPAN&gt;https://viewer.nationalmap.gov/basic&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;, and expand the Elevation Products (3DEP) section.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The actual {{ scale }} data is contained in the VV/HH (primary polarization) and/or VH/HV (cross-polarization) TIFF files included in the same downloaded folder as this file. The name of the SAR granule used to generate the files in this folder is: {{ granule_name }}. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/sentinel-1-data-and-imagery/#Naming_Convention&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Refer to ASF's &lt;/SPAN&gt;&lt;A href="https://hyp3-docs.asf.alaska.edu/guides/rtc_product_guide/" target="_blank" &gt;&lt;SPAN&gt;RTC Product Guide&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt; for more information about On Demand RTC products.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;/SPAN&gt;&lt;A href="https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1" target="_blank" &gt;&lt;SPAN&gt;https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;P&gt;&lt;SPAN&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;/SPAN&gt;&lt;A href="https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/" target="_blank" &gt;&lt;SPAN&gt;https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1&lt;/SPAN&gt;&lt;/A&gt;&lt;SPAN&gt;.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;
+        </idAbs>
+        <idCredit>Source DEM Data: Data available from the U.S. Geological Survey.</idCredit>
+        <idCitation xmlns="">
+            <date>
+                <pubDate>{{ processing_date.isoformat(timespec='seconds') }}</pubDate>
+            </date>
+            <citRespParty xmlns="">
+                <rpOrgName>Alaska Satellite Facility</rpOrgName>
+                <role>
+                    <RoleCd value="007"/>
+                </role>
+                <rpCntInfo xmlns="">
+                    <cntAddress addressType="physical">
+                        <delPoint>2156 Koyukuk Dr.</delPoint>
+                        <city>Fairbanks</city>
+                        <adminArea>Alaska</adminArea>
+                        <postCode>99775-7320</postCode>
+                        <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+                        <country>US</country>
+                    </cntAddress>
+                    <cntPhone>
+                        <voiceNum tddtty="">907-474-5041</voiceNum>
+                    </cntPhone>
+                </rpCntInfo>
+            </citRespParty>
+        </idCitation>
+        <searchKeys>
+            <keyword>Alaska Satellite Facility</keyword>
+            <keyword>ASF</keyword>
+            <keyword>Synthetic Aperture Radar</keyword>
+            <keyword>SAR</keyword>
+            <keyword>Radiometric Terrain Correction</keyword>
+            <keyword>RTC</keyword>
+            <keyword>Digital Elevation Model</keyword>
+            <keyword>DEM</keyword>
+            <keyword>Sentinel-1</keyword>
+        </searchKeys>
+        <dataLang>
+            <languageCode value="eng"/>
+            <countryCode value="US"/>
+        </dataLang>
+        <dataChar>
+            <CharSetCd value="004"/>
+        </dataChar>
+        <idPoC xmlns="">
+            <rpOrgName>U.S. Geological Survey (USGS) - USGS Earth Resources Observation &amp; Science (EROS) Center</rpOrgName>
+            <role>
+                <RoleCd value="006"/>
+            </role>
+            <rpCntInfo xmlns="">
+                <cntAddress addressType="physical">
+                    <delPoint>47914 252nd Street</delPoint>
+                    <city>Sioux Falls</city>
+                    <adminArea>South Dakota</adminArea>
+                    <postCode>57198-0001</postCode>
+                    <country>US</country>
+                </cntAddress>
+            </rpCntInfo>
+            <displayName>Alaska Satellite Facility</displayName>
+        </idPoC>
+        <resMaint xmlns="">
+            <maintFreq>
+                <MaintFreqCd value="009"/>
+            </maintFreq>
+        </resMaint>
+        <resConst>
+            <Consts xmlns="">
+                <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;DIV&gt;&lt;DIV&gt;&lt;P&gt;&lt;SPAN&gt;There are no restrictions on the use of data received from the U.S. Geological Survey's Earth Resources Observation and Science (EROS) Center or NASA's Land Processes Distributed Active Archive Center (LP DAAC), unless expressly identified prior to or at the time of receipt.&lt;/SPAN&gt;&lt;/P&gt;&lt;/DIV&gt;&lt;/DIV&gt;&lt;/DIV&gt;</useLimit>
+            </Consts>
+        </resConst>
+        <suppInfo>There is no guarantee or warranty concerning the accuracy of the data. Users should be aware that temporal changes may have occurred since these data were collected and that some parts of these data may no longer represent actual surface conditions. Users should not use these data for critical applications without a full awareness of its limitations. Acknowledgement of the originating agencies would be appreciated in products derived from these data. Any user who modifies the data is obligated to describe the types of modifications they perform. User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by the USGS. Please refer to http://www.usgs.gov/privacy.html for the USGS disclaimer.</suppInfo>
+        <envirDesc>This product was generated by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</envirDesc>
+        <tpCat>
+            <TopicCatCd value="006"/>
+        </tpCat>
+    </dataIdInfo>
+{% endblock %}
+{% block dataLineage %}
+        <dataLineage>
+            <statement>The digital elevation model was converted from ArcGrid files into GeoTIFFs. During this reformatting process, the DEM was reprojected to WGS84 and a geoid correction was applied. At the start of terrain correction, the best DEM covering the SAR image is selected, converted into UTM coordinates, and used for processing.</statement>
+        </dataLineage>
+{% endblock %}

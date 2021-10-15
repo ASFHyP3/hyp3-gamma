@@ -14,7 +14,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 import numpy as np
-from hyp3_metadata import create_metadata_file_set_rtc
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
@@ -34,6 +33,7 @@ from osgeo import gdal, gdalconst, ogr
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
+from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 

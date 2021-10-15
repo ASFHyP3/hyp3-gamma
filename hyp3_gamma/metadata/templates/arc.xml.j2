@@ -1,0 +1,62 @@
+<metadata xml:lang="en">
+    <Esri>
+        <CreaDate>{{ processing_date.strftime('%Y%m%d') }}</CreaDate>
+        <CreaTime>{{ processing_date.strftime('%H%M%S') }}00</CreaTime>
+        <ArcGISFormat>1.0</ArcGISFormat>
+        <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+        <SyncOnce>TRUE</SyncOnce>
+        {% block scaleRange %}{% endblock %}
+        <DataProperties>
+            <itemProps>
+                <imsContentType export="False">002</imsContentType>
+                <itemName>{{ reference_file }}</itemName>
+            </itemProps>
+        </DataProperties>
+        <ArcGISProfile>NAP</ArcGISProfile>
+        <ModDate>{{ processing_date.strftime('%Y%m%d') }}</ModDate>
+        <ModTime>{{ processing_date.strftime('%H%M%S') }}00</ModTime>
+    </Esri>
+    {% block dataIdInfo %}{% endblock %}
+    <mdHrLv>
+        <ScopeCd value="005"/>
+    </mdHrLv>
+        <mdFileID>{{ plugin_version }}</mdFileID>
+    <mdLang>
+        <languageCode value="eng"/>
+        <countryCode value="US"/>
+    </mdLang>
+    <mdChar>
+        <CharSetCd value="004"/>
+    </mdChar>
+    <mdDateSt>{{ processing_date.strftime('%Y%m%d') }}</mdDateSt>
+    <dataSetFn>
+        <OnFunctCd value="001"/>
+    </dataSetFn>
+    {% include 'contact-asf.xml.j2' %}
+    <dqInfo xmlns="">
+        <dqScope>
+            <scpLvl>
+                <ScopeCd value="005"/>
+            </scpLvl>
+        </dqScope>
+        {% block dataLineage %}
+        <dataLineage>
+            <statement>This data was processed by ASF DAAC HyP3 {{ processing_date.year }} using the {{ plugin_name }} plugin version {{ plugin_version }} running {{ processor_name }} release {{ processor_version }}.</statement>
+        </dataLineage>
+        {% endblock %}
+    </dqInfo>
+    <mdMaint xmlns="">
+        <maintFreq>
+            <MaintFreqCd value="009"/>
+        </maintFreq>
+    </mdMaint>
+    {% block refSysInfo %}{% endblock %}
+    {% block contInfo %}{% endblock %}
+    {% if thumbnail_encoded_string %}
+    <Binary>
+        <Thumbnail>
+            <Data EsriPropertyType="PictureX">{{ thumbnail_encoded_string }}</Data>
+        </Thumbnail>
+    </Binary>
+    {% endif %}
+</metadata>
