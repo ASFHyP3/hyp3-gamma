@@ -202,7 +202,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_displace
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords, ref_point_info):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -268,7 +268,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
         f.write('Baseline: %s\n' % baseline)
-        f.write('UTCtime: %s\n' % utctime)
+        f.write('UTC time: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
         f.write('Spacecraft height: %s\n' % height)
         f.write('Earth radius at nadir: %s\n' % erad_nadir)
@@ -285,6 +285,15 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
+        f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
+        f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
+        f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
+        f.write('Row of the reference point in MAP: %s\n' % coords["row_m"])
+        f.write('Column of the reference point in MAP: %s\n' % coords["col_m"])
+        f.write('Y of the reference point in MAP: %s\n' % coords["y"])
+        f.write('X of the reference point in MAP: %s\n' % coords["x"])
+        f.write('Latitude of the reference point: %s\n' % coords["lat"])
+        f.write('Longitude of the reference point: %s\n' % coords["lon"])
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
 
@@ -372,8 +381,9 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                         apply_water_mask=apply_water_mask)
+
+    coords, ref_point_info = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+                                                  apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -402,10 +412,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
+        ref_point_coords=coords,
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
-    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
+
+    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
+                        dem_source, coords, ref_point_info)
 
     log.info("Done!!!")
     return product_name

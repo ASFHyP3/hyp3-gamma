@@ -146,12 +146,14 @@ def decode_product(product_name: str) -> dict:
 
 def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
                      processing_date: datetime, looks: str, dem_name: str, water_mask_applied: bool,
-                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
+                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str,
+                     ref_point_coords: dict) -> dict:
     payload = locals()
     payload['granule_type'] = util.get_granule_type(reference_granule_name)['granule_type']
     payload['num_looks'] = looks
     payload['num_looks_range'] = looks[:2]
     payload['num_looks_azimuth'] = looks[3:]
+    payload['ref_point_coords'] = ref_point_coords
 
     payload.update(decode_product(product_dir.name))
 

@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import subprocess
 from tempfile import TemporaryDirectory
 
 import numpy as np
@@ -14,6 +15,92 @@ from osgeo import gdal
 from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
+
+
+def get_ref_point_info(log_text: str):
+    log_lines = log_text.splitlines()
+
+    ref = [line for line in log_lines if "phase at reference point:" in line]
+    ref_offset = float(ref[0].split(" ")[-2])
+
+    init = [line for line in log_lines if "phase initialization flag:" in line]
+    glb_offset = float(init[0].split(" ")[-2])
+    init_flg = int(init[0].split(" ")[3])
+
+    return {"initflg": init_flg, "refoffset": ref_offset, "glboffset": glb_offset}
+
+
+def coords_from_sapix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_dem_par: str) -> list:
+    """
+    Will return list of 6 coordinates if in_dem_par file is provided:
+        row_s, col_s, row_m, col_m, y, x
+    otherwise will return 4 coordinates:
+        row_s, col_s, lat, lon
+    with (row_s,col_s)in SAR space, and the rest of the coordinates in MAP space
+    """
+    cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix)]
+    log.info(f'Running command: {" ".join(cmd)}')
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    coord_log_lines = result.stdout.splitlines()
+
+    selected_coords = [line for line in coord_log_lines if "selected" in line]
+    log.info(f'Selected sarpix coordinates: {selected_coords[0]}')
+    coord_lst = selected_coords[0].split()[:-1]
+    coord_lst = [float(s) for s in coord_lst]
+    return coord_lst
+
+
+def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_par: str = None) -> dict:
+    """
+    Args:
+        in_mli_par: GAMMA MLI par file
+        ref_azlin: Reference azimuth line
+        ref_rpix:  Reference range pixel
+        in_dem_par: GAMMA DEM par file
+
+    Returns:
+        coordinates dictionary with row_s, col_s, lat, lon coordinates. Additionally, if
+        in_dem_par is provided, coords will have row_m, col_m, y, and x.
+    """
+    row_s, col_s, lat, lon = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, '-')
+    coords = {"row_s": row_s, "col_s": col_s, "lat": lat, "lon": lon}
+
+    if in_dem_par:
+        _, _, row_m, col_m, y, x = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
+        coords["row_m"] = row_m
+        coords["col_m"] = col_m
+        coords["y"] = y
+        coords["x"] = x
+
+    return coords
+
+
+def read_bin(file, lines: int, samples: int):
+    data = np.fromfile(file, dtype='>f4')
+    values = np.reshape(data, (lines, samples))
+    return values
+
+
+def read_bmp(file):
+    im = Image.open(file)
+    data = np.asarray(im)
+    return data
+
+
+def ref_point_with_max_cc(fcc: str, fmask: str, mlines: int, mwidth: int):
+    data_mk = read_bmp(fmask)
+    data_mk_max = data_mk.max()
+    data_mk = np.ma.masked_values(data_mk, data_mk_max)
+
+    data_cc = read_bin(fcc, mlines, mwidth)
+    data_cc_max = data_cc[data_mk.mask].max()
+    idx = np.where(data_cc == data_cc_max)
+    if idx:
+        ref_i = idx[0][0]
+        ref_j = idx[1][0]
+        return ref_i, ref_j
+
+    return 0, 0
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -49,6 +136,13 @@ def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
     mask = band.ReadAsArray()
     del ds
     return mask
+
+
+def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
+
+    geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
+
+    data2geotiff("tmp.bmp", out_geotiff, dempar, type_)
 
 
 def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
@@ -87,6 +181,7 @@ def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
 
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
+
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
     lt = "./DEM/MAP2RDC"
@@ -129,14 +224,20 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     if apply_water_mask:
         # create and apply water mask
-        out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, mlines, lt, demw, demn, dempar)
-        execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                f" - - {npatr} {npata}", uselogging=True)
+        out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, mlines, lt, demw, demn, dempar)
     else:
         # create water mask only
-        _ = get_water_mask(f'{ifgname}.adf.cc_mask.bmp', mwidth, lt, demw, demn, dempar)
-        execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {ifgname}.adf.cc_mask.bmp {ifgname}.adf.unw {width} {trimode} 0 0"
-                f" - - {npatr} {npata}", uselogging=True)
+        _ = get_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, lt, demw, demn, dempar)
+        out_file = f"{ifgname}.adf.cc_mask.bmp"
+
+    ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", out_file, int(mlines), int(mwidth))
+
+    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
+                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+
+    ref_point_info = get_ref_point_info(mcf_log)
+
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
             uselogging=True)
@@ -193,6 +294,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
     log.info("-------------------------------------------------")
+
+    return coords, ref_point_info
 
 
 def main():
