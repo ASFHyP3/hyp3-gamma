@@ -7,9 +7,10 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [5.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.1...v5.0.1)
+## [5.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.1...v5.1.0)
 
 ### Added
+* Ascending/descending and orbit number information have been added to the '*.txt' parameter file in InSAR products
 * The reference point coordinate information (in both SAR and map space) has been
   added to the `.txt` parameter file in InSAR products
 
