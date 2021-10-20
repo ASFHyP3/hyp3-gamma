@@ -323,8 +323,6 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
         f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
         f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
-        f.write('Row of the reference point in MAP: %s\n' % coords["row_m"])
-        f.write('Column of the reference point in MAP: %s\n' % coords["col_m"])
         f.write('Y of the reference point in MAP: %s\n' % coords["y"])
         f.write('X of the reference point in MAP: %s\n' % coords["x"])
         f.write('Latitude of the reference point: %s\n' % coords["lat"])

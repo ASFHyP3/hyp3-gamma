@@ -63,12 +63,10 @@ def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_pa
         in_dem_par is provided, coords will have row_m, col_m, y, and x.
     """
     row_s, col_s, lat, lon = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, '-')
-    coords = {"row_s": row_s, "col_s": col_s, "lat": lat, "lon": lon}
+    coords = {"row_s": int(row_s), "col_s": int(col_s), "lat": lat, "lon": lon}
 
     if in_dem_par:
-        _, _, row_m, col_m, y, x = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
-        coords["row_m"] = row_m
-        coords["col_m"] = col_m
+        _, _, _, _, y, x = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
         coords["y"] = y
         coords["x"] = x
 
