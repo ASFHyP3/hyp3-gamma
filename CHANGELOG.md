@@ -18,7 +18,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * The highest coherent pixel will be used as the starting point when unwrapping during InSAR
   processing
 
-
 ## [5.0.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.0...v5.0.1)
 
 ### Changed
