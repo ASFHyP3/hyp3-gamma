@@ -292,7 +292,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
                 s = re.split(r'\s+', t[1])
                 heading = float(s[1])
 
-    orbit_parameters = get_orbit_parameters(reference_file)
+    reference_orbit_parameters = get_orbit_parameters(reference_file)
+    secondary_orbit_parameters = get_orbit_parameters(secondary_file)
 
     reference_file = reference_file.replace(".SAFE", "")
     secondary_file = secondary_file.replace(".SAFE", "")
@@ -300,8 +301,10 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
     with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
-        f.write('Pass Direction: %s\n' % orbit_parameters["pass_direction"])
-        f.write('Orbit Number: %s\n' % orbit_parameters["orbitnumber"])
+        f.write('Reference Pass Direction: %s\n' % reference_orbit_parameters["pass_direction"])
+        f.write('Reference Orbit Number: %s\n' % reference_orbit_parameters["orbitnumber"])
+        f.write('Secondary Pass Direction: %s\n' % secondary_orbit_parameters["pass_direction"])
+        f.write('Secondary Orbit Number: %s\n' % secondary_orbit_parameters["orbitnumber"])
         f.write('Baseline: %s\n' % baseline)
         f.write('UTC time: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
