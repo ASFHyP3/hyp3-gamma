@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.1.0...v5.1.1)
 
 ### Changed
-* Reference point information has been modified for clarify in the `*.txt` parameter file
+* Reference point information has been modified for clarity in the `*.txt` parameter file
 
 ## [5.1.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.0.1...v5.1.0)
 
