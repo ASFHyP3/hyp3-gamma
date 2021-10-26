@@ -19,7 +19,7 @@ from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from hyp3lib.system import gamma_version
-from lxml import etree
+from lxml import etree, objectify
 
 import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
@@ -142,6 +142,37 @@ def get_product_name(reference_name, secondary_name, orbit_files, pixel_spacing=
            f'{product_id}'
 
 
+def get_orbit_parameters(reference_file):
+    """
+    input: manifest.safe in the reference.safe directory
+    return: {"orbitnumber": orbitnumber, "relative_orbitnumber":relative_orbitnumber,
+    "cyclenumber":cyclenumber, "pass_direction":pass_direction}
+    """
+
+    file = os.path.join(reference_file, 'manifest.safe')
+
+    if os.path.exists(file):
+        with open(file, 'rb') as f:
+            xml = f.read()
+            root = objectify.fromstring(xml)
+
+            meta = root.find('metadataSection')
+            xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData
+            orbit = xmldata.find('safe:orbitReference', root.nsmap)
+
+            orbitnumber = orbit.find('safe:orbitNumber', root.nsmap)
+            relative_orbitnumber = orbit.find('safe:relativeOrbitNumber', root.nsmap)
+            cyclenumber = orbit.find('safe:cycleNumber', root.nsmap)
+            pass_direction = orbit.find('safe:extension', root.nsmap).\
+                find('s1:orbitProperties', root.nsmap).find('s1:pass', root.nsmap)
+
+            return {"orbitnumber": orbitnumber, "relative_orbitnumber": relative_orbitnumber,
+                    "cyclenumber": cyclenumber, "pass_direction": pass_direction}
+
+    return {"orbitnumber": None, "relative_orbitnumber": None,
+            "cyclenumber": None, "pass_direction": None}
+
+
 def move_output_files(output, reference, prod_dir, long_output, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem):
     inName = "{}.mli.geo.tif".format(reference)
@@ -202,7 +233,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_displace
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords, ref_point_info):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -261,14 +292,21 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
                 s = re.split(r'\s+', t[1])
                 heading = float(s[1])
 
+    reference_orbit_parameters = get_orbit_parameters(reference_file)
+    secondary_orbit_parameters = get_orbit_parameters(secondary_file)
+
     reference_file = reference_file.replace(".SAFE", "")
     secondary_file = secondary_file.replace(".SAFE", "")
 
     with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
+        f.write('Reference Pass Direction: %s\n' % reference_orbit_parameters["pass_direction"])
+        f.write('Reference Orbit Number: %s\n' % reference_orbit_parameters["orbitnumber"])
+        f.write('Secondary Pass Direction: %s\n' % secondary_orbit_parameters["pass_direction"])
+        f.write('Secondary Orbit Number: %s\n' % secondary_orbit_parameters["orbitnumber"])
         f.write('Baseline: %s\n' % baseline)
-        f.write('UTCtime: %s\n' % utctime)
+        f.write('UTC time: %s\n' % utctime)
         f.write('Heading: %s\n' % heading)
         f.write('Spacecraft height: %s\n' % height)
         f.write('Earth radius at nadir: %s\n' % erad_nadir)
@@ -285,6 +323,13 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source):
         f.write('DEM source: %s\n' % dem_source)
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
+        f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
+        f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
+        f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
+        f.write('Y of the reference point in MAP: %s\n' % coords["y"])
+        f.write('X of the reference point in MAP: %s\n' % coords["x"])
+        f.write('Latitude of the reference point: %s\n' % coords["lat"])
+        f.write('Longitude of the reference point: %s\n' % coords["lon"])
         f.write('Unwrapping threshold: none\n')
         f.write('Speckle filtering: off\n')
 
@@ -372,8 +417,9 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Perform phase unwrapping and geocoding of results
     log.info("Starting phase unwrapping and geocoding")
-    unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                         apply_water_mask=apply_water_mask)
+
+    coords, ref_point_info = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
+                                                  apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -402,10 +448,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
         processor_version=gamma_version(),
+        ref_point_coords=coords,
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
-    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks, dem_source)
+
+    make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
+                        dem_source, coords, ref_point_info)
 
     log.info("Done!!!")
     return product_name
