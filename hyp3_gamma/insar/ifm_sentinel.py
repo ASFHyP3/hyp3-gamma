@@ -324,14 +324,14 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('DEM resolution (m): %s\n' % (res * 2))
         f.write('Unwrapping type: mcf\n')
         f.write('Phase at reference point: %s\n' % ref_point_info["refoffset"])
-        f.write('Azimuth line of the reference point in SAR: %s\n' % coords["row_s"])
-        f.write('Range pixel of the reference point in SAR: %s\n' % coords["col_s"])
-        f.write('Y of the reference point in MAP: %s\n' % coords["y"])
-        f.write('X of the reference point in MAP: %s\n' % coords["x"])
-        f.write('Latitude of the reference point: %s\n' % coords["lat"])
-        f.write('Longitude of the reference point: %s\n' % coords["lon"])
+        f.write('Azimuth line of the reference point in SAR space: %s\n' % coords["row_s"])
+        f.write('Range pixel of the reference point in SAR space: %s\n' % coords["col_s"])
+        f.write('Y coordinate of the reference point in the map projection: %s\n' % coords["y"])
+        f.write('X coordinate of the reference point in the map projection: %s\n' % coords["x"])
+        f.write('Latitude of the reference point (WGS84): %s\n' % coords["lat"])
+        f.write('Longitude of the reference point (WGS84): %s\n' % coords["lon"])
         f.write('Unwrapping threshold: none\n')
-        f.write('Speckle filtering: off\n')
+        f.write('Speckle filter: no\n')
 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
