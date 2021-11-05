@@ -12,6 +12,7 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
+from hyp3_gamma.dem import shift_pixel
 from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
@@ -110,6 +111,11 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
 
 
 def data2geotiff(inname, outname, dempar, type_):
+    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
+    shift_pixel(outname)
+
+
+def data2geotiff_only(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
 
 
