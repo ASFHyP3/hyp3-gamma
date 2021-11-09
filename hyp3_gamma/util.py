@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 from zipfile import ZipFile
 
 from hyp3lib.fetch import download_file
@@ -53,6 +54,34 @@ def earlier_granule_first(g1, g2):
     if g1[17:32] <= g2[17:32]:
         return g1, g2
     return g2, g1
+
+
+def is_shift(in_mli_par, in_dem_par, infile):
+    """
+    determine if input geotiff is shifted from the map space
+    """
+    shift_flag = False
+    ds = gdal.Open(infile)
+    gt = ds.GetGeoTransform()
+
+    # coord_to_sarpix 20200613.mli.par - ./DEM/demseg.par 1863160.000 119880.000 0.0
+    cmd = ['coord_to_sarpix', in_mli_par, '-', in_dem_par, str(gt[3]), str(gt[0]), '0.0']
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    coord_log_lines = result.stdout.splitlines()
+    selected_coords = [ line for line in coord_log_lines if "map_row,map_col,hgt_new:" in line]
+    coord_lst = selected_coords[0].split(":")[-1].strip().split(" ")
+    coord_lst = [ float(s) for s in coord_lst]
+    map_row = coord_lst[0]
+    map_col = coord_lst[1]
+
+    if map_row != 0.0 or map_col != 0.0:
+        gt_new_0 = gt[0] - gt[1]*map_row
+        gt_new_3 = gt[3] - gt[5]*map_col
+        gt_new =(gt_new_0, gt[1], gt[2], gt_new_3, gt[4], gt[5])
+        shift_flag = True
+        return shift_flag, gt_new
+    else:
+        return shift_flag, gt
 
 
 def set_pixel_as_point(tif_file, shift_origin=False):
