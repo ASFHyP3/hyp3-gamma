@@ -2,8 +2,8 @@
 
 import argparse
 import logging
-import os
 import glob
+import os
 import subprocess
 from tempfile import TemporaryDirectory
 
