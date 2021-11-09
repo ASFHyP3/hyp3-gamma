@@ -80,23 +80,6 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-def shift_pixel(tif_file: str, pix_shift: float = 0.5):
-    """
-    shift the pixels of the image. pixle_shift > 0, shift image to right and down.
-    """
-    src_ds = gdal.Open(tif_file, gdalconst.GA_Update)
-    gt = src_ds.GetGeoTransform()
-    pj = src_ds.GetProjection()
-
-    gt_shift = (gt[0]+pix_shift*gt[1], gt[1], gt[2], gt[3]+pix_shift*gt[5], gt[4], gt[5])
-
-    src_ds.SetGeoTransform(gt_shift)
-    # figured out it need to set projection again, otherwise, the projection info will lose.
-    src_ds.SetProjection(pj)
-    src_ds.FlushCache()
-    del src_ds
-
-
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry.
 

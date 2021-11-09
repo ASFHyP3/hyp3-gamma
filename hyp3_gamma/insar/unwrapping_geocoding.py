@@ -292,7 +292,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
 
-    # sift the geotiff if needed
+    # sift pixel for the geotiff files if needed
     if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif")[0]:
         for tif_file in glob.glob(f'*.tif'):
             set_pixel_as_point(tif_file, shift_origin=True)

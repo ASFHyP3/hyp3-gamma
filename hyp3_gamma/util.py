@@ -64,7 +64,6 @@ def is_shift(in_mli_par, in_dem_par, infile):
     ds = gdal.Open(infile)
     gt = ds.GetGeoTransform()
 
-    # coord_to_sarpix 20200613.mli.par - ./DEM/demseg.par 1863160.000 119880.000 0.0
     cmd = ['coord_to_sarpix', in_mli_par, '-', in_dem_par, str(gt[3]), str(gt[0]), '0.0']
     result = subprocess.run(cmd, capture_output=True, text=True)
     coord_log_lines = result.stdout.splitlines()
@@ -92,4 +91,7 @@ def set_pixel_as_point(tif_file, shift_origin=False):
         transform[0] += transform[1] / 2
         transform[3] += transform[5] / 2
         ds.SetGeoTransform(transform)
+
+    # figured out it needs to set projection again, otherwise, the projection info may loses
+    ds.SetProjection(ds.GetProjection())
     del ds

@@ -434,13 +434,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     move_output_files(output, reference, product_name, product_name, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
 
-    # shift half-pixel for geotiff file if needed
-    # dempar = "./DEM/demseg.par"
-    # mmli = reference + ".mli"
-    # if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif")[0]:
-    #    for tif_file in glob.glob(f'{product_name}/*.tif'):
-    #        set_pixel_as_point(tif_file, shift_origin=True)
-
     reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
     secondary_granule = os.path.splitext(os.path.basename(secondary_file))[0]
 
