@@ -24,8 +24,9 @@ from lxml import etree, objectify
 import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
-from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding, is_shift
 from hyp3_gamma.metadata import create_metadata_file_set_insar
+from hyp3_gamma.util import set_pixel_as_point
 
 log = logging.getLogger(__name__)
 
@@ -432,6 +433,13 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     os.mkdir(product_name)
     move_output_files(output, reference, product_name, product_name, include_displacement_maps, include_look_vectors,
                       include_wrapped_phase, include_inc_map, include_dem)
+
+    # shift half-pixel for geotiff file if needed
+    # dempar = "./DEM/demseg.par"
+    # mmli = reference + ".mli"
+    # if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif")[0]:
+    #    for tif_file in glob.glob(f'{product_name}/*.tif'):
+    #        set_pixel_as_point(tif_file, shift_origin=True)
 
     reference_granule = os.path.splitext(os.path.basename(reference_file))[0]
     secondary_granule = os.path.splitext(os.path.basename(secondary_file))[0]

@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import subprocess
+import glob
 from tempfile import TemporaryDirectory
 
 import numpy as np
@@ -12,8 +13,9 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
-from hyp3_gamma.dem import shift_pixel
 from hyp3_gamma.water_mask import create_water_mask
+from hyp3_gamma.util import set_pixel_as_point
+
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +51,35 @@ def coords_from_sapix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_d
     coord_lst = selected_coords[0].split()[:-1]
     coord_lst = [float(s) for s in coord_lst]
     return coord_lst
+
+
+def is_shift(in_mli_par, in_dem_par, infile):
+
+    """
+    determine if input geotiff is shifted from the map space
+    """
+    shift_flag = False
+    ds = gdal.Open(infile)
+    gt = ds.GetGeoTransform()
+
+    # coord_to_sarpix 20200613.mli.par - ./DEM/demseg.par 1863160.000 119880.000 0.0
+    cmd = ['coord_to_sarpix', in_mli_par, '-', in_dem_par, str(gt[3]), str(gt[0]), '0.0']
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    coord_log_lines = result.stdout.splitlines()
+    selected_coords = [ line for line in coord_log_lines if "map_row,map_col,hgt_new:" in line]
+    coord_lst = selected_coords[0].split(":")[-1].strip().split(" ")
+    coord_lst = [ float(s) for s in coord_lst]
+    map_row = coord_lst[0]
+    map_col = coord_lst[1]
+
+    if map_row != 0.0 or map_col != 0.0:
+        gt_new_0 = gt[0] - gt[1]*map_row
+        gt_new_3 = gt[3] - gt[5]*map_col
+        gt_new =(gt_new_0, gt[1], gt[2], gt_new_3, gt[4], gt[5])
+        shift_flag = True
+        return shift_flag, gt_new
+    else:
+        return shift_flag, gt
 
 
 def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_par: str = None) -> dict:
@@ -110,12 +141,7 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
     execute(f"geocode {lt} {inname} {inwidth} {outname} {outwidth} {outlines} - {type_}", uselogging=True)
 
 
-def data2geotiff(inname, outname, dempar, type_):
-    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
-    shift_pixel(outname)
-
-
-def data2geotiff_only(inname, outname, dempar, type_):
+def data2geotiff(inname, outname, dempar, type_, shift_origin=False):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
 
 
@@ -294,6 +320,11 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
+
+    # sift the geotiff if needed
+    if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif")[0]:
+        for tif_file in glob.glob(f'*.tif'):
+            set_pixel_as_point(tif_file, shift_origin=True)
 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
