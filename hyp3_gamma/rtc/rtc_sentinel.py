@@ -35,7 +35,7 @@ import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
-from hyp3_gamma.util import set_pixel_as_point, unzip_granule, is_shift
+from hyp3_gamma.util import is_shift, set_pixel_as_point, unzip_granule
 
 
 log = logging.getLogger()

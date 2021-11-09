@@ -3,8 +3,8 @@
 import argparse
 import logging
 import os
-import subprocess
 import glob
+import subprocess
 from tempfile import TemporaryDirectory
 
 import numpy as np
@@ -13,9 +13,8 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
+from hyp3_gamma.util import is_shift, set_pixel_as_point
 from hyp3_gamma.water_mask import create_water_mask
-from hyp3_gamma.util import set_pixel_as_point, is_shift
-
 
 log = logging.getLogger(__name__)
 
@@ -294,7 +293,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     # sift pixel for the geotiff files if needed
     if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif")[0]:
-        for tif_file in glob.glob(f'*.tif'):
+        for tif_file in glob.glob("*.tif"):
             set_pixel_as_point(tif_file, shift_origin=True)
 
     log.info("-------------------------------------------------")

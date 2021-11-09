@@ -24,9 +24,9 @@ from lxml import etree, objectify
 import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
-from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding, is_shift
+from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 from hyp3_gamma.metadata import create_metadata_file_set_insar
-from hyp3_gamma.util import set_pixel_as_point
+
 
 log = logging.getLogger(__name__)
 

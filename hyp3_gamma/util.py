@@ -67,16 +67,16 @@ def is_shift(in_mli_par, in_dem_par, infile):
     cmd = ['coord_to_sarpix', in_mli_par, '-', in_dem_par, str(gt[3]), str(gt[0]), '0.0']
     result = subprocess.run(cmd, capture_output=True, text=True)
     coord_log_lines = result.stdout.splitlines()
-    selected_coords = [ line for line in coord_log_lines if "map_row,map_col,hgt_new:" in line]
+    selected_coords = [line for line in coord_log_lines if "map_row,map_col,hgt_new:" in line]
     coord_lst = selected_coords[0].split(":")[-1].strip().split(" ")
-    coord_lst = [ float(s) for s in coord_lst]
+    coord_lst = [float(s) for s in coord_lst]
     map_row = coord_lst[0]
     map_col = coord_lst[1]
 
     if map_row != 0.0 or map_col != 0.0:
         gt_new_0 = gt[0] - gt[1]*map_row
         gt_new_3 = gt[3] - gt[5]*map_col
-        gt_new =(gt_new_0, gt[1], gt[2], gt_new_3, gt[4], gt[5])
+        gt_new = (gt_new_0, gt[1], gt[2], gt_new_3, gt[4], gt[5])
         shift_flag = True
         return shift_flag, gt_new
     else:
