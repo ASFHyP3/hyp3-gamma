@@ -111,7 +111,7 @@ def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
     execute(f"geocode {lt} {inname} {inwidth} {outname} {outwidth} {outlines} - {type_}", uselogging=True)
 
 
-def data2geotiff(inname, outname, dempar, type_, shift_origin=False):
+def data2geotiff(inname, outname, dempar, type_):
     execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
 
 
