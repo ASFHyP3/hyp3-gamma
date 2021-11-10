@@ -74,13 +74,9 @@ def is_shift(in_mli_par, in_dem_par, infile):
     map_col = coord_lst[1]
 
     if map_row != 0.0 or map_col != 0.0:
-        gt_new_0 = gt[0] - gt[1]*map_row
-        gt_new_3 = gt[3] - gt[5]*map_col
-        gt_new = (gt_new_0, gt[1], gt[2], gt_new_3, gt[4], gt[5])
         shift_flag = True
-        return shift_flag, gt_new
-    else:
-        return shift_flag, gt
+
+    return shift_flag
 
 
 def set_pixel_as_point(tif_file, shift_origin=False):
@@ -92,6 +88,4 @@ def set_pixel_as_point(tif_file, shift_origin=False):
         transform[3] += transform[5] / 2
         ds.SetGeoTransform(transform)
 
-    # figured out it needs to set projection again, otherwise, the projection info may loses
-    ds.SetProjection(ds.GetProjection())
     del ds

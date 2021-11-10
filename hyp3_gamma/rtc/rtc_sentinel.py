@@ -406,7 +406,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             os.remove(rgb_tif)
 
     # do pixel shift if needed
-    if is_shift(mli_par, 'dem_seg.par', power_tif)[0]:
+    if is_shift(mli_par, 'dem_seg.par', power_tif):
         for tif_file in glob(f'{product_name}/*.tif'):
             set_pixel_as_point(tif_file, shift_origin=True)
 

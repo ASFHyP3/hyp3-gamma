@@ -17,23 +17,6 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
-def wgs84extent(infile: str):
-    ds = gdal.Open(infile, gdalconst.GA_ReadOnly)
-    gt = ds.GetGeoTransform()
-    pj = ds.GetProjection()
-    minx = gt[0]
-    maxy = gt[3]
-    maxx = minx + gt[1] * ds.RasterXSize
-    miny = maxy + gt[5] * ds.RasterYSize
-
-    # convert to wgs84 (EPSG:4326)
-    trans = Transformer.from_crs(pj, 4326, always_xy=True)
-    min_lon, max_lat = trans.transform(minx, maxy)
-    max_lon, min_lat = trans.transform(maxx, miny)
-    ds = None
-    return (min_lon, max_lon, min_lat, max_lat)
-
-
 def create_water_mask(input_tif: str, output_tif: str):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
