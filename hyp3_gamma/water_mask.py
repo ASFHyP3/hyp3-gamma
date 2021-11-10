@@ -4,8 +4,7 @@ import subprocess
 from tempfile import NamedTemporaryFile
 
 import geopandas
-from osgeo import gdal, gdalconst
-from pyproj import Transformer
+from osgeo import gdal
 
 gdal.UseExceptions()
 
@@ -40,7 +39,6 @@ def create_water_mask(input_tif: str, output_tif: str):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_tif, format='json')['wgs84Extent']
-    # extent = wgs84extent(input_tif)
     extent = split_geometry_on_antimeridian(extent)
 
     mask = geopandas.read_file(mask_location, mask=extent)
