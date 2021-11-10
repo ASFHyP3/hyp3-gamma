@@ -1,8 +1,8 @@
 """Unwrap and geocode Sentinel-1 INSAR products from GAMMA"""
 
+import glob
 import argparse
 import logging
-import glob
 import os
 import subprocess
 from tempfile import TemporaryDirectory
