@@ -17,7 +17,6 @@ import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
-# from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
@@ -35,7 +34,7 @@ import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
-from hyp3_gamma.util import is_shift, set_pixel_as_point, unzip_granule
+from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 
 log = logging.getLogger()
@@ -63,20 +62,12 @@ def write_gdal_file_float(filename, geotransform, geoproj, data, nodata=None, ar
     driver = gdal.GetDriverByName(format)
     dst_datatype = gdal.GDT_Float32
     dst_ds = driver.Create(filename, y, x, 1, dst_datatype)
-    # northing = geotransform[0]
-    # weres = geotransform[1]
-    # rotationx = geotransform[2]
-    # easting = geotransform[3]
-    # rotationy = geotransform[4]
-    # nsres = geotransform[5]
-
     dst_ds.GetRasterBand(1).WriteArray(data)
 
     if nodata is not None:
         dst_ds.GetRasterBand(1).SetNoDataValue(nodata)
 
     dst_ds.SetGeoTransform(geotransform)
-    # dst_ds.SetGeoTransform([northing, weres, rotationx, easting, rotationy, nsres])
     dst_ds.SetProjection(geoproj)
     dst_ds.SetMetadataItem('AREA_OR_POINT', area_point)
     del dst_ds
@@ -458,8 +449,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         if not include_rgb:
             os.remove(rgb_tif)
 
-    for tif_file in glob(f'{product_name}/*.tif'):
-        set_pixel_as_point(tif_file, shift_origin=dem_name == 'legacy')
+    if dem_name == 'legacy':
+        for tif_file in glob(f'{product_name}/*.tif'):
+            set_pixel_as_point(tif_file, shift_origin=True)
 
     cogify_dir(directory=product_name)
 

@@ -1,7 +1,6 @@
 """Unwrap and geocode Sentinel-1 INSAR products from GAMMA"""
 
 import argparse
-import glob
 import logging
 import os
 import subprocess
@@ -13,7 +12,6 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
-# from hyp3_gamma.util import is_shift, set_pixel_as_point
 from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
