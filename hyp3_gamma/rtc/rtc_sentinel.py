@@ -17,7 +17,7 @@ import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
-from hyp3lib.createAmp import createAmp
+# from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
@@ -43,7 +43,7 @@ gdal.UseExceptions()
 ogr.UseExceptions()
 
 
-def create_decibel_tif(fi, nodata=None):
+def create_decibel_tif_orig(fi, nodata=None):
     f = gdal.Open(fi)
     in_nodata = f.GetRasterBand(1).GetNoDataValue()
     _, _, trans, proj, data = saa.read_gdal_file(f)
@@ -53,6 +53,59 @@ def create_decibel_tif(fi, nodata=None):
         nodata = np.finfo(data.dtype).min.astype(float)
     outfile = fi.replace('.tif', '-db.tif')
     saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
+    del f
+    return outfile
+
+
+def write_gdal_file_float(filename, geotransform, geoproj, data, nodata=None, area_point: str='Area'):
+    (x, y) = data.shape
+    format = "GTiff"
+    driver = gdal.GetDriverByName(format)
+    dst_datatype = gdal.GDT_Float32
+    dst_ds = driver.Create(filename, y, x, 1, dst_datatype)
+    # northing = geotransform[0]
+    # weres = geotransform[1]
+    # rotationx = geotransform[2]
+    # easting = geotransform[3]
+    # rotationy = geotransform[4]
+    # nsres = geotransform[5]
+
+    dst_ds.GetRasterBand(1).WriteArray(data)
+
+    if nodata is not None:
+        dst_ds.GetRasterBand(1).SetNoDataValue(nodata)
+
+    dst_ds.SetGeoTransform(geotransform)
+    # dst_ds.SetGeoTransform([northing, weres, rotationx, easting, rotationy, nsres])
+    dst_ds.SetProjection(geoproj)
+    dst_ds.SetMetadataItem('AREA_OR_POINT', area_point)
+    del dst_ds
+    return 0
+
+
+def create_decibel_tif(fi, nodata=None):
+    f = gdal.Open(fi)
+    area_point = f.GetMetadataItem('AREA_OR_POINT')
+    in_nodata = f.GetRasterBand(1).GetNoDataValue()
+    _, _, trans, proj, data = saa.read_gdal_file(f)
+    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
+    powerdb = 10*np.ma.log10(data)
+    if not nodata:
+        nodata = np.finfo(data.dtype).min.astype(float)
+
+    outfile = fi.replace('.tif', '-db.tif')
+    write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata, area_point=area_point)
+    del f
+    return outfile
+
+
+def createAmp(fi, nodata=None):
+    f = gdal.Open(fi)
+    area_point = f.GetMetadataItem('AREA_OR_POINT')
+    (x, y, trans, proj, data) = saa.read_gdal_file(f)
+    ampdata = np.sqrt(data)
+    outfile = fi.replace('.tif', '_amp.tif')
+    write_gdal_file_float(outfile, trans, proj, ampdata, nodata=nodata, area_point=area_point)
     del f
     return outfile
 
@@ -405,10 +458,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         if not include_rgb:
             os.remove(rgb_tif)
 
-    # do pixel shift if needed
-    if is_shift(mli_par, 'dem_seg.par', power_tif):
-        for tif_file in glob(f'{product_name}/*.tif'):
-            set_pixel_as_point(tif_file, shift_origin=True)
+    for tif_file in glob(f'{product_name}/*.tif'):
+        set_pixel_as_point(tif_file, shift_origin=dem_name == 'legacy')
 
     cogify_dir(directory=product_name)
 

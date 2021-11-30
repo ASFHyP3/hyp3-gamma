@@ -13,7 +13,7 @@ from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
-from hyp3_gamma.util import is_shift, set_pixel_as_point
+# from hyp3_gamma.util import is_shift, set_pixel_as_point
 from hyp3_gamma.water_mask import create_water_mask
 
 log = logging.getLogger(__name__)
@@ -290,11 +290,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
     data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
-
-    # sift pixel for the geotiff files if needed
-    if is_shift(f"{mmli}.par", dempar, f"{mmli}.geo.tif"):
-        for tif_file in glob.glob("*.tif"):
-            set_pixel_as_point(tif_file, shift_origin=True)
 
     log.info("-------------------------------------------------")
     log.info("            End geocoding")
