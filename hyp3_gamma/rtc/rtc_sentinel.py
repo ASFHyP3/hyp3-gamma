@@ -42,20 +42,6 @@ gdal.UseExceptions()
 ogr.UseExceptions()
 
 
-def create_decibel_tif_orig(fi, nodata=None):
-    f = gdal.Open(fi)
-    in_nodata = f.GetRasterBand(1).GetNoDataValue()
-    _, _, trans, proj, data = saa.read_gdal_file(f)
-    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
-    powerdb = 10*np.ma.log10(data)
-    if not nodata:
-        nodata = np.finfo(data.dtype).min.astype(float)
-    outfile = fi.replace('.tif', '-db.tif')
-    saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
-    del f
-    return outfile
-
-
 def write_gdal_file_float(filename, geotransform, geoproj, data, nodata=None, area_point: str='Area'):
     (x, y) = data.shape
     format = "GTiff"
