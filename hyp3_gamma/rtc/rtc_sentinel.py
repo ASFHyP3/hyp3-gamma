@@ -42,10 +42,10 @@ gdal.UseExceptions()
 ogr.UseExceptions()
 
 
-def write_gdal_file_float(filename, geotransform, geoproj, data, nodata=None, area_point: str='Area'):
+def write_gdal_file_float(filename, geotransform, geoproj, data, nodata = None, area_point: str = 'Area'):
     (x, y) = data.shape
-    format = "GTiff"
-    driver = gdal.GetDriverByName(format)
+    fileformat = "GTiff"
+    driver = gdal.GetDriverByName(fileformat)
     dst_datatype = gdal.GDT_Float32
     dst_ds = driver.Create(filename, y, x, 1, dst_datatype)
     dst_ds.GetRasterBand(1).WriteArray(data)
