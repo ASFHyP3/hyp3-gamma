@@ -7,6 +7,12 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [5.1.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.1.1...v5.1.2)
+
+### Fixed
+* `Unable to open datasource` error when providing `rtc_sentinel.py` with absolute path to SAFE directory.
+  Fixes [#332](https://github.com/ASFHyP3/hyp3-gamma/issues/332)
+
 ## [5.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v5.1.0...v5.1.1)
 
 ### Changed
