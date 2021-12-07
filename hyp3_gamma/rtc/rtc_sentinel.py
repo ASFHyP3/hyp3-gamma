@@ -316,7 +316,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         product_name: Name of the output product directory
     """
 
-    safe_dir = safe_dir.strip('/')
+    safe_dir = safe_dir.rstrip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
     polarizations = get_polarizations(granule, skip_cross_pol)
