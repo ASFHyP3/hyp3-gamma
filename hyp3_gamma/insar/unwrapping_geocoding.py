@@ -87,7 +87,7 @@ def read_bmp(file):
 
 def convert_bin_bmp(binfile: str, lines: int, samples: int):
     data = read_bin(binfile, lines, samples)
-    out_file = "{binfile}.bmp".format(binfile = binfile)
+    out_file = "{binfile}.bmp".format(binfile=binfile)
     out_im = Image.fromarray(data)
     out_im.save(out_file)
     return out_file
@@ -95,16 +95,15 @@ def convert_bin_bmp(binfile: str, lines: int, samples: int):
 
 def convert_bin_tiff(binfile: str, lines: int, samples: int):
     data = read_bin(binfile, lines, samples)
-    out_file = "{binfile}.tif".format(binfile = binfile)
+    out_file = "{binfile}.tif".format(binfile=binfile)
     out_im = Image.fromarray(data)
     out_im.save(out_file)
     return out_file
 
 
-
 def convert_bmp_bin(bmpfile: str, outfile: str):
     data = read_bmp(bmpfile)
-    np.tofile(outfile)
+    data.tofile(outfile)
     return outfile
 
 
@@ -145,24 +144,6 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def get_water_mask_orig(cc_mask_file, mwidth, lt, demw, demn, dempar):
-    """
-    create water_mask based on the cc_mask_file (bmp) file
-    """
-    with TemporaryDirectory() as temp_dir:
-        os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
-        # 2--bmp
-        geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
-        # 0--bmp
-        data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
-        # create water_mask.tif file
-        create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
-    ds = gdal.Open('water_mask.tif')
-    band = ds.GetRasterBand(1)
-    mask = band.ReadAsArray()
-    del ds
-    return mask
-
 def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     """
     create water_mask based on the cc_file (tif) file
@@ -183,44 +164,8 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     return mask
 
 def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
-
     geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
-
     data2geotiff("tmp.bmp", out_geotiff, dempar, type_)
-
-
-def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
-    """combine cc_mask with water_mask
-    """
-    # read the original mask file
-    in_im = Image.open(cc_mask_file)
-    in_data = np.array(in_im)
-    in_palette = in_im.getpalette()
-
-    with TemporaryDirectory() as temp_dir:
-        # get mask data and save it into the water_mask.bmp file
-        mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
-        water_im = Image.fromarray(mask)
-        water_im.putpalette(in_palette)
-        water_bmp_file = f'{temp_dir}/water_mask.bmp'
-        water_im.save(water_bmp_file)
-
-        # map water_mask.bmp file to SAR coordinators
-        water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
-        geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
-
-        # read water_mask_bmp_sar_file
-        water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
-        water_mask_sar_data = np.array(water_mask_sar_im)
-
-        # combine two masks and output combined_mask.bmp
-        in_data[water_mask_sar_data == 0] = 0
-        out_im = Image.fromarray(in_data)
-        out_im.putpalette(in_palette)
-        out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
-        out_im.save(out_file)
-
-    return out_file
 
 
 def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
