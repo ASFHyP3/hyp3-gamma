@@ -256,8 +256,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     if apply_water_mask:
         # produce water mask and apply to {ifgname}.adf.cc and {mmli} files
-        adf_cc_masked, _ = get_masked_files(f"{ifgname}.adf.cc", mmli, int(mwidth), int(mlines), lt,
-                                            int(demw), int(demn), dempar)
+        adf_cc_masked, _ = get_masked_files(f"{ifgname}.adf.cc", mmli, int(mwidth), int(mlines), lt, int(demw),
+                                            int(demn), dempar)
     else:
         # produce water mask file only
         cc_file_tif = convert_bin_tiff(f"{ifgname}.adf.cc", int(mlines), int(mwidth))
