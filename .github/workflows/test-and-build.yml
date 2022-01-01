@@ -17,42 +17,28 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.V2_AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  pytest:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+  call-pytest-workflow:
+    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@main
+    with:
+      local_package_name: hyp3_ci
+      conda_env_name: hyp3-ci
 
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          activate-environment: hyp3-gamma
-          environment-file: environment.yml
-
-      - name: Pytest in conda environment
-        shell: bash -l {0}
-        run: |
-          python -m pip install .[develop]
-          pytest --cov=hyp3_gamma
+  call-version-info-workflow:
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@main
+    with:
+      conda_env_name: hyp3-ci
 
   dockerize:
+    needs: call-version-info-workflow
     runs-on: ubuntu-latest
+    env:
+      SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          activate-environment: hyp3-gamma
-          environment-file: environment.yml
 
       - name: set environment variables
         shell: bash -l {0}
         run: |
-          git fetch origin +refs/tags/*:refs/tags/*
-          export SDIST_VERSION=$(python setup.py --version)
-          echo "SDIST_VERSION=${SDIST_VERSION/+/_}" >> $GITHUB_ENV
           echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
