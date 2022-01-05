@@ -275,21 +275,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
-    # do atmospheric correction
-
-    # execute(f"atm_mod2 {ifgname}.adf.unw {hgt} {mmli}.par {ifgname}.atm.unw",uselogging=True)
-
-    # subtract the atm_unw
-
-    # execute(f"sub_phase {ifgname}.adf.unw {ifgname}.atm.unw {mmli}.par {ifgname}.adf.tmp 0 - -", uselogging=True)
-
-    # copy .adf.tmp to adf.unw
-
-    # shutil.move(f"{ifgname}.adf.unw", f"{ifgname}.adf.unw.pre.atm")
-
-    # shutil.copyfile(f"{ifgname}.adf.tmp", f"{ifgname}.adf.unw")
-
-
     ref_point_info = get_ref_point_info(mcf_log)
 
     coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
