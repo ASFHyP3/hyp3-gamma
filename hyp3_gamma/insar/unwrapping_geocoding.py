@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import shutil
 import subprocess
 from tempfile import TemporaryDirectory
 
@@ -146,15 +147,15 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     """
-    create water_mask based on the cc_file (tif) file
+    create water_mask based on the binary cc_file (float)
     """
     with TemporaryDirectory() as temp_dir:
-        os.system(f'cp {cc_file} {temp_dir}/tmp_mask.tif')
+        os.system(f'cp {cc_file} {temp_dir}/tmp_mask')
         # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
-        geocode_back(f'{temp_dir}/tmp_mask.tif', f'{temp_dir}/tmp_mask_geo.tif', mwidth, lt, demw, demn, 0)
+        geocode_back(f'{temp_dir}/tmp_mask', f'{temp_dir}/tmp_mask_geo', mwidth, lt, demw, demn, 0)
         # 0--RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
         # 2--FLOAT (4 bytes/value)
-        data2geotiff(f'{temp_dir}/tmp_mask_geo.tif', f'{temp_dir}/tmpgtiff_mask_geo.tif', dempar, 2)
+        data2geotiff(f'{temp_dir}/tmp_mask_geo', f'{temp_dir}/tmpgtiff_mask_geo.tif', dempar, 2)
         # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmpgtiff_mask_geo.tif', 'water_mask.tif')
     ds = gdal.Open('water_mask.tif')
@@ -164,9 +165,12 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     return mask
 
 
-def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
-    geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
-    data2geotiff("tmp.bmp", out_geotiff, dempar, type_)
+def convert_from_sar_2_map(in_file, out_geotiff, mwidth, lt, dempar, demw, demn):
+    """
+    in_file is a float binary file, and out_geotiff is a geotiff file.
+    """
+    geocode_back(in_file, "tmp", mwidth, lt, demw, demn, 0)
+    data2geotiff("tmp", out_geotiff, dempar, 2)
 
 
 def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
@@ -185,15 +189,14 @@ def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
 
 def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt: str, demw: int,
                      demn: int, dempar: str):
-    """use water_mask to mask the cc and mmli, then used masked cc and mmli to calcualte the validity mask
     """
-    # convert binary to tif files
-    cc_file_tif = convert_bin_tiff(cc_file, mlines, mwidth)
-    # mmli_file_tif = convert_bin_tiff(mmli_file, mlines, mwidth)
+    use water_mask to mask the cc and mmli, then used masked cc and mmli to calcualte the validity mask.
+    cc_file and mli_file are binary files.
+    """
 
     with TemporaryDirectory() as temp_dir:
         # get mask data and save it into the water_mask.bmp file
-        mask = get_water_mask(cc_file_tif, mwidth, lt, demw, demn, dempar)
+        mask = get_water_mask(cc_file, mwidth, lt, demw, demn, dempar)
         water_im = Image.fromarray(mask)
         # water_im.putpalette(in_palette)
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
@@ -221,6 +224,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     mmli = reference + ".mli"
     smli = secondary + ".mli"
     cc_thres = 0.1
+    hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
@@ -260,8 +264,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
                                             int(demn), dempar)
     else:
         # produce water mask file only
-        cc_file_tif = convert_bin_tiff(f"{ifgname}.adf.cc", int(mlines), int(mwidth))
-        _ = get_water_mask(cc_file_tif, mwidth, lt, demw, demn, dempar)
+        _ = get_water_mask(f"{ifgname}.adf.cc", mwidth, lt, demw, demn, dempar)
         adf_cc_masked = f"{ifgname}.adf.cc"
 
     execute(f"rascc_mask {adf_cc_masked} - {width} 1 1 0 1 1 {cc_thres} ", uselogging=True)
@@ -271,6 +274,21 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+
+    # do atmospheric correction
+
+    # execute(f"atm_mod2 {ifgname}.adf.unw {hgt} {mmli}.par {ifgname}.atm.unw",uselogging=True)
+
+    # subtract the atm_unw
+
+    # execute(f"sub_phase {ifgname}.adf.unw {ifgname}.atm.unw {mmli}.par {ifgname}.adf.tmp 0 - -", uselogging=True)
+
+    # copy .adf.tmp to adf.unw
+
+    # shutil.move(f"{ifgname}.adf.unw", f"{ifgname}.adf.unw.pre.atm")
+
+    # shutil.copyfile(f"{ifgname}.adf.tmp", f"{ifgname}.adf.unw")
+
 
     ref_point_info = get_ref_point_info(mcf_log)
 
