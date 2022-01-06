@@ -3,7 +3,6 @@
 import argparse
 import logging
 import os
-import shutil
 import subprocess
 from tempfile import TemporaryDirectory
 
@@ -224,7 +223,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     mmli = reference + ".mli"
     smli = secondary + ".mli"
     cc_thres = 0.1
-    hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
 
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
