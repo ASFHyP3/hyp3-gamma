@@ -213,6 +213,23 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
     return cc_masked_file, intensity_masked_file
 
 
+def apply_atm_delay(unw_file, hgt, mmli_par):
+
+    shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
+
+    with TemporaryDirectory() as temp_dir:
+        # calculate atmospheric delay
+        execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm", uselogging=True)
+        # create diff_par file
+        execute(f"create_diff_par {mmli_par} - {temp_dir}/{unw_file}.diff_par 1 0", uselogging=True)
+        # subtract the atm_unw
+        execute(f"sub_phase {unw_file} {temp_dir}/{unw_file}.atm {temp_dir}/{unw_file}.diff_par"
+                f" {temp_dir}/{unw_file}.tmp 0 - -", uselogging=True)
+
+        # copy .adf.tmp to adf.unw
+        shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
+
+
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
 
@@ -275,20 +292,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
-    # do atmospheric correction
-
-    # execute(f"atm_mod2 {ifgname}.adf.unw {hgt} {mmli}.par {ifgname}.atm.unw",uselogging=True)
-
-    # subtract the atm_unw
-
-    # execute(f"sub_phase {ifgname}.adf.unw {ifgname}.atm.unw {mmli}.par {ifgname}.adf.tmp 0 - -", uselogging=True)
-
-    # copy .adf.tmp to adf.unw
-
-    # shutil.move(f"{ifgname}.adf.unw", f"{ifgname}.adf.unw.pre.atm")
-
-    # shutil.copyfile(f"{ifgname}.adf.tmp", f"{ifgname}.adf.unw")
-
+    # apply atmospheric delay correction
+    apply_atm_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par")
 
     ref_point_info = get_ref_point_info(mcf_log)
 
