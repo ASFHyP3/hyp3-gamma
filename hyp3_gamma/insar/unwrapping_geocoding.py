@@ -230,6 +230,47 @@ def apply_atm_delay(unw_file, hgt, mmli_par):
         shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
 
 
+def get_width(txtfile):
+
+    f = open(txtfile,'r')
+
+    txt = f.read().splitlines()
+
+    xx = [x for x in txt if "offset_estimation_range_samples:" in x]
+
+    width = int(xx[0].split(":")[1].strip())
+
+    f.close()
+
+    return width
+
+
+def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file):
+
+    shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
+
+    with TemporaryDirectory() as temp_dir:
+        # create diff_par file
+        execute(f"create_diff_par {mmli_par} - {temp_dir}/{unw_file}.diff_par 1 0", uselogging=True)
+        # calculate atmospheric delay a0 and a1
+        execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
+                f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1", uselogging=True)
+        # fill the gaps
+        width = get_width(f"{temp_dir}/{unw_file}.diff_par")
+        execute(f"fill_gaps {temp_dir}/a0 {width} {temp_dir}/a0n", uselogging=True)
+        execute(f"fill_gaps {temp_dir}/a1 {width} {temp_dir}/a1n", uselogging=True)
+
+        # calcualte unw_atm
+        execute(f"atm_sim_2d {temp_dir}/{unw_file}.diff_par {hgt} {temp_dir}/a0n {temp_dir}/a1n"
+                f" {temp_dir}/{unw_file}.atm", uselogging=True)
+
+        # subtract the atm_unw
+        execute(f"sub_phase {unw_file} {temp_dir}/{unw_file}.atm {temp_dir}/{unw_file}.diff_par"
+                f" {temp_dir}/{unw_file}.tmp 0 - -", uselogging=True)
+        # copy .adf.tmp to adf.unw
+        shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
+
+
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
 
@@ -293,7 +334,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     # apply atmospheric delay correction
-    apply_atm_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par")
+    # apply_atm_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par")
+    apply_atm_2d_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par", f"{ifgname}.adf.cc")
 
     ref_point_info = get_ref_point_info(mcf_log)
 
