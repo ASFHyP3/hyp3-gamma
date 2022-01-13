@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
+from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
@@ -213,18 +214,34 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
     return cc_masked_file, intensity_masked_file
 
 
-def apply_atm_delay(unw_file, hgt, mmli_par):
+def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
     with TemporaryDirectory() as temp_dir:
         # calculate atmospheric delay
-        execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm", uselogging=True)
+        # for test, set temp_dir='.'
+        temp_dir='.'
+        # execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm", uselogging=True)
+        # above command produce small range of atm_delay, 0.2 to 1.7
+
+        execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm - - - 2"
+                f" {ref_rpix} {ref_azlin}", uselogging=True)
+        #above comamnd produces large range of atm_delay, -59 to 25.0
+
+        # execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm - - - 0"
+        #        f" {ref_rpix} {ref_azlin}", uselogging=True)
+
+
+
         # create diff_par file
         execute(f"create_diff_par {mmli_par} - {temp_dir}/{unw_file}.diff_par 1 0", uselogging=True)
         # subtract the atm_unw
         execute(f"sub_phase {unw_file} {temp_dir}/{unw_file}.atm {temp_dir}/{unw_file}.diff_par"
                 f" {temp_dir}/{unw_file}.tmp 0 - -", uselogging=True)
+
+        # produce modified unw geotiff file
+
 
         # copy .adf.tmp to adf.unw
         shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
@@ -245,16 +262,22 @@ def get_width(txtfile):
     return width
 
 
-def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file):
+def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
     with TemporaryDirectory() as temp_dir:
+        # for test, set temp_dir='.'
+        temp_dir='.'
         # create diff_par file
         execute(f"create_diff_par {mmli_par} - {temp_dir}/{unw_file}.diff_par 1 0", uselogging=True)
         # calculate atmospheric delay a0 and a1
+        # execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
+        #        f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1", uselogging=True)
+
         execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
-                f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1", uselogging=True)
+            f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1 - -"
+            f" - - - - - - {ref_rpix} {ref_azlin} 0", uselogging=True)
         # fill the gaps
         width = get_width(f"{temp_dir}/{unw_file}.diff_par")
         execute(f"fill_gaps {temp_dir}/a0 {width} {temp_dir}/a0n", uselogging=True)
@@ -271,6 +294,43 @@ def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file):
         shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
 
 
+def make_browse_png(reference, secondary, unw_file):
+    dem = "./DEM/demseg"
+    dempar = "./DEM/demseg.par"
+    lt = "./DEM/MAP2RDC"
+    ifgname = "{}_{}".format(reference, secondary)
+    offit = "{}.off.it".format(ifgname)
+    mmli = reference + ".mli"
+    smli = secondary + ".mli"
+    cc_thres = 0.1
+    # hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
+    if not os.path.isfile(dempar):
+        log.error("ERROR: Unable to find dem par file {}".format(dempar))
+
+    if not os.path.isfile(lt):
+        log.error("ERROR: Unable to find look up table file {}".format(lt))
+
+    if not os.path.isfile(offit):
+        log.error("ERROR: Unable to find offset file {}".format(offit))
+
+    width = getParameter(offit, "interferogram_width")
+    mwidth = getParameter(mmli + ".par", "range_samples")
+    mlines = getParameter(mmli + ".par", "azimuth_lines")
+    swidth = getParameter(smli + ".par", "range_samples")
+    demw = getParameter(dempar, "width")
+    demn = getParameter(dempar, "nlines")
+
+    # ifgf = "{}.diff0.{}".format(ifgname, step)
+
+    execute(f"rasdt_pwr {unw_file} {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {unw_file}.adf.unw.ras",
+            uselogging=True)
+    geocode_back("{}.adf.unw.ras".format(unw_file), "{}.adf.unw.geo.bmp".format(unw_file), width, lt, demw, demn, 2)
+
+    data2geotiff("{}.adf.unw.geo.bmp".format(unw_file), "{}.adf.unw.geo.bmp.tif".format(unw_file), dempar, 0)
+
+    makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(unw_file), f"{unw_file}_png", use_nn=True)
+
+
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
                          npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
 
@@ -283,7 +343,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     smli = secondary + ".mli"
     cc_thres = 0.1
     hgt = "DEM/HGT_SAR_{}_{}".format(rlooks, alooks)
-
     if not os.path.isfile(dempar):
         log.error("ERROR: Unable to find dem par file {}".format(dempar))
 
@@ -333,10 +392,24 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
-    # apply atmospheric delay correction
-    # apply_atm_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par")
-    apply_atm_2d_delay(f"{ifgname}.adf.unw", hgt, f"{mmli}.par", f"{ifgname}.adf.cc")
+    unw_orig = f"{ifgname}.adf.unw"
 
+    # apply atmospheric delay correction
+    # method 1
+    shutil.copyfile(unw_orig, "unw_atm_m1")
+    apply_atm_delay("unw_atm_m1", hgt, f"{mmli}.par", ref_azlin, ref_rpix)
+    make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
+    convert_from_sar_2_map("unw_atm_m1.atm", "unw_atm_m1.atm.tif", mwidth, lt, dempar, demw, demn)
+    convert_from_sar_2_map("unw_atm_m1", "unw_atm_m1.tif", mwidth, lt, dempar, demw, demn)
+
+
+    shutil.copyfile(unw_orig, "unw_atm_m2")
+    apply_atm_2d_delay("unw_atm_m2", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
+    make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
+    convert_from_sar_2_map("unw_atm_m2.atm", "unw_atm_m2.atm.tif", mwidth, lt, dempar, demw, demn)
+    convert_from_sar_2_map("unw_atm_m2", "unw_atm_m2.tif", mwidth, lt, dempar, demw, demn)
+
+    # normal processes
     ref_point_info = get_ref_point_info(mcf_log)
 
     coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
