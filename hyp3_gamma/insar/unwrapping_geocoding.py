@@ -214,7 +214,7 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
     return cc_masked_file, intensity_masked_file
 
 
-def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix):
+def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix, model=2):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
@@ -225,7 +225,7 @@ def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix):
         # execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm", uselogging=True)
         # above command produce small range of atm_delay, 0.2 to 1.7
 
-        execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm - - - 2"
+        execute(f"atm_mod2 {unw_file} {hgt} {mmli_par} {temp_dir}/{unw_file}.atm - - - {model}"
                 f" {ref_rpix} {ref_azlin}", uselogging=True)
         #above comamnd produces large range of atm_delay, -59 to 25.0
 
@@ -262,7 +262,7 @@ def get_width(txtfile):
     return width
 
 
-def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix):
+def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, model=0):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
@@ -276,8 +276,8 @@ def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix):
         #        f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1", uselogging=True)
 
         execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
-            f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1 - -"
-            f" - - - - - - {ref_rpix} {ref_azlin} 0", uselogging=True)
+            f" - {model} {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1"
+            f" - - - - - - 0.1 0.5 {ref_rpix} {ref_azlin}", uselogging=True)
         # fill the gaps
         width = get_width(f"{temp_dir}/{unw_file}.diff_par")
         execute(f"fill_gaps {temp_dir}/a0 {width} {temp_dir}/a0n", uselogging=True)
@@ -395,19 +395,29 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     unw_orig = f"{ifgname}.adf.unw"
 
     # apply atmospheric delay correction
-    # method 1
-    shutil.copyfile(unw_orig, "unw_atm_m1")
-    apply_atm_delay("unw_atm_m1", hgt, f"{mmli}.par", ref_azlin, ref_rpix)
-    make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
-    convert_from_sar_2_map("unw_atm_m1.atm", "unw_atm_m1.atm.tif", mwidth, lt, dempar, demw, demn)
-    convert_from_sar_2_map("unw_atm_m1", "unw_atm_m1.tif", mwidth, lt, dempar, demw, demn)
+    # method 2, mode=2
+    shutil.copyfile(unw_orig, "unw_atm_m22")
+    apply_atm_delay("unw_atm_m22", hgt, f"{mmli}.par", ref_azlin, ref_rpix)
+    # make_browse_png("unw_atm_m22", mmli, width, lt, demw, demn)
+    make_browse_png(reference, secondary, "unw_atm_m22")
+    convert_from_sar_2_map("unw_atm_m22.atm", "unw_atm_m22.atm.tif", mwidth, lt, dempar, demw, demn)
+    convert_from_sar_2_map("unw_atm_m22", "unw_atm_m22.tif", mwidth, lt, dempar, demw, demn)
 
+    # method 2d, mode=0
+    shutil.copyfile(unw_orig, "unw_atm_m2d0")
+    apply_atm_2d_delay("unw_atm_m2d0", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
+    # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
+    make_browse_png(reference, secondary, "unw_atm_m2d0")
+    convert_from_sar_2_map("unw_atm_m2d0.atm", "unw_atm_m2d0.atm.tif", mwidth, lt, dempar, demw, demn)
+    convert_from_sar_2_map("unw_atm_m2d0", "unw_atm_m2d0.tif", mwidth, lt, dempar, demw, demn)
 
-    shutil.copyfile(unw_orig, "unw_atm_m2")
-    apply_atm_2d_delay("unw_atm_m2", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
-    make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
-    convert_from_sar_2_map("unw_atm_m2.atm", "unw_atm_m2.atm.tif", mwidth, lt, dempar, demw, demn)
-    convert_from_sar_2_map("unw_atm_m2", "unw_atm_m2.tif", mwidth, lt, dempar, demw, demn)
+    # method 2d, mode=1
+    shutil.copyfile(unw_orig, "unw_atm_m2d1")
+    apply_atm_2d_delay("unw_atm_m2d1", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix, model=1)
+    # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
+    make_browse_png(reference, secondary, "unw_atm_m2d1")
+    convert_from_sar_2_map("unw_atm_m2d1.atm", "unw_atm_m2d1.atm.tif", mwidth, lt, dempar, demw, demn)
+    convert_from_sar_2_map("unw_atm_m2d1", "unw_atm_m2d1.tif", mwidth, lt, dempar, demw, demn)
 
     # normal processes
     ref_point_info = get_ref_point_info(mcf_log)

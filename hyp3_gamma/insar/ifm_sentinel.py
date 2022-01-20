@@ -232,11 +232,35 @@ def move_output_files(output, reference, prod_dir, long_output, include_displace
     makeAsfBrowse("{}.adf.unw.geo.bmp.tif".format(output),
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
-    # produce the png files for unw_atm_m1.tif and unw_atm_m2.tif
-    makeAsfBrowse("unw_atm_m1.tif", "unw_atm_m1_png", use_nn=True)
-    makeAsfBrowse("unw_atm_m2.tif", "unw_atm_m2_png", use_nn=True)
-    makeAsfBrowse("unw_atm_m1.atm.tif", "unw_atm_m1_atm_png", use_nn=True)
-    makeAsfBrowse("unw_atm_m2.atm.tif", "unw_atm_m2_atm_png", use_nn=True)
+
+    # copy files to output
+    inName = "unw_atm_m22.tif".format(output)
+    outName = "{}_unw_atm_m22.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "unw_atm_m2d0.tif".format(output)
+    outName = "{}_unw_atm_m2d0.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "unw_atm_m2d1.tif".format(output)
+    outName = "{}_unw_atm_m2d1.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "unw_atm_m22.atm.tif".format(output)
+    outName = "{}_unw_atm_m22.atm.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "unw_atm_m2d0.atm.tif".format(output)
+    outName = "{}_unw_atm_m2d0.atm.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+    inName = "unw_atm_m2d1.atm.tif".format(output)
+    outName = "{}_unw_atm_m2d1.atm.tif".format(os.path.join(prod_dir, long_output))
+    shutil.copy(inName, outName)
+
+
+
+
 
 def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords, ref_point_info):
     res = 20 * int(alooks)
