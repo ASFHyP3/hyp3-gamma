@@ -262,7 +262,7 @@ def get_width(txtfile):
     return width
 
 
-def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, model=0):
+def apply_atm_delay_2d(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, model=0):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
@@ -275,6 +275,8 @@ def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, mo
         # execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
         #        f" - 0 {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1", uselogging=True)
 
+        # usage: atm_mod_2d <diff_unw> <hgt> <cc> <DIFF_par> <mask> <model> <a0> <a1> <sigma> <sigma_h> <s1>
+        #                   [rwin] [azwin] [rstep] [azstep] [h0] [alpha] [cc_min] [mfrac] [xref] [yref] [sflg]
         execute(f"atm_mod_2d {unw_file} {hgt} {cc_file} {temp_dir}/{unw_file}.diff_par"
             f" - {model} {temp_dir}/a0 {temp_dir}/a1 {temp_dir}/sigma {temp_dir}/s0 {temp_dir}/s1"
             f" - - - - - - 0.1 0.5 {ref_rpix} {ref_azlin}", uselogging=True)
@@ -284,6 +286,7 @@ def apply_atm_2d_delay(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, mo
         execute(f"fill_gaps {temp_dir}/a1 {width} {temp_dir}/a1n", uselogging=True)
 
         # calcualte unw_atm
+        # usage: atm_sim_2d <DIFF_par> <hgt> <a0> <a1> <atm_phase> [mask]
         execute(f"atm_sim_2d {temp_dir}/{unw_file}.diff_par {hgt} {temp_dir}/a0n {temp_dir}/a1n"
                 f" {temp_dir}/{unw_file}.atm", uselogging=True)
 
@@ -405,7 +408,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     # method 2d, mode=0
     shutil.copyfile(unw_orig, "unw_atm_m2d0")
-    apply_atm_2d_delay("unw_atm_m2d0", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
+    apply_atm_delay_2d("unw_atm_m2d0", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
     # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
     make_browse_png(reference, secondary, "unw_atm_m2d0")
     convert_from_sar_2_map("unw_atm_m2d0.atm", "unw_atm_m2d0.atm.tif", mwidth, lt, dempar, demw, demn)
@@ -413,7 +416,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     # method 2d, mode=1
     shutil.copyfile(unw_orig, "unw_atm_m2d1")
-    apply_atm_2d_delay("unw_atm_m2d1", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix, model=1)
+    apply_atm_delay_2d("unw_atm_m2d1", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix, model=1)
     # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
     make_browse_png(reference, secondary, "unw_atm_m2d1")
     convert_from_sar_2_map("unw_atm_m2d1.atm", "unw_atm_m2d1.atm.tif", mwidth, lt, dempar, demw, demn)
