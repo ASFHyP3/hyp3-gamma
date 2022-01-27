@@ -214,7 +214,22 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
     return cc_masked_file, intensity_masked_file
 
 
-def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix, model=2):
+def substract_values_at_reference_point(unw_file, mlines, mwidth, ref_azlin, ref_rpix):
+    """
+    unw_file is the '>f4' datatype, Big endian float32. we need keep its datatype when writing the data
+    """
+    data = read_bin(unw_file,mlines, mwidth)
+    ch = data == 0
+    ref = data[ref_azlin, ref_rpix]
+    data = data - ref
+    data[ref_azlin, ref_rpix] = 1.18e-38
+    data[ch] = 0
+    data = data.astype('>f4')
+    data.tofile(unw_file)
+    return ref
+
+
+def apply_atm_delay(unw_file, hgt, mmli_par, mlines, mwidth, ref_azlin, ref_rpix, init_flg, model=2):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
@@ -240,8 +255,8 @@ def apply_atm_delay(unw_file, hgt, mmli_par, ref_azlin, ref_rpix, model=2):
         execute(f"sub_phase {unw_file} {temp_dir}/{unw_file}.atm {temp_dir}/{unw_file}.diff_par"
                 f" {temp_dir}/{unw_file}.tmp 0 - -", uselogging=True)
 
-        # produce modified unw geotiff file
-
+        if init_flg == "0":
+            substract_values_at_reference_point(f"{temp_dir}/{unw_file}.tmp", int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
         # copy .adf.tmp to adf.unw
         shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
@@ -262,7 +277,7 @@ def get_width(txtfile):
     return width
 
 
-def apply_atm_delay_2d(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, model=0):
+def apply_atm_delay_2d(unw_file, hgt, mmli_par, cc_file, mlines, mwidth, ref_azlin, ref_rpix, init_flg, model=0):
 
     shutil.copyfile(unw_file, f"{unw_file}.pre.atm")
 
@@ -293,6 +308,10 @@ def apply_atm_delay_2d(unw_file, hgt, mmli_par, cc_file, ref_azlin, ref_rpix, mo
         # subtract the atm_unw
         execute(f"sub_phase {unw_file} {temp_dir}/{unw_file}.atm {temp_dir}/{unw_file}.diff_par"
                 f" {temp_dir}/{unw_file}.tmp 0 - -", uselogging=True)
+        if init_flg == "0":
+            # substract the unw value at the reference point and set the 1.18e-38 at the reference point
+            substract_values_at_reference_point(f"{temp_dir}/{unw_file}.tmp", int(mlines), int(mwidth),
+                                                ref_azlin, ref_rpix)
         # copy .adf.tmp to adf.unw
         shutil.copyfile(f"{temp_dir}/{unw_file}.tmp", f"{unw_file}")
 
@@ -392,15 +411,25 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     # name of the combined mask file f"{adf_cc_masked}_mask.bmp"
     ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", f"{adf_cc_masked}_mask.bmp", int(mlines), int(mwidth))
 
-    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
-                      f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+    # test init_flg=0 and init_flg=1
 
-    unw_orig = f"{ifgname}.adf.unw"
+    init_flg = input("input init_flag(0/1): ")
+
+    if init_flg == "1":
+        mcf_log1 = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw1 {width} "
+                      f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+        unw_orig = f"{ifgname}.adf.unw1"
+        mcf_log =mcf_log1
+    else:
+        mcf_log0 = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw0 {width} "
+                      f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 0", uselogging=True)
+        unw_orig = f"{ifgname}.adf.unw0"
+        mcf_log = mcf_log0
 
     # apply atmospheric delay correction
     # method 2, mode=2
     shutil.copyfile(unw_orig, "unw_atm_m22")
-    apply_atm_delay("unw_atm_m22", hgt, f"{mmli}.par", ref_azlin, ref_rpix)
+    apply_atm_delay("unw_atm_m22", hgt, f"{mmli}.par", mlines, mwidth, ref_azlin, ref_rpix, init_flg)
     # make_browse_png("unw_atm_m22", mmli, width, lt, demw, demn)
     make_browse_png(reference, secondary, "unw_atm_m22")
     convert_from_sar_2_map("unw_atm_m22.atm", "unw_atm_m22.atm.tif", mwidth, lt, dempar, demw, demn)
@@ -408,7 +437,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     # method 2d, mode=0
     shutil.copyfile(unw_orig, "unw_atm_m2d0")
-    apply_atm_delay_2d("unw_atm_m2d0", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix)
+    apply_atm_delay_2d("unw_atm_m2d0", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", mlines, mwidth,
+                       ref_azlin, ref_rpix, init_flg)
     # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
     make_browse_png(reference, secondary, "unw_atm_m2d0")
     convert_from_sar_2_map("unw_atm_m2d0.atm", "unw_atm_m2d0.atm.tif", mwidth, lt, dempar, demw, demn)
@@ -416,7 +446,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     # method 2d, mode=1
     shutil.copyfile(unw_orig, "unw_atm_m2d1")
-    apply_atm_delay_2d("unw_atm_m2d1", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", ref_azlin, ref_rpix, model=1)
+    apply_atm_delay_2d("unw_atm_m2d1", hgt, f"{mmli}.par", f"{ifgname}.adf.cc", mlines, mwidth,
+                       ref_azlin, ref_rpix, init_flg, model=1)
     # make_browse_png("unw_atm_m1", mmli, width, lt, demw, demn)
     make_browse_png(reference, secondary, "unw_atm_m2d1")
     convert_from_sar_2_map("unw_atm_m2d1.atm", "unw_atm_m2d1.atm.tif", mwidth, lt, dempar, demw, demn)
