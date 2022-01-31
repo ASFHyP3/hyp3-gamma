@@ -2,6 +2,7 @@
 rtc_gamma processing for HyP3
 """
 import logging
+import os
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
@@ -33,10 +34,20 @@ def main():
     )
 
 
+def write_earthdata_creds(username, password):
+    if username is None:
+        username = os.environ['EARTHDATA_USERNAME']
+
+    if password is None:
+        password = os.environ['EARTHDATA_PASSWORD']
+
+    write_credentials_to_netrc_file(username, password)
+
+
 def rtc():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
@@ -55,7 +66,7 @@ def rtc():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_earthdata_creds(args.username, args.password)
 
     safe_dir = util.get_granule(args.granule)
 
@@ -87,8 +98,8 @@ def rtc():
 
 def insar():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
@@ -112,7 +123,7 @@ def insar():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_earthdata_creds(args.username, args.password)
 
     g1, g2 = util.earlier_granule_first(args.granules[0], args.granules[1])
     reference_granule = util.get_granule(g1)
@@ -146,8 +157,8 @@ def insar():
 
 def water_map():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
@@ -163,7 +174,7 @@ def water_map():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_earthdata_creds(args.username, args.password)
 
     safe_dir = util.get_granule(args.granule)
 
