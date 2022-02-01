@@ -34,7 +34,7 @@ def main():
     )
 
 
-def write_earthdata_creds(username, password):
+def write_earthdata_credentials(username, password):
     if username is None:
         try:
             username = os.environ['EARTHDATA_USERNAME']
@@ -78,7 +78,7 @@ def rtc():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_earthdata_creds(args.username, args.password)
+    write_earthdata_credentials(args.username, args.password)
 
     safe_dir = util.get_granule(args.granule)
 
@@ -135,7 +135,7 @@ def insar():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_earthdata_creds(args.username, args.password)
+    write_earthdata_credentials(args.username, args.password)
 
     g1, g2 = util.earlier_granule_first(args.granules[0], args.granules[1])
     reference_granule = util.get_granule(g1)
@@ -186,7 +186,7 @@ def water_map():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_earthdata_creds(args.username, args.password)
+    write_earthdata_credentials(args.username, args.password)
 
     safe_dir = util.get_granule(args.granule)
 
