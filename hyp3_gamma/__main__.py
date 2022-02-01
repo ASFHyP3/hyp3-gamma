@@ -36,10 +36,22 @@ def main():
 
 def write_earthdata_creds(username, password):
     if username is None:
-        username = os.environ['EARTHDATA_USERNAME']
+        try:
+            username = os.environ['EARTHDATA_USERNAME']
+        except KeyError:
+            sys.exit(
+                'Please provide Earthdata username via the --username option '
+                'or the EARTHDATA_USERNAME environment variable.'
+            )
 
     if password is None:
-        password = os.environ['EARTHDATA_PASSWORD']
+        try:
+            password = os.environ['EARTHDATA_PASSWORD']
+        except KeyError:
+            sys.exit(
+                'Please provide Earthdata password via the --password option '
+                'or the EARTHDATA_PASSWORD environment variable.'
+            )
 
     write_credentials_to_netrc_file(username, password)
 
