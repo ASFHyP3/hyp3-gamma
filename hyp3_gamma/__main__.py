@@ -42,7 +42,7 @@ def check_earthdata_credentials(username, password):
             raise ValueError(
                 'Please provide Earthdata username via the --username option '
                 'or the EARTHDATA_USERNAME environment variable.'
-            )
+            ) from None
 
     if password is None:
         try:
@@ -51,7 +51,7 @@ def check_earthdata_credentials(username, password):
             raise ValueError(
                 'Please provide Earthdata password via the --password option '
                 'or the EARTHDATA_PASSWORD environment variable.'
-            )
+            ) from None
 
     return username, password
 
