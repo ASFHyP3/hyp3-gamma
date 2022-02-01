@@ -36,22 +36,20 @@ def main():
 
 def check_earthdata_credentials(username, password):
     if username is None:
-        try:
-            username = os.environ['EARTHDATA_USERNAME']
-        except KeyError:
+        username = os.getenv('EARTHDATA_USERNAME')
+        if username is None:
             raise ValueError(
                 'Please provide Earthdata username via the --username option '
                 'or the EARTHDATA_USERNAME environment variable.'
-            ) from None
+            )
 
     if password is None:
-        try:
-            password = os.environ['EARTHDATA_PASSWORD']
-        except KeyError:
+        password = os.getenv('EARTHDATA_PASSWORD')
+        if password is None:
             raise ValueError(
                 'Please provide Earthdata password via the --password option '
                 'or the EARTHDATA_PASSWORD environment variable.'
-            ) from None
+            )
 
     return username, password
 
