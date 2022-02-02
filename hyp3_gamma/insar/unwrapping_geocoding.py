@@ -139,7 +139,7 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
 
 def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
     """
-    use mask_file (bmp) to mask the file (binary), output the masked binary format file.
+    use mask_file (bmp) to mask the file (binary), output the masked file (binary).
     """
     data = read_bin(file, nlines, nsamples)
     mask = read_bmp(mask_file)
@@ -156,8 +156,8 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
                      demn: int, dempar: str):
     """
     create water mask first, then
-    use the water_mask to mask the cc and mmli, then use masked cc and masked mmli to calcualte the validity mask.
-    cc_file and mli_file are binary files.
+    use the water_mask to mask the cc and mmli, finally use masked cc and masked mmli to calcualte
+    the validity mask (bmp). Both cc_file and mli_file are binary files.
     """
 
     with TemporaryDirectory() as temp_dir:
@@ -220,8 +220,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    # orignal cc_thres=0.1 and pwr_thres=0.2
-
     if apply_water_mask:
         # produce water mask and apply to {ifgname}.adf.cc and {mmli} files
         adf_cc_masked, _ = get_masked_files(f"{ifgname}.adf.cc", mmli, int(mwidth), int(mlines), lt, int(demw),
@@ -231,9 +229,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         _ = get_water_mask(f"{ifgname}.adf.cc", mwidth, lt, demw, demn, dempar)
         adf_cc_masked = f"{ifgname}.adf.cc"
 
+    # produce the validity mask file f"{adf_cc_masked}_mask.bmp"
     execute(f"rascc_mask {adf_cc_masked} - {width} 1 1 0 1 1 0.1", uselogging=True)
 
-    # The name of the validity mask file is f"{adf_cc_masked}_mask.bmp"
     ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", f"{adf_cc_masked}_mask.bmp", int(mlines), int(mwidth))
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
