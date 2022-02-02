@@ -142,12 +142,10 @@ def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
     use mask_file (bmp) to mask the file (binary), output the masked binary format file.
     """
     data = read_bin(file, nlines, nsamples)
-    data_type = data.dtype
-
     mask = read_bmp(mask_file)
 
     data[mask == 0] = 0
-    data = data.astype(data_type)
+
     outfile = "{file}_masked".format(file=file)
     data.tofile(outfile)
 
