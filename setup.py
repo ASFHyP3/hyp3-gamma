@@ -39,7 +39,7 @@ setup(
         'importlib_metadata',
         'jinja2',
         'lxml',
-        'numpy',
+        'numpy>=1.17,<1.18',
         'pillow',
         'python-dateutil',
     ],
