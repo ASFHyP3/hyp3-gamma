@@ -35,6 +35,7 @@ setup(
     install_requires=[
         'gdal',
         'geopandas',
+        'pandas>=1.3.5,<1.4',
         'hyp3lib>=1.6.8,<2',
         'importlib_metadata',
         'jinja2',
