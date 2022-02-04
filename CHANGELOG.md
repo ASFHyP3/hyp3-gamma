@@ -9,6 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## 5.1.4
 
 ### Changed
+
 * The water mask is now applied to the coherence coefficient first,
   which is then used to produce the validity mask. Power is no longer used when creating the validity mask.
 
