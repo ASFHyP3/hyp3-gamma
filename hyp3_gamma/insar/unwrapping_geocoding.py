@@ -164,7 +164,6 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
         # get mask data and save it into the water_mask.bmp file
         mask = get_water_mask(cc_file, mwidth, lt, demw, demn, dempar)
         water_im = Image.fromarray(mask)
-        # water_im.putpalette(in_palette)
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
         water_im.save(water_bmp_file)
 
