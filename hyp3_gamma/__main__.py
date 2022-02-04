@@ -2,6 +2,7 @@
 rtc_gamma processing for HyP3
 """
 import logging
+import os
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
@@ -33,10 +34,30 @@ def main():
     )
 
 
+def check_earthdata_credentials(username, password):
+    if username is None:
+        username = os.getenv('EARTHDATA_USERNAME')
+        if username is None:
+            raise ValueError(
+                'Please provide Earthdata username via the --username option '
+                'or the EARTHDATA_USERNAME environment variable.'
+            )
+
+    if password is None:
+        password = os.getenv('EARTHDATA_PASSWORD')
+        if password is None:
+            raise ValueError(
+                'Please provide Earthdata password via the --password option '
+                'or the EARTHDATA_PASSWORD environment variable.'
+            )
+
+    return username, password
+
+
 def rtc():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
@@ -52,10 +73,12 @@ def rtc():
     parser.add_argument('granule')
     args = parser.parse_args()
 
+    username, password = check_earthdata_credentials(args.username, args.password)
+
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_credentials_to_netrc_file(username, password)
 
     safe_dir = util.get_granule(args.granule)
 
@@ -87,8 +110,8 @@ def rtc():
 
 def insar():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
@@ -102,6 +125,8 @@ def insar():
     parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
 
+    username, password = check_earthdata_credentials(args.username, args.password)
+
     # TODO: Remove `--include-los-displacement` and this logic once it's no longer supported by the HyP3 API
     args.include_displacement_maps = args.include_displacement_maps | args.include_los_displacement
 
@@ -112,7 +137,7 @@ def insar():
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_credentials_to_netrc_file(username, password)
 
     g1, g2 = util.earlier_granule_first(args.granules[0], args.granules[1])
     reference_granule = util.get_granule(g1)
@@ -146,8 +171,8 @@ def insar():
 
 def water_map():
     parser = ArgumentParser()
-    parser.add_argument('--username', required=True)
-    parser.add_argument('--password', required=True)
+    parser.add_argument('--username')
+    parser.add_argument('--password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
@@ -160,10 +185,12 @@ def water_map():
     parser.add_argument('granule')
     args = parser.parse_args()
 
+    username, password = check_earthdata_credentials(args.username, args.password)
+
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
-    write_credentials_to_netrc_file(args.username, args.password)
+    write_credentials_to_netrc_file(username, password)
 
     safe_dir = util.get_granule(args.granule)
 

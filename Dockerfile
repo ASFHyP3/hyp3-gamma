@@ -39,7 +39,8 @@ RUN apt update \
 COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
 
 COPY . /hyp3-gamma/
-RUN python3 -m pip install --no-cache-dir /hyp3-gamma \
+RUN python3 -m pip install --upgrade pip \
+    && python3 -m pip install --no-cache-dir /hyp3-gamma \
     && rm -rf /hyp3-gamma
 
 ARG CONDA_GID=1000
