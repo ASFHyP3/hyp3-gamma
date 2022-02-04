@@ -122,9 +122,8 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     create water_mask geotiff file based on the cc_file (float binary file)
     """
     with TemporaryDirectory() as temp_dir:
-        os.system(f'cp {cc_file} {temp_dir}/tmp_mask')
         # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
-        geocode_back(f'{temp_dir}/tmp_mask', f'{temp_dir}/tmp_mask_geo', mwidth, lt, demw, demn, 0)
+        geocode_back(cc_file, f'{temp_dir}/tmp_mask_geo', mwidth, lt, demw, demn, 0)
         # 0--RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
         # 2--FLOAT (4 bytes/value)
         data2geotiff(f'{temp_dir}/tmp_mask_geo', f'{temp_dir}/tmpgtiff_mask_geo.tif', dempar, 2)
@@ -137,7 +136,7 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
     return mask
 
 
-def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
+def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
     """
     use mask_file (bmp) to mask the file (binary), output the masked file (binary).
     """
@@ -152,8 +151,7 @@ def mask_file(file: str, nlines: int, nsamples: int, mask_file: str):
     return outfile
 
 
-def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt: str, demw: int,
-                     demn: int, dempar: str):
+def water_mask_cc_mmli(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt: str, demw: int, mask):
     """
     create water mask first, then
     use the water_mask to mask the cc and mmli, finally use masked cc and masked mmli to calcualte
@@ -161,10 +159,7 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
     """
 
     with TemporaryDirectory() as temp_dir:
-        # get mask data and save it into the water_mask.bmp file
-        mask = get_water_mask(cc_file, mwidth, lt, demw, demn, dempar)
         water_im = Image.fromarray(mask)
-        # water_im.putpalette(in_palette)
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
         water_im.save(water_bmp_file)
 
@@ -172,9 +167,9 @@ def get_masked_files(cc_file: str, mmli_file: str, mwidth: int, mlines: int, lt:
         water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
-        # mask cc_file and mmli_file
-        cc_masked_file = mask_file(cc_file, mlines, mwidth, water_mask_bmp_sar_file)
-        intensity_masked_file = mask_file(mmli_file, mlines, mwidth, water_mask_bmp_sar_file)
+        # apply mask to cc_file and mmli_file
+        cc_masked_file = apply_mask(cc_file, mlines, mwidth, water_mask_bmp_sar_file)
+        intensity_masked_file = apply_mask(mmli_file, mlines, mwidth, water_mask_bmp_sar_file)
 
     return cc_masked_file, intensity_masked_file
 
@@ -220,21 +215,17 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
+    adf_cc = f"{ifgname}.adf.cc"
+    mask = get_water_mask(adf_cc, mwidth, lt, demw, demn, dempar)
     if apply_water_mask:
-        # produce water mask and apply to {ifgname}.adf.cc and {mmli} files
-        adf_cc_masked, _ = get_masked_files(f"{ifgname}.adf.cc", mmli, int(mwidth), int(mlines), lt, int(demw),
-                                            int(demn), dempar)
-    else:
-        # produce water mask file only
-        _ = get_water_mask(f"{ifgname}.adf.cc", mwidth, lt, demw, demn, dempar)
-        adf_cc_masked = f"{ifgname}.adf.cc"
+        adf_cc, _ = water_mask_cc_mmli(adf_cc, mmli, int(mwidth), int(mlines), lt, int(demw), mask)
 
-    # produce the validity mask file f"{adf_cc_masked}_mask.bmp"
-    execute(f"rascc_mask {adf_cc_masked} - {width} 1 1 0 1 1 0.1", uselogging=True)
+    # produce the validity mask file f"{adf_cc}_mask.bmp"
+    execute(f"rascc_mask {adf_cc} - {width} 1 1 0 1 1 0.1", uselogging=True)
 
-    ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", f"{adf_cc_masked}_mask.bmp", int(mlines), int(mwidth))
+    ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", f"{adf_cc}_mask.bmp", int(mlines), int(mwidth))
 
-    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc_masked}_mask.bmp {ifgname}.adf.unw {width} "
+    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {adf_cc}_mask.bmp {ifgname}.adf.unw {width} "
                       f"{trimode} 0 0 - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
