@@ -37,10 +37,12 @@ jobs:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: set environment variables
-        shell: bash -l {0}
         run: |
+          git fetch origin +refs/tags/*:refs/tags/*
           echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
