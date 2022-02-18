@@ -6,14 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## [5.1.4]
-
-### Changed
-
-* The water mask is now applied to the coherence coefficient first,
-  which is then used to produce the validity mask. Power is no longer used when creating the validity mask.
-
 ## [5.1.3]
 
 ### Security
