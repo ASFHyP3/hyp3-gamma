@@ -8,7 +8,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.1.3]
 
-### Security
+### Added
 
 * It is now possible to inject Earthdata username and password using environment variables: `EARTHDATA_USERNAME`
   and `EARTHDATA_PASSWORD`.
