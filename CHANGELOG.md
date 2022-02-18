@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.1.4]
+
+### Changed
+* `hyp3_gamma.dem` will now pull the Copernicus DEM from the `us-west-2` mirror located at `s3://asf-dem-west/v2/COP30`
+  to reduce cross-region traffic
+
 ## [5.1.3]
 
 ### Security

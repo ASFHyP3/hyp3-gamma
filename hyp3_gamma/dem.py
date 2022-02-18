@@ -9,7 +9,7 @@ from osgeo import gdal, ogr
 
 from hyp3_gamma.util import GDALConfigManager
 
-DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30.geojson'
+DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30-us-west-2-mirror.geojson'
 
 gdal.UseExceptions()
 ogr.UseExceptions()
