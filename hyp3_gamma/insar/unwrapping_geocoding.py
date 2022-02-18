@@ -219,7 +219,6 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
     # execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
-    # test here
     execute(f"rascc_mask {ifgname}.adf.cc - {width} 1 1 0 1 1 0.10", uselogging=True)
 
     if apply_water_mask:
