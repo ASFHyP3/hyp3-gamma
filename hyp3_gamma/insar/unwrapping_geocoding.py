@@ -101,6 +101,34 @@ def ref_point_with_max_cc(fcc: str, fmask: str, mlines: int, mwidth: int):
     return 0, 0
 
 
+def ref_point_with_max_cc_close_center(fcc: str, fmask: str, mlines: int, mwidth: int):
+    data_mk = read_bmp(fmask)
+    data_mk_max = data_mk.max()
+    data_mk = np.ma.masked_values(data_mk, data_mk_max)
+
+    data_cc = read_bin(fcc, mlines, mwidth)
+    data_cc_max = data_cc[data_mk.mask].max()
+    idx = np.where(data_cc == data_cc_max)
+    if idx:
+        cnt_row, cnt_col = data_cc.shape[0]/2.0,data_cc.shape[1]/2.0
+        rows, cols = idx[0], idx[1]
+        num = len(rows)
+        target_idx = 0
+        target_dist = (rows[0] - cnt_row)**2 + (cols[0] - cnt_col)**2
+        for i in range(1, num):
+            tmp = (rows[i]-cnt_row)**2 +(cols[i]-cnt_col)**2
+            if tmp <= target_dist:
+                target_dist = tmp
+                target_idx = i
+
+        ref_i = rows[target_idx]
+        ref_j = cols[target_idx]
+
+        return ref_i, ref_j
+
+    return 0, 0
+
+
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
     execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
 
@@ -218,8 +246,8 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    # execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
-    execute(f"rascc_mask {ifgname}.adf.cc - {width} 1 1 0 1 1 0.10", uselogging=True)
+    execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
+    # execute(f"rascc_mask {ifgname}.adf.cc - {width} 1 1 0 1 1 0.10", uselogging=True)
     if apply_water_mask:
         # create and apply water mask
         out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, mlines, lt, demw, demn, dempar)
@@ -228,14 +256,17 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         _ = get_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, lt, demw, demn, dempar)
         out_file = f"{ifgname}.adf.cc_mask.bmp"
 
-    ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.adf.cc", out_file, int(mlines), int(mwidth))
+    # ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(f"{ifgname}.adf.cc", out_file, int(mlines), int(mwidth))
+    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc_close_center(f"{ifgname}.adf.cc", out_file,
+                                                                           int(mlines), int(mwidth))
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+                      f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
 
-    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
+    # coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin_offset + 1, ref_rpix=ref_rpix_offset + 1, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
             uselogging=True)
