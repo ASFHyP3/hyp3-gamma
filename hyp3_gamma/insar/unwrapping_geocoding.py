@@ -256,9 +256,9 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         _ = get_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, lt, demw, demn, dempar)
         out_file = f"{ifgname}.adf.cc_mask.bmp"
 
-    # ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(f"{ifgname}.adf.cc", out_file, int(mlines), int(mwidth))
-    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc_close_center(f"{ifgname}.adf.cc", out_file,
-                                                                           int(mlines), int(mwidth))
+    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(f"{ifgname}.adf.cc", out_file, int(mlines), int(mwidth))
+    # ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc_close_center(f"{ifgname}.adf.cc", out_file,
+    #                                                                       int(mlines), int(mwidth))
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                       f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
