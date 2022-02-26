@@ -85,45 +85,53 @@ def read_bmp(file):
     return data
 
 
-def ref_point_with_max_cc(fcc: str, fmask: str, mlines: int, mwidth: int):
-    data_mk = read_bmp(fmask)
-    data_mk_max = data_mk.max()
-    data_mk = np.ma.masked_values(data_mk, data_mk_max)
+def window_sum(data, i, j, shift=1):
+    '''
+    window_size=9, shift=1, window_size=25, shift=2
+    '''
+    (sizei, sizej) = data.shape
+    if i < shift:
+        if j < shift:
+            tot = data[:i+shift+1,:j+shift+1].sum()
+        elif j > sizej - 1 - shift:
+            tot = data[:i+shift+1,j-shift:].sum()
+        else:
+            tot = data[:i+shift+1,j-shift:j+shift+1].sum()
+    elif i > sizei - 1 - shift:
+        if j < shift:
+            tot = data[i-shift:,:j+shift+1].sum()
+        elif j > sizej -1 -shift:
+            tot = data[i-shift:, j-shift:].sum()
+        else:
+            tot = data[i-shift:, j-shift:j+shift+1].sum()
+    else:
+        if j < shift:
+            tot = data[i-shift:i+shift+1,:j+shift+1].sum()
+        elif j > sizej -1 -shift:
+            tot = data[i-shift:i+shift+1, j-shift:].sum()
+        else:
+            tot = data[i-shift:i+shift+1, j-shift:j+shift+1].sum()
 
+    return tot
+
+
+def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int):
     data_cc = read_bin(fcc, mlines, mwidth)
-    data_cc_max = data_cc[data_mk.mask].max()
+    data_cc_max = data_cc.max()
     idx = np.where(data_cc == data_cc_max)
+    keyidx = 0
     if idx:
-        ref_i = idx[0][0]
-        ref_j = idx[1][0]
-        return ref_i, ref_j
-
-    return 0, 0
-
-
-def ref_point_with_max_cc_close_center(fcc: str, fmask: str, mlines: int, mwidth: int):
-    data_mk = read_bmp(fmask)
-    data_mk_max = data_mk.max()
-    data_mk = np.ma.masked_values(data_mk, data_mk_max)
-
-    data_cc = read_bin(fcc, mlines, mwidth)
-    data_cc_max = data_cc[data_mk.mask].max()
-    idx = np.where(data_cc == data_cc_max)
-    if idx:
-        cnt_row, cnt_col = data_cc.shape[0]/2.0,data_cc.shape[1]/2.0
         rows, cols = idx[0], idx[1]
         num = len(rows)
-        target_idx = 0
-        target_dist = (rows[0] - cnt_row)**2 + (cols[0] - cnt_col)**2
-        for i in range(1, num):
-            tmp = (rows[i]-cnt_row)**2 +(cols[i]-cnt_col)**2
-            if tmp <= target_dist:
-                target_dist = tmp
-                target_idx = i
+        tot = 0.0
+        for k in range(num):
+            tmp = window_sum(data_cc, rows[k], cols[k])
+            if tot <= tmp:
+                tot = tmp
+                keyidx = k
 
-        ref_i = rows[target_idx]
-        ref_j = cols[target_idx]
-
+        ref_i = idx[0][keyidx]
+        ref_j = idx[1][keyidx]
         return ref_i, ref_j
 
     return 0, 0
@@ -247,7 +255,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
     execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
-    # execute(f"rascc_mask {ifgname}.adf.cc - {width} 1 1 0 1 1 0.10", uselogging=True)
+
     if apply_water_mask:
         # create and apply water mask
         out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, mlines, lt, demw, demn, dempar)
@@ -256,9 +264,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         _ = get_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, lt, demw, demn, dempar)
         out_file = f"{ifgname}.adf.cc_mask.bmp"
 
-    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(f"{ifgname}.adf.cc", out_file, int(mlines), int(mwidth))
-    # ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc_close_center(f"{ifgname}.adf.cc", out_file,
-    #                                                                       int(mlines), int(mwidth))
+    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(f"{ifgname}.cc", int(mlines), int(mwidth))
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                       f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
