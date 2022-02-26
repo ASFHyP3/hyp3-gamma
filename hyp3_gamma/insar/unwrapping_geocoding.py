@@ -92,22 +92,22 @@ def window_sum(data, i, j, shift=1):
     (sizei, sizej) = data.shape
     if i < shift:
         if j < shift:
-            tot = data[:i+shift+1,:j+shift+1].sum()
+            tot = data[:i+shift+1, :j+shift+1].sum()
         elif j > sizej - 1 - shift:
-            tot = data[:i+shift+1,j-shift:].sum()
+            tot = data[:i+shift+1, j-shift:].sum()
         else:
-            tot = data[:i+shift+1,j-shift:j+shift+1].sum()
+            tot = data[:i+shift+1, j-shift:j+shift+1].sum()
     elif i > sizei - 1 - shift:
         if j < shift:
-            tot = data[i-shift:,:j+shift+1].sum()
-        elif j > sizej -1 -shift:
+            tot = data[i-shift:, :j+shift+1].sum()
+        elif j > sizej - 1 - shift:
             tot = data[i-shift:, j-shift:].sum()
         else:
             tot = data[i-shift:, j-shift:j+shift+1].sum()
     else:
         if j < shift:
-            tot = data[i-shift:i+shift+1,:j+shift+1].sum()
-        elif j > sizej -1 -shift:
+            tot = data[i-shift:i+shift+1, :j+shift+1].sum()
+        elif j > sizej - 1 - shift:
             tot = data[i-shift:i+shift+1, j-shift:].sum()
         else:
             tot = data[i-shift:i+shift+1, j-shift:j+shift+1].sum()
