@@ -115,10 +115,15 @@ def window_sum(data, i, j, shift=1):
     return tot
 
 
-def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int):
+def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=1.0):
+    '''
+    ratio 0.0-1.0, it is used to determine the pixels with the values >= ratio*max
+    '''
+    if ratio > 1.0 or ratio < 0.0:
+        ratio = 1.0
     data_cc = read_bin(fcc, mlines, mwidth)
     data_cc_max = data_cc.max()
-    idx = np.where(data_cc == data_cc_max)
+    idx = np.where(data_cc >= ratio*data_cc_max)
     keyidx = 0
     if idx:
         rows, cols = idx[0], idx[1]
@@ -135,6 +140,8 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int):
         return ref_i, ref_j
 
     return 0, 0
+
+
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
