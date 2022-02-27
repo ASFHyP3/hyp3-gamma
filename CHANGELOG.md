@@ -13,6 +13,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Use cc to find the pixels with max value. Use a 9-pixel window around the pixels with the highest
   coherence to determine which one has the highest neighborhood coherence value
 
+## [5.1.5]
+
+### Changed
+* Upgraded to hyp3-lib [v1.7.0](https://github.com/ASFHyP3/hyp3-lib/blob/develop/CHANGELOG.md#170) from v1.6.8
+
 ## [5.1.4]
 
 ### Changed
