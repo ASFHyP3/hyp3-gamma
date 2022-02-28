@@ -114,6 +114,7 @@ def window_sum(data, i, j, shift=1):
 
     return tot
 
+
 def calc_window_sum(data_cc, rows, cols, shift):
     '''
     rows and cols are 1D array. shift dtermine the size of window, shift=1 means 9- window, shift=2 means 16-window.
@@ -127,6 +128,7 @@ def calc_window_sum(data_cc, rows, cols, shift):
     cols = cols[idx]
     return rows, cols
 
+
 def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
     '''
     ratio 0.0-1.0, default value=0.999. it is used to determine the pixels with the values >= ratio*max_of_data
@@ -136,7 +138,6 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
     data_cc = read_bin(fcc, mlines, mwidth)
     data_cc_max = data_cc[data_cc < 1.0].max()
     idx = np.where(data_cc >= ratio*data_cc_max)
-    keyidx = 0
     shift = 1
     if idx:
         rows, cols = idx[0], idx[1]
@@ -151,8 +152,6 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
         return ref_i, ref_j
 
     return 0, 0
-
-
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
