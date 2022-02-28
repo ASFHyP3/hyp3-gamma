@@ -114,7 +114,7 @@ def window_sum(data, i, j, shift=1):
 
     return tot
 
-def cal_window_sum(data_cc, rows, cols, shift):
+def calc_window_sum(data_cc, rows, cols, shift):
     '''
     rows and cols are 1D array. shift dtermine the size of window, shift=1 means 9- window, shift=2 means 16-window.
     '''
@@ -141,7 +141,7 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
     if idx:
         rows, cols = idx[0], idx[1]
         while (True):
-            rows, cols = cal_window_sum(data_cc, rows, cols, shift)
+            rows, cols = calc_window_sum(data_cc, rows, cols, shift)
             shift += 1
             if rows.shape[0] == 1:
                 ref_i = rows[0]
