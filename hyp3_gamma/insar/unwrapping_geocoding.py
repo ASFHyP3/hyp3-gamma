@@ -114,29 +114,40 @@ def window_sum(data, i, j, shift=1):
 
     return tot
 
-
-def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=1.0):
+def cal_window_sum(data_cc, rows, cols, shift):
     '''
-    ratio 0.0-1.0, it is used to determine the pixels with the values >= ratio*max
+    rows and cols are 1D array. shift dtermine the size of window, shift=1 means 9- window, shift=2 means 16-window.
+    '''
+    num = rows.shape[0]
+    tots = np.zeros(num, dtype=float)
+    for k in range(num):
+        tots[k] = window_sum(data_cc, rows[k], cols[k], shift)
+    idx = np.where(tots == tots.max())
+    rows = rows[idx]
+    cols = cols[idx]
+    return rows, cols
+
+def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
+    '''
+    ratio 0.0-1.0, default value=0.999. it is used to determine the pixels with the values >= ratio*max_of_data
     '''
     if ratio > 1.0 or ratio < 0.0:
         ratio = 1.0
     data_cc = read_bin(fcc, mlines, mwidth)
-    data_cc_max = data_cc.max()
+    data_cc_max = data_cc[data_cc < 1.0].max()
     idx = np.where(data_cc >= ratio*data_cc_max)
     keyidx = 0
+    shift = 1
     if idx:
         rows, cols = idx[0], idx[1]
-        num = len(rows)
-        tot = 0.0
-        for k in range(num):
-            tmp = window_sum(data_cc, rows[k], cols[k])
-            if tot <= tmp:
-                tot = tmp
-                keyidx = k
+        while (True):
+            rows, cols = cal_window_sum(data_cc, rows, cols, shift)
+            shift += 1
+            if rows.shape[0] == 1:
+                ref_i = rows[0]
+                ref_j = cols[0]
+                break
 
-        ref_i = idx[0][keyidx]
-        ref_j = idx[1][keyidx]
         return ref_i, ref_j
 
     return 0, 0
