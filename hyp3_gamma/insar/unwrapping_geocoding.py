@@ -129,8 +129,9 @@ def calc_window_sum(data_cc, rows, cols, shift):
     return rows, cols
 
 
-def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
+def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, shift=1, ratio=0.999):
     '''
+    shift determine the window size, shift=1 9-pixel window, shift=2, 16-pixel window, etc.
     ratio 0.0-1.0, default value=0.999. it is used to determine the pixels with the values >= ratio*max_of_data
     '''
     if ratio > 1.0 or ratio < 0.0:
@@ -138,7 +139,7 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, ratio=0.999):
     data_cc = read_bin(fcc, mlines, mwidth)
     data_cc_max = data_cc[data_cc < 1.0].max()
     idx = np.where(data_cc >= ratio*data_cc_max)
-    shift = 1
+
     if idx:
         rows, cols = idx[0], idx[1]
         while (True):
