@@ -149,7 +149,7 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, shift=1, ratio=0.9
     while (True):
         rows, cols = calc_window_sum(data_cc, rows, cols, shift, ratio)
         shift += 1
-        ratio = 0.5 +  ratio / 2.0
+        ratio = 0.5 + ratio / 2.0
         if rows.shape[0] == 1:
             ref_i = rows[0]
             ref_j = cols[0]
