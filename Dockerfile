@@ -70,9 +70,13 @@ ENV HDF5_DISABLE_VERSION_CHECK=1
 WORKDIR /home/conda/
 
 ## ASF TOOLS
-COPY --from=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma:5.1.2 /home/conda/mambaforge /home/conda/mambaforge
-COPY --from=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma:5.1.2 /home/conda/.profile /home/conda/.profile
-COPY --from=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma:5.1.2 /home/conda/.condarc /home/conda/.condarc
+ARG ASF_TOOLS_IMAGE=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma
+ARG ASF_TOOLS_TAG=5.1.2
+
+COPY --from=${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} --chown=${CONDA_GID}:${CONDA_UID} /home/conda/mambaforge /home/conda/mambaforge
+COPY --from=${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} --chown=${CONDA_GID}:${CONDA_UID} /home/conda/.profile /home/conda/.condarc /home/conda/
+
+ENV PATH=$PATH:/home/conda/mambaforge/bin
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
