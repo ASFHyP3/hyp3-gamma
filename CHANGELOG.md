@@ -7,6 +7,12 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [5.1.6]
+
+### Fixed
+* `asf-tools` conda environment, which is used by the water mapping code, has been (temporarily) locked to the environmnet as created
+   in HyP3 GAMMA v5.1.2 to resolve some dependancy issues.
+
 ## [5.1.5]
 
 ### Changed
