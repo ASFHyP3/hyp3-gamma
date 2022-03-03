@@ -1,3 +1,9 @@
+## ASF TOOLS
+ARG ASF_TOOLS_IMAGE=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma
+ARG ASF_TOOLS_TAG=5.1.2
+
+FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
+
 FROM ubuntu:20.04
 
 # For opencontainers label definitions, see:
@@ -69,25 +75,10 @@ ENV HDF5_DISABLE_VERSION_CHECK=1
 
 WORKDIR /home/conda/
 
-## ASF TOOLS
-RUN wget --progress=dot:mega https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh \
-    && bash Mambaforge-Linux-x86_64.sh -b \
-    && rm -f Mambaforge-Linux-x86_64.sh \
-    && echo PATH="/home/conda/mambaforge/bin":$PATH >> .profile \
-    && echo ". /home/conda/mambaforge/etc/profile.d/conda.sh" >> .profile
+COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/mambaforge /home/conda/mambaforge
+COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/.profile /home/conda/.condarc /home/conda/
 
 ENV PATH=$PATH:/home/conda/mambaforge/bin
-
-RUN conda --version \
-    && conda config --set auto_activate_base false
-
-# FIXME: dev branch and cached stale clone
-RUN git clone https://github.com/ASFHyP3/asf-tools.git \
-    && mamba env create -f asf-tools/environment.yml \
-    && mamba clean -afy
-
-RUN conda run -n asf-tools python -m pip install --no-cache-dir ./asf-tools \
-    && rm -rf ./asf-tools
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
