@@ -126,7 +126,7 @@ def calc_window_sum(data_cc, rows, cols, shift, ratio):
 
     # the maximun widow is 11*11 pixels (shift=5)
     if shift >= 5:
-        idx =np.where(tots == tots.max())
+        idx = np.where(tots == tots.max())
     else:
         idx = np.where(tots >= ratio*tots.max())
 
