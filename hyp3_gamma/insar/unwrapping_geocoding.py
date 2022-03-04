@@ -124,7 +124,12 @@ def calc_window_sum(data_cc, rows, cols, shift, ratio):
     for k in range(num):
         tots[k] = window_sum(data_cc, rows[k], cols[k], shift)
 
-    idx = np.where(tots >= ratio*tots.max())
+    # the maximun widow is 11*11 pixels (shift=5)
+    if shift >= 5:
+        idx =np.where(tots == tots.max())
+    else:
+        idx = np.where(tots >= ratio*tots.max())
+
     num_curr = len(idx[0])
     if num_curr == num:
         idx = np.where(tots == tots.max())
@@ -137,7 +142,8 @@ def calc_window_sum(data_cc, rows, cols, shift, ratio):
 def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, shift=1, ratio=0.999):
     '''
     shift determine the window size, shift=1 9-pixel window, shift=2, 16-pixel window, etc.
-    ratio 0.0-1.0, default value=0.999. it is used to determine the pixels with the values >= ratio*max_of_data
+    ratio is in the range of 0.0 to 1.0, default value=0.999. it is used to determine the candidate pixels with
+    the values >= ratio*max_of_data and values <= max_of_data.
     '''
     if ratio > 1.0 or ratio < 0.0:
         ratio = 1.0
