@@ -13,6 +13,12 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Use cc to find the pixels with max value. Use a 9-pixel window around the pixels with the highest
   coherence to determine which one has the highest neighborhood coherence value
 
+## [5.1.6]
+
+### Fixed
+* `asf-tools` conda environment, which is used by the water mapping code, has been (temporarily) locked to the environmnet as created
+   in HyP3 GAMMA v5.1.2 to resolve some dependancy issues.
+
 ## [5.1.5]
 
 ### Changed
