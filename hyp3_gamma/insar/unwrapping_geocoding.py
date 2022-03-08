@@ -181,7 +181,7 @@ def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
         create_water_mask(f'{temp_dir}/tmpgtiff_mask_geo.tif', 'water_mask.tif')
 
 
-def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demn):
+def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
     '''
     input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
     '''
@@ -192,17 +192,12 @@ def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demn):
 
     with TemporaryDirectory() as temp_dir:
         water_im = Image.fromarray(mask)
-        water_im.putpalette(in_palette)
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
         water_im.save(water_bmp_file)
 
         # map water_mask.bmp file to SAR coordinators
         water_mask_bmp_sar_file = "water_mask_sar.bmp"
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
-
-    # read water_mask_bmp_sar_file
-    water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
-    water_mask_sar_data = np.array(water_mask_sar_im)
 
 
 def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
@@ -300,22 +295,22 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         ch = input("apply water mask to cc, adf.cc, and pwr(y/n)?")
 
         if ch.lower() == 'y':
-            convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demn)
+            convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demw)
             # apply water mask to cc, adf.cc, and pwr
-            adf_cc_masked = apply(f'{ifgf}.adf.cc', mlines, mwidth, 'water_mask_sar.bmp')
-            pwr_masked = apply(f'{mmli}', mlines, mwidth, 'water_mask_sar.bmp')
-            cc_ref = apply_mask(f'{ifgname}.cc', mlines, mwidth, 'water_mask_sar.bmp')
+            adf_cc_masked = apply_mask(f'{ifgname}.adf.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
+            pwr_masked = apply_mask(f'{mmli}', int(mlines), int(mwidth), 'water_mask_sar.bmp')
+            cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
             execute(f"rascc_mask {adf_cc_masked} {pwr_masked} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
-            out_file = f"{ifgname}.adf.cc_mask.bmp"
+            out_file = f"{adf_cc_masked}_mask.bmp"
 
         else:
             execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
-            # apply water mask to cc and combine the validity and water mask
-            convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demn)
+            # combine the validity and water mask
+            convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demw)
             # combine the water mask with validity mask in SAR space
             out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", 'water_mask_sar.bmp')
             # apply water mask to cc
-            cc_ref = apply_mask(f'{ifgname}.cc', mlines, mwidth, 'water_mask_sar.bmp')
+            cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
     # normal process
     ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(cc_ref, int(mlines), int(mwidth))
