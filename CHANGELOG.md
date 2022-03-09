@@ -13,7 +13,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * `asf-tools` conda environment, which is used by the water mapping code, is now copied from the latest
   [asf-tools image](https://github.com/ASFHyP3/asf-tools/pkgs/container/asf-tools).
 
-
 ## [5.1.6]
 
 ### Fixed
