@@ -167,13 +167,13 @@ def get_water_mask_bmp(cc_mask_file, mwidth, lt, demw, demn, dempar):
         # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
 
-def get_water_mask(cc_file, mwidth, lt, demw, demn, dempar):
+def get_water_mask(cc_file, width, lt, demw, demn, dempar):
     """
     create water_mask geotiff file based on the cc_file (float binary file)
     """
     with TemporaryDirectory() as temp_dir:
         # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
-        geocode_back(cc_file, f'{temp_dir}/tmp_mask_geo', mwidth, lt, demw, demn, 0)
+        geocode_back(cc_file, f'{temp_dir}/tmp_mask_geo', width, lt, demw, demn, 0)
         # 0--RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
         # 2--FLOAT (4 bytes/value)
         data2geotiff(f'{temp_dir}/tmp_mask_geo', f'{temp_dir}/tmpgtiff_mask_geo.tif', dempar, 2)
@@ -282,7 +282,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    get_water_mask(f"{ifgname}.adf.cc", mwidth, lt, demw, demn, dempar)
+    get_water_mask(f"{ifgname}.adf.cc", width, lt, demw, demn, dempar)
 
     if not apply_water_mask:
 
