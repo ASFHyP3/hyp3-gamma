@@ -1,5 +1,5 @@
 ## ASF TOOLS
-ARG ASF_TOOLS_IMAGE="ghcr.io/asfhyp3/asf-tools"
+ARG ASF_TOOLS_IMAGE='ghcr.io/asfhyp3/asf-tools'
 ARG ASF_TOOLS_TAG=latest
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
