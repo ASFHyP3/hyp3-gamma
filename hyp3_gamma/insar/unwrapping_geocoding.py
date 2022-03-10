@@ -154,20 +154,6 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def get_water_mask_bmp(cc_mask_file, mwidth, lt, demw, demn, dempar):
-    """
-    create water_mask.tif in MAP space based on the cc_mask_file
-    """
-    with TemporaryDirectory() as temp_dir:
-        os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
-        # 2--bmp
-        geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
-        # 0--bmp
-        data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
-        # create water_mask.tif file
-        create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
-
-
 def get_water_mask(cc_file, width, lt, demw, demn, dempar):
     """
     create water_mask geotiff file based on the cc_file (float binary file)
@@ -213,13 +199,6 @@ def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
     data.tofile(outfile)
 
     return outfile
-
-
-def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
-
-    geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
-
-    data2geotiff("tmp.bmp", out_geotiff, dempar, type_)
 
 
 def combine_water_mask(cc_mask_file, water_mask_sar_file):
