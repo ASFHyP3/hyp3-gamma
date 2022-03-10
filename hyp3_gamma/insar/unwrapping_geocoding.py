@@ -167,6 +167,7 @@ def get_water_mask_bmp(cc_mask_file, mwidth, lt, demw, demn, dempar):
         # create water_mask.tif file
         create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
 
+
 def get_water_mask(cc_file, width, lt, demw, demn, dempar):
     """
     create water_mask geotiff file based on the cc_file (float binary file)
