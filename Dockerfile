@@ -1,6 +1,6 @@
 ## ASF TOOLS
-ARG ASF_TOOLS_IMAGE=845172464411.dkr.ecr.us-west-2.amazonaws.com/hyp3-gamma
-ARG ASF_TOOLS_TAG=5.1.2
+ARG ASF_TOOLS_IMAGE='ghcr.io/asfhyp3/asf-tools'
+ARG ASF_TOOLS_TAG=latest
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
 
@@ -75,10 +75,10 @@ ENV HDF5_DISABLE_VERSION_CHECK=1
 
 WORKDIR /home/conda/
 
-COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/mambaforge /home/conda/mambaforge
-COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/.profile /home/conda/.condarc /home/conda/
+COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /opt/conda /opt/conda
+COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/.profile /home/conda/
 
-ENV PATH=$PATH:/home/conda/mambaforge/bin
+ENV PATH=$PATH:/opt/conda/bin
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
