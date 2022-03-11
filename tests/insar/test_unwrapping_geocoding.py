@@ -2,6 +2,7 @@ import numpy as np
 
 from hyp3_gamma.insar.unwrapping_geocoding import get_neighbors
 
+
 def test_get_neighbors():
     array = np.arange(0, 5 * 5)
     array.shape = (5, 5)
