@@ -19,6 +19,7 @@ def test_get_neighbors():
 
     assert np.array_equal(get_neighbors(array, 2, 2), np.array([[6, 7, 8], [11, 12, 13], [16, 17, 18]]))
 
+
 def test_get_neighbors_bigger_n():
     array = np.arange(0, 5 * 5)
     array.shape = (5, 5)
