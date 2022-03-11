@@ -1,5 +1,7 @@
 import numpy as np
+
 from hyp3_gamma.insar.unwrapping_geocoding import get_neighbors
+
 
 def test_get_neighbors():
     array = np.arange(0, 5 * 5)
@@ -25,4 +27,3 @@ def test_get_neighbors_bigger_n():
                           np.array([[0, 1, 2, 3], [5, 6, 7, 8], [10, 11, 12, 13], [15, 16, 17, 18]]))
     assert np.array_equal(get_neighbors(array, 1, 1, n=3), array)
     assert np.array_equal(get_neighbors(array, 1, 1, n=4), array)
-
