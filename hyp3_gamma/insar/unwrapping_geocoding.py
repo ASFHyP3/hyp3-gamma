@@ -85,39 +85,21 @@ def read_bmp(file):
     return data
 
 
-def window_sum(data, i, j, shift=1):
-    '''
-    window_size=9, shift=1, window_size=25, shift=2
-    '''
-    (sizei, sizej) = data.shape
-    if i < shift:
-        if j < shift:
-            tot = data[:i+shift+1, :j+shift+1].sum()
-        elif j > sizej - 1 - shift:
-            tot = data[:i+shift+1, j-shift:].sum()
-        else:
-            tot = data[:i+shift+1, j-shift:j+shift+1].sum()
-    elif i > sizei - 1 - shift:
-        if j < shift:
-            tot = data[i-shift:, :j+shift+1].sum()
-        elif j > sizej - 1 - shift:
-            tot = data[i-shift:, j-shift:].sum()
-        else:
-            tot = data[i-shift:, j-shift:j+shift+1].sum()
-    else:
-        if j < shift:
-            tot = data[i-shift:i+shift+1, :j+shift+1].sum()
-        elif j > sizej - 1 - shift:
-            tot = data[i-shift:i+shift+1, j-shift:].sum()
-        else:
-            tot = data[i-shift:i+shift+1, j-shift:j+shift+1].sum()
+def get_neighbors(array, i, j, n=1):
+    i_max, j_max = array.shape
 
-    return tot
+    i_start = max(i - n, 0)
+    i_stop = min(i + n + 1, i_max)
+
+    j_start = max(j - n, 0)
+    j_stop = min(j + n + 1, j_max)
+
+    return array[i_start:i_stop, j_start:j_stop]
 
 
-def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, shift=1):
+def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, n=1):
     '''
-    shift determine the window size, shift=1 9-pixel window, shift=2, 16-pixel window, etc.
+    shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
     '''
 
     data_cc = read_bin(fcc, mlines, mwidth)
@@ -129,7 +111,7 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, shift=1):
     tots = np.zeros(num, dtype=float)
 
     for k in range(num):
-        tots[k] = window_sum(data_cc, rows[k], cols[k], shift)
+        tots[k] = get_neighbors(data_cc, rows[k], cols[k], n).sum()
 
     idx = np.where(tots == tots.max())
     ref_i = rows[idx[0][0]]
