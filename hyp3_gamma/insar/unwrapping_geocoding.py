@@ -237,7 +237,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("            Start unwrapping")
     log.info("-------------------------------------------------")
 
-    execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
+    execute(f"cc_wave {ifgf} - - {ifgname}.cc {width}", uselogging=True)
 
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
