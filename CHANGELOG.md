@@ -7,6 +7,11 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [5.1.8]
+
+### Changed
+* Upgraded to asf-tools [v0.3.2](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#032) from v0.3.1
+
 ## [5.1.7]
 
 ### Fixed
