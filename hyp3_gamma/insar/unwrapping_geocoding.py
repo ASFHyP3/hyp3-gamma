@@ -97,12 +97,11 @@ def get_neighbors(array, i, j, n=1):
     return array[i_start:i_stop, j_start:j_stop]
 
 
-def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, n=1):
+def ref_point_with_max_cc(data_cc: np.array, window_size=1):
     '''
     shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
     '''
 
-    data_cc = read_bin(fcc, mlines, mwidth)
     data_cc_max = data_cc[data_cc < 1.0].max()
     idx = np.where(data_cc == data_cc_max)
 
@@ -111,7 +110,7 @@ def ref_point_with_max_cc(fcc: str, mlines: int, mwidth: int, n=1):
     tots = np.zeros(num, dtype=float)
 
     for k in range(num):
-        tots[k] = get_neighbors(data_cc, rows[k], cols[k], n).sum()
+        tots[k] = get_neighbors(data_cc, rows[k], cols[k], window_size).sum()
 
     idx = np.where(tots == tots.max())
     ref_i = rows[idx[0][0]]
@@ -259,14 +258,13 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         # apply water mask in SAR space to cc
         cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
-    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(cc_ref, int(mlines), int(mwidth))
+    data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
+    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(data_cc)
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                       f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
-
-    # coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
     coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin_offset + 1, ref_rpix=ref_rpix_offset + 1, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",

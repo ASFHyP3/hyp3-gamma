@@ -1,6 +1,6 @@
 import numpy as np
 
-from hyp3_gamma.insar.unwrapping_geocoding import get_neighbors
+from hyp3_gamma.insar.unwrapping_geocoding import get_neighbors, ref_point_with_max_cc
 
 
 def test_get_neighbors():
@@ -28,3 +28,37 @@ def test_get_neighbors_bigger_n():
                           np.array([[0, 1, 2, 3], [5, 6, 7, 8], [10, 11, 12, 13], [15, 16, 17, 18]]))
     assert np.array_equal(get_neighbors(array, 1, 1, n=3), array)
     assert np.array_equal(get_neighbors(array, 1, 1, n=4), array)
+
+
+def test_ref_point_with_max_cc():
+    array = np.array([
+        [0.0, 0.0],
+        [0.0, 0.0],
+    ])
+    assert ref_point_with_max_cc(array) == (0, 0)
+
+    array = np.array([
+        [0.0, 0.00001],
+        [0.0, 0.0],
+    ])
+    assert ref_point_with_max_cc(array) == (0, 1)
+
+    array = np.array([
+        [0.0, 0.00001],
+        [1.0, 0.0],
+    ])
+    assert ref_point_with_max_cc(array) == (0, 1)
+
+    array = np.array([
+        [0.5, 0.2, 0.0],
+        [0.2, 0.2, 0.201],
+        [0.0, 0.2, 0.5],
+    ])
+    assert ref_point_with_max_cc(array) == (2, 2)
+
+    array = np.array([
+        [0.5, 0.201, 0.0],
+        [0.2, 0.2, 0.2],
+        [0.0, 0.2, 0.5],
+    ])
+    assert ref_point_with_max_cc(array) == (0, 0)
