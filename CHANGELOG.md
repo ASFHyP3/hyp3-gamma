@@ -8,8 +8,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.1.9]
 
-#### Changed
-* validy mask is determined by cc 0.1 and pwr 0.0. reference point is determined with cc only.
+### Changed
+* Validity mask is determined by cc 0.1 and pwr 0.0. reference point is determined with cc only.
   Use cc to find the pixels with max value. Use a 9-pixel window around the pixels with the highest
   coherence to determine which one has the highest neighborhood coherence value
 
