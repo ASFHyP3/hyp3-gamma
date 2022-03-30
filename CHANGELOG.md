@@ -9,9 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.2.0]
 
 ### Changed
-* Validity mask is determined by cc 0.1 and pwr 0.0. reference point is determined with cc only.
-  Use cc to find the pixels with max value. Use a 9-pixel window around the pixels with the highest
-  coherence to determine which one has the highest neighborhood coherence value
+* The amplitude threshold used for the InSAR phase unwrapping validity mask was changed from 0.2 to 0.0 (in power scale). The coherence threshold remains at 0.1, so the validity mask is now calculated based only on coherence values.
+* The InSAR phase unwrapping reference point is now determined using a neighborhood coherence value. The pixels with the highest coherence are examined using a 9-pixel window to find the pixel with the highest neighborhood coherence value, which is then used as the reference point for phase unwrapping.
 
 ## [5.1.8]
 
