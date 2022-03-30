@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0]
+
+### Changed
+* The amplitude threshold used for the InSAR phase unwrapping validity mask was changed from 0.2 to 0.0 (in power scale). The coherence threshold remains at 0.1, so the validity mask is now calculated based only on coherence values.
+* The InSAR phase unwrapping reference point is now determined using a neighborhood coherence value. The pixels with the highest coherence are examined using a 9-pixel window to find the pixel with the highest neighborhood coherence value, which is then used as the reference point for phase unwrapping.
 
 ## [5.1.8]
 

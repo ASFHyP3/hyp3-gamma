@@ -85,20 +85,38 @@ def read_bmp(file):
     return data
 
 
-def ref_point_with_max_cc(fcc: str, fmask: str, mlines: int, mwidth: int):
-    data_mk = read_bmp(fmask)
-    data_mk_max = data_mk.max()
-    data_mk = np.ma.masked_values(data_mk, data_mk_max)
+def get_neighbors(array, i, j, n=1):
+    i_max, j_max = array.shape
 
-    data_cc = read_bin(fcc, mlines, mwidth)
-    data_cc_max = data_cc[data_mk.mask].max()
+    i_start = max(i - n, 0)
+    i_stop = min(i + n + 1, i_max)
+
+    j_start = max(j - n, 0)
+    j_stop = min(j + n + 1, j_max)
+
+    return array[i_start:i_stop, j_start:j_stop]
+
+
+def ref_point_with_max_cc(data_cc: np.array, window_size=1):
+    '''
+    shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
+    '''
+
+    data_cc_max = data_cc[data_cc < 1.0].max()
     idx = np.where(data_cc == data_cc_max)
-    if idx:
-        ref_i = idx[0][0]
-        ref_j = idx[1][0]
-        return ref_i, ref_j
 
-    return 0, 0
+    rows, cols = idx[0], idx[1]
+    num = len(rows)
+    tots = np.zeros(num, dtype=float)
+
+    for k in range(num):
+        tots[k] = get_neighbors(data_cc, rows[k], cols[k], window_size).sum()
+
+    idx = np.where(tots == tots.max())
+    ref_i = rows[idx[0][0]]
+    ref_j = cols[idx[0][0]]
+
+    return ref_i, ref_j
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -117,62 +135,68 @@ def create_phase_from_complex(incpx, outfloat, width):
     execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
 
 
-def get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar):
+def get_water_mask(cc_file, width, lt, demw, demn, dempar):
     """
-    create water_mask based on the cc_mask_file
+    create water_mask geotiff file based on the cc_file (float binary file)
     """
     with TemporaryDirectory() as temp_dir:
-        os.system(f'cp {cc_mask_file} {temp_dir}/tmp_mask.bmp')
-        # 2--bmp
-        geocode_back(f'{temp_dir}/tmp_mask.bmp', f'{temp_dir}/tmp_mask_geo.bmp', mwidth, lt, demw, demn, 2)
-        # 0--bmp
-        data2geotiff(f'{temp_dir}/tmp_mask_geo.bmp', f'{temp_dir}/tmp_mask_geo.tif', dempar, 0)
+        # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
+        geocode_back(cc_file, f'{temp_dir}/tmp_mask_geo', width, lt, demw, demn, 0)
+        # 0--RASTER 8 or 24 bit uncompressed raster image, SUN (*.ras), BMP:(*.bmp), or TIFF: (*.tif)
+        # 2--FLOAT (4 bytes/value)
+        data2geotiff(f'{temp_dir}/tmp_mask_geo', f'{temp_dir}/tmpgtiff_mask_geo.tif', dempar, 2)
         # create water_mask.tif file
-        create_water_mask(f'{temp_dir}/tmp_mask_geo.tif', 'water_mask.tif')
+        create_water_mask(f'{temp_dir}/tmpgtiff_mask_geo.tif', 'water_mask.tif')
+
+
+def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
+    '''
+    input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
+    '''
     ds = gdal.Open('water_mask.tif')
     band = ds.GetRasterBand(1)
     mask = band.ReadAsArray()
     del ds
-    return mask
+
+    with TemporaryDirectory() as temp_dir:
+        water_im = Image.fromarray(mask)
+        water_bmp_file = f'{temp_dir}/water_mask.bmp'
+        water_im.save(water_bmp_file)
+        # map water_mask.bmp file to SAR coordinators
+        water_mask_bmp_sar_file = "water_mask_sar.bmp"
+        geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
 
-def convert_from_sar_2_map(in_file, out_geotiff, width, lt, dempar, demw, demn, type_):
+def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
+    """
+    use mask_file (bmp) to mask the file (binary), output the masked file (binary). All three file are in SAR space.
+    """
+    data = read_bin(file, nlines, nsamples)
+    mask = read_bmp(mask_file)
 
-    geocode_back(in_file, "tmp.bmp", width, lt, demw, demn, type_)
+    data[mask == 0] = 0
 
-    data2geotiff("tmp.bmp", out_geotiff, dempar, type_)
+    outfile = "{file}_masked".format(file=file)
+    data.tofile(outfile)
+
+    return outfile
 
 
-def combine_water_mask(cc_mask_file, mwidth, mlines, lt, demw, demn, dempar):
-    """combine cc_mask with water_mask
+def combine_water_mask(cc_mask_file, water_mask_sar_file):
+    """combine cc_mask with water_mask in SAR space
     """
     # read the original mask file
     in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
     in_palette = in_im.getpalette()
 
-    with TemporaryDirectory() as temp_dir:
-        # get mask data and save it into the water_mask.bmp file
-        mask = get_water_mask(cc_mask_file, mwidth, lt, demw, demn, dempar)
-        water_im = Image.fromarray(mask)
-        water_im.putpalette(in_palette)
-        water_bmp_file = f'{temp_dir}/water_mask.bmp'
-        water_im.save(water_bmp_file)
-
-        # map water_mask.bmp file to SAR coordinators
-        water_mask_bmp_sar_file = f'{temp_dir}/water_mask_sar.bmp'
-        geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
-
-        # read water_mask_bmp_sar_file
-        water_mask_sar_im = Image.open(water_mask_bmp_sar_file)
-        water_mask_sar_data = np.array(water_mask_sar_im)
-
-        # combine two masks and output combined_mask.bmp
-        in_data[water_mask_sar_data == 0] = 0
-        out_im = Image.fromarray(in_data)
-        out_im.putpalette(in_palette)
-        out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
-        out_im.save(out_file)
+    # combine two masks and output combined_mask.bmp
+    water_mask_sar_data = read_bmp(water_mask_sar_file)
+    in_data[water_mask_sar_data == 0] = 0
+    out_im = Image.fromarray(in_data)
+    out_im.putpalette(in_palette)
+    out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
+    out_im.save(out_file)
 
     return out_file
 
@@ -212,30 +236,36 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     log.info("            Start unwrapping")
     log.info("-------------------------------------------------")
 
-    execute(f"cc_wave {ifgf} {mmli} - {ifgname}.cc {width}", uselogging=True)
+    execute(f"cc_wave {ifgf} - - {ifgname}.cc {width}", uselogging=True)
 
     execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 
-    execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.20 ", uselogging=True)
+    execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
+
+    get_water_mask(f"{ifgname}.adf.cc", width, lt, demw, demn, dempar)
+
+    out_file = f"{ifgname}.adf.cc_mask.bmp"
+
+    cc_ref = f"{ifgname}.cc"
 
     if apply_water_mask:
-        # create and apply water mask
-        out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, mlines, lt, demw, demn, dempar)
-    else:
-        # create water mask only
-        _ = get_water_mask(f"{ifgname}.adf.cc_mask.bmp", mwidth, lt, demw, demn, dempar)
-        out_file = f"{ifgname}.adf.cc_mask.bmp"
+        # convert water_mak.tif in MAP to SAR space
+        convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demw)
+        # combine the water mask with validity mask in SAR space
+        out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", 'water_mask_sar.bmp')
+        # apply water mask in SAR space to cc
+        cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
-    ref_azlin, ref_rpix = ref_point_with_max_cc(f"{ifgname}.cc", out_file, int(mlines), int(mwidth))
+    data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
+    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(data_cc)
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+                      f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
-
-    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin_offset + 1, ref_rpix=ref_rpix_offset + 1, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
             uselogging=True)
