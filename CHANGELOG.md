@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.2.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.5.1...v4.6.0)
 
 ### Added
-* `flood_map` entrypoint to create a flood depth map product. 
+* Option to add a `--include-flood-depth` flag when running `water_map` to produce a map of estimated flood depths.
 
 ## [5.2.0]
 
