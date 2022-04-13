@@ -226,7 +226,7 @@ def water_map():
                 f'{product_name}/{product_name}_WM.tif {product_name}/{product_name}_WM_HAND.tif '
                 f'--estimator {args.estimator} --water_level_sigma {args.water_level_sigma} '
                 f'--known_water_threshold {args.known_water_threshold} --iterative-bounds {args.iterative_bounds[0]} '
-                f'{args.iterative_bounds[-1]}',
+                f'{args.iterative_bounds[1]}',
                 uselogging=True)
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
