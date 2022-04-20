@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.1]
+
+### Changed
+* Output the reference point in SAR space in the meta text file. The reference point indexes start form 0.
 ## [5.2.0]
 
 ### Changed
