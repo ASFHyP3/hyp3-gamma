@@ -11,6 +11,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 * Added `--include-flood-depth` option for `water_map` to produce a map of estimated flood depths.
 
+### Changed
+* Output the reference point in SAR space in the meta text file. The reference point indexes start form 0.
+
 ## [5.2.0]
 
 ### Changed

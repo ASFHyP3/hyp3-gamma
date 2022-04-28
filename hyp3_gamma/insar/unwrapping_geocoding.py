@@ -30,7 +30,7 @@ def get_ref_point_info(log_text: str):
     return {"initflg": init_flg, "refoffset": ref_offset, "glboffset": glb_offset}
 
 
-def coords_from_sapix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_dem_par: str) -> list:
+def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_dem_par: str) -> list:
     """
     Will return list of 6 coordinates if in_dem_par file is provided:
         row_s, col_s, row_m, col_m, y, x
@@ -62,11 +62,11 @@ def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_pa
         coordinates dictionary with row_s, col_s, lat, lon coordinates. Additionally, if
         in_dem_par is provided, coords will have row_m, col_m, y, and x.
     """
-    row_s, col_s, lat, lon = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, '-')
+    row_s, col_s, lat, lon = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, '-')
     coords = {"row_s": int(row_s), "col_s": int(col_s), "lat": lat, "lon": lon}
 
     if in_dem_par:
-        _, _, _, _, y, x = coords_from_sapix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
+        _, _, _, _, y, x = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
         coords["y"] = y
         coords["x"] = x
 
@@ -259,13 +259,13 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
     data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
-    ref_azlin_offset, ref_rpix_offset = ref_point_with_max_cc(data_cc)
+    ref_azlin, ref_rpix = ref_point_with_max_cc(data_cc)
 
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {npatr} {npata} - {ref_rpix_offset} {ref_azlin_offset} 1", uselogging=True)
+                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
-    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin_offset + 1, ref_rpix=ref_rpix_offset + 1, in_dem_par=dempar)
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
             uselogging=True)
