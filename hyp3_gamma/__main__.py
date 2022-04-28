@@ -187,7 +187,7 @@ def water_map():
 
     parser.add_argument('--include-flood-depth', type=string_is_true, default=False)
     parser.add_argument('--estimator', type=str, default='iterative', choices=['iterative', 'logstat', 'nmad', 'numpy'])
-    parser.add_argument('--water-level-sigma', type=float, default=3., )
+    parser.add_argument('--water-level-sigma', type=float, default=3.)
     parser.add_argument('--known-water-threshold', type=float, default=30.)
     parser.add_argument('--iterative-bounds', type=int, nargs=2, default=[0, 15])
 
