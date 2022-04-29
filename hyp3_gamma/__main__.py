@@ -189,7 +189,8 @@ def water_map():
     parser.add_argument('--estimator', type=str, default='iterative', choices=['iterative', 'logstat', 'nmad', 'numpy'])
     parser.add_argument('--water-level-sigma', type=float, default=3.)
     parser.add_argument('--known-water-threshold', type=float, default=30.)
-    parser.add_argument('--iterative-bounds', type=int, nargs=2, default=[0, 15])
+    parser.add_argument('--iterative-min', type=int, default=0)
+    parser.add_argument('--iterative-max', type=int, default=15)
 
     args = parser.parse_args()
 
@@ -225,8 +226,8 @@ def water_map():
         execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
                 f'{product_name}/{product_name}_WM.tif {product_name}/{product_name}_WM_HAND.tif '
                 f'--estimator {args.estimator} --water-level-sigma {args.water_level_sigma} '
-                f'--known-water-threshold {args.known_water_threshold} --iterative-bounds {args.iterative_bounds[0]} '
-                f'{args.iterative_bounds[1]}',
+                f'--known-water-threshold {args.known_water_threshold} --iterative-bounds {args.iterative_min} '
+                f'{args.iterative_max}',
                 uselogging=True)
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
