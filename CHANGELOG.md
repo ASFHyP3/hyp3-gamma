@@ -9,8 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.3.1]
 
 ### Updated
-- Granules for jobs are now validated against the updated 
-[2021  release of Copernicus GLO-30 Public DEM coverage](https://spacedata.copernicus.eu/blogs/-/blogs/copernicus-dem-2021-release-now-available).
+- RTC and InSAR products are now generated using the updated 
+[2021 release of Copernicus GLO-30 Public DEM coverage](https://spacedata.copernicus.eu/blogs/-/blogs/copernicus-dem-2021-release-now-available).
 
 ## [5.3.0]
 
