@@ -8,7 +8,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.4.0]
 
-### Updated
+### Changed
 - RTC and InSAR products are now generated using the updated 
 [2021 release of Copernicus GLO-30 Public DEM coverage](https://spacedata.copernicus.eu/blogs/-/blogs/copernicus-dem-2021-release-now-available).
 
