@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.4.1]
+
+### Added
+- Added links to reference material for the Minimum Cost Flow (MCF) phase unwrapping algorithm to the InSAR readme template and unwrapped phase png xml template
+- Added language to the InSAR readme template to clarify that the sign convention used for unwrapped phase is opposite to that used for the displacement maps
+- Added new HyP3 citation to the InSAR and RTC readme templates
+
 ## [5.4.0]
 
 ### Changed
