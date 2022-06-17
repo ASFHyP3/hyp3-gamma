@@ -11,7 +11,6 @@ from PIL import Image
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
-from shapely.geometry import Point
 
 from hyp3_gamma.water_mask import create_water_mask
 
@@ -108,31 +107,12 @@ def get_neighbors(array, i, j, n=1):
     return array[i_start:i_stop, j_start:j_stop]
 
 
-def is_pixels_spread(rows, cols, window_size=1, num_area=5):
-    num = len(rows)
-    geoms = [Point(rows[i], cols[i]) for i in range(num)]
-    dist_matrix = []
-    dist_thresh = np.sqrt(2*(2*window_size + 1)**2)
-
-    for element in geoms:
-        dist_matrix.append([element.distance(item) for item in geoms])
-    dist_array = np.array(dist_matrix)
-    if (dist_array[dist_array > dist_thresh]).size/2 > num_area:
-        return True
-    else:
-        return False
-
-
 def find_ref_point_with_largest_cc(data_cc: np.array, indices, window_size, start_idx, pick_num):
 
     # get the indices of the  pixels with the highest coherence values
     rows = indices[0][start_idx:start_idx + pick_num]
 
     cols = indices[1][start_idx:start_idx + pick_num]
-
-    # check if the pixels are spread in at least num_area areas
-    if not is_pixels_spread(rows, cols, window_size=window_size, num_area=3):
-        return None, None
 
     num = len(rows)
     tots = np.zeros(num, dtype=float)
