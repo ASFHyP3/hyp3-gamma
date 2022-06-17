@@ -13,6 +13,11 @@ from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
 from hyp3_gamma.water_mask import create_water_mask
+# for test purpose only
+from hyp3_gamma.insar.list_to_point_shapefile import *
+from hyp3_gamma.insar.test_ref_point_in_sar_space import *
+from shapely.geometry import Point
+
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +35,15 @@ def get_ref_point_info(log_text: str):
     return {"initflg": init_flg, "refoffset": ref_offset, "glboffset": glb_offset}
 
 
-def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_dem_par: str) -> list:
+def get_height_at_pixel(in_height_file: str, mlines: int, mwidth: int, ref_azlin: int, ref_rpix: int) -> float:
+    """get the height of the pixel at the ref_azlin, ref_rpix
+    """
+    height = read_bin(in_height_file, mlines, mwidth)
+
+    return height[ref_azlin, ref_rpix]
+
+
+def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, height: float, in_dem_par: str) -> list:
     """
     Will return list of 6 coordinates if in_dem_par file is provided:
         row_s, col_s, row_m, col_m, y, x
@@ -38,7 +51,7 @@ def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_
         row_s, col_s, lat, lon
     with (row_s,col_s)in SAR space, and the rest of the coordinates in MAP space
     """
-    cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix)]
+    cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix), str(height)]
     log.info(f'Running command: {" ".join(cmd)}')
     result = subprocess.run(cmd, capture_output=True, text=True)
     coord_log_lines = result.stdout.splitlines()
@@ -50,7 +63,8 @@ def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, in_
     return coord_lst
 
 
-def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_par: str = None) -> dict:
+def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, height: float = 0.0,
+               in_dem_par: str = None) -> dict:
     """
     Args:
         in_mli_par: GAMMA MLI par file
@@ -62,11 +76,11 @@ def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, in_dem_pa
         coordinates dictionary with row_s, col_s, lat, lon coordinates. Additionally, if
         in_dem_par is provided, coords will have row_m, col_m, y, and x.
     """
-    row_s, col_s, lat, lon = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, '-')
+    row_s, col_s, lat, lon = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, height, '-')
     coords = {"row_s": int(row_s), "col_s": int(col_s), "lat": lat, "lon": lon}
 
     if in_dem_par:
-        _, _, _, _, y, x = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, in_dem_par)
+        _, _, _, _, y, x = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, height, in_dem_par)
         coords["y"] = y
         coords["x"] = x
 
@@ -97,24 +111,75 @@ def get_neighbors(array, i, j, n=1):
     return array[i_start:i_stop, j_start:j_stop]
 
 
-def ref_point_with_max_cc(data_cc: np.array, window_size=1):
-    '''
-    shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
-    '''
+def is_pixels_spread(rows, cols, window_size=1, num_area=5):
+    num = len(rows)
+    geoms = [Point(rows[i], cols[i]) for i in range(num)]
+    dist_matrix = []
+    dist_thresh = np.sqrt(2*(2*window_size + 1)**2)
 
-    data_cc_max = data_cc[data_cc < 1.0].max()
-    idx = np.where(data_cc == data_cc_max)
+    for element in geoms:
+        dist_matrix.append([element.distance(item) for item in geoms])
+    dist_array = np.array(dist_matrix)
+    if (dist_array[dist_array > dist_thresh]).size/2 > num_area:
+        return True
+    else:
+        return False
 
-    rows, cols = idx[0], idx[1]
+
+def find_ref_point_with_largest_cc(data_cc: np.array, indices, window_size, start_idx, pick_num):
+
+    # get the indices of the  pixels with the highest coherence values
+    rows = indices[0][start_idx:start_idx + pick_num]
+
+    cols = indices[1][start_idx:start_idx + pick_num]
+
+    # check if the pixels are spread in at least num_area areas
+    if not is_pixels_spread(rows, cols, window_size=window_size, num_area=3):
+        return None, None
+
     num = len(rows)
     tots = np.zeros(num, dtype=float)
 
     for k in range(num):
-        tots[k] = get_neighbors(data_cc, rows[k], cols[k], window_size).sum()
+        neighbors = get_neighbors(data_cc, rows[k], cols[k], window_size)
+        if (neighbors == 0.0).any() or neighbors.size < (2*window_size+1)**2:
+            tots[k] = 0.0
+        else:
+            tots[k] = neighbors.sum()
 
-    idx = np.where(tots == tots.max())
-    ref_i = rows[idx[0][0]]
-    ref_j = cols[idx[0][0]]
+    if (tots == 0.0).all():
+        ref_i = None
+        ref_j = None
+    else:
+        idx = np.where(tots == tots.max())
+        ref_i = rows[idx[0][0]]
+        ref_j = cols[idx[0][0]]
+
+    return ref_i, ref_j
+
+
+def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thresh=0.3):
+    '''
+    shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
+    largest_num is the number of the first largest elements
+    '''
+
+    data = data_cc.copy()
+
+    data[np.logical_or(data == 1.0, data < cc_thresh)] = 0.0
+
+    indices = np.unravel_index(np.argsort(-data_cc, axis=None), data_cc.shape)
+
+    start_idx = 0
+
+    while True:
+
+        ref_i, ref_j = find_ref_point_with_largest_cc(data, indices, window_size, start_idx, pick_num)
+
+        if ref_i and ref_j:
+            break
+
+        start_idx += pick_num
 
     return ref_i, ref_j
 
@@ -153,7 +218,8 @@ def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
     '''
     input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
     '''
-    ds = gdal.Open('water_mask.tif')
+
+    ds = gdal.Open(water_mask)
     band = ds.GetRasterBand(1)
     mask = band.ReadAsArray()
     del ds
@@ -261,11 +327,14 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
     ref_azlin, ref_rpix = ref_point_with_max_cc(data_cc)
 
+    height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
+
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
                       f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
-    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, in_dem_par=dempar)
+
+    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, height=height, in_dem_par=dempar)
 
     execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
             uselogging=True)
