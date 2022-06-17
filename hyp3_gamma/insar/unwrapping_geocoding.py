@@ -11,12 +11,9 @@ from PIL import Image
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 from osgeo import gdal
+from shapely.geometry import Point
 
 from hyp3_gamma.water_mask import create_water_mask
-# for test purpose only
-from hyp3_gamma.insar.list_to_point_shapefile import *
-from hyp3_gamma.insar.test_ref_point_in_sar_space import *
-from shapely.geometry import Point
 
 
 log = logging.getLogger(__name__)
