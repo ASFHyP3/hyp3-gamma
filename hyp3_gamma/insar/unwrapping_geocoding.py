@@ -32,7 +32,7 @@ def get_ref_point_info(log_text: str):
 
 
 def get_height_at_pixel(in_height_file: str, mlines: int, mwidth: int, ref_azlin: int, ref_rpix: int) -> float:
-    """get the height of the pixel at the ref_azlin, ref_rpix
+    """get the height of the pixel (ref_azlin, ref_rpix)
     """
     height = read_bin(in_height_file, mlines, mwidth)
 
@@ -66,6 +66,7 @@ def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, height: f
         in_mli_par: GAMMA MLI par file
         ref_azlin: Reference azimuth line
         ref_rpix:  Reference range pixel
+        height: Height of the reference point
         in_dem_par: GAMMA DEM par file
 
     Returns:
@@ -107,7 +108,8 @@ def get_neighbors(array, i, j, n=1):
     return array[i_start:i_stop, j_start:j_stop]
 
 
-def find_ref_point_with_largest_cc(data_cc: np.array, indices, window_size, start_idx, pick_num):
+def find_ref_point_with_largest_cc(data_cc: np.ndarray, indices: (np.array, np.array),
+                                   window_size, start_idx, pick_num):
 
     # get the indices of the  pixels with the highest coherence values
     rows = indices[0][start_idx:start_idx + pick_num]
@@ -136,10 +138,16 @@ def find_ref_point_with_largest_cc(data_cc: np.array, indices, window_size, star
 
 
 def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thresh=0.3):
-    '''
-    shift determine the window size, n=1 9-pixel window, n=2, 25-pixel window, etc.
-    largest_num is the number of the first largest elements
-    '''
+    """window size determines the actual window, for example, n=1 means 9-pixel window, n=2 means 25-pixel window, etc.
+    Args:
+        data_cc: array includes cc data
+        window_size: defines the actual window, the actual window is a square of 2*window_size + 1
+        pick_num: the number of elements
+        cc_thresh: cc threshold used to exclude the pixels seeking the reference pixel
+
+    Returns:
+        indices of the reference pixel
+    """
 
     data = data_cc.copy()
 
