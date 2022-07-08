@@ -108,10 +108,9 @@ def get_neighbors(array, i, j, n=1):
     return array[i_start:i_stop, j_start:j_stop]
 
 
-def find_ref_point_with_largest_cc(data_cc: np.ndarray, indices: (np.array, np.array),
+def find_ref_point_from_candidates(data_cc: np.ndarray, indices: (np.array, np.array),
                                    window_size, start_idx, pick_num):
 
-    # get the indices of the  pixels with the highest coherence values
     rows = indices[0][start_idx:start_idx + pick_num]
 
     cols = indices[1][start_idx:start_idx + pick_num]
@@ -159,9 +158,9 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
 
     while True:
 
-        ref_i, ref_j = find_ref_point_with_largest_cc(data, indices, window_size, start_idx, pick_num)
+        ref_i, ref_j = find_ref_point_from_candidates(data, indices, window_size, start_idx, pick_num)
 
-        if ref_i and ref_j:
+        if ref_i is not None and ref_j is not None:
             break
 
         start_idx += pick_num
