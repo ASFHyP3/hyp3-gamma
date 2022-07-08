@@ -138,10 +138,10 @@ def find_ref_point_with_largest_cc(data_cc: np.ndarray, indices: (np.array, np.a
 
 
 def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thresh=0.3):
-    """window size determines the actual window, for example, n=1 means 9-pixel window, n=2 means 25-pixel window, etc.
+    """
     Args:
         data_cc: array includes cc data
-        window_size: defines the actual window, the actual window is a square of 2*window_size + 1
+        window_size: the actual window is a square of size (2*window_size + 1); for example, window_size=1 means 9-pixel window, window_size=2 means 25-pixel window, etc.
         pick_num: the number of elements
         cc_thresh: cc threshold used to exclude the pixels seeking the reference pixel
 
