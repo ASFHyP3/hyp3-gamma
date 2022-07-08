@@ -140,7 +140,8 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
     """
     Args:
         data_cc: array includes cc data
-        window_size: the actual window is a square of size (2*window_size + 1); for example, window_size=1 means 9-pixel window, window_size=2 means 25-pixel window, etc.
+        window_size: the actual window is a square of size (2*window_size + 1);
+        for example, window_size=1 means 9-pixel window, window_size=2 means 25-pixel window, etc.
         pick_num: the number of elements
         cc_thresh: cc threshold used to exclude the pixels seeking the reference pixel
 
@@ -185,8 +186,7 @@ def create_phase_from_complex(incpx, outfloat, width):
 
 
 def get_water_mask(cc_file, width, lt, demw, demn, dempar):
-    """
-    create water_mask geotiff file based on the cc_file (float binary file)
+    """create water_mask geotiff file based on the cc_file (float binary file)
     """
     with TemporaryDirectory() as temp_dir:
         # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
@@ -199,9 +199,8 @@ def get_water_mask(cc_file, width, lt, demw, demn, dempar):
 
 
 def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
-    '''
-    input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
-    '''
+    """input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
+    """
 
     ds = gdal.Open(water_mask)
     band = ds.GetRasterBand(1)
@@ -218,8 +217,7 @@ def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
 
 
 def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
-    """
-    use mask_file (bmp) to mask the file (binary), output the masked file (binary). All three file are in SAR space.
+    """use mask_file (bmp) to mask the file (binary), output the masked file (binary). All three file are in SAR space.
     """
     data = read_bin(file, nlines, nsamples)
     mask = read_bmp(mask_file)
