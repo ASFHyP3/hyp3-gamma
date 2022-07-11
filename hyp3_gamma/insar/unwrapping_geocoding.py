@@ -120,9 +120,7 @@ def find_ref_point_from_candidates(data_cc: np.ndarray, indices: (np.array, np.a
 
     for k in range(num):
         neighbors = get_neighbors(data_cc, rows[k], cols[k], window_size)
-        if (neighbors == 0.0).any() or neighbors.size < (2*window_size+1)**2:
-            tots[k] = 0.0
-        else:
+        if not ((neighbors == 0.0).any() or neighbors.size < (2*window_size+1)**2):
             tots[k] = neighbors.sum()
 
     if (tots == 0.0).all():
