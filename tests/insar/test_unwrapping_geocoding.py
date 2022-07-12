@@ -46,11 +46,13 @@ def test_ref_point_with_max_cc():
     assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
 
     array = np.array([
-        [0.0, 0.0, 0.0],
-        [1.0, 0.0, 0.9],
-        [0.0, 0.8, 0.2],
+        [0.4, 0.6, 0.9, 0.4, 0.5, 0.2],
+        [0.5, 0.9, 0.8, 0.6, 0.4, 0.1],
+        [0.7, 0.5, 0.9, 0.4, 0.5, 0.2],
+        [0.2, 0.5, 0.4, 0.8, 0.9, 0.4],
+        [0.0, 0.4, 0.8, 0.6, 0.5, 0.3],
     ])
-    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (1, 1)
 
     array = np.array([
         [0.5, 0.5, 0.9],
@@ -60,11 +62,11 @@ def test_ref_point_with_max_cc():
     assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (1, 1)
 
     array = np.array([
-        [0.5, 0.2, 0.0],
-        [0.2, 0.2, 0.2],
-        [0.0, 0.2, 0.5],
+        [0.5, 0.2, 0.0, 0.3, 0.9, 0.7, 0.5, 0.8, 0.9, 0.4],
+        [0.2, 0.2, 0.2, 0.6, 0.9, 0.5, 0.8, 0.3, 0.0, 1.0],
+        [0.0, 0.2, 0.5, 0.5, 0.7, 0.8, 0.4, 0.7, 0.1, 0.0],
     ])
-    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (1, 4)
 
     array = np.array([
         [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
