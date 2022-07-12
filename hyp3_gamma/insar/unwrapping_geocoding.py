@@ -110,10 +110,9 @@ def get_neighbors(array, i, j, n=1):
 
 def find_ref_point_from_candidates(data_cc: np.ndarray, indices: (np.array, np.array),
                                    window_size, start_idx, pick_num):
-
-    rows = indices[0][start_idx:start_idx + pick_num]
-
-    cols = indices[1][start_idx:start_idx + pick_num]
+    i_max = indices[0].size
+    rows = indices[0][start_idx:min(start_idx + pick_num, i_max)]
+    cols = indices[1][start_idx:min(start_idx + pick_num, i_max)]
 
     num = len(rows)
     tots = np.zeros(num, dtype=float)
