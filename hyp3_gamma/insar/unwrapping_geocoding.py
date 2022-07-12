@@ -155,7 +155,9 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
 
     start_idx = 0
 
-    while True:
+    num = data_cc.size
+
+    while start_idx < num:
 
         ref_i, ref_j = find_ref_point_from_candidates(data, indices, window_size, start_idx, pick_num)
 
@@ -164,7 +166,10 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
 
         start_idx += pick_num
 
-    return ref_i, ref_j
+    if ref_i is not None and ref_j is not None:
+        return ref_i, ref_j
+    else:
+        return 0, 0
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):

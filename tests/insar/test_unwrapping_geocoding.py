@@ -32,33 +32,49 @@ def test_get_neighbors_bigger_n():
 
 def test_ref_point_with_max_cc():
     array = np.array([
-        [0.0, 0.0],
-        [0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
     ])
-    assert ref_point_with_max_cc(array) == (0, 0)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
 
     array = np.array([
-        [0.0, 0.00001],
-        [0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.2, 0.0],
     ])
-    assert ref_point_with_max_cc(array) == (0, 1)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
 
     array = np.array([
-        [0.0, 0.00001],
-        [1.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.9],
+        [0.0, 0.8, 0.2],
     ])
-    assert ref_point_with_max_cc(array) == (0, 1)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
+
+    array = np.array([
+        [0.5, 0.5, 0.9],
+        [0.4, 0.9, 0.6],
+        [0.4, 0.7, 0.5],
+    ])
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (1, 1)
 
     array = np.array([
         [0.5, 0.2, 0.0],
-        [0.2, 0.2, 0.201],
-        [0.0, 0.2, 0.5],
-    ])
-    assert ref_point_with_max_cc(array) == (2, 2)
-
-    array = np.array([
-        [0.5, 0.201, 0.0],
         [0.2, 0.2, 0.2],
         [0.0, 0.2, 0.5],
     ])
-    assert ref_point_with_max_cc(array) == (0, 0)
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (0, 0)
+
+    array = np.array([
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
+        [0.0, 0.1, 0.3, 0.7, 0.9, 0.8, 0.2, 0.7, 0.1, 0.0],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.9, 0.6, 0.7, 0.0, 0.0],
+        [0.0, 0.1, 0.3, 0.5, 0.8, 0.9, 0.2, 0.7, 0.2, 0.0],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.1],
+        [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.5, 0.2],
+    ])
+    assert ref_point_with_max_cc(array, window_size=1, pick_num=4) == (4, 4)
