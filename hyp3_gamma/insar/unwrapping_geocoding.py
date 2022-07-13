@@ -154,9 +154,7 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
 
     start_idx = 0
 
-    num = data_cc.size
-
-    while start_idx < num:
+    while start_idx < data_cc.size:
 
         ref_i, ref_j = find_ref_point_from_candidates(data, indices, window_size, start_idx, pick_num)
 
