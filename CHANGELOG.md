@@ -10,8 +10,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.4.2]
 
 ### Changed
-- calculate the indices of pixel in MAP space based on the indices and height of the pixel in SAR space
 - improve the method of determination of the reference pixel in SAR space
+
+### Fixed
+- Map coordinates for the phase unwrapping reference point are now reported correctly in the output metadata text file
+  for InSAR products. Fixes [#380](https://github.com/ASFHyP3/hyp3-gamma/issues/380)
 
 ## [5.4.1]
 
