@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.4.2]
 
 ### Changed
-- improve the method of determination of the reference pixel in SAR space
+- Increase the window size and ignore pixels near an edge when determining the phase unwrapping reference point for InSAR products.
 
 ### Fixed
 - Map coordinates for the phase unwrapping reference point are now reported correctly in the output metadata text file
