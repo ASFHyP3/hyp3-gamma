@@ -3,7 +3,7 @@ import numpy as np
 from hyp3_gamma.insar.unwrapping_geocoding import get_reference_pixel
 
 
-def test_ref_point_with_max_cc():
+def test_get_reference_pixel():
     array = np.array([
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],

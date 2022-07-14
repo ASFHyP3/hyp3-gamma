@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 from tempfile import TemporaryDirectory
+from typing import Tuple
 
 import numpy as np
 import scipy.ndimage
@@ -97,25 +98,26 @@ def read_bmp(file):
     return data
 
 
-def get_sum_of_array(array: np.array, threshold: float = 0.3):
+def sum_valid_coherence_values(array: np.array, threshold: float = 0.3):
     if (array < threshold).any() or (array == 1.0).any():
         return 0.0
     return array.sum()
 
 
-def get_reference_pixel(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
+def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_threshold=0.3) -> Tuple[int, int]:
     """
     Args:
-        data_cc: array includes cc data
+        coherence: array of coherence values
         window_size: window size over which to sum coherence values for each pixel
-        cc_thresh: cc threshold used to exclude the pixels seeking the reference pixel
+        coherence_threshold: pixels with values less than the threshold in their window will not be considered
 
     Returns:
-        indices of the reference pixel
+        array indices of the reference pixel
     """
-    data = scipy.ndimage.generic_filter(input=data_cc, function=get_sum_of_array, size=window_size,
-                                        mode='constant', cval=0.0, extra_keywords={'threshold': cc_thresh})
-    return np.unravel_index(np.argmax(data), data.shape)
+    data = scipy.ndimage.generic_filter(input=coherence, function=sum_valid_coherence_values, size=window_size,
+                                        mode='constant', cval=0.0, extra_keywords={'threshold': coherence_threshold})
+    x, y = np.unravel_index(np.argmax(data), data.shape)
+    return x, y
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
