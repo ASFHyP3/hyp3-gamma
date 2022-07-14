@@ -97,14 +97,13 @@ def read_bmp(file):
     return data
 
 
-def get_sum_of_array(array: np.array):
-    if array.size < 9 or (array == 0.0).any():
+def get_sum_of_array(array: np.array, threshold: float = 0.3):
+    if (array < threshold).any() or (array == 1.0).any():
         return 0.0
-
     return array.sum()
 
 
-def ref_point_with_max_cc(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
+def get_reference_pixel(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
     """
     Args:
         data_cc: array includes cc data
@@ -114,11 +113,8 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
     Returns:
         indices of the reference pixel
     """
-
-    data = data_cc.copy()
-    data[np.logical_or(data == 1.0, data < cc_thresh)] = 0.0
-    data = scipy.ndimage.generic_filter(data, get_sum_of_array, window_size, mode='constant')
-    np.unravel_index(np.argmax(data), data.shape)
+    data = scipy.ndimage.generic_filter(input=data_cc, function=get_sum_of_array, size=window_size,
+                                        mode='constant', cval=0.0, extra_keywords={'threshold': cc_thresh})
     return np.unravel_index(np.argmax(data), data.shape)
 
 
@@ -260,7 +256,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
     data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
-    ref_azlin, ref_rpix = ref_point_with_max_cc(data_cc)
+    ref_azlin, ref_rpix = get_reference_pixel(data_cc)
 
     height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
 

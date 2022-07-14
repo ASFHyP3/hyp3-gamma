@@ -1,6 +1,6 @@
 import numpy as np
 
-from hyp3_gamma.insar.unwrapping_geocoding import ref_point_with_max_cc
+from hyp3_gamma.insar.unwrapping_geocoding import get_reference_pixel
 
 
 def test_ref_point_with_max_cc():
@@ -9,14 +9,14 @@ def test_ref_point_with_max_cc():
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (0, 0)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (0, 0)
 
     array = np.array([
         [0.0, 0.0, 0.0],
         [0.0, 0.0, 0.0],
         [0.0, 0.2, 0.0],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (0, 0)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (0, 0)
 
     array = np.array([
         [0.4, 0.6, 0.9, 0.4, 0.5, 0.2],
@@ -25,21 +25,22 @@ def test_ref_point_with_max_cc():
         [0.2, 0.5, 0.4, 0.8, 0.9, 0.4],
         [0.0, 0.4, 0.8, 0.6, 0.5, 0.3],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (1, 1)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (1, 1)
 
     array = np.array([
         [0.5, 0.5, 0.9],
         [0.4, 0.9, 0.6],
         [0.4, 0.7, 0.5],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (1, 1)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (1, 1)
 
     array = np.array([
         [0.5, 0.2, 0.0, 0.3, 0.9, 0.7, 0.5, 0.8, 0.9, 0.4],
         [0.2, 0.2, 0.2, 0.6, 0.9, 0.5, 0.8, 0.3, 0.0, 1.0],
         [0.0, 0.2, 0.5, 0.5, 0.7, 0.8, 0.4, 0.7, 0.1, 0.0],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (1, 5)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (1, 5)
+    assert get_reference_pixel(array, window_size=(5, 5)) == (0, 0)
 
     array = np.array([
         [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.0],
@@ -52,4 +53,7 @@ def test_ref_point_with_max_cc():
         [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.0, 0.1],
         [0.0, 0.1, 0.3, 0.4, 0.9, 0.6, 0.2, 0.7, 0.5, 0.2],
     ])
-    assert ref_point_with_max_cc(array, window_size=(3, 3)) == (5, 4)
+    assert get_reference_pixel(array, window_size=(1, 1)) == (0, 4)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (5, 4)
+    assert get_reference_pixel(array, window_size=(3, 3)) == (5, 4)
+    assert get_reference_pixel(array, window_size=(5, 5)) == (0, 0)
