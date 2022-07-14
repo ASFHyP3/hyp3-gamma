@@ -98,12 +98,6 @@ def read_bmp(file):
     return data
 
 
-def sum_valid_coherence_values(array: np.array, threshold: float = 0.3):
-    if (array < threshold).any() or (array == 1.0).any():
-        return 0.0
-    return array.sum()
-
-
 def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_threshold=0.3) -> Tuple[int, int]:
     """
     Args:
@@ -114,8 +108,14 @@ def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_thres
     Returns:
         array indices of the reference pixel
     """
+
+    def sum_valid_coherence_values(array: np.array):
+        if (array < coherence_threshold).any() or (array == 1.0).any():
+            return 0.0
+        return array.sum()
+
     data = scipy.ndimage.generic_filter(input=coherence, function=sum_valid_coherence_values, size=window_size,
-                                        mode='constant', cval=0.0, extra_keywords={'threshold': coherence_threshold})
+                                        mode='constant', cval=0.0)
     x, y = np.unravel_index(np.argmax(data), data.shape)
     return x, y
 
