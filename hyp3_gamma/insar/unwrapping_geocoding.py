@@ -109,14 +109,14 @@ def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_thres
         array indices of the reference pixel
     """
 
-    def sum_valid_coherence_values(array: np.array):
+    def sum_valid_coherence_values(array: np.array) -> float:
         if (array < coherence_threshold).any() or (array == 1.0).any():
             return 0.0
         return array.sum()
 
-    data = scipy.ndimage.generic_filter(input=coherence, function=sum_valid_coherence_values, size=window_size,
-                                        mode='constant', cval=0.0)
-    x, y = np.unravel_index(np.argmax(data), data.shape)
+    pixel_weights = scipy.ndimage.generic_filter(input=coherence, function=sum_valid_coherence_values, size=window_size,
+                                                 mode='constant', cval=0.0)
+    x, y = np.unravel_index(np.argmax(pixel_weights), pixel_weights.shape)
     return x, y
 
 
