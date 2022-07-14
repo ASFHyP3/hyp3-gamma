@@ -7,6 +7,7 @@ import subprocess
 from tempfile import TemporaryDirectory
 
 import numpy as np
+import scipy.ndimage
 from PIL import Image
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
@@ -96,44 +97,14 @@ def read_bmp(file):
     return data
 
 
-def get_neighbors(array, i, j, n=1):
-    i_max, j_max = array.shape
+def get_sum_of_array(array: np.array):
+    if array.size < 9 or (array == 0.0).any():
+        return 0.0
 
-    i_start = max(i - n, 0)
-    i_stop = min(i + n + 1, i_max)
-
-    j_start = max(j - n, 0)
-    j_stop = min(j + n + 1, j_max)
-
-    return array[i_start:i_stop, j_start:j_stop]
+    return array.sum()
 
 
-def find_ref_point_from_candidates(data_cc: np.ndarray, indices: (np.array, np.array),
-                                   window_size, start_idx, pick_num):
-    i_max = indices[0].size
-    rows = indices[0][start_idx:min(start_idx + pick_num, i_max)]
-    cols = indices[1][start_idx:min(start_idx + pick_num, i_max)]
-
-    num = len(rows)
-    tots = np.zeros(num, dtype=float)
-
-    for k in range(num):
-        neighbors = get_neighbors(data_cc, rows[k], cols[k], window_size)
-        if not ((neighbors == 0.0).any() or neighbors.size < (2*window_size+1)**2):
-            tots[k] = neighbors.sum()
-
-    if (tots == 0.0).all():
-        ref_i = None
-        ref_j = None
-    else:
-        idx = np.where(tots == tots.max())
-        ref_i = rows[idx[0][0]]
-        ref_j = cols[idx[0][0]]
-
-    return ref_i, ref_j
-
-
-def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thresh=0.3):
+def ref_point_with_max_cc(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
     """
     Args:
         data_cc: array includes cc data
@@ -149,19 +120,9 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=10, pick_num=20, cc_thr
     data = data_cc.copy()
 
     data[np.logical_or(data == 1.0, data < cc_thresh)] = 0.0
-
-    indices = np.unravel_index(np.argsort(-data_cc, axis=None), data_cc.shape)
-
-    start_idx = 0
-
-    while start_idx < data_cc.size:
-
-        ref_i, ref_j = find_ref_point_from_candidates(data, indices, window_size, start_idx, pick_num)
-
-        if ref_i is not None and ref_j is not None:
-            break
-
-        start_idx += pick_num
+    data = scipy.ndimage.generic_filter(data, get_sum_of_array, window_size, mode='constant')
+    index = np.argmax(data)
+    ref_i, ref_j = np.unravel_index(index, data.shape)
 
     if ref_i is not None and ref_j is not None:
         return ref_i, ref_j
