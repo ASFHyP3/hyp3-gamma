@@ -108,9 +108,7 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
     """
     Args:
         data_cc: array includes cc data
-        window_size: the actual window is a square of size (2*window_size + 1);
-        for example, window_size=1 means 9-pixel window, window_size=2 means 25-pixel window, etc.
-        pick_num: the number of elements
+        window_size: window size over which to sum coherence values for each pixel
         cc_thresh: cc threshold used to exclude the pixels seeking the reference pixel
 
     Returns:
@@ -118,16 +116,10 @@ def ref_point_with_max_cc(data_cc: np.array, window_size=(5, 5), cc_thresh=0.3):
     """
 
     data = data_cc.copy()
-
     data[np.logical_or(data == 1.0, data < cc_thresh)] = 0.0
     data = scipy.ndimage.generic_filter(data, get_sum_of_array, window_size, mode='constant')
-    index = np.argmax(data)
-    ref_i, ref_j = np.unravel_index(index, data.shape)
-
-    if ref_i is not None and ref_j is not None:
-        return ref_i, ref_j
-    else:
-        return 0, 0
+    np.unravel_index(np.argmax(data), data.shape)
+    return np.unravel_index(np.argmax(data), data.shape)
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
