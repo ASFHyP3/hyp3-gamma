@@ -11,6 +11,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Increase the window size and ignore pixels near an edge when determining the phase unwrapping reference point for InSAR products.
+- Upgraded to asf-tools [v0.4.1](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#41) from v0.4.0
 
 ### Fixed
 - Map coordinates for the phase unwrapping reference point are now reported correctly in the output metadata text file
