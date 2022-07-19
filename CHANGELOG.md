@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [5.4.2]
+
+### Changed
+- Increase the window size and ignore pixels near an edge when determining the phase unwrapping reference point for InSAR products.
+- Upgraded to asf-tools [v0.4.1](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#41) from v0.4.0
+
+### Fixed
+- Map coordinates for the phase unwrapping reference point are now reported correctly in the output metadata text file
+  for InSAR products. Fixes [#380](https://github.com/ASFHyP3/hyp3-gamma/issues/380)
+
 ## [5.4.1]
 
 ### Added
