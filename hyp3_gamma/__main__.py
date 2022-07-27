@@ -224,10 +224,10 @@ def water_map():
 
     if args.include_flood_depth:
         execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
-                f'{product_name}/{product_name}_WM.tif {product_name}/{product_name}_WM_HAND.tif '
-                f'--estimator {args.estimator} --water-level-sigma {args.water_level_sigma} '
-                f'--known-water-threshold {args.known_water_threshold} --iterative-bounds {args.iterative_min} '
-                f'{args.iterative_max}',
+                f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_WM.tif '
+                f'{product_name}/{product_name}_WM_HAND.tif --estimator {args.estimator} '
+                f'--water-level-sigma {args.water_level_sigma} --known-water-threshold {args.known_water_threshold}'
+                f'--iterative-bounds {args.iterative_min} {args.iterative_max}',
                 uselogging=True)
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
