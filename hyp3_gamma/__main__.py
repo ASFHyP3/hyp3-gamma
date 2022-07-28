@@ -226,7 +226,7 @@ def water_map():
         execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
                 f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_WM.tif '
                 f'{product_name}/{product_name}_WM_HAND.tif --estimator {args.estimator} '
-                f'--water-level-sigma {args.water_level_sigma} --known-water-threshold {args.known_water_threshold}'
+                f'--water-level-sigma {args.water_level_sigma} --known-water-threshold {args.known_water_threshold} '
                 f'--iterative-bounds {args.iterative_min} {args.iterative_max}',
                 uselogging=True)
 
