@@ -105,7 +105,6 @@ def rtc():
         upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
 
         for product_file in product_dir.iterdir():
-            if product_file
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
@@ -236,12 +235,22 @@ def water_map():
 
     if args.bucket:
         product_dir = Path(product_name)
+
         for browse in product_dir.glob('*.png'):
             create_thumbnail(browse, output_dir=product_dir)
 
         upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
 
-        for product_file in product_dir.iterdir():
+        flist_full = set(product_dir.glob('*'))
+
+        if args.include_hand:
+            flist_excluded = set(product_dir.glob('*_water_map_??_*.tif'))
+        else:
+            flist_excluded = set(product_dir.glob('*_water_map_*.tif'))
+
+        flist = flist_full - flist_excluded
+
+        for product_file in flist:
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
