@@ -14,7 +14,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.4.3]
 
-## Changed
+### Changed
 - Upgraded to asf-tools [v0.4.2](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#042) from v0.4.1
 
 ## [5.4.2]
