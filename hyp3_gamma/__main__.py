@@ -246,9 +246,9 @@ def water_map():
         flist_full = set(product_dir.glob('*'))
 
         if args.include_hand:
-            flist_excluded = set(product_dir.glob('*_water_map_??_*.tif'))
+            flist_excluded = set(product_dir.glob('*_WM_??_*.tif'))
         else:
-            flist_excluded = set(product_dir.glob('*_water_map_*.tif'))
+            flist_excluded = set(product_dir.glob('*_WM_*.tif'))
 
         flist = flist_full - flist_excluded
 
