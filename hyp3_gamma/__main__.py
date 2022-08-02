@@ -105,6 +105,7 @@ def rtc():
         upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
 
         for product_file in product_dir.iterdir():
+            if product_file
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
@@ -186,6 +187,7 @@ def water_map():
     parser.add_argument('granule')
 
     parser.add_argument('--include-flood-depth', type=string_is_true, default=False)
+    parser.add_argument('--include-hand', type=string_is_true, default=False)
     parser.add_argument('--estimator', type=str, default='iterative', choices=['iterative', 'logstat', 'nmad', 'numpy'])
     parser.add_argument('--water-level-sigma', type=float, default=3.)
     parser.add_argument('--known-water-threshold', type=float, default=30.)
