@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.4.4]
 
-## Changed
+### Changed
 - `insar` now uploads unzipped product files (in addition to the zip archive) when using the `--bucket` option
 
 ## [5.4.3]
