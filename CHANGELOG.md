@@ -10,7 +10,12 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.5.0]
 
 ### Changed
-- Upgraded to [GAMMA software](https://www.gamma-rs.ch/software) `20220630` from `20210701`
+* Upgraded to the latest available [GAMMA software](https://www.gamma-rs.ch/software) version and related dependencies
+  * GAMMA software `20220630` from `20210701`
+  * Ubuntu 22.04 from 20.04
+  * Python 3.10.4 from 3.8.10
+  * numpy 1.21.5 from 1.17.4
+  * GDAL 3.4.1 from 3.0.4
 
 ## [5.4.4]
 
