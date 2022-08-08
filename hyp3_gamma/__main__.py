@@ -188,7 +188,6 @@ def water_map():
     parser.add_argument('granule')
 
     parser.add_argument('--include-flood-depth', type=string_is_true, default=False)
-    parser.add_argument('--include-hand', type=string_is_true, default=False)
     parser.add_argument('--estimator', type=str, default='iterative', choices=['iterative', 'logstat', 'nmad', 'numpy'])
     parser.add_argument('--water-level-sigma', type=float, default=3.)
     parser.add_argument('--known-water-threshold', type=float, default=30.)
@@ -225,6 +224,9 @@ def water_map():
             f'--hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction} '
             f'--membership-threshold {args.membership_threshold}', uselogging=True)
 
+    for p in Path(product_name).glob(f"{product_name}_WM_??_*.tif"):
+        p.unlink()
+
     if args.include_flood_depth:
         execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
                 f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_WM.tif '
@@ -237,20 +239,10 @@ def water_map():
 
     if args.bucket:
         product_dir = Path(product_name)
-
         for browse in product_dir.glob('*.png'):
             create_thumbnail(browse, output_dir=product_dir)
 
         upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
-
-        flist_full = set(product_dir.glob('*'))
-
-        if args.include_hand:
-            flist_excluded = set(product_dir.glob('*_WM_??_*.tif'))
-        else:
-            flist_excluded = set(product_dir.glob('*_WM_*.tif'))
-
-        flist = flist_full - flist_excluded
 
         for product_file in flist:
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
