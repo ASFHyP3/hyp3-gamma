@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.4.5]
 
 ### Changed
-- 'water_map' now uploads the hand file when using the '--include-hand' option  
+- Removed the intermediate initial/fuzzy geotiffs from the water_map product package.
 
 ## [5.4.4]
 
