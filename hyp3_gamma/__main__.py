@@ -228,7 +228,7 @@ def water_map():
         Path(product_name) / f'{product_name}_WM_VV_initial.tif',
         Path(product_name) / f'{product_name}_WM_VH_initial.tif',
         Path(product_name) / f'{product_name}_WM_VV_fuzzy.tif',
-        Path(product_name) / f'{product_name}_WM_VV_fuzzy.tif',
+        Path(product_name) / f'{product_name}_WM_VH_fuzzy.tif',
     ]
     for file_to_remove in files_to_remove:
         file_to_remove.unlink()
