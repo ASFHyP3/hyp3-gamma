@@ -42,15 +42,15 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
+COPY GAMMA_SOFTWARE-20220630 /usr/local/GAMMA_SOFTWARE-20220630/
 
 COPY . /hyp3-gamma/
 RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache-dir /hyp3-gamma \
     && rm -rf /hyp3-gamma
 
-ARG CONDA_GID=1000
-ARG CONDA_UID=1000
+ARG CONDA_GID=1001
+ARG CONDA_UID=1001
 
 RUN groupadd -g "${CONDA_GID}" --system conda \
     && useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m -s /bin/bash conda
@@ -60,7 +60,7 @@ SHELL ["/bin/bash", "-l", "-c"]
 ENV PYTHONDONTWRITEBYTECODE=true
 
 # GAMMA environment variables per section 1 of the Linux installation guide
-ENV GAMMA_VERSION=20210701
+ENV GAMMA_VERSION=20220630
 ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-${GAMMA_VERSION}
 ENV MSP_HOME=$GAMMA_HOME/MSP
 ENV ISP_HOME=$GAMMA_HOME/ISP
