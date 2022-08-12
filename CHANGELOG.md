@@ -17,6 +17,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   * numpy 1.21.5 from 1.17.4
   * GDAL 3.4.1 from 3.0.4
 
+## [5.4.5]
+
+### Changed
+- Removed the intermediate initial/fuzzy geotiffs from the water_map product package.
+
 ## [5.4.4]
 
 ### Changed

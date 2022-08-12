@@ -224,6 +224,15 @@ def water_map():
             f'--hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction} '
             f'--membership-threshold {args.membership_threshold}', uselogging=True)
 
+    files_to_remove = [
+        Path(product_name) / f'{product_name}_WM_VV_initial.tif',
+        Path(product_name) / f'{product_name}_WM_VH_initial.tif',
+        Path(product_name) / f'{product_name}_WM_VV_fuzzy.tif',
+        Path(product_name) / f'{product_name}_WM_VH_fuzzy.tif',
+    ]
+    for file_to_remove in files_to_remove:
+        file_to_remove.unlink()
+
     if args.include_flood_depth:
         execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
                 f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_WM.tif '
