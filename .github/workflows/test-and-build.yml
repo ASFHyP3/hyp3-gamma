@@ -22,13 +22,13 @@ jobs:
     with:
       local_package_name: hyp3_gamma
       conda_env_name: hyp3-gamma
-      python_version: '3.8'
+      python_version: '3.10'
 
   call-version-info-workflow:
     uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@main
     with:
       conda_env_name: hyp3-gamma
-      python_version: '3.8'
+      python_version: '3.10'
 
   dockerize:
     needs: call-version-info-workflow
@@ -59,8 +59,8 @@ jobs:
 
       - name: Fetch GAMMA
         run: |
-          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20210701_MSP_ISP_DIFF_LAT.linux64_ubuntu2004.tar.gz .
-          tar -zxvf GAMMA_SOFTWARE-20210701_MSP_ISP_DIFF_LAT.linux64_ubuntu2004.tar.gz
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20220630_MSP_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz .
+          tar -zxvf GAMMA_SOFTWARE-20220630_MSP_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
         uses: docker/build-push-action@v2

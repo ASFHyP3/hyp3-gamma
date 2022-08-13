@@ -4,7 +4,7 @@ ARG ASF_TOOLS_TAG=0.4.2
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -34,7 +34,7 @@ RUN apt update \
          gdal-bin libgdal-dev \
          libhdf5-dev libhdf5-103 \
          libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc \
-         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely \
+         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
          # GAMMA scripts require csh/tcsh
          tcsh \
          # Additional installs
@@ -42,7 +42,7 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY GAMMA_SOFTWARE-20210701 /usr/local/GAMMA_SOFTWARE-20210701/
+COPY GAMMA_SOFTWARE-20220630 /usr/local/GAMMA_SOFTWARE-20220630/
 
 COPY . /hyp3-gamma/
 RUN python3 -m pip install --upgrade pip \
@@ -60,7 +60,7 @@ SHELL ["/bin/bash", "-l", "-c"]
 ENV PYTHONDONTWRITEBYTECODE=true
 
 # GAMMA environment variables per section 1 of the Linux installation guide
-ENV GAMMA_VERSION=20210701
+ENV GAMMA_VERSION=20220630
 ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-${GAMMA_VERSION}
 ENV MSP_HOME=$GAMMA_HOME/MSP
 ENV ISP_HOME=$GAMMA_HOME/ISP
