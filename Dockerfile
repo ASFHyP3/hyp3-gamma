@@ -4,7 +4,7 @@ ARG ASF_TOOLS_TAG=0.4.2
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
 
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -34,7 +34,7 @@ RUN apt update \
          gdal-bin libgdal-dev \
          libhdf5-dev libhdf5-103 \
          libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc \
-         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
+         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely \
          # GAMMA scripts require csh/tcsh
          tcsh \
          # Additional installs

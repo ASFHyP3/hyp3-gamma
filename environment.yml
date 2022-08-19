@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.10
+  - python=3.8
   - pip
   # For packaging, and testing
   - flake8
@@ -23,6 +23,6 @@ dependencies:
   - importlib_metadata
   - jinja2
   - lxml
-  - numpy
+  - numpy>=1.17,<1.18
   - pillow
   - python-dateutil
