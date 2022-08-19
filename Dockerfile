@@ -49,8 +49,8 @@ RUN python3 -m pip install --upgrade pip \
     && python3 -m pip install --no-cache-dir /hyp3-gamma \
     && rm -rf /hyp3-gamma
 
-ARG CONDA_GID=1001
-ARG CONDA_UID=1001
+ARG CONDA_GID=1000
+ARG CONDA_UID=1000
 
 RUN groupadd -g "${CONDA_GID}" --system conda \
     && useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/conda -m -s /bin/bash conda

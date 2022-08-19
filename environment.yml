@@ -1,4 +1,4 @@
-name: hyp3-gamma-u2004
+name: hyp3-gamma
 channels:
   - conda-forge
   - nodefaults
