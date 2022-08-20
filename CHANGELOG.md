@@ -10,7 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Upgraded to the latest available [GAMMA software](https://www.gamma-rs.ch/software) version
-  * GAMMA software `20220630` from `20210701`
+  * GAMMA software `20220630` compiled in utunbut20.04 from `20210701`
 
 ## [5.5.0]
 
