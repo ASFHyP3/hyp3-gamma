@@ -27,10 +27,10 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.8',
     ],
 
-    python_requires='~=3.10',
+    python_requires='~=3.8',
 
     install_requires=[
         'gdal',
@@ -39,7 +39,7 @@ setup(
         'importlib_metadata',
         'jinja2',
         'lxml',
-        'numpy',
+        'numpy>=1.17,<1.18',
         'pillow',
         'python-dateutil',
     ],
