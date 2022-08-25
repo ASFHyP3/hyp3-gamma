@@ -80,6 +80,20 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
+def resamplereproject(vrtfile, dest_epsg_code, dest_res, outfile):
+
+    ds = gdal.Open(vrtfile)
+
+    gt = ds.GetGeoTransform()
+
+    res = round(dest_res/30)*gt[1]
+
+    gdal.Translate("trans.tif", ds, format='GTiff', xRes=res, yRes=res, resampleAlg='cubic')
+
+    gdal.Warp(outfile, "trans.tif", dstSRS=f'EPSG:{dest_epsg_code}', xRes=dest_res, yRes=dest_res,
+            targetAlignedPixels=True, resampleAlg='near', multithread=True)
+
+
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry.
 
@@ -110,5 +124,5 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
-                      targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
+
+            resamplereproject(str(dem_vrt), epsg_code, pixel_size, output_name)

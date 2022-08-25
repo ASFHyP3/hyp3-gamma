@@ -34,7 +34,7 @@ RUN apt update \
          gdal-bin libgdal-dev \
          libhdf5-dev libhdf5-103 \
          libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc \
-         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely \
+         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
          # GAMMA scripts require csh/tcsh
          tcsh \
          # Additional installs
