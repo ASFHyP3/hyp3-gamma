@@ -91,7 +91,7 @@ def resamplereproject(vrtfile, dest_epsg_code, dest_res, outfile):
     gdal.Translate("trans.tif", ds, format='GTiff', xRes=res, yRes=res, resampleAlg='cubic')
 
     gdal.Warp(outfile, "trans.tif", dstSRS=f'EPSG:{dest_epsg_code}', xRes=dest_res, yRes=dest_res,
-            targetAlignedPixels=True, resampleAlg='near', multithread=True)
+              targetAlignedPixels=True, resampleAlg='near', multithread=True)
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
