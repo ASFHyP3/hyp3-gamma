@@ -125,4 +125,5 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
 
-            resamplereproject(str(dem_vrt), epsg_code, pixel_size, output_name)
+            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+                      targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
