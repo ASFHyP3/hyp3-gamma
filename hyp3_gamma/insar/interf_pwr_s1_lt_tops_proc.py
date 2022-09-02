@@ -27,7 +27,7 @@ def create_slc2r_tab(SLC2tab, SLC2Rtab):
 
 
 def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
-                    reference, secondary, lt, rlooks, alooks, iterations):
+                    reference, secondary, lt, rlooks, alooks, iterations, off):
     if cnt < iterations + 1:
         offi = ifgname + ".off_{}".format(cnt)
     else:
@@ -47,7 +47,8 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
     execute(f"SLC_interp_lt_S1_TOPS {SLC2tab} {spar} {SLC1tab} {mpar} {lt}"
             f" {mmli} {smli} {offit} {SLC2Rtab} {srslc} {srpar}", uselogging=True)
 
-    execute(f"create_offset {mpar} {spar} {offi} 1 {rlooks} {alooks} 0", uselogging=True)
+    # execute(f"create_offset {mpar} {spar} {offi} 1 {rlooks} {alooks} 0", uselogging=True)
+    shutil.copy(off, offi)
 
     if cnt < iterations + 1:
         cmd_sfx = "256 64 offsets 1 64 256 0.2"
@@ -109,20 +110,21 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
     elif step == 1:
         log.info("Starting initial coregistration with look up table")
         coregister_data(
-            0, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, reference, secondary, lt, rlooks, alooks, iterations
+            0, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname, reference, secondary, lt, rlooks, alooks,
+            iterations, off
         )
     elif step == 2:
         log.info("Starting iterative coregistration with look up table")
         for n in range(1, iterations + 1):
             coregister_data(
                 n, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
-                reference, secondary, lt, rlooks, alooks, iterations
+                reference, secondary, lt, rlooks, alooks, iterations, off
             )
     elif step == 3:
         log.info("Starting single interation coregistration with look up table")
         coregister_data(
             iterations + 1, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
-            reference, secondary, lt, rlooks, alooks, iterations
+            reference, secondary, lt, rlooks, alooks, iterations, off
         )
     else:
         log.error("ERROR: Unrecognized step {}; must be from 0 - 2".format(step))
