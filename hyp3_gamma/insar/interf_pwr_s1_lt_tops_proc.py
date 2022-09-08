@@ -34,7 +34,7 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
         offi = ifgname + ".off.it.corrected.temp"
 
     if cnt == 0:
-        offit = "-"
+        offit = off
     elif cnt < iterations + 1:
         offit = ifgname + ".off.it"
     else:
