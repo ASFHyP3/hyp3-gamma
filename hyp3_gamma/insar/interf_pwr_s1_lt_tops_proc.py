@@ -47,7 +47,6 @@ def coregister_data(cnt, SLC2tab, SLC2Rtab, spar, mpar, mmli, smli, ifgname,
     execute(f"SLC_interp_lt_S1_TOPS {SLC2tab} {spar} {SLC1tab} {mpar} {lt}"
             f" {mmli} {smli} {offit} {SLC2Rtab} {srslc} {srpar}", uselogging=True)
 
-    # execute(f"create_offset {mpar} {spar} {offi} 1 {rlooks} {alooks} 0", uselogging=True)
     shutil.copy(off, offi)
 
     if cnt < iterations + 1:
