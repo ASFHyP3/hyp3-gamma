@@ -29,7 +29,7 @@ def create_water_mask(input_tif: str, output_tif: str):
         input_tif: Path for the input GeoTIFF
         output_tif: Path for the output GeoTIFF
     """
-    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/GSHHS_f_L1.shp'
+    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
 
     src_ds = gdal.Open(input_tif)
 
