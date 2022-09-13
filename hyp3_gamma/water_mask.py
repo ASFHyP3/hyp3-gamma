@@ -44,6 +44,6 @@ def create_water_mask(input_tif: str, output_tif: str):
     mask = geopandas.read_file(mask_location, mask=extent)
     with NamedTemporaryFile() as temp_file:
         mask.to_file(temp_file.name, driver='GeoJSON')
-        gdal.Rasterize(dst_ds, temp_file.name, burnValues=[1])
+        gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds

@@ -72,7 +72,7 @@ def test_create_water_mask_with_water_and_land(tmp_path, test_data_dir):
     water_mask.create_water_mask(input_tif, output_tif)
 
     info = gdal.Info(output_tif, format='json')
-    assert info['geoTransform'] == [199880.0, 80.0, 0.0, 1753560.0, 0.0, -80.0]
+    assert info['geoTransform'] == [200360.0, 80.0, 0.0, 1756920.0, 0.0, -80.0]
     assert info['bands'][0]['type'] == 'Byte'
     assert info['metadata']['']['AREA_OR_POINT'] == 'Point'
 
@@ -80,10 +80,10 @@ def test_create_water_mask_with_water_and_land(tmp_path, test_data_dir):
     data = ds.GetRasterBand(1).ReadAsArray()
     expected = np.array([
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-        [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
