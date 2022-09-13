@@ -110,5 +110,8 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
             gdal.BuildVRT(str(dem_vrt), dem_file_paths)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(output_name, str(dem_vrt), dstSRS=f'EPSG:{epsg_code}', xRes=pixel_size, yRes=pixel_size,
+
+            dem_reproj = temp_path / 'dem_reproj.tif'
+            gdal.Warp(str(dem_reproj), str(dem_vrt), dstSRS=f'EPSG:{epsg_code}')
+            gdal.Warp(output_name, str(dem_reproj), xRes=pixel_size, yRes=pixel_size,
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)

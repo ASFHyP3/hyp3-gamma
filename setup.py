@@ -30,7 +30,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
 
-    python_requires='~=3.8',
+    python_requires='~=3.10',
 
     install_requires=[
         'gdal',
@@ -39,7 +39,7 @@ setup(
         'importlib_metadata',
         'jinja2',
         'lxml',
-        'numpy>=1.17,<1.18',
+        'numpy',
         'pillow',
         'python-dateutil',
     ],
