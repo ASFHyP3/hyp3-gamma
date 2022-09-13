@@ -7,8 +7,8 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [5.5.2]
-### Update
-* Updated to an unbuffered version for water mask.
+### Changed
+* Removed buffer from water mask during unwrapped_phase calculation
 
 ## [5.5.1]
 
