@@ -213,7 +213,7 @@ The DEM used for this product is {{ dem_name }}, which has a native pixel spacin
 
 The water mask identifies coastal waters and major inland waterbodies. These areas are assigned a pixel value of 0. All remaining pixels (land, small inland waterbodies, and land ice) have a value of 1. The water mask is stored as an 8-bit unsigned integer GeoTIFF file and is always included in the product package.
 
-The water mask is not precise, however the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) L1, L2 and L5 shoreline data is  a useful tool for masking out phase unwrapping artifacts over water.
+The water mask is not precise, however the [GSHHG](http://www.soest.hawaii.edu/wessel/gshhg/) L1, L2, L3 and L5 shoreline data is  a useful tool for masking out phase unwrapping artifacts over water.
 
 Note that applying the mask after phase unwrapping does not prevent unwrapping errors caused by the inclusion of water pixels as valid data during the phase unwrapping process. When submitting InSAR jobs for processing, there is an option to "Apply Water Mask". Selecting this option uses the water mask to adjust the validity mask used for phase unwrapping. This prevents phase unwrapping from occurring over large expanses of water, which can lead to unexpected phase jumps in the unwrapped outputs. This mask {{ "was" if water_mask_applied else "was not" }} applied during phase unwrapping. Refer to the Unwrapped Interferogram description above (item 2) for more information.
 
