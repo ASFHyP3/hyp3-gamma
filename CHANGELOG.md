@@ -9,6 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.5.2]
 ### Changed
 * Removed buffer from water mask during unwrapped_phase calculation
+* Updated metadata templates to reflect new water masking approach and link to new resources
 
 ## [5.5.1]
 
