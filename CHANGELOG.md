@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [5.6.0]
+
+### Changed
+* Upgraded to the base image used for the hyp3-gamma docker image to Ubuntu 22.04 from 20.04. This also changes:
+  * the GAMMA software `20220630` build
+  * Python to 3.10 from 3.8
+  * Numpy to 1.21 from 1.17
+  * GDAL to 3.4 from 3.0
+
 ## [5.5.1]
 
 ### Added
