@@ -12,9 +12,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 * Upgraded to the base image used for the hyp3-gamma docker image to Ubuntu 22.04 from 20.04. This also changes:
   * the GAMMA software `20220630` build
-  * Python to 3.10 from 3.8
-  * Numpy to 1.21 from 1.17
-  * GDAL to 3.4 from 3.0
+  * Python to 3.10.4 from 3.8.10
+  * Numpy to 1.21.5 from 1.17.4
+  * GDAL to 3.4.1 from 3.0.4
 
 ## [5.5.1]
 
