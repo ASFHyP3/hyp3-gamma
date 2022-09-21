@@ -22,7 +22,9 @@ from hyp3lib.system import gamma_version
 from lxml import etree, objectify
 
 import hyp3_gamma
-from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
+# from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
+from hyp3lib.execute import execute
+from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 from hyp3_gamma.metadata import create_metadata_file_set_insar
@@ -366,6 +368,15 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
+
+    # get the dem.tif
+    # dem_tif='dem.tif'
+    # geometry = get_geometry_from_kml(f'{reference_file}/preview/map-overlay.kml')
+    # prepare_dem_geotiff(dem_tif, geometry, dem_pixel_size)
+
+    # execute(f'dem_import {dem_tif} big.dem big.par - - $DIFF_HOME/scripts/egm2008-5.dem '
+    #             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
+
     get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
     log.info("Got dem of type {}".format(dem_source))
 
