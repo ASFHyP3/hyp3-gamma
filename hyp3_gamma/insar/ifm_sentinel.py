@@ -377,7 +377,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     # execute(f'dem_import {dem_tif} big.dem big.par - - $DIFF_HOME/scripts/egm2008-5.dem '
     #             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
 
-    get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
+    get_dem_file_gamma('dem.tif', 'big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
     log.info("Got dem of type {}".format(dem_source))
 
     # Figure out which bursts overlap between the two swaths
