@@ -6,8 +6,6 @@ from tempfile import TemporaryDirectory
 import geopandas
 from osgeo import gdal
 
-from hyp3_gamma.util import GDALConfigManager
-
 gdal.UseExceptions()
 
 
