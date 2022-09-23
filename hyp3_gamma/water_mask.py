@@ -6,6 +6,8 @@ from tempfile import NamedTemporaryFile
 import geopandas
 from osgeo import gdal
 
+from hyp3_gamma.util import GDALConfigManager
+
 gdal.UseExceptions()
 
 
@@ -44,6 +46,7 @@ def create_water_mask(input_tif: str, output_tif: str):
     mask = geopandas.read_file(mask_location, mask=extent)
     with NamedTemporaryFile() as temp_file:
         mask.to_file(temp_file.name, driver='GeoJSON')
-        gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
+        with GDALConfigManager(OGR_GEOJSON_MAX_OBJ_SIZE='500MB'):
+            gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds
