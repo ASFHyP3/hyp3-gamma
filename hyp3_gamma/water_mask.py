@@ -44,8 +44,8 @@ def create_water_mask(input_tif: str, output_tif: str):
     extent = split_geometry_on_antimeridian(extent)
 
     mask = geopandas.read_file(mask_location, mask=extent)
-    with TemporaryDirectory() as temp_file:
-        mask.to_file(temp_file.name, driver='ESRI Shapefile')
-        gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
+    with TemporaryDirectory() as temp_shapefile:
+        mask.to_file(temp_shapefile, driver='ESRI Shapefile')
+        gdal.Rasterize(dst_ds, temp_shapefile, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds
