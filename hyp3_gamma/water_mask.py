@@ -1,7 +1,7 @@
 """Create and apply a water body mask"""
 import json
 import subprocess
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 import geopandas
 from osgeo import gdal
@@ -44,9 +44,8 @@ def create_water_mask(input_tif: str, output_tif: str):
     extent = split_geometry_on_antimeridian(extent)
 
     mask = geopandas.read_file(mask_location, mask=extent)
-    with NamedTemporaryFile() as temp_file:
-        mask.to_file(temp_file.name, driver='GeoJSON')
-        with GDALConfigManager(OGR_GEOJSON_MAX_OBJ_SIZE='500MB'):
-            gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
+    with TemporaryDirectory() as temp_file:
+        mask.to_file(temp_file.name, driver='ESRI Shapefile')
+        gdal.Rasterize(dst_ds, temp_file.name, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds
