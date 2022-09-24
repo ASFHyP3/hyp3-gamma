@@ -368,15 +368,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Getting a DEM file")
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
-
-    # get the dem.tif
-    # dem_tif='dem.tif'
-    # geometry = get_geometry_from_kml(f'{reference_file}/preview/map-overlay.kml')
-    # prepare_dem_geotiff(dem_tif, geometry, dem_pixel_size)
-
-    # execute(f'dem_import {dem_tif} big.dem big.par - - $DIFF_HOME/scripts/egm2008-5.dem '
-    #             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1', uselogging=True)
-
     get_dem_file_gamma('dem.tif', 'big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
     log.info("Got dem of type {}".format(dem_source))
 
@@ -388,6 +379,12 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")
+    
+    # prepare the empty DEM directory
+    if os.path.exists("DEM"):
+            os.system(f"/bin/rm -r DEM")
+    os.mkdir("DEM")
+
     os.chdir(reference)
     SLC_copy_S1_fullSW(wrk, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
     os.chdir("..")
