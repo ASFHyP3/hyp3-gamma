@@ -6,6 +6,8 @@ from tempfile import TemporaryDirectory
 import geopandas
 from osgeo import gdal
 
+from hyp3_gamma.util import GDALConfigManager
+
 gdal.UseExceptions()
 
 
@@ -44,6 +46,7 @@ def create_water_mask(input_tif: str, output_tif: str):
     mask = geopandas.read_file(mask_location, mask=extent)
     with TemporaryDirectory() as temp_shapefile:
         mask.to_file(temp_shapefile, driver='ESRI Shapefile')
-        gdal.Rasterize(dst_ds, temp_shapefile, allTouched=True, burnValues=[1])
+        with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='YES'):
+            gdal.Rasterize(dst_ds, temp_shapefile, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds
