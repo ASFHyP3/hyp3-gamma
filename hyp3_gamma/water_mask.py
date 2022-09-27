@@ -1,10 +1,12 @@
 """Create and apply a water body mask"""
 import json
 import subprocess
-from tempfile import NamedTemporaryFile
+from tempfile import TemporaryDirectory
 
 import geopandas
 from osgeo import gdal
+
+from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
 
@@ -19,17 +21,17 @@ def split_geometry_on_antimeridian(geometry: dict):
 def create_water_mask(input_tif: str, output_tif: str):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
-    The water mask is assembled from GSHHG v2.3.7 Levels 1, 2, and 5 at full resolution. To learn more, visit
+    The water mask is assembled from GSHHG v2.3.7 Levels 1, 2, 3, and 5 at full resolution. To learn more, visit
     https://www.soest.hawaii.edu/pwessel/gshhg/
 
-    Shoreline data is buffered to 3 km to reduce the possibility of near-shore features being excluded. Pixel values of
-    1 indicate land and 0 indicate water.
+    Shoreline data is unbuffered and pixel values of 1 indicate land touches the pixel and 0 indicates there is no
+    land in the pixel.
 
     Args:
         input_tif: Path for the input GeoTIFF
         output_tif: Path for the output GeoTIFF
     """
-    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/GSHHS_f_L1.shp'
+    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
 
     src_ds = gdal.Open(input_tif)
 
@@ -42,8 +44,9 @@ def create_water_mask(input_tif: str, output_tif: str):
     extent = split_geometry_on_antimeridian(extent)
 
     mask = geopandas.read_file(mask_location, mask=extent)
-    with NamedTemporaryFile() as temp_file:
-        mask.to_file(temp_file.name, driver='GeoJSON')
-        gdal.Rasterize(dst_ds, temp_file.name, burnValues=[1])
+    with TemporaryDirectory() as temp_shapefile:
+        mask.to_file(temp_shapefile, driver='ESRI Shapefile')
+        with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='YES'):
+            gdal.Rasterize(dst_ds, temp_shapefile, allTouched=True, burnValues=[1])
 
     del src_ds, dst_ds
