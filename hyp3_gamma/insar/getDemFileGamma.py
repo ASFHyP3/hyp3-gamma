@@ -1,6 +1,4 @@
 from tempfile import NamedTemporaryFile
-from osgeo import ogr
-import json
 
 from hyp3lib.execute import execute
 
