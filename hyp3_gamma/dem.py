@@ -117,5 +117,3 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
                       targetAlignedPixels=True, resampleAlg='cubic', multithread=True)
 
 
-
-
