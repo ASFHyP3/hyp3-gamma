@@ -23,7 +23,6 @@ from lxml import etree, objectify
 
 import hyp3_gamma
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
-from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 from hyp3_gamma.metadata import create_metadata_file_set_insar
@@ -378,12 +377,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
 
     # Mosaic the swaths together and copy SLCs over
     log.info("Starting SLC_copy_S1_fullSW.py")
-    
-    # prepare the empty DEM directory
-    if os.path.exists("DEM"):
-            os.system(f"/bin/rm -r DEM")
-    os.mkdir("DEM")
-
     os.chdir(reference)
     SLC_copy_S1_fullSW(wrk, reference, "SLC_TAB", burst_tab1, mode=1, dem="big", dempath=wrk, raml=rlooks, azml=alooks)
     os.chdir("..")
