@@ -22,13 +22,13 @@ jobs:
     with:
       local_package_name: hyp3_gamma
       conda_env_name: hyp3-gamma
-      python_version: '3.8'
+      python_version: '3.10'
 
   call-version-info-workflow:
     uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@main
     with:
       conda_env_name: hyp3-gamma
-      python_version: '3.8'
+      python_version: '3.10'
 
   dockerize:
     needs: call-version-info-workflow
