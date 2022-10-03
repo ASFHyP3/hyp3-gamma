@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.8
+  - python=3.10
   - pip
   # For packaging, and testing
   - flake8
@@ -17,7 +17,7 @@ dependencies:
   - pytest-console-scripts
   - pytest-cov
   # For running
-  - gdal
+  - gdal>=3.4,<3.5
   - geopandas
   - hyp3lib>=1.7.0,<2
   - importlib_metadata
