@@ -4,7 +4,7 @@ ARG ASF_TOOLS_TAG=0.4.2
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
@@ -45,8 +45,8 @@ RUN apt update \
 COPY GAMMA_SOFTWARE-20220630 /usr/local/GAMMA_SOFTWARE-20220630/
 
 COPY . /hyp3-gamma/
-RUN python3 -m pip install --upgrade pip \
-    && python3 -m pip install --no-cache-dir /hyp3-gamma \
+RUN python -m pip install --upgrade pip \
+    && python -m pip install --no-cache-dir /hyp3-gamma \
     && rm -rf /hyp3-gamma
 
 ARG CONDA_GID=1000
