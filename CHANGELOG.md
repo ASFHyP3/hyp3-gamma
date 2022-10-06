@@ -7,6 +7,14 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [5.7.1]
+
+### Changed
+* Upgraded to [`importlib.metadata.entry_points()`](https://docs.python.org/3.10/library/importlib.metadata.html#entry-points)
+  for loading [`console_script` `entry_point`](https://packaging.python.org/en/latest/specifications/entry-points/)
+  functions from the depreciated [`pkg_resources`](https://setuptools.pypa.io/en/latest/pkg_resources.html) package  
+
 ## [5.7.0]
 
 ### Changed
