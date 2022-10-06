@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from importlib.metadata import entry_points
 from pathlib import Path
 from shutil import make_archive
 
@@ -13,7 +14,6 @@ from hyp3lib.execute import execute
 from hyp3lib.fetch import write_credentials_to_netrc_file
 from hyp3lib.image import create_thumbnail
 from hyp3lib.util import string_is_true
-from pkg_resources import load_entry_point
 
 from hyp3_gamma import util
 from hyp3_gamma.insar.ifm_sentinel import insar_sentinel_gamma
@@ -27,10 +27,11 @@ def main():
         help='Select the HyP3 entrypoint version to use'
     )
     args, unknowns = parser.parse_known_args()
+    (process_entry_point,) = entry_points(group='console_scripts', name=args.process)
 
     sys.argv = [args.process, *unknowns]
     sys.exit(
-        load_entry_point('hyp3_gamma', 'console_scripts', args.process)()
+        process_entry_point.load()()
     )
 
 
