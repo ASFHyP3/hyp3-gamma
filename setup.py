@@ -36,7 +36,6 @@ setup(
         'gdal>=3.4,<3.5',
         'geopandas',
         'hyp3lib>=1.7.0,<2',
-        'importlib_metadata',
         'jinja2',
         'lxml',
         'numpy>=1.21,<1.22',
