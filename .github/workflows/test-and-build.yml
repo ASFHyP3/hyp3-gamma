@@ -46,7 +46,7 @@ jobs:
           echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
