@@ -77,14 +77,14 @@ jobs:
 
       - name: Add test tag
         if: github.ref == 'refs/heads/develop'
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:test
 
       - name: Add latest tag
         if: github.ref == 'refs/heads/main'
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:latest
