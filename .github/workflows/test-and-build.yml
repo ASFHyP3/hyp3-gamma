@@ -18,14 +18,14 @@ env:
 
 jobs:
   call-pytest-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@main
+    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@v0.4.0
     with:
       local_package_name: hyp3_gamma
       conda_env_name: hyp3-gamma
       python_version: '3.10'
 
   call-version-info-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@main
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.4.0
     with:
       conda_env_name: hyp3-gamma
       python_version: '3.10'
@@ -36,7 +36,7 @@ jobs:
     env:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -46,7 +46,7 @@ jobs:
           echo "CI_JOB_TIMESTAMP=$(date --utc --rfc-3339=seconds)" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -63,7 +63,7 @@ jobs:
           tar -zxvf GAMMA_SOFTWARE-20220630_MSP_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           no-cache: true
@@ -77,14 +77,14 @@ jobs:
 
       - name: Add test tag
         if: github.ref == 'refs/heads/develop'
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:test
 
       - name: Add latest tag
         if: github.ref == 'refs/heads/main'
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:latest
