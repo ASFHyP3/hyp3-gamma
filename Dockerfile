@@ -1,6 +1,6 @@
 ## ASF TOOLS
 ARG ASF_TOOLS_IMAGE='ghcr.io/asfhyp3/asf-tools'
-ARG ASF_TOOLS_TAG=0.4.3
+ARG ASF_TOOLS_TAG=0.4.4
 
 FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
 
