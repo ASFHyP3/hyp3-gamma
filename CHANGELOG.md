@@ -8,6 +8,9 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
 
+## [5.7.2]
+- Upgraded to asf-tools [v0.4.4](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#044) from v0.4.3
+
 ## [5.7.1]
 
 ### Changed
