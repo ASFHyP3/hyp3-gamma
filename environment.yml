@@ -26,8 +26,6 @@ dependencies:
   # Addresses https://github.com/ASFHyP3/hyp3-gamma/issues/421
   # - hyp3lib>=1.7.0,<2
   # - lxml
-  - boto3
-  - netcdf4
   - pip:
     - lxml==4.8.0
     - hyp3lib==1.7.0
