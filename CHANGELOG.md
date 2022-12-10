@@ -17,7 +17,11 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Upgraded to [`importlib.metadata.entry_points()`](https://docs.python.org/3.10/library/importlib.metadata.html#entry-points)
   for loading [`console_script` `entry_point`](https://packaging.python.org/en/latest/specifications/entry-points/)
   functions from the depreciated [`pkg_resources`](https://setuptools.pypa.io/en/latest/pkg_resources.html) package  
-- Upgraded to asf-tools [v0.4.3](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#043) from v0.4.2
+* Upgraded to asf-tools [v0.4.3](https://github.com/ASFHyP3/asf-tools/blob/develop/CHANGELOG.md#043) from v0.4.2
+
+### Fixed
+* In the conda environment, install `hyp3lib` and `lxml` via `pip` due to an `libxml2` issue as described in
+  [#421](https://github.com/ASFHyP3/hyp3-gamma/issues/421)
 
 ## [5.7.0]
 
