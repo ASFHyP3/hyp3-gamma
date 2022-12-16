@@ -257,6 +257,18 @@ def test_decode_product():
         'polarizations': ('HH', 'HV'),
     }
 
+    name = 'S1B_IW_20170330T165506_DVP_RTC30_G_gduned_094B'
+    assert hyp3_gamma.metadata.rtc.decode_product(name) == {
+        'pixel_spacing': 30,
+        'radiometry': 'gamma-0',
+        'scale': 'decibel',
+        'masked': False,
+        'filter_applied': False,
+        'clipped': False,
+        'matching': False,
+        'polarizations': ('VV', 'VH'),
+    }
+
 
 def test_create_metadata_no_such_reference_file(test_data_folder):
     writer = rtc.RtcMetadataWriter({})
