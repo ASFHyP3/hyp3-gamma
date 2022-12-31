@@ -30,7 +30,7 @@ def main():
     args, unknowns = parser.parse_known_args()
     (process_entry_point,) = entry_points(group='console_scripts', name=args.process)
 
-    if args.thread_limit:
+    if args.omp_num_threads:
         os.environ['OMP_NUM_THREADS'] = str(args.omp_num_threads)
 
     sys.argv = [args.process, *unknowns]
