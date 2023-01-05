@@ -12,6 +12,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - `++omp-num-threads` parameter to the `main()` entrypoint to limit the number of threads used by GAMMA during
   multiprocessing.
+- Choice 10 m to the `resolution` parameter for `hyp3_gamma.rtc_sentinel`
 
 ## [5.7.3]
 

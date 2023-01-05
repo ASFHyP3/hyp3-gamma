@@ -438,7 +438,8 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Path to the Sentinel-1 .SAFE directory to process.')
-    parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
+    parser.add_argument('--resolution', type=float, choices=(10.0, 30.0), default=30.0,
+                        help='Pixel size of the output images.')
     parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
                         help='Radiometry of the output backscatter image(s)')
     parser.add_argument('--scale', choices=('power', 'decibel', 'amplitude'), default='power',
