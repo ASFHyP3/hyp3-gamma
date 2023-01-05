@@ -26,8 +26,12 @@ def main():
         '++process', choices=['rtc', 'insar', 'water_map'], default='rtc',
         help='Select the HyP3 entrypoint version to use'
     )
+    parser.add_argument('++omp-num-threads', type=int, help='The number of OpenMP threads to use for parallel regions')
     args, unknowns = parser.parse_known_args()
     (process_entry_point,) = entry_points(group='console_scripts', name=args.process)
+
+    if args.omp_num_threads:
+        os.environ['OMP_NUM_THREADS'] = str(args.omp_num_threads)
 
     sys.argv = [args.process, *unknowns]
     sys.exit(

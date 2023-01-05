@@ -7,6 +7,12 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [5.7.4]
+
+### Added
+- `++omp-num-threads` parameter to the `main()` entrypoint to limit the number of threads used by GAMMA during
+  multiprocessing.
+
 ## [5.7.3]
 
 ### Added
