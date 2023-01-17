@@ -1,9 +1,3 @@
-## ASF TOOLS
-ARG ASF_TOOLS_IMAGE='ghcr.io/asfhyp3/asf-tools'
-ARG ASF_TOOLS_TAG=0.4.4
-
-FROM ${ASF_TOOLS_IMAGE}:${ASF_TOOLS_TAG} as asf-tools
-
 FROM ubuntu:22.04
 
 # For opencontainers label definitions, see:
@@ -74,11 +68,6 @@ ENV PYTHONPATH=$GAMMA_HOME:$PYTHONPATH
 ENV HDF5_DISABLE_VERSION_CHECK=1
 
 WORKDIR /home/conda/
-
-COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /opt/conda /opt/conda
-COPY --from=asf-tools --chown=${CONDA_GID}:${CONDA_UID} /home/conda/.profile /home/conda/
-
-ENV PATH=$PATH:/opt/conda/bin
 
 ENTRYPOINT ["/usr/local/bin/hyp3_gamma"]
 CMD ["-h"]
