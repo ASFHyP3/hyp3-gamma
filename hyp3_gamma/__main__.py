@@ -10,7 +10,6 @@ from pathlib import Path
 from shutil import make_archive
 
 from hyp3lib.aws import upload_file_to_s3
-from hyp3lib.execute import execute
 from hyp3lib.fetch import write_credentials_to_netrc_file
 from hyp3lib.image import create_thumbnail
 from hyp3lib.util import string_is_true
@@ -23,7 +22,7 @@ from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 def main():
     parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '++process', choices=['rtc', 'insar', 'water_map'], default='rtc',
+        '++process', choices=['rtc', 'insar'], default='rtc',
         help='Select the HyP3 entrypoint version to use'
     )
     parser.add_argument('++omp-num-threads', type=int, help='The number of OpenMP threads to use for parallel regions')
@@ -162,89 +161,6 @@ def insar():
         include_inc_map=args.include_inc_map,
         apply_water_mask=args.apply_water_mask,
     )
-
-    output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
-
-    if args.bucket:
-        product_dir = Path(product_name)
-        for browse in product_dir.glob('*.png'):
-            create_thumbnail(browse, output_dir=product_dir)
-
-        upload_file_to_s3(Path(output_zip), args.bucket, args.bucket_prefix)
-
-        for product_file in product_dir.iterdir():
-            upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
-
-
-def water_map():
-    parser = ArgumentParser()
-    parser.add_argument('--username')
-    parser.add_argument('--password')
-    parser.add_argument('--bucket')
-    parser.add_argument('--bucket-prefix', default='')
-
-    parser.add_argument('--resolution', type=float, choices=[10.0, 30.0], default=30.0)
-    parser.add_argument('--speckle-filter', type=string_is_true, default=False)
-    parser.add_argument('--max-vv-threshold', type=float, default=-17.)
-    parser.add_argument('--max-vh-threshold', type=float, default=-24.)
-    parser.add_argument('--hand-threshold', type=float, default=15.)
-    parser.add_argument('--hand-fraction', type=float, default=0.8)
-    parser.add_argument('--membership-threshold', type=float, default=0.45)
-    parser.add_argument('granule')
-
-    parser.add_argument('--include-flood-depth', type=string_is_true, default=False)
-    parser.add_argument('--estimator', type=str, default='iterative', choices=['iterative', 'logstat', 'nmad', 'numpy'])
-    parser.add_argument('--water-level-sigma', type=float, default=3.)
-    parser.add_argument('--known-water-threshold', type=float, default=30.)
-    parser.add_argument('--iterative-min', type=int, default=0)
-    parser.add_argument('--iterative-max', type=int, default=15)
-
-    args = parser.parse_args()
-
-    username, password = check_earthdata_credentials(args.username, args.password)
-
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
-
-    write_credentials_to_netrc_file(username, password)
-
-    safe_dir = util.get_granule(args.granule)
-
-    product_name = rtc_sentinel_gamma(
-        safe_dir=safe_dir,
-        resolution=args.resolution,
-        scale='power',
-        radiometry='gamma0',
-        speckle_filter=args.speckle_filter,
-        dem_matching=False,
-        include_dem=True,
-        include_inc_map=False,
-        include_scattering_area=False,
-        include_rgb=True,
-        dem_name='copernicus',
-    )
-    execute(f'conda run -n  asf-tools water_map {product_name}/{product_name}_WM.tif '
-            f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_VH.tif '
-            f'--max-vv-threshold {args.max_vv_threshold} --max-vh-threshold {args.max_vh_threshold} '
-            f'--hand-threshold {args.hand_threshold} --hand-fraction {args.hand_fraction} '
-            f'--membership-threshold {args.membership_threshold}', uselogging=True)
-
-    files_to_remove = [
-        Path(product_name) / f'{product_name}_WM_VV_initial.tif',
-        Path(product_name) / f'{product_name}_WM_VH_initial.tif',
-        Path(product_name) / f'{product_name}_WM_VV_fuzzy.tif',
-        Path(product_name) / f'{product_name}_WM_VH_fuzzy.tif',
-    ]
-    for file_to_remove in files_to_remove:
-        file_to_remove.unlink()
-
-    if args.include_flood_depth:
-        execute(f'conda run -n  asf-tools flood_map {product_name}/{product_name}_FM.tif '
-                f'{product_name}/{product_name}_VV.tif {product_name}/{product_name}_WM.tif '
-                f'{product_name}/{product_name}_WM_HAND.tif --estimator {args.estimator} '
-                f'--water-level-sigma {args.water_level_sigma} --known-water-threshold {args.known_water_threshold} '
-                f'--iterative-bounds {args.iterative_min} {args.iterative_max}',
-                uselogging=True)
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
 

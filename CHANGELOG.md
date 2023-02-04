@@ -7,6 +7,14 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [6.0.0]
+
+### Removed
+- Surface water extent map processing of RTC products, which is now entirely contained in 
+  [asf-tools](https://github.com/ASFHyP3/asf-tools/) and its associated docker container image. This includes removing:
+  - `water_map` entrypoint to create a water map product
+  - `asf_tools` environment from the hyp3-gamma docker container image
+
 ## [5.7.5]
 
 ### Added
