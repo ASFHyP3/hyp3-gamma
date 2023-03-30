@@ -112,6 +112,17 @@ def rtc():
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
+def valid_range_float(x):
+    try:
+        x = float(x)
+    except ValueError:
+        raise argparse.ArgumentTypeError("%r not a floating-point literal" % (x,))
+
+    if x < 0.0 or x > 1.0:
+        raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]"%(x,))
+    return x
+
+
 def insar():
     parser = ArgumentParser()
     parser.add_argument('--username')
@@ -126,6 +137,7 @@ def insar():
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--apply-water-mask', type=string_is_true, default=False)
     parser.add_argument('--looks', choices=['20x4', '10x2'], default='20x4')
+    parser.add_argument('--phase-filter-threshold', type=valid_range_float, default=0.6)
     parser.add_argument('granules', type=str.split, nargs='+')
     args = parser.parse_args()
 
@@ -160,6 +172,7 @@ def insar():
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
         apply_water_mask=args.apply_water_mask,
+        phase_filter_threshold=args.phase_filter_threshold
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)
