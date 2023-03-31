@@ -119,8 +119,6 @@ def valid_range_float(x):
     raise ValueError(f'{x} not in range [0.0, 1.0]')
 
 
-
-
 def insar():
     parser = ArgumentParser()
     parser.add_argument('--username')
