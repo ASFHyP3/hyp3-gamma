@@ -4,7 +4,7 @@ rtc_gamma processing for HyP3
 import logging
 import os
 import sys
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, ArgumentTypeError
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from importlib.metadata import entry_points
 from pathlib import Path
 from shutil import make_archive
