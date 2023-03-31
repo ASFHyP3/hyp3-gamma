@@ -487,7 +487,7 @@ def main():
     insar_sentinel_gamma(args.reference, args.secondary, rlooks=args.rlooks, alooks=args.alooks,
                          include_look_vectors=args.l, include_displacement_maps=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
-                         include_dem=args.d, apply_water_mask=args.m, phase_filter_thrshold=args.t)
+                         include_dem=args.d, apply_water_mask=args.m, phase_filter_thrshold=args.phase_filter_threshold)
 
 
 if __name__ == "__main__":
