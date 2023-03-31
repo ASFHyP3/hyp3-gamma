@@ -4,7 +4,7 @@ rtc_gamma processing for HyP3
 import logging
 import os
 import sys
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, ArgumentTypeError
 from importlib.metadata import entry_points
 from pathlib import Path
 from shutil import make_archive
@@ -116,10 +116,10 @@ def valid_range_float(x):
     try:
         x = float(x)
     except ValueError:
-        raise argparse.ArgumentTypeError("%r not a floating-point literal" % (x,))
+        raise ArgumentTypeError("%r not a floating-point literal" % (x,))
 
     if x < 0.0 or x > 1.0:
-        raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]"%(x,))
+        raise ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
     return x
 
 
