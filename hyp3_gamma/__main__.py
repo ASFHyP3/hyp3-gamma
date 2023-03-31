@@ -113,14 +113,12 @@ def rtc():
 
 
 def valid_range_float(x):
-    try:
-        x = float(x)
-    except ValueError:
-        raise ArgumentTypeError("%r not a floating-point literal" % (x,))
+    x = float(x)
+    if 0.0 <= x <= 1.0:
+        return x
+    raise ValueError(f'{x} not in range [0.0, 1.0]')
 
-    if x < 0.0 or x > 1.0:
-        raise ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
-    return x
+
 
 
 def insar():
