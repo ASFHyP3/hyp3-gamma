@@ -233,7 +233,8 @@ def move_output_files(output, reference, prod_dir, long_output, include_displace
                   "{}_unw_phase".format(os.path.join(prod_dir, long_output)), use_nn=True)
 
 
-def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, phase_filter_threshold, dem_source, coords, ref_point_info):
+def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords,
+                        ref_point_info, phase_filter_threshold):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -454,7 +455,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
-                        dem_source, coords, ref_point_info)
+                        dem_source, coords, ref_point_info, phase_filter_threshold)
 
     log.info("Done!!!")
     return product_name
