@@ -234,7 +234,7 @@ def move_output_files(output, reference, prod_dir, long_output, include_displace
 
 
 def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, coords,
-                        ref_point_info, phase_filter_threshold):
+                        ref_point_info, phase_filter_parameter):
     res = 20 * int(alooks)
 
     reference_date = mydir[:15]
@@ -317,7 +317,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
         f.write('INSAR phase filter:  adf\n')
-        f.write('Phase filter parameter: %s\n' % phase_filter_threshold)
+        f.write('Phase filter parameter: %s\n' % phase_filter_parameter)
         f.write('Resolution of output (m): %s\n' % res)
         f.write('Range bandpass filter: no\n')
         f.write('Azimuth bandpass filter: no\n')
@@ -337,7 +337,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
 
 def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, include_look_vectors=False,
                          include_displacement_maps=False, include_wrapped_phase=False, include_inc_map=False,
-                         include_dem=False, apply_water_mask=False, phase_filter_threshold=0.6):
+                         include_dem=False, apply_water_mask=False, phase_filter_parameter=0.6):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
     wrk = os.getcwd()
@@ -420,7 +420,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     log.info("Starting phase unwrapping and geocoding")
 
     coords, ref_point_info = unwrapping_geocoding(reference, secondary, step="man", rlooks=rlooks, alooks=alooks,
-                                                  alpha=phase_filter_threshold, apply_water_mask=apply_water_mask)
+                                                  alpha=phase_filter_parameter, apply_water_mask=apply_water_mask)
 
     # Generate metadata
     log.info("Collecting metadata and output files")
@@ -455,7 +455,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)
 
     make_parameter_file(igramName, f'{product_name}/{product_name}.txt', alooks, rlooks,
-                        dem_source, coords, ref_point_info, phase_filter_threshold)
+                        dem_source, coords, ref_point_info, phase_filter_parameter)
 
     log.info("Done!!!")
     return product_name
@@ -477,7 +477,7 @@ def main():
     parser.add_argument("-s", action="store_true", help="Create both line of sight and vertical displacement files")
     parser.add_argument("-w", action="store_true", help="Create wrapped phase file")
     parser.add_argument("-m", action="store_true", help="Apply water mask")
-    parser.add_argument("-t", "--phase-filter-threshold", default=0.6, help="Threshold value for adf phase filter")
+    parser.add_argument("-p", "--phase-filter-parameter", default=0.6, help="Adaptive phase filter parameter")
 
     args = parser.parse_args()
 
@@ -488,7 +488,7 @@ def main():
                          include_look_vectors=args.l, include_displacement_maps=args.s,
                          include_wrapped_phase=args.w, include_inc_map=args.i,
                          include_dem=args.d, apply_water_mask=args.m,
-                         phase_filter_threshold=args.phase_filter_threshold)
+                         phase_filter_parameter=args.phase_filter_parameter)
 
 
 if __name__ == "__main__":

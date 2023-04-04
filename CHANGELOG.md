@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.0.2]
 
 ### Added
-- `phase_filter_threshold` option for the processing of INSAR products 
+- A `--phase-filter-paameter` option has been added to the `__main__` (HyP3) and `ifm_sentinel.py` entry points to specify the adaptive phase filter parameter used when processing InSAR products. The provided value is ultimately passed to the `alpha` argument of the `adf` GAMMA function, which uses the algorithm with a constant exponent as described in https://doi.org/10.1029/1998GL900033.
 
 ## [6.0.1]
 
