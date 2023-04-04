@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.0.2]
 
 ### Added
-- `phase-filter-threshold` option for the processing of INSAR products 
+- `phase_filter_threshold` option for the processing of INSAR products 
 
 ## [6.0.1]
 
