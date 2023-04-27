@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.2]
+## [6.2.0]
 
 ### Added
-- added `resolution=20.0` option for `__main__.rtc()`
+- Added `resolution=20.0` option for `__main__.rtc()`
 
+## [6.1.0]
+
+### Added
+- A `--phase-filter-paameter` option has been added to the `__main__` (HyP3) and `ifm_sentinel.py` entry points to specify the adaptive phase filter parameter used when processing InSAR products. The provided value is ultimately passed to the `alpha` argument of the `adf` GAMMA function, which uses the algorithm with a constant exponent as described in https://doi.org/10.1029/1998GL900033.
 
 ## [6.0.1]
 
