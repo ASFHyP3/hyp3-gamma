@@ -189,7 +189,7 @@ A textfile is generated during processing, which includes the parameters used an
 The basic steps in the radiometric terrain correction process are as follows:
 
 1. Data granule is ingested into the format required by GAMMA software - calibration is done during this step.
-2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 20-m products default to two looks; and 10-m products default to one look). This product used {{ looks }} look(s).
+2. If required, data is multi-looked to the desired number of looks (default for 30-m products is 6 looks for GRD granules and 3 for SLC; 20-m products default to 2 looks; and 10-m products default to 1 look). This product used {{ looks }} look(s).
 3. A DEM is extracted from the ASF DEM heap covering the granule to be corrected.
 4. A mapping function is created, mapping from DEM space into SAR space.
 5. By default, DEM coregistration is not used. When the DEM Matching option is selected for a custom order, the following steps will be performed. *By default the process will skip from step 4 to step 6.*
