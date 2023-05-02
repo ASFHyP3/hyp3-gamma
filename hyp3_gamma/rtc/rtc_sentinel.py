@@ -147,7 +147,7 @@ def run(cmd):
     execute(cmd, uselogging=True)
 
 
-def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None, resolution: float = 30.0):
+def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None, pixel_size: float = 30.0):
     dem_tif = 'dem.tif'
     dem_type = 'UNKNOWN'
     dem_image = 'dem.image'
@@ -165,7 +165,7 @@ def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str
             geometry = ogr.CreateGeometryFromWkt(wkt)
         else:
             geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
-        prepare_dem_geotiff(dem_tif, geometry, resolution)
+        prepare_dem_geotiff(dem_tif, geometry, pixel_size)
         run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
