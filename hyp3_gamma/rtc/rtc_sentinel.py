@@ -147,7 +147,7 @@ def run(cmd):
     execute(cmd, uselogging=True)
 
 
-def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None):
+def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None, resolution: float = 30.0):
     dem_tif = 'dem.tif'
     dem_type = 'UNKNOWN'
     dem_image = 'dem.image'
@@ -165,7 +165,7 @@ def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str
             geometry = ogr.CreateGeometryFromWkt(wkt)
         else:
             geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
-        prepare_dem_geotiff(dem_tif, geometry)
+        prepare_dem_geotiff(dem_tif, geometry, resolution)
         run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
@@ -338,7 +338,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
                    include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
 
     log.info('Preparing DEM')
-    dem_image, dem_par, dem_type = prepare_dem(safe_dir, dem_name, bbox, dem)
+    dem_image, dem_par, dem_type = prepare_dem(safe_dir, dem_name, bbox, dem, resolution)
 
     for pol in polarizations:
         mli_image, mli_par = prepare_mli_image(safe_dir, granule_type, pol, orbit_file, looks)
