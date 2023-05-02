@@ -158,9 +158,9 @@ _There are 17 possible different pixel values, indicating the layover, shadow, a
 -------------
 ## 7. False-color RGB decomposition
 
-The RGB decomposition GeoTIFF is not included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _rgb.tif, and has the same pixel spacing as the RTC products.
+The RGB decomposition GeoTIFF can optionally be included in the product package. This layer is tagged with _rgb.tif, and has the same pixel spacing as the RTC products.
 
-If you do not require a full-resolution decomposition raster, you can omit this product and simply refer to the lower-resolution color browse image included in the product package.
+If you do not require a full-resolution RGB decomposition raster, you can omit this product and simply refer to the lower-resolution color browse image included by default in the product package.
 
 This option is only available for dual-pol products, as it combines the co- and cross-polarized RTC values to generate a false-color image. In general, blue indicates areas with low backscatter in both co- and cross-polarizations (calm water, dry sand, frozen ground), green indicates high cross-pol values (vegetation or other volume scatterers), and red indicates areas with low cross-pol but relatively high co-pol values (urban areas). A full description of the approach used for generating this particular decomposition is available [here](https://github.com/ASFHyP3/hyp3-lib/blob/develop/docs/rgb_decomposition.md).
 
