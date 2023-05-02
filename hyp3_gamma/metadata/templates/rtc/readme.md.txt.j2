@@ -97,7 +97,7 @@ KMZ files are generated for use in Google Earth and other compatible application
 -------------
 ## 3. DEM used to correct the data
 
-The Digital Elevation Model (DEM) layer is included with standard products, but is optional when placing a custom order for imagery. This layer is tagged with _dem.tif, and is provided in 16-bit signed integer format. Note that the actual RTC correction is performed using a 32-bit float version, but this file has been converted to 16-bit to reduce file size.
+The Digital Elevation Model (DEM) used for RTC processing can optionally be included in the product package. This layer is tagged with _dem.tif, and is provided in 16-bit signed integer format. Note that the actual RTC correction is performed using a 32-bit float version, but this file has been converted to 16-bit to reduce file size.
 
 The source DEM has a geoid correction applied before it is used for RTC, so elevation values in this file will differ from the source DEM. It is provided in the same pixel spacing/alignment as the RTC product. **The pixel spacing of the DEM included in the product package is not a reflection of the resolution of the source DEM, which is resampled to match the pixel spacing of the RTC product.** The pixel spacing of the adjusted DEM included in this product package is {{ pixel_spacing|int }} meters.
 
