@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.1.1]
+
+## [6.2.2]
+
+### Changed
+- The initial DEM mosaic for RTC processing is now resampled to the desired output pixel spacing so that pixels for 20m
+  products are always aligned to a common grid.
+
+## [6.2.1]
+
+### Changed
+- Updated language in RTC readme files to remove references to standard products
+
+## [6.2.0]
 
 ### Added
 - Added `resolution=20.0` option for `__main__.rtc()`
