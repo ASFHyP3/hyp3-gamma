@@ -80,6 +80,24 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
+def get_envelope_geometry(geometry):
+    # get the envelope of the geometry
+    if geometry.GetGeometryName() == 'MULTIPOLYGON':
+        geom = [g for g in geometry]
+        multipolygon = ogr.Geometry(ogr.wkbMultiPolygon)
+        for g in geom:
+            minlon, maxlon, minlat, maxlat = g.GetEnvelope()
+            wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}))'
+            poly = ogr.CreateGeometryFromWkt(wkt)
+            multipolygon.AddGeometry(poly)
+        return multipolygon
+    else:
+        minlon, maxlon, minlat, maxlat = geometry.GetEnvelope()
+        wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}))'
+        polygon = ogr.CreateGeometryFromWkt(wkt)
+        return polygon
+
+
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry.
 
@@ -98,6 +116,8 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
+
+            geometry = get_envelope_geometry(geometry)
 
             centroid = geometry.Centroid()
             dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
