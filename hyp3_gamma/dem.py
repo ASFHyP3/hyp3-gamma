@@ -101,12 +101,10 @@ def get_envelope_geometry(geometry):
                f' {minlon1} {minlat}))'
         poly1 = ogr.CreateGeometryFromWkt(wkt1)
         geometry_out.AddGeometry(poly1)
-        ogr_geometry_2_geojson_file(geometry_out, "envelope-split.geojson")
     else:
         minlon, maxlon, minlat, maxlat = geometry.GetEnvelope()
         wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}))'
         geometry_out = ogr.CreateGeometryFromWkt(wkt)
-        ogr_geometry_2_geojson_file(geometry_out, "envelope.geojson")
 
     return geometry_out
 
