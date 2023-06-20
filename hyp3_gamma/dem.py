@@ -81,45 +81,34 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
 
 
 def get_envelope_geometry(geometry):
-    geometry1 = geometry.Clone()
-
-    centroid = geometry.Centroid()
+    # get the envelope of the geometry
     if geometry.GetGeometryName() == 'MULTIPOLYGON':
-        centroid = get_centroid_crossing_antimeridian(geometry)
+        geom = [g for g in geometry]
+        geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
 
-    # get the epsg_code of the geometry
-    epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
+        minlon0, maxlon0, minlat0, maxlat0 = geom[0].GetEnvelope()
+        minlon1, maxlon1, minlat1, maxlat1 = geom[1].GetEnvelope()
 
-    # convert the crs of the geometry to utm epsg_code
-    source = osr.SpatialReference()
-    # source.ImportFromEPSG(4326)
-    source.ImportFromProj4('+proj=longlat +datum=WGS84 +no_defs')
-    target = osr.SpatialReference()
-    target.ImportFromEPSG(epsg_code)
-    transform1 = osr.CoordinateTransformation(source, target)
-    geometry1.Transform(transform1)
+        minlat = min(minlat0, minlat1)
+        maxlat = max(maxlat0, maxlat1)
 
-    # get envelope
-    minlon, maxlon, minlat, maxlat = geometry1.GetEnvelope()
+        wkt0 = f'POLYGON (({minlon0}  {minlat}, {minlon0} {maxlat}, {maxlon0} {maxlat}, {maxlon0} {minlat},' \
+               f' {minlon0} {minlat}))'
+        poly0 = ogr.CreateGeometryFromWkt(wkt0)
+        geometry_out.AddGeometry(poly0)
 
-    if geometry.GetGeometryName() == 'MULTIPOLYGON':
-        geometry_out = []
-        wkt1 = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {(maxlon + minlon)/2} {maxlat},' \
-               f' {(maxlon + minlon)/2} {minlat}, {minlon} {minlat}))'
+        wkt1 = f'POLYGON (({minlon1}  {minlat}, {minlon1} {maxlat}, {maxlon1} {maxlat}, {maxlon1} {minlat},' \
+               f' {minlon1} {minlat}))'
         poly1 = ogr.CreateGeometryFromWkt(wkt1)
-        geometry_out.append(poly1)
-        wkt2 = f'POLYGON (({(maxlon + minlon)/2}  {minlat}, {(maxlon + minlon)/2} {maxlat}, {maxlon} {maxlat},' \
-               f' {maxlon} {minlat}, {(maxlon + minlon)/2} {minlat}))'
-        poly2 = ogr.CreateGeometryFromWkt(wkt2)
-        geometry_out.append(poly2)
+        geometry_out.AddGeometry(poly1)
+        ogr_geometry_2_geojson_file(geometry_out, "envelope-split.geojson")
     else:
+        minlon, maxlon, minlat, maxlat = geometry.GetEnvelope()
         wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}))'
-        geometry2 = ogr.CreateGeometryFromWkt(wkt)
+        geometry_out = ogr.CreateGeometryFromWkt(wkt)
+        ogr_geometry_2_geojson_file(geometry_out, "envelope.geojson")
 
-    # convert back
-    transform2 = osr.CoordinateTransformation(target, source)
-
-    return geometry_out.Transform(transform2)
+    return geometry_out
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):

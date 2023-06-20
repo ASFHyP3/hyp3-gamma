@@ -391,7 +391,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     if include_dem:
         with NamedTemporaryFile() as temp_file:
             run(f'data2geotiff dem_seg.par dem_seg 2 {temp_file.name}')
-            gdal.Translate(f'{product_name}/{product_name}_dem.tif', temp_file.name, outputType=gdalconst.GDT_Int16)
+            gdal.Translate(f'{product_name}/{product_name}_dem.tif', temp_file.name, nodata="none",
+                           outputType=gdalconst.GDT_Int16)
     if include_inc_map:
         run(f'data2geotiff dem_seg.par corrected.inc_map 2 {product_name}/{product_name}_inc_map.tif')
     if include_scattering_area:
