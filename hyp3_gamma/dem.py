@@ -2,8 +2,9 @@ import json
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
-from typing import Generator, List
+from typing import Generator, List, Union
 
+import numpy as np
 from hyp3lib import DemError
 from osgeo import gdal, ogr, osr
 
