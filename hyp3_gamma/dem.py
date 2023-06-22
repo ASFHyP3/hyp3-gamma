@@ -2,11 +2,10 @@ import json
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
-from typing import Generator, List, Union
+from typing import Generator, List
 
-import numpy as np
 from hyp3lib import DemError
-from osgeo import gdal, ogr, osr
+from osgeo import gdal, ogr
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -104,7 +103,8 @@ def get_envelope_geometry(geometry):
         geometry_out.AddGeometry(poly1)
     else:
         minlon, maxlon, minlat, maxlat = geometry.GetEnvelope()
-        wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat}, {maxlon} {minlat}, {minlon} {minlat}))'
+        wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat},' \
+              f' {maxlon} {minlat}, {minlon} {minlat}))'
         geometry_out = ogr.CreateGeometryFromWkt(wkt)
 
     return geometry_out
