@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.2.3]
 
 ### Added
-- the DEM unit in meters to the readme.md.txt file in the RTC product
+- References to the DEM pixel value unit (meters) in the readme.md.txt file for the RTC and InSAR products
 
 ## [6.2.2]
 
