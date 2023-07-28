@@ -99,36 +99,6 @@ def get_envelope_geometry(geometry):
 
     return geometry_out
 
-def get_envelope_geometry_orig(geometry):
-    # get the envelope of the geometry
-    if geometry.GetGeometryName() == 'MULTIPOLYGON':
-        geom = [g for g in geometry]
-        geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
-
-        minlon0, maxlon0, minlat0, maxlat0 = geom[0].GetEnvelope()
-        minlon1, maxlon1, minlat1, maxlat1 = geom[1].GetEnvelope()
-
-        minlat = min(minlat0, minlat1)
-        maxlat = max(maxlat0, maxlat1)
-
-        wkt0 = f'POLYGON (({minlon0}  {minlat}, {minlon0} {maxlat}, {maxlon0} {maxlat}, {maxlon0} {minlat},' \
-               f' {minlon0} {minlat}))'
-        poly0 = ogr.CreateGeometryFromWkt(wkt0)
-        geometry_out.AddGeometry(poly0)
-
-        wkt1 = f'POLYGON (({minlon1}  {minlat}, {minlon1} {maxlat}, {maxlon1} {maxlat}, {maxlon1} {minlat},' \
-               f' {minlon1} {minlat}))'
-        poly1 = ogr.CreateGeometryFromWkt(wkt1)
-        geometry_out.AddGeometry(poly1)
-    else:
-        minlon, maxlon, minlat, maxlat = geometry.GetEnvelope()
-        wkt = f'POLYGON (({minlon}  {minlat}, {minlon} {maxlat}, {maxlon} {maxlat},' \
-              f' {maxlon} {minlat}, {minlon} {minlat}))'
-        geometry_out = ogr.CreateGeometryFromWkt(wkt)
-
-    return geometry_out
-
-
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
     """Create a DEM mosaic GeoTIFF covering a given geometry.
