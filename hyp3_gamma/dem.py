@@ -84,7 +84,7 @@ def get_envelope_geometry(geometry):
     # get the envelope of the geometry
     geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
     geoms = [g for g in geometry]
-    boxes =[]
+    boxes = []
     for g in geoms:
         boxes.append(g.GetEnvelope())
 
