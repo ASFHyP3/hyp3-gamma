@@ -82,6 +82,25 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
 
 def get_envelope_geometry(geometry):
     # get the envelope of the geometry
+    geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
+    geoms = [g for g in geometry]
+    boxes =[]
+    for g in geoms:
+        boxes.append(g.GetEnvelope())
+
+    minlat = min([x[2] for x in boxes])
+    maxlat = max([x[3] for x in boxes])
+
+    for item in boxes:
+        wkt = f'POLYGON (({item[0]}  {minlat}, {item[0]} {maxlat}, {item[1]} {maxlat}, {item[1]} {minlat},' \
+               f' {item[0]} {minlat}))'
+        poly = ogr.CreateGeometryFromWkt(wkt)
+        geometry_out.AddGeometry(poly)
+
+    return geometry_out
+
+def get_envelope_geometry_orig(geometry):
+    # get the envelope of the geometry
     if geometry.GetGeometryName() == 'MULTIPOLYGON':
         geom = [g for g in geometry]
         geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
@@ -108,6 +127,7 @@ def get_envelope_geometry(geometry):
         geometry_out = ogr.CreateGeometryFromWkt(wkt)
 
     return geometry_out
+
 
 
 def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
