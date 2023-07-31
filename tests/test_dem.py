@@ -228,6 +228,8 @@ def test_get_envelope_geometry():
 
     assert envelope_wkt == dem.get_envelope_geometry(ogr.CreateGeometryFromWkt(geometry_wkt)).ExportToWkt()
 
+
+def test_get_envelope_geometry_antimeridian():
     geometry_wkt = ('MULTIPOLYGON (((176.345322 64.323662,177.029633 66.099213,180.0 65.8476739643197,'
                     '180.0 64.0049669812713,176.345322 64.323662)),'
                     '((-180 64.0049669812713,-180 65.8476739643197,-177.548157 65.640045,'
