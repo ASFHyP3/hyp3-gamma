@@ -217,3 +217,25 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     info = gdal.Info(str(dem_geotiff), format='json')
     assert info['geoTransform'] == [219330.0, 30.0, 0.0, 5768640.0, 0.0, -30.0]
     assert info['size'] == [4780, 3897]
+
+
+def test_get_envelope_geometry():
+    geometry_wkt = ('POLYGON ((-143.374771 64.309959,-148.58963 64.759972,-147.983917 66.244545,'
+                    '-142.475601 65.779709,-143.374771 64.309959))')
+
+    envelope_wkt = ('MULTIPOLYGON (((-148.58963 64.309959,-148.58963 66.244545,-142.475601 66.244545,'
+                    '-142.475601 64.309959,-148.58963 64.309959)))')
+
+    assert envelope_wkt == dem.get_envelope_geometry(ogr.CreateGeometryFromWkt(geometry_wkt)).ExportToWkt()
+
+    geometry_wkt = ('MULTIPOLYGON (((176.345322 64.323662,177.029633 66.099213,180.0 65.8476739643197,'
+                    '180.0 64.0049669812713,176.345322 64.323662)),'
+                    '((-180 64.0049669812713,-180 65.8476739643197,-177.548157 65.640045,'
+                    '-178.576431 63.880829,-180 64.0049669812713)))')
+
+    envelope_wkt = ('MULTIPOLYGON (((176.345322 63.880829,176.345322 66.099213,180.0 66.099213,'
+                    '180.0 63.880829,176.345322 63.880829)),'
+                    '((-180 63.880829,-180 66.099213,-177.548157 66.099213,'
+                    '-177.548157 63.880829,-180 63.880829)))')
+
+    assert envelope_wkt == dem.get_envelope_geometry(ogr.CreateGeometryFromWkt(geometry_wkt)).ExportToWkt()
