@@ -118,8 +118,8 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-
-            geometry = get_envelope_geometry(geometry)
+            # do not use the envelope
+            # geometry = get_envelope_geometry(geometry)
 
             centroid = geometry.Centroid()
             dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
