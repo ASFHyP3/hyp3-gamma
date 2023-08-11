@@ -9,7 +9,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.2.4]
 
 ### Changed
-- Use the envelope of the map-overlay.kml to determine the input dem.tif
 - Remove the NoData setting in the output dem.tif
 
 ## [6.2.3]
