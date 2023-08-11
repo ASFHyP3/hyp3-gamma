@@ -80,20 +80,17 @@ def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[s
     return shifted_file_paths
 
 
-def get_envelope_geometry(geometry):
-    # get the envelope of the geometry
+def get_envelope_geometry(geometry: ogr.Geometry) -> ogr.Geometry:
+    # Returns the envelope of the given geometry.
+    boxes = [g.GetEnvelope() for g in geometry]
+
+    minlat = min(box[2] for box in boxes)
+    maxlat = max(box[3] for box in boxes)
+
     geometry_out = ogr.Geometry(ogr.wkbMultiPolygon)
-    geoms = [g for g in geometry]
-    boxes = []
-    for g in geoms:
-        boxes.append(g.GetEnvelope())
-
-    minlat = min([x[2] for x in boxes])
-    maxlat = max([x[3] for x in boxes])
-
-    for item in boxes:
-        wkt = f'POLYGON (({item[0]}  {minlat}, {item[0]} {maxlat}, {item[1]} {maxlat}, {item[1]} {minlat},' \
-               f' {item[0]} {minlat}))'
+    for box in boxes:
+        wkt = f'POLYGON (({box[0]}  {minlat}, {box[0]} {maxlat}, {box[1]} {maxlat}, {box[1]} {minlat},' \
+              f' {box[0]} {minlat}))'
         poly = ogr.CreateGeometryFromWkt(wkt)
         geometry_out.AddGeometry(poly)
 
