@@ -98,12 +98,12 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
         with TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
-
             centroid = geometry.Centroid()
             dem_file_paths = get_dem_file_paths(geometry.Buffer(0.15))
 
             if geometry.GetGeometryName() == 'MULTIPOLYGON':
                 centroid = get_centroid_crossing_antimeridian(geometry)
+
                 dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
 
             dem_vrt = temp_path / 'dem.vrt'
