@@ -36,8 +36,7 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY GAMMA_SOFTWARE-20221129 /usr/local/GAMMA_SOFTWARE-20221129/
-
+COPY GAMMA_SOFTWARE-20221129/ /usr/local/GAMMA_SOFTWARE-20221129/
 COPY . /hyp3-gamma/
 RUN python -m pip install --upgrade pip \
     && python -m pip install --no-cache-dir /hyp3-gamma \
