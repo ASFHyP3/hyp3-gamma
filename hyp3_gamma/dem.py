@@ -24,7 +24,8 @@ def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
 
 
 def get_dem_features() -> Generator[ogr.Feature, None, None]:
-    ds = ogr.Open(DEM_GEOJSON)
+    # ds = ogr.Open(DEM_GEOJSON)
+    ds = ogr.Open("cop30-2021-us-west-2-mirror.geojson")
     layer = ds.GetLayer()
     for feature in layer:
         yield feature
