@@ -35,7 +35,7 @@ jobs:
     env:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
