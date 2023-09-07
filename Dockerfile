@@ -22,21 +22,23 @@ ENV PYTHONDONTWRITEBYTECODE=true
 RUN apt update \
     && apt upgrade -y \
     && apt install -y --no-install-recommends \
-         # GAMMA requirements per sections 2-6, 9 of the Linux installation guide
+         # GAMMA requirements per sections 2-6, 9-10 of the Linux installation guide
          libfftw3-3 libfftw3-dev libfftw3-single3 \
-         gnuplot gnuplot-data gimp \
+         gnuplot gnuplot-data gimp gnome-icon-theme \
          gdal-bin libgdal-dev \
          libhdf5-dev libhdf5-103 \
          libblas-dev libblas3 liblapack-dev liblapack3 liblapack-doc \
-         python-is-python3 python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
-         # GAMMA scripts require csh/tcsh
-         tcsh \
+         tcsh perl \
+         python3 \
+         python-is-python3 \
+         python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
          # Additional installs
          python3-pip wget git vim \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY GAMMA_SOFTWARE-20230712/ /usr/local/GAMMA_SOFTWARE-20230712/
+COPY GAMMA_SOFTWARE-20230712 /usr/local/GAMMA_SOFTWARE-20230712/
+
 COPY . /hyp3-gamma/
 RUN python -m pip install --upgrade pip \
     && python -m pip install --no-cache-dir /hyp3-gamma \
