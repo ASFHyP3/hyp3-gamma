@@ -11,7 +11,6 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Upgraded to [GAMMA software](https://www.gamma-rs.ch/software) version `20230712` from `20220630`
 
-
 ## [6.2.4]
 
 ### Changed
