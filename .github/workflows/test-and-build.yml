@@ -18,14 +18,14 @@ env:
 
 jobs:
   call-pytest-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@v0.8.1
+    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@v0.8.2
     with:
       local_package_name: hyp3_gamma
       python_versions: >-
         ["3.10"]
 
   call-version-info-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.8.1
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.8.2
     with:
       python_version: '3.10'
 
@@ -35,7 +35,7 @@ jobs:
     env:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -58,8 +58,8 @@ jobs:
 
       - name: Fetch GAMMA
         run: |
-          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20220630_MSP_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz .
-          tar -zxvf GAMMA_SOFTWARE-20220630_MSP_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
+          aws s3 cp s3://hyp3-software/GAMMA_SOFTWARE-20230712_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz .
+          tar -zxvf GAMMA_SOFTWARE-20230712_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
         uses: docker/build-push-action@v4
