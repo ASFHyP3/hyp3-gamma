@@ -264,7 +264,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
-    if width * lines < 54000000:  # https://github.com/ASFHyP3/hyp3-gamma/issues/316#issuecomment-1338522427
+    if int(width) * int(lines) < 54000000:  # https://github.com/ASFHyP3/hyp3-gamma/issues/316#issuecomment-1338522427
         range_patches = 1
         azimuth_patches = 1
         overlap = 1024
