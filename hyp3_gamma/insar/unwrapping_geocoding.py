@@ -264,16 +264,15 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
-    if int(width) * int(lines) < 54000000:  # https://github.com/ASFHyP3/hyp3-gamma/issues/316#issuecomment-1338522427
+    # unwrap very large interferograms in multiple patches to keep memory requirement under 31,600 MB
+    # https://github.com/ASFHyP3/hyp3-gamma/issues/316#issuecomment-1338522427
+    if int(width) * int(lines) < 54000000:
         range_patches = 1
-        azimuth_patches = 1
-        overlap = 1024
     else:
         range_patches = 2
-        azimuth_patches = 1
-        overlap = 1024
+
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {range_patches} {azimuth_patches} {overlap} {ref_rpix} {ref_azlin} 1", uselogging=True)
+                      f" - - {range_patches} 1 - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
 

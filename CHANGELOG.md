@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.1]
+
+### Changed
+- Phase unwrapping for very large interferograms is now performed in two range patches to keep total memory requirement
+  under 31,600 MB.
+
 ## [6.3.0]
 
 ### Changed
