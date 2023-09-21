@@ -201,7 +201,7 @@ def combine_water_mask(cc_mask_file, water_mask_sar_file):
 
 
 def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
-                         npatr=1, npata=1, alpha=0.6, apply_water_mask=False):
+                         alpha=0.6, apply_water_mask=False):
 
     dem = "./DEM/demseg"
     dempar = "./DEM/demseg.par"
@@ -221,6 +221,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
         log.error("ERROR: Unable to find offset file {}".format(offit))
 
     width = getParameter(offit, "interferogram_width")
+    lines = getParameter(offit, "interferogram_azimuth_lines")
     mwidth = getParameter(mmli + ".par", "range_samples")
     mlines = getParameter(mmli + ".par", "azimuth_lines")
     swidth = getParameter(smli + ".par", "range_samples")
@@ -259,11 +260,19 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     data_cc = read_bin(cc_ref, int(mlines), int(mwidth))
     ref_azlin, ref_rpix = get_reference_pixel(data_cc)
+    del data_cc
 
     height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
+    # unwrap very large interferograms in multiple patches to keep memory requirement under 31,600 MB
+    # https://github.com/ASFHyP3/hyp3-gamma/issues/316
+    if int(width) * int(lines) < 54000000:
+        range_patches = 1
+    else:
+        range_patches = 2
+
     mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {npatr} {npata} - {ref_rpix} {ref_azlin} 1", uselogging=True)
+                      f" - - {range_patches} 1 - {ref_rpix} {ref_azlin} 1", uselogging=True)
 
     ref_point_info = get_ref_point_info(mcf_log)
 
@@ -343,15 +352,13 @@ def main():
                         help="Triangulation method for mcf unwrapper: "
                              "0) filled traingular mesh (default); 1) Delaunay triangulation")
     parser.add_argument("--alpha", default=0.6, type=float, help="adf filter alpha value (def=0.6)")
-    parser.add_argument("--npatr", default=1, help="Number of patches in range (def=1)")
-    parser.add_argument("--npata", default=1, help="Number of patches in azimuth (def=1)")
     args = parser.parse_args()
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
 
     unwrapping_geocoding(args.reference, args.secondary, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
-                         trimode=args.tri, npatr=args.npatr, npata=args.npata, alpha=args.alpha)
+                         trimode=args.tri, alpha=args.alpha)
 
 
 if __name__ == "__main__":
