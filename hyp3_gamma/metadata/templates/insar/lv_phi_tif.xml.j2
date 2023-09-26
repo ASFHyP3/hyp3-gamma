@@ -11,7 +11,7 @@ The phi look vector map is generated from the SLC parameter file using GAMMA's l
 
 
 {# Begin idAbs READABLE - not to be included in the xml template
-This is the phi look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The look vector orientation angle is defined as the angle between the East direction and the projection of the look vector (pointing back towards the sensor) on the horizontal surface plane. The pixel values indicate the SAR look vector orientation angle at each map pixel, with values of 0 indicating east, pi/2 indicating north, and -pi/2 indicating south. The range of orientation angle is -pi to pi, expressed in radians. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
+This is the phi look vector map for a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The look vector orientation angle is defined as the angle between the East direction and the projection of the look vector (pointing back towards the sensor) on the horizontal surface plane. The pixel values indicate the SAR look vector orientation angle at each map pixel, with values of 0 indicating east, pi/2 indicating north, and -pi/2 indicating south. The range of the orientation angle is -pi to pi, expressed in radians. It is a 32-bit float GeoTIFF projected to {{ projection }}, and has a pixel spacing of {{ pixel_spacing|int }} m.
 
 Reference Scene: {{ reference_granule_name }}
 Secondary Scene: {{ secondary_granule_name }}
