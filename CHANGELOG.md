@@ -6,11 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.2]
+
+### Fixed
+- Description of the range of the lv_phi to be -Pi to Pi in the readme.txt.j2 and the lv_phi_tif.xml.j2.
+  Fixes [#478](https://github.com/ASFHyP3/hyp3-gamma/issues/478).
+
 ## [6.3.1]
 
 ### Fixed
-- Phase unwrapping for very large interferograms is now performed in two range patches to keep total memory requirement
+- Phase unwrapping for very large interferograms is now performed in two range patches to keep the total memory requirement
   under 31,600 MB. Fixes [#316](https://github.com/ASFHyP3/hyp3-gamma/issues/316).
+
+### Removed
+- The `unwrapping_geocoding` function and CLI for InSAR processing no longer allow specifying the number of range
+  and/or azimuth patches to use when unwrapping. Unwrapping is always done with 1 azimuth patch and 1 or 2 range patches,
+  depending on size.
 
 ## [6.3.0]
 
