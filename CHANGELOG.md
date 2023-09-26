@@ -9,7 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.3.2]
 
 ### Fixed
-- Description of the range of the lv_phi to be -Pi to Pi in the readme.txt.j2 and the lv_phi_tif.xml.j2
+- Description of the range of the lv_phi to be -Pi to Pi in the readme.txt.j2 and the lv_phi_tif.xml.j2.
+  Fixes [#478](https://github.com/ASFHyP3/hyp3-gamma/issues/478).
 
 ## [6.3.1]
 
