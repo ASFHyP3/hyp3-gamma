@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from zipfile import ZipFile
 
 from hyp3lib.fetch import download_file
@@ -39,14 +40,13 @@ def get_granule(granule):
     return safe_dir
 
 
-def unzip_granule(zip_file, remove=False):
+def unzip_granule(zip_file: str, remove: bool = False) -> str:
     log.info(f'Unzipping {zip_file}')
     with ZipFile(zip_file) as z:
         z.extractall()
-        safe_dir = next(item.filename for item in z.infolist() if item.is_dir() and item.filename.endswith('.SAFE/'))
     if remove:
         os.remove(zip_file)
-    return safe_dir.strip('/')
+    return Path(zip_file).with_suffix('.SAFE').name
 
 
 def earlier_granule_first(g1, g2):
