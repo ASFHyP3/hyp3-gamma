@@ -118,7 +118,7 @@ class RtcMetadataWriter:
         if strip_pol:
             out_name = util.strip_polarization(out_name)
         output_file = reference_file.parent / f'{out_name}.{out_ext}'
-        with open(output_file, 'w') as f:
+        with open(output_file, 'w', encoding='utf-8') as f:
             f.write(content)
 
         return output_file
