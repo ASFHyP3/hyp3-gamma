@@ -101,9 +101,7 @@ The Digital Elevation Model (DEM) used for RTC processing can optionally be incl
 
 The source DEM has a geoid correction applied before it is used for RTC, so elevation values in this file will differ from the source DEM. It is provided in the same pixel spacing/alignment as the RTC product. **The pixel spacing of the DEM included in the product package is not a reflection of the resolution of the source DEM, which is resampled to match the pixel spacing of the RTC product.** The pixel spacing of the adjusted DEM included in this product package is {{ pixel_spacing|int }} meters.
 
-The DEM used for this product is {{ dem_name }}. The DEM has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}
-
-{{ cop_exemption(dem_name) }}
+The DEM used for this product is {{ dem_name }}. The DEM has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}{{ cop_exemption(dem_name) }}
 
 {% if dem_blurb(dem_name) %}
 *Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
