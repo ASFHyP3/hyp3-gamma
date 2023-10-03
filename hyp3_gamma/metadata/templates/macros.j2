@@ -42,6 +42,6 @@
 {% endmacro %}
 {% macro cop_exemption(dem_name) %}
     {% if dem_name == 'GLO-30' -%}
-        The Copernicus DEM GLO-30 does not have coverage over Armenia or Azerbaijan. For products located where these gaps exist, the Copernicus DEM GLO-90 (90-meter resolution) is used to fill the missing coverage.
+        The Copernicus DEM GLO-30 does not have coverage over Armenia or Azerbaijan, so for products located where these gaps exist, the Copernicus DEM GLO-90 (90-meter resolution) is used to fill the missing coverage.
     {%- endif %}
 {% endmacro %}
