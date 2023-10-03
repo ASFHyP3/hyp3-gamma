@@ -40,3 +40,9 @@
         The Copernicus DEM GLO-30 is a global Digital Surface Model (DSM) derived from the WorldDEM. The WorldDEM is based on radar satellite data acquired by the TanDEM-X mission, which was funded by the German Aerospace Center (DLR) and Airbus Defence and Space, and edited to flatten water bodies, provide consistent flow of rivers, and apply corrections to shore/coastlines and special features. For an overview of the dataset, visit https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model.
     {%- endif %}
 {% endmacro %}
+{% macro cop_exemption(dem_name) %}
+    {% if dem_name == 'GLO-30' -%}
+        The Copericus DEM GLO-30 does not have coverage over Armenia or Azerbaijan. For products located where these gaps exist, the Copernicus DEM GLO-90 (90-meter resolution) is used to fill the missing coverage.
+    {%- else -%}
+    {%- endif %}
+{% endmacro %}
