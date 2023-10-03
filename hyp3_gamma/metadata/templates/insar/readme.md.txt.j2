@@ -206,7 +206,7 @@ The source DEM has a geoid correction applied before it is used for processing, 
 
 *This file is optional. Select the "Include DEM" option in the On Demand HyP3 Processing Options to include it in the product package.*
 
-The DEM used for this product is {{ dem_name }}, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. {{ dem_blurb(dem_name) }}
+The DEM used for this product is {{ dem_name }}, which has a native pixel spacing of {{ dem_pixel_spacing(dem_name) }}. Note that the Copernicus DEM GLO-30 does not have coverage over Armenia or Azerbaijan, so for products located where these gaps exist, the Copernicus DEM GLO-90 (90-meter resolution) is used to fill the missing coverage. {{ dem_blurb(dem_name) }}
 
 {% if dem_blurb(dem_name) %}
 *Refer to the _dem.tif.xml file for additional information about the specific DEM included with this product, including use and citation requirements.*
