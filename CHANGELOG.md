@@ -10,6 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Added
 - New DEM coverage file which allows for jobs over Armenia and Azerbaijan to use COP90.
+  Fixes [#462](https://github.com/ASFHyP3/hyp3-gamma/issues/462).
 
 ## [6.3.3]
 
