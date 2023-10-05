@@ -134,7 +134,7 @@ def test_get_centroid_crossing_antimeridian():
 
 
 def test_get_dem_features():
-    assert len(list(dem.get_dem_features())) == 26450
+    assert len(list(dem.get_dem_features())) == 26475
 
 
 def test_shift_for_antimeridian(tmp_path):
