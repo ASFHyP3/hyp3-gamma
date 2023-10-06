@@ -31,7 +31,7 @@ python -m hyp3_gamma.metadata insar --help
 ```
 for usage details. 
 
-**Note:** This will generate an *entire* product with pseduo data files
+**Note:** This will generate an *entire* product with pseudo data files
 (e.g., GeoTIFFs and Browse images), so you don't need to have a HyP3 product on
 hand.
 
