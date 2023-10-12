@@ -112,6 +112,7 @@ def rtc():
             upload_file_to_s3(product_file, args.bucket, args.bucket_prefix)
 
 
+# TODO round to 2 decimal place precision?
 def phase_filter_valid_range(x: str) -> float:
     x = float(x)
     if 0.0 <= x <= 1.0:
