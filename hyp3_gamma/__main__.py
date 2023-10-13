@@ -1,5 +1,5 @@
 """
-rtc_gamma processing for HyP3
+rtc_gamma and insar_gamma processing for HyP3
 """
 import logging
 import os
