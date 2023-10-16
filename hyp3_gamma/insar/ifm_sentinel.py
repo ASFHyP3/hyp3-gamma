@@ -299,6 +299,8 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
     reference_file = reference_file.replace(".SAFE", "")
     secondary_file = secondary_file.replace(".SAFE", "")
 
+    phase_filter = 'adf' if phase_filter_parameter > 0.0 else 'none'
+
     with open(parameter_file_name, 'w') as f:
         f.write('Reference Granule: %s\n' % reference_file)
         f.write('Secondary Granule: %s\n' % secondary_file)
@@ -316,7 +318,7 @@ def make_parameter_file(mydir, parameter_file_name, alooks, rlooks, dem_source, 
         f.write('Slant range far: %s\n' % far_slant_range)
         f.write('Range looks: %s\n' % rlooks)
         f.write('Azimuth looks: %s\n' % alooks)
-        f.write('INSAR phase filter:  adf\n')
+        f.write(f'INSAR phase filter: {phase_filter}\n')
         f.write('Phase filter parameter: %s\n' % phase_filter_parameter)
         f.write('Resolution of output (m): %s\n' % res)
         f.write('Range bandpass filter: no\n')
