@@ -49,6 +49,7 @@ def main():
                               help='Number of azimuth looks taken when generating the RTC product')
     insar_parser.add_argument('--water-mask-applied', action='store_true',
                               help='Water mask was applied when generating the InSAR product')
+    parser.add_argument('--phase-filter-parameter', default=0.6, type=float, help='Adaptive phase filter parameter')
     insar_parser.set_defaults(func=insar_metadata)
 
     args = parser.parse_args()
