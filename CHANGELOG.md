@@ -10,6 +10,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - The `--phase-filter-parameter` option now accepts a value of `0.0`, which indicates that the adaptive phase filter will be skipped.
+- Documentation for the adaptive phase filter parameter in product readme and xml files.
 
 ## [6.3.4]
 

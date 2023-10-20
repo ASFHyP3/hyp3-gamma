@@ -27,7 +27,7 @@ def create_metadata_file_set_rtc(product_dir: Path, granule_name: str, dem_name:
 def create_metadata_file_set_insar(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
                                    processing_date: datetime, looks: str, dem_name: str, water_mask_applied: bool,
                                    plugin_name: str, plugin_version: str, processor_name: str, processor_version: str,
-                                   ref_point_coords: dict) -> List[Path]:
+                                   ref_point_coords: dict, phase_filter_parameter: float) -> List[Path]:
     payload = insar.marshal_metadata(
         product_dir=product_dir,
         reference_granule_name=reference_granule_name,
@@ -41,6 +41,7 @@ def create_metadata_file_set_insar(product_dir: Path, reference_granule_name: st
         processor_name=processor_name,
         processor_version=processor_version,
         ref_point_coords=ref_point_coords,
+        phase_filter_parameter=phase_filter_parameter,
     )
     writer = insar.InSarMetadataWriter(payload)
     return writer.create_metadata_file_set()

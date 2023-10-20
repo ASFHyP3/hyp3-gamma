@@ -67,7 +67,7 @@ hyp3_gamma ++process insar --username ${EDL_USERNAME} --password ${EDL_PASSWORD}
 
 ### Example product metadata
 
-The `hyp3_gamma.matadata` subpackage can generate an example set of product metadata
+The `hyp3_gamma.metadata` subpackage can generate an example set of product metadata
 for each of the supported product types. E.g.:
 
 ```
