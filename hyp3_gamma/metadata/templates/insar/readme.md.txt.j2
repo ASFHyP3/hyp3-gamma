@@ -41,7 +41,7 @@ Products with 20x4 looks have a pixel spacing of 80 m, while those with 10x2 loo
 ----------------
 ### Adaptive Phase Filtering ###
 
-When ordering InSAR On Demand products, users can choose to set a custom value for the Goldstein-Werner adaptive phase filter (adf). This filter improves fringe visibility and reduces phase noise in interferograms, particularly for InSAR pairs with low coherence.
+When ordering InSAR On Demand products, users can choose to set a custom value for the parameter used in the Goldstein-Werner adaptive phase filter (adf). This filter improves fringe visibility and reduces phase noise in interferograms, particularly for InSAR pairs with low coherence.
 
 The filter is applied adaptively, meaning that regions with high coherence (where fringe patterns are easily discernible) will have more smoothing applied, while regions with low coherence will undergo less smoothing, so as not to remove residues that may represent actual deformation signals. Using this filter approach allows more of the interferogram to be unwrapped. For more information, refer to Goldstein and Werner's 1998 paper, [Radar interferogram filtering for geophysical applications](https://doi.org/10.1029/1998GL900033).
 
