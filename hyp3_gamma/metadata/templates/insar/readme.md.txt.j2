@@ -47,6 +47,8 @@ The filter is applied adaptively, meaning that regions with high coherence (wher
 
 Users can set the adf value within the range of 0 to 1, with 0 indicating that no filtering occurs, and 1 indicating the strongest level of filtering. The value should generally be greater than 0.2, and interferograms with very low coherence will benefit from higher values (closer to 1). Setting this value to 0 will result in no filter being applied.
 
+The filter impacts both wrapped and unwrapped interferograms, as well as the displacement maps generated from the unwrapped interferogram. This product had an adf value of {{ adf_value }} applied.
+
 ----------------
 ### Using this data ###
 
