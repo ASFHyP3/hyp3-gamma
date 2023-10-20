@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
-    # RTC Argruments
+    # RTC Arguments
     rtc_parser = subparsers.add_parser('rtc')
     rtc_parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     rtc_parser.add_argument('-o', '--output-dir', default='.', type=Path,
