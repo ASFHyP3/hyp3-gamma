@@ -452,6 +452,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
         processor_name='GAMMA',
         processor_version=gamma_version(),
         ref_point_coords=coords,
+        phase_filter_parameter=phase_filter_parameter,
     )
 
     execute(f"base_init {reference}.slc.par {secondary}.slc.par - - base > baseline.log", uselogging=True)

@@ -93,6 +93,7 @@ def insar_metadata(args):
         processor_name='GAMMA',
         processor_version='YYYYMMDD',
         ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
+        phase_filter_parameter=args.phase_filter_parameter,
     )
 
 
