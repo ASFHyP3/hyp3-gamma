@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import shutil
 import subprocess
 from tempfile import TemporaryDirectory
 from typing import Tuple
@@ -238,7 +239,12 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
 
     execute(f"cc_wave {ifgf} - - {ifgname}.cc {width}", uselogging=True)
 
-    execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
+    if alpha > 0.0:
+        execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
+    else:
+        log.info('Skipping adaptive phase filter because alpha is zero')
+        shutil.copyfile(ifgf, f"{ifgf}.adf")
+        shutil.copyfile(f"{ifgname}.cc", f"{ifgname}.adf.cc")
 
     execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
 

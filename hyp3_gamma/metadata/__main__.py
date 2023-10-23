@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
-    # RTC Argruments
+    # RTC Arguments
     rtc_parser = subparsers.add_parser('rtc')
     rtc_parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     rtc_parser.add_argument('-o', '--output-dir', default='.', type=Path,
@@ -49,6 +49,7 @@ def main():
                               help='Number of azimuth looks taken when generating the RTC product')
     insar_parser.add_argument('--water-mask-applied', action='store_true',
                               help='Water mask was applied when generating the InSAR product')
+    parser.add_argument('--phase-filter-parameter', default=0.6, type=float, help='Adaptive phase filter parameter')
     insar_parser.set_defaults(func=insar_metadata)
 
     args = parser.parse_args()
@@ -93,6 +94,7 @@ def insar_metadata(args):
         processor_name='GAMMA',
         processor_version='YYYYMMDD',
         ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
+        phase_filter_parameter=args.phase_filter_parameter,
     )
 
 

@@ -6,9 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.0]
+
+### Added
+- The `--phase-filter-parameter` option now accepts a value of `0.0`, which indicates that the adaptive phase filter will be skipped.
+- Documentation for the adaptive phase filter parameter in product readme and xml files.
+
 ## [6.3.4]
 
-## Added
+### Added
 - New DEM coverage file which allows for jobs over Armenia and Azerbaijan to use COP90.
   Fixes [#462](https://github.com/ASFHyP3/hyp3-gamma/issues/462).
 
