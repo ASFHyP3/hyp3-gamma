@@ -45,7 +45,7 @@ def create_water_mask(input_tif: str, output_tif: str):
 
     mask = geopandas.read_file(mask_location, mask=extent)
     with TemporaryDirectory() as temp_shapefile:
-        mask.to_file(temp_shapefile, driver='ESRI Shapefile')
+        mask.to_file(temp_shapefile, crs='EPSG:32632', driver='ESRI Shapefile')
         with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='YES'):
             gdal.Rasterize(dst_ds, temp_shapefile, allTouched=True, burnValues=[1])
 
