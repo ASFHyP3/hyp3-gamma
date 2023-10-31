@@ -12,7 +12,7 @@ import shapely
 from osgeo import gdal
 from shapely import geometry, wkt
 
-from hyp3_isce2.utils import GDALConfigManager
+from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
 
