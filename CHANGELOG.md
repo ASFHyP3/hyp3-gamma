@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.1]
+
+### Fixed
+- A bug where the water mask would be significantly incorrect over some regions in Europe.
+
 ## [6.4.0]
 
 ### Added
