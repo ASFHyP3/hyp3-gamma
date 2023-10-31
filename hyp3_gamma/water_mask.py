@@ -4,8 +4,8 @@ import subprocess
 from tempfile import TemporaryDirectory
 
 import geopandas
-from shapely.geometry import Polygon
 from osgeo import gdal
+from shapely.geometry import Polygon
 
 from hyp3_gamma.util import GDALConfigManager
 
