@@ -41,7 +41,8 @@ setup(
         'numpy>=1.21,<1.22',
         'pillow',
         'python-dateutil',
-        's3fs'
+        's3fs',
+        'pyarrow'
     ],
 
     extras_require={
