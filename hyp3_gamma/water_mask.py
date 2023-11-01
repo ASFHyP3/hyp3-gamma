@@ -8,7 +8,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import s3fs
-import shapely
 from osgeo import gdal
 from shapely import geometry, wkt
 
