@@ -56,7 +56,8 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     # extent_poly = geometry.shape(extent)
     corrected_extent = split_geometry_on_antimeridian(extent)
 
-    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in geometry.shape(extent).exterior.coords]))
+    shape_coords = geometry.shape(extent).exterior.coords
+    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in shape_coords]))
     s3_fs = s3fs.S3FileSystem(anon=True, default_block_size=5 * (2**20))
 
     # TODO the conversion from pd -> gpd can be removed when gpd adds the filter param for read_parquet
