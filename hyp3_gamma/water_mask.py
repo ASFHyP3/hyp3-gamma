@@ -44,7 +44,7 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
-def get_water_mask_gdf(extent: geometry.Polygon) -> gpd.GeoDataFrame:
+def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     """Get a GeoDataFrame of the water mask for a given extent
 
     Args:
@@ -54,9 +54,10 @@ def get_water_mask_gdf(extent: geometry.Polygon) -> gpd.GeoDataFrame:
         GeoDataFrame of the water mask for the given extent
     """
     mask_location = 'asf-dem-west/WATER_MASK/GSHHG/hyp3_water_mask_20220912'
-    corrected_extent = split_geometry_on_antimeridian(json.loads(shapely.to_geojson(extent)))
+    # extent_poly = geometry.shape(extent)
+    corrected_extent = split_geometry_on_antimeridian(extent)
 
-    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in extent.exterior.coords]))
+    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in geometry.shape(extent).exterior.coords]))
     s3_fs = s3fs.S3FileSystem(anon=True, default_block_size=5 * (2**20))
 
     # TODO the conversion from pd -> gpd can be removed when gpd adds the filter param for read_parquet
@@ -102,7 +103,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_image, format='json')['wgs84Extent']
-    mask = get_water_mask_gdf(geometry.shape(extent))
+    mask = get_water_mask_gdf(extent)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')

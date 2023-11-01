@@ -20,7 +20,6 @@ dependencies:
   - gdal>=3.4,<3.5
   - geopandas
   - jinja2
-  - shapely>=2.0
   - numpy>=1.21,<1.22
   - pillow
   - python-dateutil

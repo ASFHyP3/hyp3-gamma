@@ -37,7 +37,6 @@ setup(
         'geopandas',
         'hyp3lib>=1.7.0,<2',
         'jinja2',
-        'shapely>=2.0',
         'lxml',
         'numpy>=1.21,<1.22',
         'pillow',
