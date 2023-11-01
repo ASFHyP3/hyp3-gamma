@@ -30,4 +30,5 @@ dependencies:
   - pip:
     - lxml==4.8.0
     - hyp3lib==1.7.0
+    - rtree
     - pyarrow
