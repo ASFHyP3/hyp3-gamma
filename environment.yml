@@ -27,7 +27,7 @@ dependencies:
   # - hyp3lib>=1.7.0,<2
   # - lxml
   - s3fs
-  - rtree
+  - pyogrio
   - pyarrow
   - pip:
     - lxml==4.8.0
