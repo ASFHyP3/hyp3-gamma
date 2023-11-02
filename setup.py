@@ -42,6 +42,7 @@ setup(
         'pillow',
         'python-dateutil',
         's3fs',
+        'rtree',
         'pyogrio',
         'pyarrow'
     ],
