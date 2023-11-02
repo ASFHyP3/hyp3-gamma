@@ -33,7 +33,7 @@ RUN apt update \
          python-is-python3 \
          python3-numpy python3-matplotlib python3-scipy python3-shapely python3-packaging \
          # Additional installs
-         python3-pip wget git vim \
+         python3-pip wget git vim libspatialindex-dev \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
