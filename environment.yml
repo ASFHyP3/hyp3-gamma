@@ -28,7 +28,6 @@ dependencies:
   # - lxml
   - s3fs
   - rtree
-  - pyogrio
   - pyarrow
   - pip:
     - lxml==4.8.0

@@ -103,12 +103,12 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_image, format='json')['wgs84Extent']
-    extent = split_geometry_on_antimeridian(extent)
+    corrected_extent = split_geometry_on_antimeridian(extent)
     # mask = get_water_mask_gdf(extent)
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
-    mask = geopandas.read_file(mask_location, mask=extent, engine="pyogrio")
-    mask = mask.clip(gdf, geometry.shape(extent))
+    mask = gpd.read_file(mask_location, mask=corrected_extent)
+    mask = mask.clip(mask, geometry.shape(corrected_extent))
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
