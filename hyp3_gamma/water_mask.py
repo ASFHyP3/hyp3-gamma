@@ -28,7 +28,9 @@ def get_geo_partition(coordinate, partition_size=90):
         A string representing the geo-partition for the given coordinate and partition size
     """
     x, y = coordinate
-    x_rounded = int(np.floor(x / partition_size)) * partition_size
+    x_rounded = 0 if int(np.floor(x / partition_size)) * partition_size == 180 \
+        else int(np.floor(x / partition_size)) * partition_size
+
     y_rounded = int(np.floor(y / partition_size)) * partition_size
     x_fill = str(x_rounded).zfill(4)
     y_fill = str(y_rounded).zfill(4)
@@ -43,6 +45,37 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
+def poly_from_box(box):
+    '''
+    create a polygon with box
+    Args:
+        box: [min_lon, min_lat, max_lon, max_lat]
+    Returns:
+        polygon
+    '''
+    p1 = geometry.Point(box[0], box[1])
+    p2 = geometry.Point(box[2], box[1])
+    p3 = geometry.Point(box[2], box[3])
+    p4 = geometry.Point(box[0], box[3])
+    return geometry.Polygon([p1,p2,p3,p4,p1])
+
+
+def envelope(corrected_extent):
+    if corrected_extent["type"] == 'Polygon':
+        polys = geometry.MultiPolygon([geometry.shape(corrected_extent)])
+        return polys
+    else:
+        polys = geometry.shape(corrected_extent)
+        bounds = [list(poly.bounds) for poly in polys.geoms]
+        lat_min = min([bound[1] for bound in bounds])
+        lat_max = max([bound[3] for bound in bounds])
+        for i in range(len(bounds)):
+            bounds[i][1] = lat_min
+            bounds[i][3] = lat_max
+
+        return geometry.MultiPolygon([poly_from_box(bound) for bound in bounds])
+
+
 def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     """Get a GeoDataFrame of the water mask for a given extent
 
@@ -53,11 +86,17 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
         GeoDataFrame of the water mask for the given extent
     """
     mask_location = 'asf-dem-west/WATER_MASK/GSHHG/hyp3_water_mask_20220912'
-    # extent_poly = geometry.shape(extent)
+
     corrected_extent = split_geometry_on_antimeridian(extent)
 
-    shape_coords = geometry.shape(extent).exterior.coords
-    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in shape_coords]))
+    polys = envelope(corrected_extent)
+
+    filters = []
+    for poly in polys.geoms:
+        tmp = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in poly.envelope.exterior.coords]))
+        for i in tmp:
+            filters.append([i])
+
     s3_fs = s3fs.S3FileSystem(anon=True, default_block_size=5 * (2**20))
 
     # TODO the conversion from pd -> gpd can be removed when gpd adds the filter param for read_parquet
@@ -66,7 +105,7 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     df['lat_lon'] = df['lat_lon'].astype(str)
     gdf = gpd.GeoDataFrame(df, crs='EPSG:4326')
 
-    mask = gpd.clip(gdf, geometry.shape(corrected_extent))
+    mask = gpd.clip(gdf, polys)
     return mask
 
 
@@ -103,12 +142,8 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_image, format='json')['wgs84Extent']
-    corrected_extent = split_geometry_on_antimeridian(extent)
-    # mask = get_water_mask_gdf(extent)
 
-    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
-    mask = gpd.read_file(mask_location, mask=corrected_extent)
-    mask = mask.clip(mask, geometry.shape(corrected_extent))
+    mask = get_water_mask_gdf(extent)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
