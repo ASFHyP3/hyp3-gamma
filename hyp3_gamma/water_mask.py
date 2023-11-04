@@ -57,7 +57,7 @@ def poly_from_box(box):
     p2 = geometry.Point(box[2], box[1])
     p3 = geometry.Point(box[2], box[3])
     p4 = geometry.Point(box[0], box[3])
-    return geometry.Polygon([p1,p2,p3,p4,p1])
+    return geometry.Polygon([p1, p2, p3, p4, p1])
 
 
 def envelope(corrected_extent):
