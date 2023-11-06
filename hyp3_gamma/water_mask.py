@@ -28,7 +28,9 @@ def get_geo_partition(coordinate, partition_size=90):
         A string representing the geo-partition for the given coordinate and partition size
     """
     x, y = coordinate
-    x_rounded = int(np.floor(x / partition_size)) * partition_size
+    x_rounded = 0 if int(np.floor(x / partition_size)) * partition_size == 180 \
+        else int(np.floor(x / partition_size)) * partition_size
+
     y_rounded = int(np.floor(y / partition_size)) * partition_size
     x_fill = str(x_rounded).zfill(4)
     y_fill = str(y_rounded).zfill(4)
@@ -43,6 +45,48 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
+def poly_from_box(bbox: list):
+    """ Create a polygon from a bbox
+
+    Args:
+        bbox: The extent bounding box, e.g. [min_lon, min_lat, max_lon, max_lat]
+
+    Returns:
+        Polygon: The extent Polygon: [(min_lon, min_lat), (min_lon, max_lat), ...]
+    """
+    min_lon = geometry.Point(bbox[0], bbox[1])
+    min_lat = geometry.Point(bbox[2], bbox[1])
+    max_lon = geometry.Point(bbox[2], bbox[3])
+    max_lat = geometry.Point(bbox[0], bbox[3])
+    return geometry.Polygon([min_lon, min_lat, max_lon, max_lat])
+
+
+def envelope(extent: dict):
+    """Returns an evelope surrounding a split extent.
+
+    Args:
+        extent: A dict representing a Polygon or MultiPolygon from split_geometry_on_antimeridian.
+
+    Returns:
+        A MultiPolygon representing the envelope surrounding the input Polygon(s).
+    """
+    min_lat_col = 1
+    max_lat_col = 3
+    if extent["type"] == 'Polygon':
+        polys = geometry.MultiPolygon([geometry.shape(extent)])
+        return polys
+    else:
+        polys = geometry.shape(extent)
+        bounds = np.asarray([list(poly.bounds) for poly in polys.geoms])
+        lat_min = bounds[:, min_lat_col].min()
+        lat_max = bounds[:, max_lat_col].max()
+        for i in range(len(bounds)):
+            bounds[i][min_lat_col] = lat_min
+            bounds[i][max_lat_col] = lat_max
+
+        return geometry.MultiPolygon([poly_from_box(bound) for bound in bounds])
+
+
 def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     """Get a GeoDataFrame of the water mask for a given extent
 
@@ -53,11 +97,15 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
         GeoDataFrame of the water mask for the given extent
     """
     mask_location = 'asf-dem-west/WATER_MASK/GSHHG/hyp3_water_mask_20220912'
-    # extent_poly = geometry.shape(extent)
-    corrected_extent = split_geometry_on_antimeridian(extent)
 
-    shape_coords = geometry.shape(extent).exterior.coords
-    filters = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in shape_coords]))
+    polys = envelope(split_geometry_on_antimeridian(extent))
+
+    filters = []
+    for poly in polys.geoms:
+        tmp = list(set([('lat_lon', '=', get_geo_partition(coord)) for coord in poly.envelope.exterior.coords]))
+        for i in tmp:
+            filters.append([i])
+
     s3_fs = s3fs.S3FileSystem(anon=True, default_block_size=5 * (2**20))
 
     # TODO the conversion from pd -> gpd can be removed when gpd adds the filter param for read_parquet
@@ -66,7 +114,7 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     df['lat_lon'] = df['lat_lon'].astype(str)
     gdf = gpd.GeoDataFrame(df, crs='EPSG:4326')
 
-    mask = gpd.clip(gdf, geometry.shape(corrected_extent))
+    mask = gpd.clip(gdf, polys)
     return mask
 
 
@@ -103,6 +151,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
     extent = gdal.Info(input_image, format='json')['wgs84Extent']
+
     mask = get_water_mask_gdf(extent)
 
     with TemporaryDirectory() as temp_dir:
