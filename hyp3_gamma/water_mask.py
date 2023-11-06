@@ -45,33 +45,44 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
-def poly_from_box(box):
-    '''
-    create a polygon with box
+def poly_from_box(bbox: list):
+    """ Create a polygon from a bbox
+
     Args:
-        box: [min_lon, min_lat, max_lon, max_lat]
+        bbox: The extent bounding box, e.g. [min_lon, min_lat, max_lon, max_lat]
+
     Returns:
-        polygon
-    '''
-    p1 = geometry.Point(box[0], box[1])
-    p2 = geometry.Point(box[2], box[1])
-    p3 = geometry.Point(box[2], box[3])
-    p4 = geometry.Point(box[0], box[3])
-    return geometry.Polygon([p1, p2, p3, p4, p1])
+        Polygon: The extent Polygon: [(min_lon, min_lat), (min_lon, max_lat), ...]
+    """
+    min_lon = geometry.Point(bbox[0], bbox[1])
+    min_lat = geometry.Point(bbox[2], bbox[1])
+    max_lon = geometry.Point(bbox[2], bbox[3])
+    max_lat = geometry.Point(bbox[0], bbox[3])
+    return geometry.Polygon([min_lon, min_lat, max_lon, max_lat])
 
 
-def envelope(corrected_extent):
-    if corrected_extent["type"] == 'Polygon':
-        polys = geometry.MultiPolygon([geometry.shape(corrected_extent)])
+def envelope(extent: dict):
+    """Returns an evelope surrounding a split extent. 
+
+    Args:
+        extent: A dict representing a Polygon or MultiPolygon from split_geometry_on_antimeridian.
+
+    Returns:
+        A MultiPolygon representing the envelope surrounding the input Polygon(s).
+    """
+    min_lat_col = 1
+    max_lat_col = 3
+    if extent["type"] == 'Polygon':
+        polys = geometry.MultiPolygon([geometry.shape(extent)])
         return polys
     else:
-        polys = geometry.shape(corrected_extent)
-        bounds = [list(poly.bounds) for poly in polys.geoms]
-        lat_min = min([bound[1] for bound in bounds])
-        lat_max = max([bound[3] for bound in bounds])
+        polys = geometry.shape(extent)
+        bounds = np.asarray([list(poly.bounds) for poly in polys.geoms])
+        lat_min = bounds[:, min_lat_col].min()
+        lat_max = bounds[:, max_lat_col].max()
         for i in range(len(bounds)):
-            bounds[i][1] = lat_min
-            bounds[i][3] = lat_max
+            bounds[i][min_lat_col] = lat_min
+            bounds[i][max_lat_col] = lat_max
 
         return geometry.MultiPolygon([poly_from_box(bound) for bound in bounds])
 
@@ -87,9 +98,7 @@ def get_water_mask_gdf(extent: dict) -> gpd.GeoDataFrame:
     """
     mask_location = 'asf-dem-west/WATER_MASK/GSHHG/hyp3_water_mask_20220912'
 
-    corrected_extent = split_geometry_on_antimeridian(extent)
-
-    polys = envelope(corrected_extent)
+    polys = envelope(split_geometry_on_antimeridian(extent))
 
     filters = []
     for poly in polys.geoms:
