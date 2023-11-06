@@ -62,7 +62,7 @@ def poly_from_box(bbox: list):
 
 
 def envelope(extent: dict):
-    """Returns an evelope surrounding a split extent. 
+    """Returns an evelope surrounding a split extent.
 
     Args:
         extent: A dict representing a Polygon or MultiPolygon from split_geometry_on_antimeridian.
