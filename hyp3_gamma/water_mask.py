@@ -6,8 +6,8 @@ from tempfile import TemporaryDirectory
 
 import geopandas as gpd
 from osgeo import gdal
-from shapely import geometry
 from pyproj import CRS
+from shapely import geometry
 
 from hyp3_gamma.util import GDALConfigManager
 
