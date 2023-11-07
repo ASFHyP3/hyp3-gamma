@@ -1,6 +1,5 @@
 import numpy as np
 from osgeo import gdal
-import pyorgio
 
 from hyp3_gamma import water_mask
 
