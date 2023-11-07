@@ -1,6 +1,4 @@
 """Create and apply a water body mask"""
-import json
-import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -12,13 +10,6 @@ from shapely import geometry
 from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
-
-
-def split_geometry_on_antimeridian(geometry: dict):
-    geometry_as_bytes = json.dumps(geometry).encode()
-    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/', '/vsistdin/']
-    geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
-    return json.loads(geojson_str)['features'][0]['geometry']
 
 
 def get_envelope(input_image: str):
