@@ -20,6 +20,7 @@ def split_geometry_on_antimeridian(geometry: dict):
     geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
     return json.loads(geojson_str)['features'][0]['geometry']
 
+
 def get_envelope(input_image: str):
     """
     get the envelope of the input_image
