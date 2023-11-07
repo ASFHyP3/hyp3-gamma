@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 import geopandas as gpd
 from osgeo import gdal
 from shapely import geometry
+from pyproj import CRS
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -52,12 +53,21 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    extent = gdal.Info(input_image, format='json')['wgs84Extent']
-    corrected_extent = split_geometry_on_antimeridian(extent)
+    info =  gdal.Info(input_image, format='json')
+    prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
+    epsg = prj.to_epsg()
+
+    extent = info['wgs84Extent']
+
+    extent_gdf = gpd.GeoDataFrame(index=[0], geometry=[geometry.shape(extent)], crs='EPSG:4326').to_crs(epsg)
+
+    envelope = extent_gdf.envelope
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
-    mask = gpd.read_file(mask_location, mask=corrected_extent, engine="fiona")
-    mask = gpd.clip(mask, geometry.shape(corrected_extent))
+
+    mask = gpd.read_file(mask_location, mask=envelope, engine="fiona").to_crs(epsg)
+
+    mask =gpd.clip(mask, envelope)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
