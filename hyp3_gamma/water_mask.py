@@ -20,6 +20,23 @@ def split_geometry_on_antimeridian(geometry: dict):
     geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
     return json.loads(geojson_str)['features'][0]['geometry']
 
+def get_envelope(input_image: str):
+    """
+    get the envelope of the input_image
+    Args:
+        input_image: Path for the input GDAL-compatible image
+
+    Returns:
+        (envelope, epsg): polygon of the envelope of the geotiff in the crs of the geotiff, epsg str
+
+    """
+    info = gdal.Info(input_image, format='json')
+    prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
+    epsg = prj.to_epsg()
+    extent = info['wgs84Extent']
+    extent_gdf = gpd.GeoDataFrame(index=[0], geometry=[geometry.shape(extent)], crs='EPSG:4326').to_crs(epsg)
+    return extent_gdf.envelope, epsg
+
 
 def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
@@ -31,7 +48,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     land in the pixel.
 
     Args:
-        input_imge: Path for the input GDAL-compatible image
+        input_image: Path for the input GDAL-compatible image
         output_image: Path for the output image
         gdal_format: GDAL format name to create output image as
     """
@@ -53,19 +70,11 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    info = gdal.Info(input_image, format='json')
-    prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
-    epsg = prj.to_epsg()
-
-    extent = info['wgs84Extent']
-
-    extent_gdf = gpd.GeoDataFrame(index=[0], geometry=[geometry.shape(extent)], crs='EPSG:4326').to_crs(epsg)
-
-    envelope = extent_gdf.envelope
+    envelope, epsg = get_envelope(input_image)
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
 
-    mask = gpd.read_file(mask_location, mask=envelope, engine="fiona").to_crs(epsg)
+    mask = gpd.read_file(mask_location, mask=envelope).to_crs(epsg)
 
     mask = gpd.clip(mask, envelope)
 
