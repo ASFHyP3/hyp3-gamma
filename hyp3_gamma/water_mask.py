@@ -53,7 +53,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    info =  gdal.Info(input_image, format='json')
+    info = gdal.Info(input_image, format='json')
     prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
     epsg = prj.to_epsg()
 
@@ -67,7 +67,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
 
     mask = gpd.read_file(mask_location, mask=envelope, engine="fiona").to_crs(epsg)
 
-    mask =gpd.clip(mask, envelope)
+    mask = gpd.clip(mask, envelope)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
