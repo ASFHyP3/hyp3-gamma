@@ -6,6 +6,7 @@ import geopandas as gpd
 from osgeo import gdal
 from pyproj import CRS
 from shapely import geometry
+import pyogrio
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -65,7 +66,10 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
 
-    mask = gpd.read_file(mask_location, mask=envelope).to_crs(epsg)
+    bounds = envelope.to_crs(4326).bounds
+    bbox = (bounds['minx'][0], bounds['miny'][0],bounds['maxx'][0], bounds['maxy'][0])
+
+    mask = gpd.read_file(mask_location, bbox=bbox, engine='pyogrio').to_crs(epsg)
 
     mask = gpd.clip(mask, envelope)
 
