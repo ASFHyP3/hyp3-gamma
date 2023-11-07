@@ -43,7 +43,8 @@ setup(
         'python-dateutil',
         's3fs',
         'rtree',
-        'pyarrow'
+        'pyarrow',
+        'pyogrio'
     ],
 
     extras_require={
