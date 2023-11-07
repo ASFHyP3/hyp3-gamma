@@ -13,14 +13,13 @@ gdal.UseExceptions()
 
 
 def get_envelope(input_image: str):
-    """
-    get the envelope of the input_image
+    """ Get the envelope of the input_image
+
     Args:
         input_image: Path for the input GDAL-compatible image
 
     Returns:
-        (envelope, epsg): polygon of the envelope of the geotiff in the crs of the geotiff, epsg str
-
+        (envelope, epsg): Envelope of the geotiff as a Polygon, and the EPSG code of the geotiff as a string.
     """
     info = gdal.Info(input_image, format='json')
     prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
