@@ -40,10 +40,7 @@ setup(
         'lxml',
         'numpy>=1.21,<1.22',
         'pillow',
-        'python-dateutil',
-        's3fs',
-        'rtree',
-        'pyarrow'
+        'python-dateutil'
     ],
 
     extras_require={
