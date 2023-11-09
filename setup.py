@@ -41,6 +41,7 @@ setup(
         'numpy>=1.21,<1.22',
         'pillow',
         'python-dateutil',
+        'rtree'
     ],
 
     extras_require={

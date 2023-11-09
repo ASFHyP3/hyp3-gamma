@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.4.1]
+
+### Fixed
+- Incorrect / blank water masks in some areas (primarily Europe), by clipping the water mask to the envelope of the product before rasterization.
+
 ## [6.4.0]
 
 ### Added
