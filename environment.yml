@@ -23,6 +23,7 @@ dependencies:
   - numpy>=1.21,<1.22
   - pillow
   - python-dateutil
+  - rtree
   # Addresses https://github.com/ASFHyP3/hyp3-gamma/issues/421
   # - hyp3lib>=1.7.0,<2
   # - lxml
