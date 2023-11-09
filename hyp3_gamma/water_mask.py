@@ -20,7 +20,7 @@ def get_envelope(input_image: str):
         input_image: Path for the input GDAL-compatible image
 
     Returns:
-        (envelope, epsg): Envelope of the geotiff as a Polygon, and the EPSG code of the geotiff as a string.
+        (envelope, epsg): The envelope and epsg code of the GeoTIFF.
     """
     info = gdal.Info(input_image, format='json')
     prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
