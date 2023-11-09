@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.4.1]
 
 ### Fixed
-- A bug where the water mask would be significantly incorrect over some regions in Europe.
+- Incorrect / blank water masks in some areas (primarily Europe), by clipping the water mask to the envelope of the product before rasterization.
 
 ## [6.4.0]
 
