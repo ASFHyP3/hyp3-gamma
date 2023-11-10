@@ -29,5 +29,4 @@ dependencies:
   # - lxml
   - pip:
     - lxml==4.8.0
-    # TODO revert after done testing hyp3-lib changes:
-    - git+https://github.com/ASFHyP3/hyp3-lib.git@develop
+    - hyp3lib==1.7.0
