@@ -324,7 +324,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     try:
         log.info(f'Downloading orbit file for {granule}')
-        orbit_file, provider = downloadSentinelOrbitFile(granule)
+        # TODO decide if we want a more robust interface for passing ESA creds, similar to Earthdata creds
+        esa_credentials = (os.environ['ESA_USERNAME'], os.environ['ESA_PASSWORD'])
+        orbit_file, provider = downloadSentinelOrbitFile(granule, esa_credentials=esa_credentials)
         log.info(f'Got orbit file {orbit_file} from provider {provider}')
     except OrbitDownloadError as e:
         log.warning(e)
