@@ -10,8 +10,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Upgraded `hyp3lib` dependency to version `2.x.x`.
-- As of [HyP3-lib v2.0.0](https://github.com/ASFHyP3/hyp3-lib/releases/tag/v2.0.0), the [Copernicus Data Space Ecosystem (CDSE)](https://dataspace.copernicus.eu/) will now be used for downloading Sentinel-1 orbit files from `ESA`.
-- CDSE credentials must now be provided via the `--esa-username` and `--esa-password` command-line options or the `ESA_USERNAME` and `ESA_PASSWORD` environment variables.
+- As of [HyP3-lib v2.0.0](https://github.com/ASFHyP3/hyp3-lib/releases/tag/v2.0.0), the [Copernicus Data Space Ecosystem (CDSE)](https://dataspace.copernicus.eu/) will now be used for downloading Sentinel-1 orbit files from ESA.
+- CDSE credentials must be provided via the `--esa-username` and `--esa-password` command-line options or the `ESA_USERNAME` and `ESA_PASSWORD` environment variables.
 
 ## [6.4.1]
 
