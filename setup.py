@@ -35,9 +35,7 @@ setup(
     install_requires=[
         'gdal>=3.4,<3.5',
         'geopandas',
-        # TODO revert after done testing hyp3-lib changes:
-        # 'hyp3lib>=1.7.0,<2',
-        'hyp3lib @ git+https://github.com/ASFHyP3/hyp3-lib.git@develop',
+        'hyp3lib>=2,<3',
         'jinja2',
         'lxml',
         'numpy>=1.21,<1.22',
