@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0]
+
+### Changed
+- Upgraded `hyp3lib` dependency to version `2.x.x`.
+- As of [HyP3-lib v2.0.0](https://github.com/ASFHyP3/hyp3-lib/releases/tag/v2.0.0), the [Copernicus Data Space Ecosystem (CDSE)](https://dataspace.copernicus.eu/) will now be used for downloading Sentinel-1 orbit files from ESA.
+- CDSE credentials must be provided via the `--esa-username` and `--esa-password` command-line options or the `ESA_USERNAME` and `ESA_PASSWORD` environment variables.
+
 ## [6.4.1]
 
 ### Fixed
