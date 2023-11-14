@@ -38,7 +38,7 @@ rtc_sentinel.py S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_7
 To run the RTC process through the HyP3 interface:
 ```
 hyp3_gamma ++process rtc --help
-hyp3_gamma ++process rtc --username ${EDL_USERNAME} --password ${EDL_PASSWORD} --esa-username ${ESA_USERNAME} --esa-password {$ESA_PASSWORD} \
+hyp3_gamma ++process rtc --username ${EDL_USERNAME} --password ${EDL_PASSWORD} --esa-username ${ESA_USERNAME} --esa-password ${ESA_PASSWORD} \
     S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8
 ```
 
@@ -60,7 +60,7 @@ ifm_sentinel.py \
 To run the InSAR process through the HyP3 interface:
 ```
 hyp3_gamma ++process insar --help
-hyp3_gamma ++process insar --username ${EDL_USERNAME} --password ${EDL_PASSWORD} --esa-username ${ESA_USERNAME} --esa-password {$ESA_PASSWORD} \
+hyp3_gamma ++process insar --username ${EDL_USERNAME} --password ${EDL_PASSWORD} --esa-username ${ESA_USERNAME} --esa-password ${ESA_PASSWORD} \
     S1A_IW_SLC__1SDV_20200203T172103_20200203T172122_031091_03929B_3048 \
     S1A_IW_SLC__1SDV_20200110T172104_20200110T172123_030741_03864E_A996
 ```
