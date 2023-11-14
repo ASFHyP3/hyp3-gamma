@@ -342,6 +342,7 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
                          include_dem=False, apply_water_mask=False, phase_filter_parameter=0.6):
     log.info("\n\nSentinel-1 differential interferogram creation program\n")
 
+    esa_credentials = (os.environ['ESA_USERNAME'], os.environ['ESA_PASSWORD'])
     wrk = os.getcwd()
     reference_date = reference_file[17:32]
     reference = reference_file[17:25]
@@ -362,8 +363,6 @@ def insar_sentinel_gamma(reference_file, secondary_file, rlooks=20, alooks=4, in
     orbit_files = []
     for granule in (reference_file, secondary_file):
         log.info(f'Downloading orbit file for {granule}')
-        # TODO decide if we want a more robust interface for passing ESA creds, similar to Earthdata creds
-        esa_credentials = (os.environ['ESA_USERNAME'], os.environ['ESA_PASSWORD'])
         orbit_file, provider = downloadSentinelOrbitFile(granule, esa_credentials=esa_credentials)
         log.info(f'Got orbit file {orbit_file} from provider {provider}')
         par_s1_slc_single(granule, pol, os.path.abspath(orbit_file))
