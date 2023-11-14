@@ -145,6 +145,8 @@ def insar():
     parser = ArgumentParser()
     parser.add_argument('--username')
     parser.add_argument('--password')
+    parser.add_argument('--esa-username')
+    parser.add_argument('--esa-password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
@@ -160,6 +162,7 @@ def insar():
     args = parser.parse_args()
 
     username, password = check_earthdata_credentials(args.username, args.password)
+    check_esa_credentials(args.esa_username, args.esa_password)
 
     # TODO: Remove `--include-los-displacement` and this logic once it's no longer supported by the HyP3 API
     args.include_displacement_maps = args.include_displacement_maps | args.include_los_displacement
