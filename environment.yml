@@ -24,9 +24,6 @@ dependencies:
   - pillow
   - python-dateutil
   - rtree
-  # Addresses https://github.com/ASFHyP3/hyp3-gamma/issues/421
-  # - hyp3lib>=1.7.0,<2
-  # - lxml
   - pip:
-    - lxml==4.8.0
-    - hyp3lib==1.7.0
+    - lxml
+    - hyp3lib>=2,<3
