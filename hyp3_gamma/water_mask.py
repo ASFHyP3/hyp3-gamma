@@ -7,27 +7,27 @@ from osgeo import gdal
 from pyproj import CRS
 from shapely import geometry
 
-
 from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
 
 
-def get_envelope(input_image: str):
-    """ Get the envelope of the input_image
-
-    Args:
-        input_image: Path for the input GDAL-compatible image
-
-    Returns:
-        (envelope, epsg): The envelope and epsg code of the GeoTIFF.
-    """
+def get_envelope_wgs84(input_image: str):
     info = gdal.Info(input_image, format='json')
     prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
     epsg = prj.to_epsg()
     extent = info['wgs84Extent']
-    extent_gdf = gpd.GeoDataFrame(index=[0], geometry=[geometry.shape(extent)], crs='EPSG:4326').to_crs(epsg)
-    return extent_gdf.envelope, epsg
+    poly = geometry.shape(extent)
+    poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
+    envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
+    envelope_poly = envelope_gdf.geometry[0]
+    envelope = json.loads(to_geojson(envelope_poly))
+
+    correct_extent = split_geometry_on_antimeridian(envelope)
+    envelope_wgs84 = geometry.shape(correct_extent)
+    envelope_wgs84_gdf = gpd.GeoDataFrame(index=[0], geometry=[envelope_wgs84], crs='EPSG:4326')
+
+    return envelope_wgs84_gdf
 
 
 def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
@@ -62,13 +62,13 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    envelope, epsg = get_envelope(input_image)
+    envelope_wgs84_gdf = get_envelope_wgs84(input_image)
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
 
-    mask = gpd.read_file(mask_location, mask=envelope).to_crs(epsg)
+    mask = gpd.read_file(mask_location, mask=envelope_wgs84_gdf)
 
-    mask = gpd.clip(mask, envelope)
+    mask = gpd.clip(mask, envelope_wgs84_gdf)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
