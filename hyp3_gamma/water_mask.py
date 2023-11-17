@@ -1,15 +1,23 @@
 """Create and apply a water body mask"""
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import geopandas as gpd
 from osgeo import gdal
 from pyproj import CRS
-from shapely import geometry
+from shapely import geometry, to_geojson
 
 from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
+
+
+def split_geometry_on_antimeridian(geometry: dict):
+    geometry_as_bytes = json.dumps(geometry).encode()
+    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/', '/vsistdin/']
+    geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
+    return json.loads(geojson_str)['features'][0]['geometry']
 
 
 def get_envelope_wgs84(input_image: str):
