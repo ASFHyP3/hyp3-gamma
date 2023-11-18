@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 import geopandas as gpd
 from osgeo import gdal
 from pyproj import CRS
-from shapely import geometry, to_geojson
+from shapely import geometry
 
 from hyp3_gamma.util import GDALConfigManager
 
@@ -30,8 +30,8 @@ def get_envelope_wgs84(input_image: str):
     poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
     envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
     envelope_poly = envelope_gdf.geometry[0]
-    envelope = json.loads(to_geojson(envelope_poly))
 
+    envelope = geometry.mapping(envelope_poly)
     correct_extent = split_geometry_on_antimeridian(envelope)
     envelope_wgs84 = geometry.shape(correct_extent)
     envelope_wgs84_gdf = gpd.GeoDataFrame(index=[0], geometry=[envelope_wgs84], crs='EPSG:4326')
