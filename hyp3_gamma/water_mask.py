@@ -29,15 +29,18 @@ def get_envelope_wgs84(input_image: str):
         envelope_wgs84_gdf: The WGS84 envelope around the GeoTIFF, as a GeoDataFrame.
     """
     info = gdal.Info(input_image, format='json')
+
     prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
     epsg = prj.to_epsg()
+
     extent = info['wgs84Extent']
+
     poly = geometry.shape(extent)
     poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
     envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
     envelope_poly = envelope_gdf.geometry[0]
     envelope = geometry.mapping(envelope_poly)
-    
+
     correct_extent = split_geometry_on_antimeridian(envelope)
     envelope_wgs84 = geometry.shape(correct_extent)
     envelope_wgs84_gdf = gpd.GeoDataFrame(index=[0], geometry=[envelope_wgs84], crs='EPSG:4326')
