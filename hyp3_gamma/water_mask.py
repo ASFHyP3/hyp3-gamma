@@ -37,7 +37,7 @@ def get_envelope_wgs84(input_image: str):
 
     poly = geometry.shape(extent)
     poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
-    envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
+    envelope_gdf = poly_gdf.to_crs(epsg).buffer(1000).envelope.to_crs(4326).envelope
     envelope_poly = envelope_gdf.geometry[0]
     envelope = geometry.mapping(envelope_poly)
 
