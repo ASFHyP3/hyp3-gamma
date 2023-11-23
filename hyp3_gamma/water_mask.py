@@ -2,8 +2,8 @@
 import json
 import subprocess
 from pathlib import Path
-from tempfile import TemporaryDirectory
 import warnings
+from tempfile import TemporaryDirectory
 
 import geopandas as gpd
 from osgeo import gdal
