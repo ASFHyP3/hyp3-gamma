@@ -95,6 +95,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
         try:
             mask = gpd.clip(mask.to_crs(epsg), envelope_gdf_epsg).to_crs(epsg)
         except Warning as e:
+            print('warning:', e)
             mask = gpd.clip(mask, envelope_gdf_wgs84)
 
     with TemporaryDirectory() as temp_dir:
