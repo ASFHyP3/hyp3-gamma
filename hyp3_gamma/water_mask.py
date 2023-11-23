@@ -1,8 +1,8 @@
 """Create and apply a water body mask"""
+import warnings
 import json
 import subprocess
 from pathlib import Path
-import warnings
 from tempfile import TemporaryDirectory
 
 import geopandas as gpd
