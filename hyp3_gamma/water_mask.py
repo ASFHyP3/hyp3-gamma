@@ -1,7 +1,7 @@
 """Create and apply a water body mask"""
 import json
-import warnings
 import subprocess
+import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
