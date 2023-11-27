@@ -44,7 +44,7 @@ def get_envelope_wgs84(input_image: str):
     correct_envelope = geometry.shape(correct_extent)
     envelope_gdf_wgs84 = gpd.GeoDataFrame(index=[0], geometry=[correct_envelope], crs='EPSG:4326')
 
-    return  envelope_gdf_wgs84
+    return envelope_gdf_wgs84
 
 
 def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
