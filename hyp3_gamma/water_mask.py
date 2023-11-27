@@ -1,7 +1,6 @@
 """Create and apply a water body mask"""
 import json
 import subprocess
-import warnings
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -47,6 +46,7 @@ def get_envelope_wgs84(input_image: str):
 
     return  envelope_gdf_wgs84
 
+
 def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
@@ -84,7 +84,6 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
     mask = gpd.read_file(mask_location, mask=envelope_gdf_wgs84)
     mask = gpd.clip(mask, envelope_gdf_wgs84)
-
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
