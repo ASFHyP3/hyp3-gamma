@@ -22,7 +22,7 @@ def split_geometry_on_antimeridian(geometry: dict):
     return json.loads(geojson_str)['features'][0]['geometry']
 
 
-def get_envelope(input_image: str):
+def get_envelope_wgs84(input_image: str):
     """Get the envelope around a GeoTIFF.
     Args:
         input_image: The path to the desired GeoTIFF, as a string.
@@ -35,12 +35,8 @@ def get_envelope(input_image: str):
     extent = info['wgs84Extent']
     poly = geometry.shape(extent).buffer(0.15)
     poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
-    # envelope of the extent in epsg coordinates
-    poly_gdf_epsg = poly_gdf.to_crs(epsg)
-    envelope_gdf_epsg = poly_gdf_epsg.envelope
 
-    # envelope of extent in wgs84 coordinates
-    envelope_gdf = envelope_gdf_epsg.to_crs(4326)
+    envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
 
     envelope_poly = envelope_gdf.geometry[0]
     envelope = geometry.mapping(envelope_poly)
@@ -49,8 +45,7 @@ def get_envelope(input_image: str):
     correct_envelope = geometry.shape(correct_extent)
     envelope_gdf_wgs84 = gpd.GeoDataFrame(index=[0], geometry=[correct_envelope], crs='EPSG:4326')
 
-    return envelope_gdf_epsg, envelope_gdf_wgs84, epsg
-
+    return  envelope_gdf_wgs84
 
 def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
@@ -84,19 +79,12 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
     dst_ds.SetProjection(src_ds.GetProjection())
     dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    envelope_gdf_epsg, envelope_gdf_wgs84, epsg = get_envelope(input_image)
+    envelope_gdf_wgs84 = get_envelope_wgs84(input_image)
 
     mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
-
     mask = gpd.read_file(mask_location, mask=envelope_gdf_wgs84)
+    mask = gpd.clip(mask, envelope_gdf_wgs84)
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings('error')
-        try:
-            mask = gpd.clip(mask.to_crs(epsg), envelope_gdf_epsg).to_crs(epsg)
-        except Warning as e:
-            print('warning:', e)
-            mask = gpd.clip(mask, envelope_gdf_wgs84)
 
     with TemporaryDirectory() as temp_dir:
         temp_file = str(Path(temp_dir) / 'mask.shp')
