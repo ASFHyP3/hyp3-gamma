@@ -1,9 +1,39 @@
 import numpy as np
-from osgeo import gdal
+from osgeo import gdal, osr
 
 from hyp3_gamma import water_mask
 
 gdal.UseExceptions()
+
+
+def get_envelope_with_args(out_path, xres, yres, bounds):
+    xmin, ymin, xmax, ymax = bounds
+    xsize = abs(int((xmax - xmin) / xres))
+    ysize = abs(int((ymax - ymin) / yres))
+
+    out_img_path = str(out_path)
+    driver = gdal.GetDriverByName('GTiff')
+    spatref = osr.SpatialReference()
+    spatref.ImportFromEPSG(4326)
+    wkt = spatref.ExportToWkt()
+    ds = driver.Create(out_img_path, xsize, ysize, options=['COMPRESS=LZW', 'TILED=YES'])
+    ds.SetProjection(wkt)
+    ds.SetGeoTransform([xmin, xres, 0, ymin, 0, yres])
+    ds.GetRasterBand(1).Fill(0)
+    ds.FlushCache()
+    ds = None
+
+    return water_mask.get_envelope_wgs84(out_img_path)
+
+
+def test_get_envelope_wgs84(tmp_path):
+    buffer = 0.15
+    out_path_1 = str(tmp_path / 'envelope1.tif')
+    out_path_2 = str(tmp_path / 'envelope2.tif')
+    envelope1 = get_envelope_with_args(out_path_1, 0.01, 0.01, [0, 40, 10, 50])
+    envelope2 = get_envelope_with_args(out_path_2, 0.01, 0.01, [-177, 40, 178, 50])
+    assert np.all(envelope1.bounds.values == np.asarray([[0.0, 40.0, 10.0, 50.0]])) + buffer
+    assert np.all(envelope2.bounds.values == np.asarray([[-180.0, 40.0, 180.0, 50.0]])) + buffer
 
 
 def test_split_geometry_on_antimeridian():
