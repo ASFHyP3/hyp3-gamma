@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [7.0.1]
 
 ### Fixed
-- A water masking bug that would cause some jobs to fail.
+- A bug that would cause some INSAR jobs, with `apply-water-mask`, to fail with a `shapely.errors.TopologicalError`.
 
 ## [7.0.0]
 
