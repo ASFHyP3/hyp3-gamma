@@ -6,6 +6,52 @@ from hyp3_gamma import water_mask
 gdal.UseExceptions()
 
 
+def test_split_geometry_on_antimeridian():
+    geometry = {
+        'type': 'Polygon',
+        'coordinates': [[
+            [170, 50],
+            [175, 55],
+            [-170, 55],
+            [-175, 50],
+            [170, 50],
+        ]],
+    }
+    result = water_mask.split_geometry_on_antimeridian(geometry)
+    assert result == {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [[
+                [175.0, 55.0],
+                [180.0, 55.0],
+                [180.0, 50.0],
+                [170.0, 50.0],
+                [175.0, 55.0],
+            ]],
+            [[
+                [-170.0, 55.0],
+                [-175.0, 50.0],
+                [-180.0, 50.0],
+                [-180.0, 55.0],
+                [-170.0, 55.0],
+            ]],
+        ],
+    }
+
+    geometry = {
+        'type': 'Polygon',
+        'coordinates': [[
+            [150, 50],
+            [155, 55],
+            [-150, 55],
+            [-155, 50],
+            [150, 50],
+        ]],
+    }
+    result = water_mask.split_geometry_on_antimeridian(geometry)
+    assert result == geometry
+
+
 def test_create_water_mask_with_no_water(tmp_path, test_data_dir):
     input_tif = str(test_data_dir / 'test_geotiff.tif')
     output_tif = str(tmp_path / 'water_mask.tif')
