@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import pytest
-
 import hyp3_gamma.metadata.rtc
 import hyp3_gamma.metadata.util
 from hyp3_gamma.metadata import create_metadata_file_set_rtc, rtc
