@@ -67,20 +67,11 @@ def test_create_dem_xml(rtc_product_dir):
         assert output_file.exists()
         output_file.unlink()
 
-    payload['dem_name'] = 'unknown'
-    writer = rtc.RtcMetadataWriter(payload)
-    unknown_dem_file = writer.create_dem_xml()
-    assert unknown_dem_file is None
-
-    payload['dem_name'] = ''
-    writer = rtc.RtcMetadataWriter(payload)
-    empty_name_file = writer.create_dem_xml()
-    assert empty_name_file is None
-
-    payload['dem_name'] = None
-    with pytest.raises(AttributeError):
+    for dem_name in ['unknown', '', None]:
+        payload['dem_name'] = dem_name
         writer = rtc.RtcMetadataWriter(payload)
-        _ = writer.create_dem_xml()
+        output_file = writer.create_dem_xml()
+        assert output_file is None
 
 
 def test_create_browse_xmls(rtc_product_dir):
