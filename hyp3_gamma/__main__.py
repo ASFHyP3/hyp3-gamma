@@ -94,7 +94,7 @@ def rtc():
     parser.add_argument('--include-inc-map', type=string_is_true, default=False)
     parser.add_argument('--include-scattering-area', type=string_is_true, default=False)
     parser.add_argument('--include-rgb', type=string_is_true, default=False)
-    parser.add_argument('--dem-name', choices=['copernicus', 'legacy'], default='copernicus')
+    parser.add_argument('--dem-name', choices=['copernicus'], default='copernicus')
     parser.add_argument('granule')
     args = parser.parse_args()
 

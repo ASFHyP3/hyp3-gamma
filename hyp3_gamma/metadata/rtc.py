@@ -11,7 +11,7 @@ from hyp3_gamma.metadata import data
 from hyp3_gamma.metadata import util
 
 
-SUPPORTED_DEMS = ['EU_DEM_V11', 'GIMP', 'IFSAR', 'NED13', 'NED1', 'NED2', 'REMA', 'SRTMGL1', 'SRTMGL3', 'GLO-30']
+SUPPORTED_DEMS = ['GLO-30']
 
 
 class RtcMetadataWriter:
@@ -125,18 +125,6 @@ class RtcMetadataWriter:
 
 
 def get_dem_template_id(dem_name: str) -> Optional[str]:
-    if dem_name.startswith('EU'):
-        return 'eu'
-    if dem_name.startswith('GIMP'):
-        return 'gimp'
-    if dem_name.startswith('IFSAR'):
-        return 'ifsar'
-    if dem_name.startswith('NED'):
-        return 'ned'
-    if dem_name.startswith('REMA'):
-        return 'rema'
-    if dem_name.startswith('SRTM'):
-        return 'srtm'
     if dem_name == 'GLO-30':
         return 'cop'
 
