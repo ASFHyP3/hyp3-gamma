@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import pytest
-
 import hyp3_gamma.metadata.rtc
 import hyp3_gamma.metadata.util
 from hyp3_gamma.metadata import create_metadata_file_set_rtc, rtc
@@ -12,7 +10,7 @@ def test_create_rtc_gamma_readme(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -30,7 +28,7 @@ def test_rtc_gamma_product(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -67,27 +65,18 @@ def test_create_dem_xml(rtc_product_dir):
         assert output_file.exists()
         output_file.unlink()
 
-    payload['dem_name'] = 'unknown'
-    writer = rtc.RtcMetadataWriter(payload)
-    unknown_dem_file = writer.create_dem_xml()
-    assert unknown_dem_file is None
-
-    payload['dem_name'] = ''
-    writer = rtc.RtcMetadataWriter(payload)
-    empty_name_file = writer.create_dem_xml()
-    assert empty_name_file is None
-
-    payload['dem_name'] = None
-    with pytest.raises(AttributeError):
+    for dem_name in ['unknown', '', None]:
+        payload['dem_name'] = dem_name
         writer = rtc.RtcMetadataWriter(payload)
-        _ = writer.create_dem_xml()
+        output_file = writer.create_dem_xml()
+        assert output_file is None
 
 
 def test_create_browse_xmls(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -109,7 +98,7 @@ def test_rtc_gamma_area(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -127,7 +116,7 @@ def test_rtc_gamma_inc_map(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -145,7 +134,7 @@ def test_rtc_gamma_ls_map(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -163,7 +152,7 @@ def test_rtc_gamma_rgb(rtc_product_dir):
     payload = hyp3_gamma.metadata.rtc.marshal_metadata(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SDV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
@@ -181,7 +170,7 @@ def test_rtc_gamma_all_files(rtc_product_dir):
     files = create_metadata_file_set_rtc(
         product_dir=rtc_product_dir,
         granule_name='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
-        dem_name='SRTMGL1',
+        dem_name='GLO-30',
         processing_date=datetime.strptime('2020-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z'),
         looks=1,
         plugin_name='hyp3_rtc_gamma',
