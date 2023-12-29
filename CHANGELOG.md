@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.0.0]
+
+### Removed
+- Support for legacy SRTM/NED DEMs in RTC processing. All RTC processing now uses the Copernicus DEM.
+  - `legacy` option for the `--dem-name` parameter of `__main__.rtc()`
+  - `legacy` option for the `--dem-name` parameter of `rtc_sentinel.main()`
+  - `legacy` option for the `dem_name` parameter of `rtc_sentinel.rtc_sentinel_gamma()`
+  - `EU_DEM_V11`, `GIMP`, `IFSAR`, `NED13`, `NED1`, `NED2`, `REMA`, `SRTMGL1`, and `SRTMGL3` entries from
+    `metadata.rtc.SUPPORTED_DEMS`
+
 ## [7.0.1]
 
 ### Fixed

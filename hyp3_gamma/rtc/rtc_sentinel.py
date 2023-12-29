@@ -19,16 +19,13 @@ from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.getDemFor import getDemFile
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_dem import get_dem
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
-from hyp3lib.utm2dem import utm2dem
 from osgeo import gdal, gdalconst, ogr
 
 import hyp3_gamma
@@ -170,15 +167,8 @@ def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str
         run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
             f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
 
-    elif dem_name == 'legacy':
-        if bbox:
-            dem_type = get_dem(bbox[0], bbox[1], bbox[2], bbox[3], dem_tif, post=30.0)
-        else:
-            dem, dem_type = getDemFile(safe_dir, dem_tif, post=30.0)
-        utm2dem(dem_tif, dem_image, dem_par)
-
     else:
-        raise DemError(f'DEM name "{dem_name}" is invalid; supported options are "copernicus" and "legacy".')
+        raise DemError(f'DEM name "{dem_name}" is invalid; supported options are "copernicus".')
 
     return dem_image, dem_par, dem_type
 
@@ -311,7 +301,8 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         looks: Number of azimuth looks to take. Will be selected automatically if not specified.  Range and filter looks
             are selected automatically based on azimuth looks and product type.
         skip_cross_pol: Do not include the co-polarization backscatter GeoTIFF in the output package.
-        dem_name: DEM to use for RTC processing; `copernicus` or `legacy`. `dem_name` is ignored if `dem` is provided.
+        dem_name: DEM to use for RTC processing; `copernicus` is the only valid option.
+            `dem_name` is ignored if `dem` is provided.
 
     Returns:
         product_name: Name of the output product directory
@@ -411,7 +402,7 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
             os.remove(rgb_tif)
 
     for tif_file in glob(f'{product_name}/*.tif'):
-        set_pixel_as_point(tif_file, shift_origin=dem_name == 'legacy')
+        set_pixel_as_point(tif_file, shift_origin=False)
     cogify_dir(directory=product_name)
 
     log.info('Generating browse images and metadata files')
@@ -465,7 +456,7 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
                                      ' A DEM will be selected automatically if not provided.')
-    group.add_argument('--dem-name', choices=('copernicus', 'legacy'), default='copernicus',
+    group.add_argument('--dem-name', choices=['copernicus'], default='copernicus',
                        help='DEM to use for RTC processing.')
 
     parser.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
