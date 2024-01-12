@@ -19,11 +19,10 @@ dependencies:
   # For running
   - gdal>=3.4,<3.5
   - geopandas
+  - hyp3lib>=3,<4
   - jinja2
+  - lxml
   - numpy>=1.21,<1.22
   - pillow
   - python-dateutil
   - rtree
-  - pip:
-    - lxml
-    - hyp3lib>=2,<3
