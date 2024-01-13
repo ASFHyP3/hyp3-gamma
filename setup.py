@@ -35,7 +35,7 @@ setup(
     install_requires=[
         'gdal>=3.4,<3.5',
         'geopandas',
-        'hyp3lib>=2,<3',
+        'hyp3lib>=3,<4',
         'jinja2',
         'lxml',
         'numpy>=1.21,<1.22',
