@@ -54,7 +54,6 @@ def test_get_tiles(tmp_path):
     assert water_mask.get_tiles(case_2[0], tmp_path=str(tmp_path)) == case_2[1]
 
 
-@pytest.mark.integration
 def test_create_water_mask(tmp_path):
     input_image = 'tests/data/water_mask_input.tif'
     output_image = 'tests/data/water_mask_output.wgs84'
