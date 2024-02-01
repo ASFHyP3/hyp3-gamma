@@ -1,124 +1,65 @@
 import numpy as np
-from osgeo import gdal, osr
+import pytest
+from osgeo import gdal
 
-from hyp3_gamma import water_mask
+from hyp3_isce2 import water_mask
 
 gdal.UseExceptions()
 
-
-def get_envelope_with_args(out_path, xres, yres, bounds):
-    xmin, ymin, xmax, ymax = bounds
-    xsize = abs(int((xmax - xmin) / xres))
-    ysize = abs(int((ymax - ymin) / yres))
-
-    out_img_path = str(out_path)
-    driver = gdal.GetDriverByName('GTiff')
-    spatref = osr.SpatialReference()
-    spatref.ImportFromEPSG(4326)
-    wkt = spatref.ExportToWkt()
-    ds = driver.Create(out_img_path, xsize, ysize, options=['COMPRESS=LZW', 'TILED=YES'])
-    ds.SetProjection(wkt)
-    ds.SetGeoTransform([xmin, xres, 0, ymin, 0, yres])
-    ds.GetRasterBand(1).Fill(0)
-    ds.FlushCache()
-    ds = None
-
-    return water_mask.get_envelope_wgs84(out_img_path)
+TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
-def test_get_envelope_wgs84(tmp_path):
-    buffer = 0.15
-    out_path_1 = str(tmp_path / 'envelope1.tif')
-    out_path_2 = str(tmp_path / 'envelope2.tif')
-    envelope1 = get_envelope_with_args(out_path_1, 0.01, 0.01, [0, 40, 10, 50])
-    envelope2 = get_envelope_with_args(out_path_2, 0.01, 0.01, [-177, 40, 178, 50])
-    assert np.all(envelope1.bounds.values == np.asarray([[0.0, 40.0, 10.0, 50.0]])) + buffer
-    assert np.all(envelope2.bounds.values == np.asarray([[-180.0, 40.0, 180.0, 50.0]])) + buffer
+def test_get_corners(tmp_path):
+    filepath_1 = 'tests/data/water_mask_input.tif'
+    corners_1 = np.round(np.asarray(water_mask.get_corners(filepath_1, tmp_path=str(tmp_path))), 13)
+    filepath_2 = 'tests/data/test_geotiff.tif'
+    corners_2 = np.round(np.asarray(water_mask.get_corners(filepath_2, tmp_path=str(tmp_path))), 13)
+    assert corners_1.all() == np.round(np.asarray([
+        [-95.79788474283704, 15.873371301597947],
+        [-95.79788474283704, 15.86602285408288],
+        [-95.79053629532197, 15.873371301597947],
+        [-95.79053629532197, 15.86602285408288]
+    ]), 13).all()
+    assert corners_2.all() == np.round(np.asarray([
+        [-117.64205396140792, 33.902434573500166],
+        [-117.64205396140792, 33.89166840507894],
+        [-117.62889531111531, 33.902434573500166],
+        [-117.62889531111531, 33.89166840507894]
+    ]), 13).all()
 
 
-def test_split_geometry_on_antimeridian():
-    geometry = {
-        'type': 'Polygon',
-        'coordinates': [[
-            [170, 50],
-            [175, 55],
-            [-170, 55],
-            [-175, 50],
-            [170, 50],
-        ]],
-    }
-    result = water_mask.split_geometry_on_antimeridian(geometry)
-    assert result == {
-        'type': 'MultiPolygon',
-        'coordinates': [
-            [[
-                [175.0, 55.0],
-                [180.0, 55.0],
-                [180.0, 50.0],
-                [170.0, 50.0],
-                [175.0, 55.0],
-            ]],
-            [[
-                [-170.0, 55.0],
-                [-175.0, 50.0],
-                [-180.0, 50.0],
-                [-180.0, 55.0],
-                [-170.0, 55.0],
-            ]],
-        ],
-    }
-
-    geometry = {
-        'type': 'Polygon',
-        'coordinates': [[
-            [150, 50],
-            [155, 55],
-            [-150, 55],
-            [-155, 50],
-            [150, 50],
-        ]],
-    }
-    result = water_mask.split_geometry_on_antimeridian(geometry)
-    assert result == geometry
+def test_coord_to_tile():
+    case_1 = ((0, 0), 'n00e000.tif')
+    case_2 = ((-179, 0), 'n00w180.tif')
+    case_3 = ((179, 0), 'n00e175.tif')
+    case_4 = ((55, -45), 's45e055.tif')
+    case_5 = ((-45, 55), 'n55w045.tif')
+    assert water_mask.coord_to_tile(case_1[0]) == case_1[1]
+    assert water_mask.coord_to_tile(case_2[0]) == case_2[1]
+    assert water_mask.coord_to_tile(case_3[0]) == case_3[1]
+    assert water_mask.coord_to_tile(case_4[0]) == case_4[1]
+    assert water_mask.coord_to_tile(case_5[0]) == case_5[1]
 
 
-def test_create_water_mask_with_no_water(tmp_path, test_data_dir):
-    input_tif = str(test_data_dir / 'test_geotiff.tif')
-    output_tif = str(tmp_path / 'water_mask.tif')
-    water_mask.create_water_mask(input_tif, output_tif)
+def test_get_tiles(tmp_path):
+    case_1 = (
+        'tests/data/water_mask_input.tif',
+        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n15w100.tif']
+    )
+    case_2 = (
+        'tests/data/test_geotiff.tif',
+        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n30w120.tif']
+    )
+    assert water_mask.get_tiles(case_1[0], tmp_path=str(tmp_path)) == case_1[1]
+    assert water_mask.get_tiles(case_2[0], tmp_path=str(tmp_path)) == case_2[1]
 
-    info = gdal.Info(output_tif, format='json', stats=True)
-    assert info['size'] == [20, 20]
-    assert info['geoTransform'] == [440720.0, 60.0, 0.0, 3751320.0, 0.0, -60.0]
-    assert info['bands'][0]['type'] == 'Byte'
-    assert info['bands'][0]['minimum'] == 1
-    assert info['bands'][0]['maximum'] == 1
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Area'
 
-
-def test_create_water_mask_with_water_and_land(tmp_path, test_data_dir):
-    input_tif = str(test_data_dir / 'water_mask_input.tif')
-    output_tif = str(tmp_path / 'water_mask.tif')
-    water_mask.create_water_mask(input_tif, output_tif)
-
-    info = gdal.Info(output_tif, format='json')
-    assert info['geoTransform'] == [200360.0, 80.0, 0.0, 1756920.0, 0.0, -80.0]
-    assert info['bands'][0]['type'] == 'Byte'
-    assert info['metadata']['']['AREA_OR_POINT'] == 'Point'
-
-    ds = gdal.Open(str(output_tif))
-    data = ds.GetRasterBand(1).ReadAsArray()
-    expected = np.array([
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ])
-    assert np.array_equal(data, expected)
-    del ds
+@pytest.mark.integration
+def test_create_water_mask(tmp_path):
+    input_image = 'tests/data/water_mask_input.tif'
+    output_image = 'tests/data/water_mask_output.wgs84'
+    validation_text = 'tests/data/water_mask_output_info.txt'
+    water_mask.create_water_mask(input_image, output_image, gdal_format='ISCE', tmp_path=tmp_path)
+    info_from_img = gdal.Info(output_image)
+    info_from_txt = open(validation_text).read()
+    assert info_from_img == info_from_txt
