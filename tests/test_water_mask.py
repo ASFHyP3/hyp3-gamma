@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from osgeo import gdal
 
-from hyp3_isce2 import water_mask
+from hyp3_gamma import water_mask
 
 gdal.UseExceptions()
 
