@@ -1,0 +1,31 @@
+Driver: ISCE/ISCE raster
+Files: tests/data/water_mask_output.wgs84
+       tests/data/water_mask_output.wgs84.aux.xml
+       tests/data/water_mask_output.wgs84.xml
+Size is 11, 10
+Coordinate System is:
+GEOGCRS["WGS 84",
+    DATUM["World Geodetic System 1984",
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    ID["EPSG",4326]]
+Data axis to CRS axis mapping: 2,1
+Origin = (-95.798036030162891,15.873381477294892)
+Pixel Size = (0.000734844751507,-0.000734844751507)
+Corner Coordinates:
+Upper Left  ( -95.7980360,  15.8733815) ( 95d47'52.93"W, 15d52'24.17"N)
+Lower Left  ( -95.7980360,  15.8660330) ( 95d47'52.93"W, 15d51'57.72"N)
+Upper Right ( -95.7899527,  15.8733815) ( 95d47'23.83"W, 15d52'24.17"N)
+Lower Right ( -95.7899527,  15.8660330) ( 95d47'23.83"W, 15d51'57.72"N)
+Center      ( -95.7939944,  15.8697073) ( 95d47'38.38"W, 15d52'10.95"N)
+Band 1 Block=11x1 Type=Byte, ColorInterp=Undefined
+  NoData Value=255

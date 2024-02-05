@@ -8,10 +8,10 @@ gdal.UseExceptions()
 TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
-def test_get_corners(tmp_path):
-    filepath_1 = 'tests/data/water_mask_input.tif'
+def test_get_corners(tmp_path, test_data_dir):
+    filepath_1 = str(test_data_dir / 'water_mask_input.tif')
     corners_1 = np.round(np.asarray(water_mask.get_corners(filepath_1, tmp_path=str(tmp_path))), 13)
-    filepath_2 = 'tests/data/test_geotiff.tif'
+    filepath_2 = str(test_data_dir / 'test_geotiff.tif')
     corners_2 = np.round(np.asarray(water_mask.get_corners(filepath_2, tmp_path=str(tmp_path))), 13)
     assert corners_1.all() == np.round(np.asarray([
         [-95.79788474283704, 15.873371301597947],
@@ -40,24 +40,26 @@ def test_coord_to_tile():
     assert water_mask.coord_to_tile(case_5[0]) == case_5[1]
 
 
-def test_get_tiles(tmp_path):
+def test_get_tiles(tmp_path, test_data_dir):
     case_1 = (
-        'tests/data/water_mask_input.tif',
+        str(test_data_dir / 'water_mask_input.tif'),
         ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n15w100.tif']
     )
     case_2 = (
-        'tests/data/test_geotiff.tif',
+        str(test_data_dir / 'test_geotiff.tif'),
         ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n30w120.tif']
     )
     assert water_mask.get_tiles(case_1[0], tmp_path=str(tmp_path)) == case_1[1]
     assert water_mask.get_tiles(case_2[0], tmp_path=str(tmp_path)) == case_2[1]
 
 
-def test_create_water_mask(tmp_path):
-    input_image = 'tests/data/water_mask_input.tif'
-    output_image = 'tests/data/water_mask_output.wgs84'
-    validation_text = 'tests/data/water_mask_output_info.txt'
+def test_create_water_mask(tmp_path, test_data_dir):
+    input_image = str(test_data_dir / 'water_mask_input.tif')
+    output_image = str(test_data_dir / 'water_mask_output.wgs84')
+    validation_text = str(test_data_dir / 'water_mask_output_info.txt')
     water_mask.create_water_mask(input_image, output_image, gdal_format='ISCE', tmp_path=tmp_path)
     info_from_img = gdal.Info(output_image)
     info_from_txt = open(validation_text).read()
+    info_from_img = info_from_img.split('\n')[4:]
+    info_from_txt = info_from_txt.split('\n')[4:]
     assert info_from_img == info_from_txt
