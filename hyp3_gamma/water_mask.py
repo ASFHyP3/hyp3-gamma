@@ -1,5 +1,5 @@
 """Create and apply a water body mask"""
-from os import system
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -97,13 +97,13 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
 
     # This is WAY faster than using gdal_merge, because of course it is.
     if len(tiles) > 1:
-        build_vrt_command = ' '.join(['gdalbuildvrt', merged_vrt_path] + tiles)
-        system(build_vrt_command)
-        translate_command = ' '.join(['gdal_translate', merged_vrt_path, merged_tif_path])
-        system(translate_command)
+        build_vrt_command = ['gdalbuildvrt', merged_vrt_path] + tiles
+        subprocess.run(build_vrt_command, check=True)
+        translate_command = ['gdal_translate', merged_vrt_path, merged_tif_path]
+        subprocess.run(translate_command, check=True)
 
-    shapefile_command = ' '.join(['gdaltindex', shape_path, input_image])
-    system(shapefile_command)
+    shapefile_command = ['gdaltindex', shape_path, input_image]
+    subprocess.run(shapefile_command, check=True)
 
     warp_filename = merged_tif_path if len(tiles) > 1 else tiles[0]
 
@@ -119,12 +119,12 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         format='GTiff'
     )
 
-    flip_values_command = ' '.join([
+    flip_values_command = [
         'gdal_calc.py',
         '-A',
         merged_warped_path,
         f'--outfile={output_image}',
         '--calc="numpy.abs((A.astype(numpy.int16) + 1) - 2)"',  # Change 1's to 0's and 0's to 1's.
         f'--format={gdal_format}'
-    ])
-    system(flip_values_command)
+    ]
+    subprocess.run(flip_values_command, check=True)
