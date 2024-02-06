@@ -1,57 +1,76 @@
 """Create and apply a water body mask"""
-import json
 import subprocess
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from typing import Optional
 
-import geopandas as gpd
+import numpy as np
 from osgeo import gdal
-from pyproj import CRS
-from shapely import geometry
-
-from hyp3_gamma.util import GDALConfigManager
 
 gdal.UseExceptions()
 
-
-def split_geometry_on_antimeridian(geometry: dict):
-    geometry_as_bytes = json.dumps(geometry).encode()
-    cmd = ['ogr2ogr', '-wrapdateline', '-datelineoffset', '20', '-f', 'GeoJSON', '/vsistdout/', '/vsistdin/']
-    geojson_str = subprocess.run(cmd, input=geometry_as_bytes, stdout=subprocess.PIPE, check=True).stdout
-    return json.loads(geojson_str)['features'][0]['geometry']
+TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
-def get_envelope_wgs84(input_image: str):
-    """Get the envelope around a GeoTIFF.
+def get_corners(filename, tmp_path: Optional[Path]):
+    """Get all four corners of the given image: [upper_left, bottom_left, upper_right, bottom_right].
+
     Args:
-        input_image: The path to the desired GeoTIFF, as a string.
-    Returns:
-        envelope_gdf_wgs84: The WGS84 envelope around the GeoTIFF, as a GeoDataFrame.
+        filename: The path to the input image.
+        tmp_path: An optional path to a temporary directory for temp files.
     """
-    info = gdal.Info(input_image, format='json')
-    prj = CRS.from_wkt(info["coordinateSystem"]["wkt"])
-    epsg = prj.to_epsg()
-    extent = info['wgs84Extent']
-    poly = geometry.shape(extent).buffer(0.15)
-    poly_gdf = gpd.GeoDataFrame(index=[0], geometry=[poly], crs='EPSG:4326')
-
-    envelope_gdf = poly_gdf.to_crs(epsg).envelope.to_crs(4326)
-
-    envelope_poly = envelope_gdf.geometry[0]
-    envelope = geometry.mapping(envelope_poly)
-
-    correct_extent = split_geometry_on_antimeridian(envelope)
-    correct_envelope = geometry.shape(correct_extent)
-    envelope_gdf_wgs84 = gpd.GeoDataFrame(index=[0], geometry=[correct_envelope], crs='EPSG:4326')
-
-    return envelope_gdf_wgs84
+    tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
+    ds = gdal.Warp(tmp_file, filename, dstSRS='EPSG:4326')
+    geotransform = ds.GetGeoTransform()
+    x_min = geotransform[0]
+    x_max = x_min + geotransform[1] * ds.RasterXSize
+    y_max = geotransform[3]
+    y_min = y_max + geotransform[5] * ds.RasterYSize
+    upper_left = [x_min, y_max]
+    bottom_left = [x_min, y_min]
+    upper_right = [x_max, y_max]
+    bottom_right = [x_max, y_min]
+    return [upper_left, bottom_left, upper_right, bottom_right]
 
 
-def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
+def coord_to_tile(coord: tuple[float, float]) -> str:
+    """Get the filename of the tile which encloses the inputted coordinate.
+
+    Args:
+        coord: The (lon, lat) tuple containing the desired coordinate.
+    """
+    lat_rounded = np.floor(coord[1] / 5) * 5
+    lon_rounded = np.floor(coord[0] / 5) * 5
+    if lat_rounded >= 0:
+        lat_part = 'n' + str(int(lat_rounded)).zfill(2)
+    else:
+        lat_part = 's' + str(int(np.abs(lat_rounded))).zfill(2)
+    if lon_rounded >= 0:
+        lon_part = 'e' + str(int(lon_rounded)).zfill(3)
+    else:
+        lon_part = 'w' + str(int(np.abs(lon_rounded))).zfill(3)
+    return lat_part + lon_part + '.tif'
+
+
+def get_tiles(filename: str, tmp_path: Optional[Path]) -> None:
+    """Get the AWS vsicurl path's to the tiles necessary to cover the inputted file.
+
+    Args:
+        filename: The path to the input file.
+        tmp_path: An optional path to a temporary directory for temp files.
+    """
+    tiles = []
+    corners = get_corners(filename, tmp_path=tmp_path)
+    for corner in corners:
+        tile = TILE_PATH + coord_to_tile(corner)
+        if tile not in tiles:
+            tiles.append(tile)
+    return tiles
+
+
+def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', tmp_path: Optional[Path] = Path('.')):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
-    The water mask is assembled from GSHHG v2.3.7 Levels 1, 2, 3, and 5 at full resolution. To learn more, visit
-    https://www.soest.hawaii.edu/pwessel/gshhg/
+    The water mask is assembled from OpenStreetMaps data.
 
     Shoreline data is unbuffered and pixel values of 1 indicate land touches the pixel and 0 indicates there is no
     land in the pixel.
@@ -60,35 +79,52 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff'):
         input_image: Path for the input GDAL-compatible image
         output_image: Path for the output image
         gdal_format: GDAL format name to create output image as
+        tmp_path: An optional path to a temporary directory for temp files.
     """
-    src_ds = gdal.Open(input_image)
 
-    driver_options = []
-    if gdal_format == 'GTiff':
-        driver_options = ['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=ALL_CPUS']
+    tiles = get_tiles(input_image, tmp_path=tmp_path)
 
-    dst_ds = gdal.GetDriverByName(gdal_format).Create(
-        output_image,
-        src_ds.RasterXSize,
-        src_ds.RasterYSize,
-        1,
-        gdal.GDT_Byte,
-        driver_options,
+    if len(tiles) < 1:
+        raise ValueError(f'No water mask tiles found for {tiles}.')
+
+    tmp_px_size_path = str(tmp_path / 'tmp_px_size.tif')
+    merged_tif_path = str(tmp_path / 'merged.tif')
+    merged_vrt_path = str(tmp_path / 'merged.vrt')
+    merged_warped_path = str(tmp_path / 'merged_warped.tif')
+    shape_path = str(tmp_path / 'tmp.shp')
+
+    pixel_size = gdal.Warp(tmp_px_size_path, input_image, dstSRS='EPSG:4326').GetGeoTransform()[1]
+
+    # This is WAY faster than using gdal_merge, because of course it is.
+    if len(tiles) > 1:
+        build_vrt_command = ['gdalbuildvrt', merged_vrt_path] + tiles
+        subprocess.run(build_vrt_command, check=True)
+        translate_command = ['gdal_translate', merged_vrt_path, merged_tif_path]
+        subprocess.run(translate_command, check=True)
+
+    shapefile_command = ['gdaltindex', shape_path, input_image]
+    subprocess.run(shapefile_command, check=True)
+
+    warp_filename = merged_tif_path if len(tiles) > 1 else tiles[0]
+
+    gdal.Warp(
+        merged_warped_path,
+        warp_filename,
+        cutlineDSName=shape_path,
+        cropToCutline=True,
+        xRes=pixel_size,
+        yRes=pixel_size,
+        targetAlignedPixels=True,
+        dstSRS='EPSG:4326',
+        format='GTiff'
     )
-    dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
-    dst_ds.SetProjection(src_ds.GetProjection())
-    dst_ds.SetMetadataItem('AREA_OR_POINT', src_ds.GetMetadataItem('AREA_OR_POINT'))
 
-    envelope_gdf_wgs84 = get_envelope_wgs84(input_image)
-
-    mask_location = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/GSHHG/hyp3_water_mask_20220912.shp'
-    mask = gpd.read_file(mask_location, mask=envelope_gdf_wgs84)
-    mask = gpd.clip(mask, envelope_gdf_wgs84)
-
-    with TemporaryDirectory() as temp_dir:
-        temp_file = str(Path(temp_dir) / 'mask.shp')
-        mask.to_file(temp_file, driver='ESRI Shapefile')
-        with GDALConfigManager(OGR_ENABLE_PARTIAL_REPROJECTION='YES'):
-            gdal.Rasterize(dst_ds, temp_file, allTouched=True, burnValues=[1])
-
-    del src_ds, dst_ds
+    flip_values_command = [
+        'gdal_calc.py',
+        '-A',
+        merged_warped_path,
+        f'--outfile={output_image}',
+        '--calc="numpy.abs((A.astype(numpy.int16) + 1) - 2)"',  # Change 1's to 0's and 0's to 1's.
+        f'--format={gdal_format}'
+    ]
+    subprocess.run(flip_values_command, check=True)
