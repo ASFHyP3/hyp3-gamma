@@ -60,6 +60,7 @@ def test_create_water_mask(tmp_path, test_data_dir):
     water_mask.create_water_mask(input_image, output_image, gdal_format='ISCE', tmp_path=tmp_path)
     info_from_img = gdal.Info(output_image)
     info_from_txt = open(validation_text).read()
+    # The first 4 lines are file paths; they will be different everytime and don't need to be checked.
     info_from_img = info_from_img.split('\n')[4:]
     info_from_txt = info_from_txt.split('\n')[4:]
     assert info_from_img == info_from_txt
