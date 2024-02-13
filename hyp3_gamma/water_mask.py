@@ -1,14 +1,11 @@
 """Create and apply a water body mask"""
-import json
 import subprocess
 from pathlib import Path
 from typing import Optional
 
-import geopandas as gpd
 import numpy as np
 from osgeo import gdal
 from pyproj import CRS
-from shapely import geometry
 
 gdal.UseExceptions()
 
