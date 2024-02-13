@@ -5,10 +5,29 @@ from typing import Optional
 
 import numpy as np
 from osgeo import gdal
+from pyproj import CRS
 
 gdal.UseExceptions()
 
 TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
+
+
+def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
+    """Get the extent of the image [min x, min y, max x, max y].
+
+    Args:
+        filename: The path to the input image.
+        tmp_path: An optional path to a temporary directory for temp files.
+        epsg: The EPSG code to open the image in.
+    """
+    tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
+    ds = gdal.Warp(tmp_file, filename, dstSRS=epsg)
+    geotransform = ds.GetGeoTransform()
+    x_min = geotransform[0]
+    x_max = x_min + geotransform[1] * ds.RasterXSize
+    y_max = geotransform[3]
+    y_min = y_max + geotransform[5] * ds.RasterYSize
+    return [x_min, y_min, x_max, y_max]
 
 
 def get_corners(filename, tmp_path: Optional[Path]):
@@ -82,18 +101,24 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         tmp_path: An optional path to a temporary directory for temp files.
     """
 
+    # Ensures that the input image is not using Ground Control Points.
+    input_image_tmp = 'input.tif'
+    ds = gdal.Warp(input_image_tmp, input_image)
+    input_image = input_image_tmp
+
+    pixel_size = ds.GetGeoTransform()[1]
+    proj = CRS.from_wkt(ds.GetProjection())
+    epsg = f'EPSG:{proj.to_epsg()}'
+
     tiles = get_tiles(input_image, tmp_path=tmp_path)
 
     if len(tiles) < 1:
         raise ValueError(f'No water mask tiles found for {tiles}.')
 
-    tmp_px_size_path = str(tmp_path / 'tmp_px_size.tif')
     merged_tif_path = str(tmp_path / 'merged.tif')
     merged_vrt_path = str(tmp_path / 'merged.vrt')
     merged_warped_path = str(tmp_path / 'merged_warped.tif')
     shape_path = str(tmp_path / 'tmp.shp')
-
-    pixel_size = gdal.Warp(tmp_px_size_path, input_image, dstSRS='EPSG:4326').GetGeoTransform()[1]
 
     # This is WAY faster than using gdal_merge, because of course it is.
     if len(tiles) > 1:
@@ -106,16 +131,14 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
     subprocess.run(shapefile_command, check=True)
 
     warp_filename = merged_tif_path if len(tiles) > 1 else tiles[0]
-
+    corners = get_extent(input_image, tmp_path=tmp_path, epsg=epsg)
     gdal.Warp(
         merged_warped_path,
         warp_filename,
-        cutlineDSName=shape_path,
-        cropToCutline=True,
+        outputBounds=corners,
         xRes=pixel_size,
         yRes=pixel_size,
-        targetAlignedPixels=True,
-        dstSRS='EPSG:4326',
+        dstSRS=epsg,
         format='GTiff'
     )
 
