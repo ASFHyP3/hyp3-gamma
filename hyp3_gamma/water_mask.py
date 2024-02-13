@@ -13,11 +13,12 @@ TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
 def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
-    """Get all four corners of the given image: [upper_left, bottom_left, upper_right, bottom_right].
+    """Get the extent of the image [min x, min y, max x, max y].
 
     Args:
         filename: The path to the input image.
         tmp_path: An optional path to a temporary directory for temp files.
+        epsg: The EPSG code to open the image in.
     """
     tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
     ds = gdal.Warp(tmp_file, filename, dstSRS=epsg)
