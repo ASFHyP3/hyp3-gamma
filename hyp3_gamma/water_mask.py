@@ -135,10 +135,10 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         build_vrt_command = ['gdalbuildvrt', merged_vrt_path] + tiles
         subprocess.run(build_vrt_command, check=True)
         translate_command = [
-            'gdal_translate', 
-            '-co COMPRESS=LZW', 
-            '-co NUM_THREADS=all_cpus', 
-            merged_vrt_path, 
+            'gdal_translate',
+            '-co COMPRESS=LZW',
+            '-co NUM_THREADS=all_cpus',
+            merged_vrt_path,
             merged_tif_path
         ]
         subprocess.run(translate_command, check=True)
