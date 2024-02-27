@@ -21,7 +21,7 @@ def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
         epsg: The EPSG code to open the image in.
     """
     tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
-    ds = gdal.Warp(tmp_file, filename, dstSRS=epsg, creationOptions=['COMPRESS=LZW'])
+    ds = gdal.Warp(tmp_file, filename, dstSRS=epsg, creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'])
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
     x_max = x_min + geotransform[1] * ds.RasterXSize
@@ -38,7 +38,7 @@ def get_corners(filename, tmp_path: Optional[Path]):
         tmp_path: An optional path to a temporary directory for temp files.
     """
     tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
-    ds = gdal.Warp(tmp_file, filename, dstSRS='EPSG:4326', creationOptions=['COMPRESS=LZW'])
+    ds = gdal.Warp(tmp_file, filename, dstSRS='EPSG:4326', creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'])
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
     x_max = x_min + geotransform[1] * ds.RasterXSize
@@ -124,7 +124,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
     if len(tiles) > 1:
         build_vrt_command = ['gdalbuildvrt', merged_vrt_path] + tiles
         subprocess.run(build_vrt_command, check=True)
-        translate_command = ['gdal_translate', '-co', 'COMPRESS=LZW', merged_vrt_path, merged_tif_path]
+        translate_command = ['gdal_translate', '-co', 'COMPRESS=LZW', '-co', 'NUM_THREADS=all_cpus', merged_vrt_path, merged_tif_path]
         subprocess.run(translate_command, check=True)
 
     shapefile_command = ['gdaltindex', shape_path, input_image]
@@ -140,7 +140,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         yRes=pixel_size,
         dstSRS=epsg,
         format='GTiff',
-        creationOptions=['COMPRESS=LZW']
+        creationOptions=['COMPRESS=LZW', 'NUM_THREADS=all_cpus']
     )
 
     flip_values_command = [
