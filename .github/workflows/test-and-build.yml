@@ -62,7 +62,7 @@ jobs:
           tar -zxvf GAMMA_SOFTWARE-20230712_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           no-cache: true
