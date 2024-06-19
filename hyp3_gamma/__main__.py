@@ -1,6 +1,7 @@
 """
 rtc_gamma and insar_gamma processing for HyP3
 """
+import concurrent.futures
 import logging
 import os
 import sys
@@ -176,9 +177,9 @@ def insar():
 
     write_credentials_to_netrc_file(username, password)
 
-    g1, g2 = util.earlier_granule_first(args.granules[0], args.granules[1])
-    reference_granule = util.get_granule(g1)
-    secondary_granule = util.get_granule(g2)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        downloaded_granules = [granule for granule in executor.map(util.get_granule, args.granules)]
+    reference_granule, secondary_granule = util.earlier_granule_first(*downloaded_granules)
 
     rlooks, alooks = (20, 4) if args.looks == '20x4' else (10, 2)
 
