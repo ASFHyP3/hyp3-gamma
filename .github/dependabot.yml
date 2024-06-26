@@ -14,8 +14,8 @@ updates:
     ignore:
       - dependency-name: gdal
       - dependency-name: matplotlib
-      - dependency-name: packaging
       - dependency-name: numpy
+      - dependency-name: packaging
       - dependency-name: scipy
       - dependency-name: shapely
   - package-ecosystem: github-actions
