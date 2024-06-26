@@ -1,5 +1,5 @@
 # required by GAMMA and pinned to versions available via apt; ignored in dependabot.yml
-gdal==3.4.1
+gdal[numpy]==3.4.1
 matplotlib==3.5.1
 numpy==1.21.5
 packaging==21.3
