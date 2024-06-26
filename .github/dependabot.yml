@@ -12,7 +12,7 @@ updates:
     labels:
       - bumpless
     ignore:
-      - dependency-name: gdal
+      - dependency-name: gdal[numpy]
       - dependency-name: matplotlib
       - dependency-name: numpy
       - dependency-name: packaging
