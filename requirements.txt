@@ -1,0 +1,15 @@
+# required by GAMMA and pinned to versions available via apt; ignored in dependabot.yml
+gdal==3.4.1
+matplotlib==3.5.1
+packaging==21.3
+numpy==1.21.5
+scipy==1.8.0
+shapely==1.8.0
+# required by hyp3_gamma
+geopandas==0.14.3
+hyp3lib==3.0.0
+jinja2==3.1.4
+lxml==4.8.0
+pillow==9.0.1
+python-dateutil==2.9.0.post0
+rtree==1.2.0

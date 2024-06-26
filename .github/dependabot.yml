@@ -5,6 +5,19 @@
 
 version: 2
 updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - bumpless
+    ignore:
+      - dependency-name: gdal
+      - dependency-name: matplotlib
+      - dependency-name: packaging
+      - dependency-name: numpy
+      - dependency-name: scipy
+      - dependency-name: shapely
   - package-ecosystem: github-actions
     directory: /
     schedule:
