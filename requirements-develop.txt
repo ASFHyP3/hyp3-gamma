@@ -5,3 +5,4 @@ flake8-builtins
 pytest
 pytest-cov
 pytest-console-scripts
+setuptools_scm
