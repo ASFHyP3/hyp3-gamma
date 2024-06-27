@@ -5,24 +5,7 @@ channels:
 dependencies:
   - python=3.10
   - pip
-  # For packaging, and testing
-  - flake8
-  - flake8-import-order
-  - flake8-blind-except
-  - flake8-builtins
-  - setuptools
-  - setuptools_scm
-  - wheel
-  - pytest
-  - pytest-console-scripts
-  - pytest-cov
-  # For running
-  - gdal>=3.4,<3.5
-  - geopandas
-  - hyp3lib>=3,<4
-  - jinja2
-  - lxml
-  - numpy>=1.21,<1.22
-  - pillow
-  - python-dateutil
-  - rtree
+  - gdal[numpy]=3.4.1
+  - numpy=1.21.5
+  - pip:
+      - --editable .[develop]

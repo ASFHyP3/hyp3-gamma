@@ -1,2 +1,53 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyp3_gamma"
+requires-python = "~=3.10"
+authors = [
+    {name="ASF Tools Team", email="UAF-asf-apd@alaska.edu"},
+]
+description = "HyP3 plugin for SAR processing with GAMMA"
+license = {text = "BSD-3-Clause"}
+classifiers=[
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+
+dynamic = ["version", "readme", "dependencies", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/ASFHyP3/hyp3-gamma"
+Documentation = "https://hyp3-docs.asf.alaska.edu"
+
+[project.scripts]
+hyp3_gamma = "hyp3_gamma.__main__:main"
+rtc = "hyp3_gamma.__main__:rtc"
+"rtc_sentinel.py" = "hyp3_gamma.rtc:rtc_sentinel.main"
+insar = "hyp3_gamma.__main__:insar"
+"ifm_sentinel.py" = "hyp3_gamma.insar.ifm_sentinel:main"
+"interf_pwr_s1_lt_tops_proc.py" = "hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc:main"
+"unwrapping_geocoding.py" = "hyp3_gamma.insar.unwrapping_geocoding:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+script_launch_mode = "subprocess"
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"], content-type = "text/markdown"}
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {develop = {file = ["requirements-develop.txt"]}}
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools_scm]
