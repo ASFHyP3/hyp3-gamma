@@ -14,7 +14,6 @@ Ubuntu 20.04 is recommended for GAMMA support.
    cd hyp3-gamma
    conda env create -f environment.yml
    conda activate hyp3-gamma
-   python -m pip install -e .[develop]
    ```
 1. Check hyp3_gamma is installed
    ```
