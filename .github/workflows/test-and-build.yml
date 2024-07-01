@@ -18,14 +18,14 @@ env:
 
 jobs:
   call-pytest-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@v0.11.0
+    uses: ASFHyP3/actions/.github/workflows/reusable-pytest.yml@v0.11.1
     with:
       local_package_name: hyp3_gamma
       python_versions: >-
         ["3.10"]
 
   call-version-info-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.11.0
+    uses: ASFHyP3/actions/.github/workflows/reusable-version-info.yml@v0.11.1
     with:
       python_version: '3.10'
 
@@ -62,7 +62,7 @@ jobs:
           tar -zxvf GAMMA_SOFTWARE-20230712_ISP_DIFF_LAT.linux64_ubuntu2204.tar.gz
 
       - name: Build, tag, and push image to Amazon ECR
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           no-cache: true
@@ -76,14 +76,14 @@ jobs:
 
       - name: Add test tag
         if: github.ref == 'refs/heads/develop'
-        uses: akhilerm/tag-push-action@v2.1.0
+        uses: akhilerm/tag-push-action@v2.2.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:test
 
       - name: Add latest tag
         if: github.ref == 'refs/heads/main'
-        uses: akhilerm/tag-push-action@v2.1.0
+        uses: akhilerm/tag-push-action@v2.2.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:latest
