@@ -37,7 +37,7 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY GAMMA_SOFTWARE-20230712 /usr/local/GAMMA_SOFTWARE-20230712/
+COPY GAMMA_SOFTWARE-20231208 /usr/local/GAMMA_SOFTWARE-20231208/
 
 COPY . /hyp3-gamma/
 RUN python -m pip install --upgrade pip \
@@ -55,7 +55,7 @@ SHELL ["/bin/bash", "-l", "-c"]
 ENV PYTHONDONTWRITEBYTECODE=true
 
 # GAMMA environment variables per section 1 of the Linux installation guide
-ENV GAMMA_VERSION=20230712
+ENV GAMMA_VERSION=20231208
 ENV GAMMA_HOME=/usr/local/GAMMA_SOFTWARE-${GAMMA_VERSION}
 ENV MSP_HOME=$GAMMA_HOME/MSP
 ENV ISP_HOME=$GAMMA_HOME/ISP
