@@ -19,8 +19,6 @@ updates:
       - dependency-name: scipy
       - dependency-name: shapely
       - dependency-name: geopandas
-        versions:
-          - '>=1.0.0'
   - package-ecosystem: github-actions
     directory: /
     schedule:
