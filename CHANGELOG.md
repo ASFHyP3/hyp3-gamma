@@ -7,6 +7,10 @@ and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [8.1.4]
+### Changed
+* Updated versions for Python and GitHub Actions dependencies.
+
 ## [8.1.3]
 ### Changed
 * Input SLCs for insar jobs are now downloaded in parallel in `__main__.insar()`
