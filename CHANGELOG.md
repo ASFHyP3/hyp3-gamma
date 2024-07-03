@@ -11,6 +11,10 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Upgraded to [GAMMA software](https://www.gamma-rs.ch/software) version `20231208` from `20230712`
 
+## [8.1.4]
+### Changed
+* Updated versions for Python and GitHub Actions dependencies.
+
 ## [8.1.3]
 ### Changed
 * Input SLCs for insar jobs are now downloaded in parallel in `__main__.insar()`
