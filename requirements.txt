@@ -6,6 +6,7 @@ packaging==21.3
 scipy==1.8.0
 shapely==1.8.0
 # required by hyp3_gamma
+# geopandas>0.14.3 requires numpy>=1.22, which conflicts with GAMMA expecting numpy==1.21.5
 geopandas==0.14.3
 hyp3lib==3.1.0
 jinja2==3.1.4
