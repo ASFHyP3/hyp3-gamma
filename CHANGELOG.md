@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [8.2.0]
 ### Changed
-- Upgraded to [GAMMA software](https://www.gamma-rs.ch/software) version `20231208` from `20230712`
+- Upgraded to [GAMMA software](https://www.gamma-rs.ch/software) version `20240627` from `20230712`
 
 ## [8.1.4]
 ### Changed
