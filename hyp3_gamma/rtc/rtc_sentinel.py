@@ -14,7 +14,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 import numpy as np
-from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
+from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
@@ -308,7 +308,6 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         product_name: Name of the output product directory
     """
 
-    esa_credentials = (os.environ['ESA_USERNAME'], os.environ['ESA_PASSWORD'])
     safe_dir = safe_dir.rstrip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)

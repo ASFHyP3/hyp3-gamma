@@ -60,30 +60,10 @@ def check_earthdata_credentials(username, password):
     return username, password
 
 
-def check_esa_credentials(username: Optional[str], password: Optional[str]) -> None:
-    if username is not None:
-        os.environ['ESA_USERNAME'] = username
-    elif 'ESA_USERNAME' not in os.environ:
-        raise ValueError(
-            'Please provide Copernicus Data Space Ecosystem (CDSE) username via the --esa-username option '
-            'or the ESA_USERNAME environment variable.'
-        )
-
-    if password is not None:
-        os.environ['ESA_PASSWORD'] = password
-    elif 'ESA_PASSWORD' not in os.environ:
-        raise ValueError(
-            'Please provide Copernicus Data Space Ecosystem (CDSE) password via the --esa-password option '
-            'or the ESA_PASSWORD environment variable.'
-        )
-
-
 def rtc():
     parser = ArgumentParser()
     parser.add_argument('--username')
     parser.add_argument('--password')
-    parser.add_argument('--esa-username')
-    parser.add_argument('--esa-password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--resolution', type=float, choices=[10.0, 20.0, 30.0], default=30.0)
@@ -100,7 +80,6 @@ def rtc():
     args = parser.parse_args()
 
     username, password = check_earthdata_credentials(args.username, args.password)
-    check_esa_credentials(args.esa_username, args.esa_password)
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                         datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
@@ -146,8 +125,6 @@ def insar():
     parser = ArgumentParser()
     parser.add_argument('--username')
     parser.add_argument('--password')
-    parser.add_argument('--esa-username')
-    parser.add_argument('--esa-password')
     parser.add_argument('--bucket')
     parser.add_argument('--bucket-prefix', default='')
     parser.add_argument('--include-dem', type=string_is_true, default=False)
@@ -163,7 +140,6 @@ def insar():
     args = parser.parse_args()
 
     username, password = check_earthdata_credentials(args.username, args.password)
-    check_esa_credentials(args.esa_username, args.esa_password)
 
     # TODO: Remove `--include-los-displacement` and this logic once it's no longer supported by the HyP3 API
     args.include_displacement_maps = args.include_displacement_maps | args.include_los_displacement
