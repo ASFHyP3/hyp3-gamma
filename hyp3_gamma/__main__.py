@@ -9,7 +9,6 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from importlib.metadata import entry_points
 from pathlib import Path
 from shutil import make_archive
-from typing import Optional
 
 from hyp3lib.aws import upload_file_to_s3
 from hyp3lib.fetch import write_credentials_to_netrc_file
