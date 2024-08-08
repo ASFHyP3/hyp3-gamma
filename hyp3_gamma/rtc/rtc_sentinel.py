@@ -26,7 +26,7 @@ from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
-from s1_orbits import fetch_for_scene, OrbitNotFoundError
+from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
