@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [8.2.1]
+## [9.0.0]
 ### Changed
-- Orbit files are now retrived from [s1-orbits](https://github.com/ASFHyP3/sentinel1-orbits-py).
+- Orbit files are now retrieved using the [s1-orbits](https://github.com/ASFHyP3/sentinel1-orbits-py) library.
+### Removed
+- Removed support for the `--esa-username` and `--esa-password` command-line options and the `ESA_USERNAME` and `ESA_PASSWORD` environment variables.
 
 ## [8.2.0]
 ### Changed
