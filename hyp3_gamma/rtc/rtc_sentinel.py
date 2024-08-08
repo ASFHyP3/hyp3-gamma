@@ -20,13 +20,13 @@ from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
+from s1_orbits import fetch_for_scene, OrbitNotFoundError
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
@@ -316,9 +316,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     try:
         log.info(f'Downloading orbit file for {granule}')
-        orbit_file, provider = downloadSentinelOrbitFile(granule, esa_credentials=esa_credentials)
-        log.info(f'Got orbit file {orbit_file} from provider {provider}')
-    except OrbitDownloadError as e:
+        orbit_file = str(fetch_for_scene(granule))
+        log.info(f'Got orbit file {orbit_file} from s1-orbits.')
+    except OrbitNotFoundError as e:
         log.warning(e)
         log.warning(f'Proceeding using original predicted orbit data included with {granule}')
         orbit_file = None
