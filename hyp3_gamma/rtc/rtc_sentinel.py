@@ -14,19 +14,19 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import List
 
 import numpy as np
-from hyp3lib import DemError, ExecuteError, GranuleError, OrbitDownloadError
+from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib import saa_func_lib as saa
 from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
-from hyp3lib.get_orb import downloadSentinelOrbitFile
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
+from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
@@ -308,7 +308,6 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         product_name: Name of the output product directory
     """
 
-    esa_credentials = (os.environ['ESA_USERNAME'], os.environ['ESA_PASSWORD'])
     safe_dir = safe_dir.rstrip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
@@ -316,9 +315,9 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     try:
         log.info(f'Downloading orbit file for {granule}')
-        orbit_file, provider = downloadSentinelOrbitFile(granule, esa_credentials=esa_credentials)
-        log.info(f'Got orbit file {orbit_file} from provider {provider}')
-    except OrbitDownloadError as e:
+        orbit_file = str(fetch_for_scene(granule))
+        log.info(f'Got orbit file {orbit_file} from s1-orbits.')
+    except OrbitNotFoundError as e:
         log.warning(e)
         log.warning(f'Proceeding using original predicted orbit data included with {granule}')
         orbit_file = None
