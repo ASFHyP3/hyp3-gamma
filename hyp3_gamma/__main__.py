@@ -1,6 +1,4 @@
-"""
-rtc_gamma and insar_gamma processing for HyP3
-"""
+"""rtc_gamma and insar_gamma processing for HyP3"""
 
 import concurrent.futures
 import logging

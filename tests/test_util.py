@@ -5,6 +5,7 @@ from osgeo import gdal
 
 from hyp3_gamma import util
 
+
 gdal.UseExceptions()
 
 

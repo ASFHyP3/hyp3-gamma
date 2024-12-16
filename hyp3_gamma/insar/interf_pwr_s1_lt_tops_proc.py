@@ -9,6 +9,7 @@ import sys
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
 
+
 log = logging.getLogger(__name__)
 
 
@@ -23,7 +24,7 @@ def create_slc2r_tab(SLC2tab, SLC2Rtab):
                 item = item.rstrip()
                 out = item.replace('slc', 'rslc')
                 out = out.replace('tops', 'rtops')
-                g.write('{}\n'.format(out).encode())
+                g.write(f'{out}\n'.encode())
 
 
 def coregister_data(
@@ -43,7 +44,7 @@ def coregister_data(
     iterations,
 ):
     if cnt < iterations + 1:
-        offi = ifgname + '.off_{}'.format(cnt)
+        offi = ifgname + f'.off_{cnt}'
     else:
         offi = ifgname + '.off.it.corrected.temp'
 
@@ -75,7 +76,7 @@ def coregister_data(
         uselogging=True,
     )
 
-    with open('offsetfit{}.log'.format(cnt), 'w') as log:
+    with open(f'offsetfit{cnt}.log', 'w') as log:
         execute(f'offset_fit offs snr {offi} - - 0.2 1', uselogging=True, logfile=log)
 
     if cnt < iterations + 1:
@@ -99,17 +100,17 @@ def coregister_data(
         shutil.copy(offi, offit)
     elif cnt < iterations + 1:
         execute(f'offset_add {offit} {offi} {offi}.temp', uselogging=True)
-        shutil.copy('{}.temp'.format(offi), offit)
+        shutil.copy(f'{offi}.temp', offit)
     else:
         execute(f'offset_add {offit} {offi} {offi}.out', uselogging=True)
 
 
 def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, iterations=5, step=0):
     # Setup various file names that we'll need
-    ifgname = '{}_{}'.format(reference, secondary)
+    ifgname = f'{reference}_{secondary}'
     SLC2tab = 'SLC2_tab'
     SLC2Rtab = 'SLC2R_tab'
-    lt = '{}.lt'.format(reference)
+    lt = f'{reference}.lt'
     mpar = reference + '.slc.par'
     spar = secondary + '.slc.par'
     mmli = reference + '.mli.par'
@@ -121,10 +122,10 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
 
     if step == 0:
         if not os.path.isfile(dem):
-            log.info('Currently in directory {}'.format(os.getcwd()))
-            log.error("ERROR: Input DEM file {} can't be found!".format(dem))
+            log.info(f'Currently in directory {os.getcwd()}')
+            log.error(f"ERROR: Input DEM file {dem} can't be found!")
             sys.exit(1)
-        log.info('Input DEM file {} found'.format(dem))
+        log.info(f'Input DEM file {dem} found')
         log.info('Preparing initial look up table and sim_unw file')
         execute(f'create_offset {mpar} {spar} {off} 1 {rlooks} {alooks} 0', uselogging=True)
 
@@ -191,7 +192,7 @@ def interf_pwr_s1_lt_tops_proc(reference, secondary, dem, rlooks=10, alooks=2, i
             iterations,
         )
     else:
-        log.error('ERROR: Unrecognized step {}; must be from 0 - 2'.format(step))
+        log.error(f'ERROR: Unrecognized step {step}; must be from 0 - 2')
         sys.exit(1)
 
 

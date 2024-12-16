@@ -27,6 +27,7 @@ from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_pr
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 from hyp3_gamma.metadata import create_metadata_file_set_insar
 
+
 log = logging.getLogger(__name__)
 
 
@@ -50,7 +51,7 @@ def get_bursts(mydir, name):
 
 
 def get_burst_overlaps(reference_dir, secondary_dir):
-    log.info('Calculating burst overlaps; in directory {}'.format(os.getcwd()))
+    log.info(f'Calculating burst overlaps; in directory {os.getcwd()}')
     burst_tab1 = '%s_burst_tab' % reference_dir[17:25]
     burst_tab2 = '%s_burst_tab' % secondary_dir[17:25]
 
@@ -58,9 +59,9 @@ def get_burst_overlaps(reference_dir, secondary_dir):
         with open(burst_tab2, 'w') as f2:
             for name in ['001.xml', '002.xml', '003.xml']:
                 time1, total_bursts1 = get_bursts(reference_dir, name)
-                log.info('total_bursts1, time1 {} {}'.format(total_bursts1, time1))
+                log.info(f'total_bursts1, time1 {total_bursts1} {time1}')
                 time2, total_bursts2 = get_bursts(secondary_dir, name)
-                log.info('total_bursts2, time2 {} {}'.format(total_bursts2, time2))
+                log.info(f'total_bursts2, time2 {total_bursts2} {time2}')
                 cnt = 1
                 start1 = 0
                 start2 = 0
@@ -151,12 +152,10 @@ def get_product_name(
 
 
 def get_orbit_parameters(reference_file):
-    """
-    input: manifest.safe in the reference.safe directory
+    """input: manifest.safe in the reference.safe directory
     return: {"orbitnumber": orbitnumber, "relative_orbitnumber":relative_orbitnumber,
     "cyclenumber":cyclenumber, "pass_direction":pass_direction}
     """
-
     file = os.path.join(reference_file, 'manifest.safe')
 
     if os.path.exists(file):
@@ -203,66 +202,66 @@ def move_output_files(
     include_inc_map,
     include_dem,
 ):
-    inName = '{}.mli.geo.tif'.format(reference)
-    outName = '{}_amp.tif'.format(os.path.join(prod_dir, long_output))
+    inName = f'{reference}.mli.geo.tif'
+    outName = f'{os.path.join(prod_dir, long_output)}_amp.tif'
     shutil.copy(inName, outName)
 
     inName = 'water_mask.tif'
-    outName = '{}_water_mask.tif'.format(os.path.join(prod_dir, long_output))
+    outName = f'{os.path.join(prod_dir, long_output)}_water_mask.tif'
     shutil.copy(inName, outName)
 
-    inName = '{}.cc.geo.tif'.format(output)
-    outName = '{}_corr.tif'.format(os.path.join(prod_dir, long_output))
+    inName = f'{output}.cc.geo.tif'
+    outName = f'{os.path.join(prod_dir, long_output)}_corr.tif'
     if os.path.isfile(inName):
         shutil.copy(inName, outName)
 
-    inName = '{}.adf.unw.geo.tif'.format(output)
-    outName = '{}_unw_phase.tif'.format(os.path.join(prod_dir, long_output))
+    inName = f'{output}.adf.unw.geo.tif'
+    outName = f'{os.path.join(prod_dir, long_output)}_unw_phase.tif'
     shutil.copy(inName, outName)
 
     if include_wrapped_phase:
-        inName = '{}.diff0.man.adf.geo.tif'.format(output)
-        outName = '{}_wrapped_phase.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.diff0.man.adf.geo.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_wrapped_phase.tif'
         shutil.copy(inName, outName)
 
     if include_dem:
-        inName = '{}.dem.tif'.format(output)
-        outName = '{}_dem.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.dem.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_dem.tif'
         shutil.copy(inName, outName)
 
     if include_displacement_maps:
-        inName = '{}.los.disp.geo.org.tif'.format(output)
-        outName = '{}_los_disp.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.los.disp.geo.org.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_los_disp.tif'
         shutil.copy(inName, outName)
-        inName = '{}.vert.disp.geo.org.tif'.format(output)
-        outName = '{}_vert_disp.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.vert.disp.geo.org.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_vert_disp.tif'
         shutil.copy(inName, outName)
 
     if include_inc_map:
-        inName = '{}.inc.tif'.format(output)
-        outName = '{}_inc_map.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.inc.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_inc_map.tif'
         shutil.copy(inName, outName)
-        inName = '{}.inc_ell.tif'.format(output)
-        outName = '{}_inc_map_ell.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.inc_ell.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_inc_map_ell.tif'
         shutil.copy(inName, outName)
 
     if include_look_vectors:
-        inName = '{}.lv_theta.tif'.format(output)
-        outName = '{}_lv_theta.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.lv_theta.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_lv_theta.tif'
         shutil.copy(inName, outName)
-        inName = '{}.lv_phi.tif'.format(output)
-        outName = '{}_lv_phi.tif'.format(os.path.join(prod_dir, long_output))
+        inName = f'{output}.lv_phi.tif'
+        outName = f'{os.path.join(prod_dir, long_output)}_lv_phi.tif'
         shutil.copy(inName, outName)
 
     makeAsfBrowse(
-        '{}.diff0.man.adf.bmp.geo.tif'.format(output),
-        '{}_color_phase'.format(os.path.join(prod_dir, long_output)),
+        f'{output}.diff0.man.adf.bmp.geo.tif',
+        f'{os.path.join(prod_dir, long_output)}_color_phase',
         use_nn=True,
     )
 
     makeAsfBrowse(
-        '{}.adf.unw.geo.bmp.tif'.format(output),
-        '{}_unw_phase'.format(os.path.join(prod_dir, long_output)),
+        f'{output}.adf.unw.geo.bmp.tif',
+        f'{os.path.join(prod_dir, long_output)}_unw_phase',
         use_nn=True,
     )
 
@@ -283,7 +282,7 @@ def make_parameter_file(
     secondary_date = mydir[17:]
     reference_date_short = reference_date[:8]
 
-    log.info('In directory {} looking for file with date {}'.format(os.getcwd(), reference_date_short))
+    log.info(f'In directory {os.getcwd()} looking for file with date {reference_date_short}')
     reference_file = glob.glob('*%s*.SAFE' % reference_date)[0]
     secondary_file = glob.glob('*%s*.SAFE' % secondary_date)[0]
 
@@ -317,17 +316,17 @@ def make_parameter_file(
             root = etree.parse(myfile)
             for coord in root.iter('productFirstLineUtcTime'):
                 utc = coord.text
-                log.info('Found utc time {}'.format(utc))
+                log.info(f'Found utc time {utc}')
                 t = utc.split('T')
-                log.info('{}'.format(t))
+                log.info(f'{t}')
                 s = t[1].split(':')
-                log.info('{}'.format(s))
+                log.info(f'{s}')
                 utctime = ((int(s[0]) * 60 + int(s[1])) * 60) + float(s[2])
     os.chdir(back)
 
     heading = None
     name = f'{reference_date[:8]}.mli.par'
-    with open(name, 'r') as f:
+    with open(name) as f:
         for line in f:
             if 'heading' in line:
                 t = re.split(':', line)
@@ -400,14 +399,14 @@ def insar_sentinel_gamma(
     secondary_date = secondary_file[17:32]
     secondary = secondary_file[17:25]
 
-    igramName = '{}_{}'.format(reference_date, secondary_date)
+    igramName = f'{reference_date}_{secondary_date}'
     if 'IW_SLC__' not in reference_file:
         raise GranuleError(f'Reference file {reference_file} is not of type IW_SLC!')
     if 'IW_SLC__' not in secondary_file:
         raise GranuleError(f'Secondary file {secondary_file} is not of type IW_SLC!')
 
     pol = get_copol(reference_file)
-    log.info('Processing the {} polarization'.format(pol))
+    log.info(f'Processing the {pol} polarization')
 
     # Ingest the data files into gamma format
     log.info('Starting par_S1_SLC')
@@ -424,11 +423,11 @@ def insar_sentinel_gamma(
     dem_source = 'GLO-30'
     dem_pixel_size = int(alooks) * 40  # typically 160 or 80; IFG pixel size will be half the DEM pixel size (80 or 40)
     get_dem_file_gamma('big.dem', 'big.par', reference_file, pixel_size=dem_pixel_size)
-    log.info('Got dem of type {}'.format(dem_source))
+    log.info(f'Got dem of type {dem_source}')
 
     # Figure out which bursts overlap between the two swaths
     burst_tab1, burst_tab2 = get_burst_overlaps(reference_file, secondary_file)
-    log.info('Finished calculating overlap - in directory {}'.format(os.getcwd()))
+    log.info(f'Finished calculating overlap - in directory {os.getcwd()}')
     shutil.move(burst_tab1, f'{reference}/{burst_tab1}')
     shutil.move(burst_tab2, f'{secondary}/{burst_tab2}')
 
@@ -453,7 +452,7 @@ def insar_sentinel_gamma(
 
     # Interferogram creation, matching, refinement
     log.info('Starting interf_pwr_s1_lt_tops_proc.py 0')
-    hgt = 'DEM/HGT_SAR_{}_{}'.format(rlooks, alooks)
+    hgt = f'DEM/HGT_SAR_{rlooks}_{alooks}'
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=0)
 
     log.info('Starting interf_pwr_s1_lt_tops_proc.py 1')
@@ -468,10 +467,10 @@ def insar_sentinel_gamma(
         if 'final azimuth offset poly. coeff.:' in line:
             offset = line.split(':')[1]
     if float(offset) > 0.02:
-        log.error('ERROR: Found azimuth offset of {}!'.format(offset))
+        log.error(f'ERROR: Found azimuth offset of {offset}!')
         sys.exit(1)
     else:
-        log.info('Found azimuth offset of {}!'.format(offset))
+        log.info(f'Found azimuth offset of {offset}!')
 
     output = f'{reference}_{secondary}'
 
