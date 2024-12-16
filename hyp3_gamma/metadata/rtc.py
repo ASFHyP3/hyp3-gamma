@@ -40,12 +40,19 @@ class RtcMetadataWriter:
         return files
 
     def create_readme(self) -> Path:
-        reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_' \
-                                                       f'{self.payload["polarizations"][0]}.tif'
+        reference_file = (
+            self.payload['product_dir'] / f'{self.payload["product_dir"].name}_'
+            f'{self.payload["polarizations"][0]}.tif'
+        )
 
-        return self.create_metadata_file(self.payload, 'rtc/readme.md.txt.j2', reference_file, out_ext='README.md.txt',
-                                         strip_ext=True, strip_pol=True
-                                         )
+        return self.create_metadata_file(
+            self.payload,
+            'rtc/readme.md.txt.j2',
+            reference_file,
+            out_ext='README.md.txt',
+            strip_ext=True,
+            strip_pol=True,
+        )
 
     def create_product_xmls(self) -> List[Path]:
         payload = deepcopy(self.payload)
@@ -55,9 +62,7 @@ class RtcMetadataWriter:
             payload['pol'] = pol
             reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{pol}.tif'
 
-            output_files.append(
-                self.create_metadata_file(payload, 'rtc/product.xml.j2', reference_file)
-            )
+            output_files.append(self.create_metadata_file(payload, 'rtc/product.xml.j2', reference_file))
         return output_files
 
     def create_dem_xml(self) -> Path:
@@ -76,9 +81,7 @@ class RtcMetadataWriter:
 
         rgb_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_rgb.png'
         if rgb_file.exists():
-            output_files.append(
-                self.create_metadata_file(self.payload, 'browse/browse-color.xml.j2', rgb_file)
-            )
+            output_files.append(self.create_metadata_file(self.payload, 'browse/browse-color.xml.j2', rgb_file))
         return output_files
 
     def create_inc_map_xml(self) -> Path:
@@ -98,8 +101,15 @@ class RtcMetadataWriter:
         return self.create_metadata_file(self.payload, 'rtc/rgb.xml.j2', reference_file)
 
     @classmethod
-    def create_metadata_file(cls, payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
-                             strip_ext: bool = False, strip_pol: bool = False) -> Optional[Path]:
+    def create_metadata_file(
+        cls,
+        payload: dict,
+        template: str,
+        reference_file: Path,
+        out_ext: str = 'xml',
+        strip_ext: bool = False,
+        strip_pol: bool = False,
+    ) -> Optional[Path]:
         if not reference_file.exists():
             return None
 
@@ -145,8 +155,17 @@ def decode_product(product_name: str) -> dict:
     }
 
 
-def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
-                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
+def marshal_metadata(
+    product_dir: Path,
+    granule_name: str,
+    dem_name: str,
+    processing_date: datetime,
+    looks: int,
+    plugin_name: str,
+    plugin_version: str,
+    processor_name: str,
+    processor_version: str,
+) -> dict:
     payload = locals()
 
     payload.update(decode_product(product_dir.name))

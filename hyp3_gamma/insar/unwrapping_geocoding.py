@@ -24,19 +24,18 @@ log = logging.getLogger(__name__)
 def get_ref_point_info(log_text: str):
     log_lines = log_text.splitlines()
 
-    ref = [line for line in log_lines if "phase at reference point:" in line]
-    ref_offset = float(ref[0].split(" ")[-2])
+    ref = [line for line in log_lines if 'phase at reference point:' in line]
+    ref_offset = float(ref[0].split(' ')[-2])
 
-    init = [line for line in log_lines if "phase initialization flag:" in line]
-    glb_offset = float(init[0].split(" ")[-2])
-    init_flg = int(init[0].split(" ")[3])
+    init = [line for line in log_lines if 'phase initialization flag:' in line]
+    glb_offset = float(init[0].split(' ')[-2])
+    init_flg = int(init[0].split(' ')[3])
 
-    return {"initflg": init_flg, "refoffset": ref_offset, "glboffset": glb_offset}
+    return {'initflg': init_flg, 'refoffset': ref_offset, 'glboffset': glb_offset}
 
 
 def get_height_at_pixel(in_height_file: str, mlines: int, mwidth: int, ref_azlin: int, ref_rpix: int) -> float:
-    """get the height of the pixel (ref_azlin, ref_rpix)
-    """
+    """get the height of the pixel (ref_azlin, ref_rpix)"""
     height = read_bin(in_height_file, mlines, mwidth)
 
     return height[ref_azlin, ref_rpix]
@@ -50,20 +49,33 @@ def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, hei
         row_s, col_s, lat, lon
     with (row_s,col_s)in SAR space, and the rest of the coordinates in MAP space
     """
-    cmd = ['sarpix_coord', in_mli_par, '-', in_dem_par, str(ref_azlin), str(ref_rpix), str(height)]
+    cmd = [
+        'sarpix_coord',
+        in_mli_par,
+        '-',
+        in_dem_par,
+        str(ref_azlin),
+        str(ref_rpix),
+        str(height),
+    ]
     log.info(f'Running command: {" ".join(cmd)}')
     result = subprocess.run(cmd, capture_output=True, text=True)
     coord_log_lines = result.stdout.splitlines()
 
-    selected_coords = [line for line in coord_log_lines if "selected" in line]
+    selected_coords = [line for line in coord_log_lines if 'selected' in line]
     log.info(f'Selected sarpix coordinates: {selected_coords[0]}')
     coord_lst = selected_coords[0].split()[:-1]
     coord_lst = [float(s) for s in coord_lst]
     return coord_lst
 
 
-def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, height: float = 0.0,
-               in_dem_par: str = None) -> dict:
+def get_coords(
+    in_mli_par: str,
+    ref_azlin: int = 0,
+    ref_rpix: int = 0,
+    height: float = 0.0,
+    in_dem_par: str = None,
+) -> dict:
     """
     Args:
         in_mli_par: GAMMA MLI par file
@@ -77,12 +89,12 @@ def get_coords(in_mli_par: str, ref_azlin: int = 0, ref_rpix: int = 0, height: f
         in_dem_par is provided, coords will have row_m, col_m, y, and x.
     """
     row_s, col_s, lat, lon = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, height, '-')
-    coords = {"row_s": int(row_s), "col_s": int(col_s), "lat": lat, "lon": lon}
+    coords = {'row_s': int(row_s), 'col_s': int(col_s), 'lat': lat, 'lon': lon}
 
     if in_dem_par:
         _, _, _, _, y, x = coords_from_sarpix_coord(in_mli_par, ref_azlin, ref_rpix, height, in_dem_par)
-        coords["y"] = y
-        coords["x"] = x
+        coords['y'] = y
+        coords['x'] = x
 
     return coords
 
@@ -115,31 +127,41 @@ def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_thres
             return 0.0
         return array.sum()
 
-    pixel_weights = scipy.ndimage.generic_filter(input=coherence, function=sum_valid_coherence_values, size=window_size,
-                                                 mode='constant', cval=0.0)
+    pixel_weights = scipy.ndimage.generic_filter(
+        input=coherence,
+        function=sum_valid_coherence_values,
+        size=window_size,
+        mode='constant',
+        cval=0.0,
+    )
     x, y = np.unravel_index(np.argmax(pixel_weights), pixel_weights.shape)
     return x, y
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
-    execute(f"geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}", uselogging=True)
+    execute(
+        f'geocode_back {inname} {width} {lt} {outname} {demw} {demn} 0 {type_}',
+        uselogging=True,
+    )
 
 
 def geocode(inname, outname, inwidth, lt, outwidth, outlines, type_):
-    execute(f"geocode {lt} {inname} {inwidth} {outname} {outwidth} {outlines} - {type_}", uselogging=True)
+    execute(
+        f'geocode {lt} {inname} {inwidth} {outname} {outwidth} {outlines} - {type_}',
+        uselogging=True,
+    )
 
 
 def data2geotiff(inname, outname, dempar, type_):
-    execute(f"data2geotiff {dempar} {inname} {type_} {outname} ", uselogging=True)
+    execute(f'data2geotiff {dempar} {inname} {type_} {outname} ', uselogging=True)
 
 
 def create_phase_from_complex(incpx, outfloat, width):
-    execute(f"cpx_to_real {incpx} {outfloat} {width} 4", uselogging=True)
+    execute(f'cpx_to_real {incpx} {outfloat} {width} 4', uselogging=True)
 
 
 def get_water_mask(cc_file, width, lt, demw, demn, dempar):
-    """create water_mask geotiff file based on the cc_file (float binary file)
-    """
+    """create water_mask geotiff file based on the cc_file (float binary file)"""
     with TemporaryDirectory() as temp_dir:
         # 2--SUN raster/BMP/TIFF, 0--FLOAT (default)
         geocode_back(cc_file, f'{temp_dir}/tmp_mask_geo', width, lt, demw, demn, 0)
@@ -151,8 +173,7 @@ def get_water_mask(cc_file, width, lt, demw, demn, dempar):
 
 
 def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
-    """input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space.
-    """
+    """input file is water_mask.tif file in MAP space, outptut is water_mask_sar.bmp file in SAR space."""
 
     ds = gdal.Open(water_mask)
     band = ds.GetRasterBand(1)
@@ -164,27 +185,25 @@ def convert_water_mask_to_sar_bmp(water_mask, mwidth, mlines, lt, demw):
         water_bmp_file = f'{temp_dir}/water_mask.bmp'
         water_im.save(water_bmp_file)
         # map water_mask.bmp file to SAR coordinators
-        water_mask_bmp_sar_file = "water_mask_sar.bmp"
+        water_mask_bmp_sar_file = 'water_mask_sar.bmp'
         geocode(water_bmp_file, water_mask_bmp_sar_file, demw, lt, mwidth, mlines, 2)
 
 
 def apply_mask(file: str, nlines: int, nsamples: int, mask_file: str):
-    """use mask_file (bmp) to mask the file (binary), output the masked file (binary). All three file are in SAR space.
-    """
+    """use mask_file (bmp) to mask the file (binary), output the masked file (binary). All three file are in SAR space."""
     data = read_bin(file, nlines, nsamples)
     mask = read_bmp(mask_file)
 
     data[mask == 0] = 0
 
-    outfile = "{file}_masked".format(file=file)
+    outfile = '{file}_masked'.format(file=file)
     data.tofile(outfile)
 
     return outfile
 
 
 def combine_water_mask(cc_mask_file, water_mask_sar_file):
-    """combine cc_mask with water_mask in SAR space
-    """
+    """combine cc_mask with water_mask in SAR space"""
     # read the original mask file
     in_im = Image.open(cc_mask_file)
     in_data = np.array(in_im)
@@ -195,72 +214,85 @@ def combine_water_mask(cc_mask_file, water_mask_sar_file):
     in_data[water_mask_sar_data == 0] = 0
     out_im = Image.fromarray(in_data)
     out_im.putpalette(in_palette)
-    out_file = os.path.join(os.path.dirname(cc_mask_file), "combined_mask.bmp")
+    out_file = os.path.join(os.path.dirname(cc_mask_file), 'combined_mask.bmp')
     out_im.save(out_file)
 
     return out_file
 
 
-def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, trimode=0,
-                         alpha=0.6, apply_water_mask=False):
-
-    dem = "./DEM/demseg"
-    dempar = "./DEM/demseg.par"
-    lt = "./DEM/MAP2RDC"
-    ifgname = "{}_{}".format(reference, secondary)
-    offit = "{}.off.it".format(ifgname)
-    mmli = reference + ".mli"
-    smli = secondary + ".mli"
+def unwrapping_geocoding(
+    reference,
+    secondary,
+    step='man',
+    rlooks=10,
+    alooks=2,
+    trimode=0,
+    alpha=0.6,
+    apply_water_mask=False,
+):
+    dem = './DEM/demseg'
+    dempar = './DEM/demseg.par'
+    lt = './DEM/MAP2RDC'
+    ifgname = '{}_{}'.format(reference, secondary)
+    offit = '{}.off.it'.format(ifgname)
+    mmli = reference + '.mli'
+    smli = secondary + '.mli'
 
     if not os.path.isfile(dempar):
-        log.error("ERROR: Unable to find dem par file {}".format(dempar))
+        log.error('ERROR: Unable to find dem par file {}'.format(dempar))
 
     if not os.path.isfile(lt):
-        log.error("ERROR: Unable to find look up table file {}".format(lt))
+        log.error('ERROR: Unable to find look up table file {}'.format(lt))
 
     if not os.path.isfile(offit):
-        log.error("ERROR: Unable to find offset file {}".format(offit))
+        log.error('ERROR: Unable to find offset file {}'.format(offit))
 
-    width = getParameter(offit, "interferogram_width")
-    lines = getParameter(offit, "interferogram_azimuth_lines")
-    mwidth = getParameter(mmli + ".par", "range_samples")
-    mlines = getParameter(mmli + ".par", "azimuth_lines")
-    swidth = getParameter(smli + ".par", "range_samples")
-    demw = getParameter(dempar, "width")
-    demn = getParameter(dempar, "nlines")
+    width = getParameter(offit, 'interferogram_width')
+    lines = getParameter(offit, 'interferogram_azimuth_lines')
+    mwidth = getParameter(mmli + '.par', 'range_samples')
+    mlines = getParameter(mmli + '.par', 'azimuth_lines')
+    swidth = getParameter(smli + '.par', 'range_samples')
+    demw = getParameter(dempar, 'width')
+    demn = getParameter(dempar, 'nlines')
 
-    ifgf = "{}.diff0.{}".format(ifgname, step)
+    ifgf = '{}.diff0.{}'.format(ifgname, step)
 
-    log.info("{} will be used for unwrapping and geocoding".format(ifgf))
+    log.info('{} will be used for unwrapping and geocoding'.format(ifgf))
 
-    log.info("-------------------------------------------------")
-    log.info("            Start unwrapping")
-    log.info("-------------------------------------------------")
+    log.info('-------------------------------------------------')
+    log.info('            Start unwrapping')
+    log.info('-------------------------------------------------')
 
-    execute(f"cc_wave {ifgf} - - {ifgname}.cc {width}", uselogging=True)
+    execute(f'cc_wave {ifgf} - - {ifgname}.cc {width}', uselogging=True)
 
     if alpha > 0.0:
-        execute(f"adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5", uselogging=True)
+        execute(
+            f'adf {ifgf} {ifgf}.adf {ifgname}.adf.cc {width} {alpha} - 5',
+            uselogging=True,
+        )
     else:
         log.info('Skipping adaptive phase filter because alpha is zero')
-        shutil.copyfile(ifgf, f"{ifgf}.adf")
-        shutil.copyfile(f"{ifgname}.cc", f"{ifgname}.adf.cc")
+        shutil.copyfile(ifgf, f'{ifgf}.adf')
+        shutil.copyfile(f'{ifgname}.cc', f'{ifgname}.adf.cc')
 
-    execute(f"rasmph_pwr {ifgf}.adf {mmli} {width}", uselogging=True)
+    execute(f'rasmph_pwr {ifgf}.adf {mmli} {width}', uselogging=True)
 
-    execute(f"rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ", uselogging=True)
+    execute(
+        f'rascc_mask {ifgname}.adf.cc {mmli} {width} 1 1 0 1 1 0.10 0.0 ',
+        uselogging=True,
+    )
 
-    get_water_mask(f"{ifgname}.adf.cc", width, lt, demw, demn, dempar)
+    get_water_mask(f'{ifgname}.adf.cc', width, lt, demw, demn, dempar)
 
-    out_file = f"{ifgname}.adf.cc_mask.bmp"
+    out_file = f'{ifgname}.adf.cc_mask.bmp'
 
-    cc_ref = f"{ifgname}.cc"
+    cc_ref = f'{ifgname}.cc'
 
     if apply_water_mask:
         # convert water_mak.tif in MAP to SAR space
         convert_water_mask_to_sar_bmp('water_mask.tif', mwidth, mlines, lt, demw)
         # combine the water mask with validity mask in SAR space
-        out_file = combine_water_mask(f"{ifgname}.adf.cc_mask.bmp", 'water_mask_sar.bmp')
+        out_file = combine_water_mask(f'{ifgname}.adf.cc_mask.bmp', 'water_mask_sar.bmp')
         # apply water mask in SAR space to cc
         cc_ref = apply_mask(f'{ifgname}.cc', int(mlines), int(mwidth), 'water_mask_sar.bmp')
 
@@ -268,7 +300,7 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     ref_azlin, ref_rpix = get_reference_pixel(data_cc)
     del data_cc
 
-    height = get_height_at_pixel(f"DEM/HGT_SAR_{rlooks}_{alooks}", int(mlines), int(mwidth), ref_azlin, ref_rpix)
+    height = get_height_at_pixel(f'DEM/HGT_SAR_{rlooks}_{alooks}', int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
     # unwrap very large interferograms in multiple patches to keep memory requirement under 31,600 MB
     # https://github.com/ASFHyP3/hyp3-gamma/issues/316
@@ -277,68 +309,167 @@ def unwrapping_geocoding(reference, secondary, step="man", rlooks=10, alooks=2, 
     else:
         range_patches = 2
 
-    mcf_log = execute(f"mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0"
-                      f" - - {range_patches} 1 - {ref_rpix} {ref_azlin} 1", uselogging=True)
+    mcf_log = execute(
+        f'mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0'
+        f' - - {range_patches} 1 - {ref_rpix} {ref_azlin} 1',
+        uselogging=True,
+    )
 
     ref_point_info = get_ref_point_info(mcf_log)
 
-    coords = get_coords(f"{mmli}.par", ref_azlin=ref_azlin, ref_rpix=ref_rpix, height=height, in_dem_par=dempar)
+    coords = get_coords(
+        f'{mmli}.par',
+        ref_azlin=ref_azlin,
+        ref_rpix=ref_rpix,
+        height=height,
+        in_dem_par=dempar,
+    )
 
-    execute(f"rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras",
-            uselogging=True)
+    execute(
+        f'rasdt_pwr {ifgname}.adf.unw {mmli} {width} - - - - - {6 * np.pi} 1 rmg.cm {ifgname}.adf.unw.ras',
+        uselogging=True,
+    )
 
-    execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
-            f" - {ifgname}.vert.disp 1", uselogging=True)
+    execute(
+        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par' f' - {ifgname}.vert.disp 1',
+        uselogging=True,
+    )
 
-    execute(f"dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par"
-            f" - {ifgname}.los.disp 0", uselogging=True)
+    execute(
+        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par' f' - {ifgname}.los.disp 0',
+        uselogging=True,
+    )
 
-    execute(f"gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell")
+    execute(f'gc_map2 {mmli}.par DEM/demseg.par 0 - - - - - - - inc_ell')
 
-    log.info("-------------------------------------------------")
-    log.info("            End unwrapping")
-    log.info("-------------------------------------------------")
+    log.info('-------------------------------------------------')
+    log.info('            End unwrapping')
+    log.info('-------------------------------------------------')
 
-    log.info("-------------------------------------------------")
-    log.info("            Start geocoding")
-    log.info("-------------------------------------------------")
+    log.info('-------------------------------------------------')
+    log.info('            Start geocoding')
+    log.info('-------------------------------------------------')
 
-    geocode_back(mmli, mmli + ".geo", mwidth, lt, demw, demn, 0)
-    geocode_back(smli, smli + ".geo", swidth, lt, demw, demn, 0)
-    geocode_back("{}.sim_unw".format(ifgname), "{}.sim_unw.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.adf.unw".format(ifgname), "{}.adf.unw.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.adf".format(ifgf), "{}.adf.geo".format(ifgf), width, lt, demw, demn, 1)
-    geocode_back("{}.adf.unw.ras".format(ifgname), "{}.adf.unw.geo.bmp".format(ifgname), width, lt, demw, demn, 2)
-    geocode_back("{}.adf.bmp".format(ifgf), "{}.adf.bmp.geo".format(ifgf), width, lt, demw, demn, 2)
-    geocode_back("{}.cc".format(ifgname), "{}.cc.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.adf.cc".format(ifgname), "{}.adf.cc.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.vert.disp".format(ifgname), "{}.vert.disp.geo".format(ifgname), width, lt, demw, demn, 0)
-    geocode_back("{}.los.disp".format(ifgname), "{}.los.disp.geo".format(ifgname), width, lt, demw, demn, 0)
+    geocode_back(mmli, mmli + '.geo', mwidth, lt, demw, demn, 0)
+    geocode_back(smli, smli + '.geo', swidth, lt, demw, demn, 0)
+    geocode_back(
+        '{}.sim_unw'.format(ifgname),
+        '{}.sim_unw.geo'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        0,
+    )
+    geocode_back(
+        '{}.adf.unw'.format(ifgname),
+        '{}.adf.unw.geo'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        0,
+    )
+    geocode_back('{}.adf'.format(ifgf), '{}.adf.geo'.format(ifgf), width, lt, demw, demn, 1)
+    geocode_back(
+        '{}.adf.unw.ras'.format(ifgname),
+        '{}.adf.unw.geo.bmp'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        2,
+    )
+    geocode_back(
+        '{}.adf.bmp'.format(ifgf),
+        '{}.adf.bmp.geo'.format(ifgf),
+        width,
+        lt,
+        demw,
+        demn,
+        2,
+    )
+    geocode_back('{}.cc'.format(ifgname), '{}.cc.geo'.format(ifgname), width, lt, demw, demn, 0)
+    geocode_back(
+        '{}.adf.cc'.format(ifgname),
+        '{}.adf.cc.geo'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        0,
+    )
+    geocode_back(
+        '{}.vert.disp'.format(ifgname),
+        '{}.vert.disp.geo'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        0,
+    )
+    geocode_back(
+        '{}.los.disp'.format(ifgname),
+        '{}.los.disp.geo'.format(ifgname),
+        width,
+        lt,
+        demw,
+        demn,
+        0,
+    )
 
-    create_phase_from_complex("{}.adf.geo".format(ifgf), "{}.adf.geo.phase".format(ifgf), width)
+    create_phase_from_complex('{}.adf.geo'.format(ifgf), '{}.adf.geo.phase'.format(ifgf), width)
 
-    data2geotiff(mmli + ".geo", mmli + ".geo.tif", dempar, 2)
-    data2geotiff(smli + ".geo", smli + ".geo.tif", dempar, 2)
-    data2geotiff("{}.sim_unw.geo".format(ifgname), "{}.sim_unw.geo.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.adf.unw.geo".format(ifgname), "{}.adf.unw.geo.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.adf.unw.geo.bmp".format(ifgname), "{}.adf.unw.geo.bmp.tif".format(ifgname), dempar, 0)
-    data2geotiff("{}.adf.geo.phase".format(ifgf), "{}.adf.geo.tif".format(ifgf), dempar, 2)
-    data2geotiff("{}.adf.bmp.geo".format(ifgf), "{}.adf.bmp.geo.tif".format(ifgf), dempar, 0)
-    data2geotiff("{}.cc.geo".format(ifgname), "{}.cc.geo.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.adf.cc.geo".format(ifgname), "{}.adf.cc.geo.tif".format(ifgname), dempar, 2)
-    data2geotiff("DEM/demseg", "{}.dem.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.vert.disp.geo".format(ifgname), "{}.vert.disp.geo.org.tif".format(ifgname), dempar, 2)
-    data2geotiff("{}.los.disp.geo".format(ifgname), "{}.los.disp.geo.org.tif".format(ifgname), dempar, 2)
-    data2geotiff("DEM/inc", "{}.inc.tif".format(ifgname), dempar, 2)
-    data2geotiff("inc_ell", "{}.inc_ell.tif".format(ifgname), dempar, 2)
-    execute(f"look_vector {mmli}.par {offit} {dempar} {dem} lv_theta lv_phi", uselogging=True)
+    data2geotiff(mmli + '.geo', mmli + '.geo.tif', dempar, 2)
+    data2geotiff(smli + '.geo', smli + '.geo.tif', dempar, 2)
+    data2geotiff(
+        '{}.sim_unw.geo'.format(ifgname),
+        '{}.sim_unw.geo.tif'.format(ifgname),
+        dempar,
+        2,
+    )
+    data2geotiff(
+        '{}.adf.unw.geo'.format(ifgname),
+        '{}.adf.unw.geo.tif'.format(ifgname),
+        dempar,
+        2,
+    )
+    data2geotiff(
+        '{}.adf.unw.geo.bmp'.format(ifgname),
+        '{}.adf.unw.geo.bmp.tif'.format(ifgname),
+        dempar,
+        0,
+    )
+    data2geotiff('{}.adf.geo.phase'.format(ifgf), '{}.adf.geo.tif'.format(ifgf), dempar, 2)
+    data2geotiff('{}.adf.bmp.geo'.format(ifgf), '{}.adf.bmp.geo.tif'.format(ifgf), dempar, 0)
+    data2geotiff('{}.cc.geo'.format(ifgname), '{}.cc.geo.tif'.format(ifgname), dempar, 2)
+    data2geotiff('{}.adf.cc.geo'.format(ifgname), '{}.adf.cc.geo.tif'.format(ifgname), dempar, 2)
+    data2geotiff('DEM/demseg', '{}.dem.tif'.format(ifgname), dempar, 2)
+    data2geotiff(
+        '{}.vert.disp.geo'.format(ifgname),
+        '{}.vert.disp.geo.org.tif'.format(ifgname),
+        dempar,
+        2,
+    )
+    data2geotiff(
+        '{}.los.disp.geo'.format(ifgname),
+        '{}.los.disp.geo.org.tif'.format(ifgname),
+        dempar,
+        2,
+    )
+    data2geotiff('DEM/inc', '{}.inc.tif'.format(ifgname), dempar, 2)
+    data2geotiff('inc_ell', '{}.inc_ell.tif'.format(ifgname), dempar, 2)
+    execute(
+        f'look_vector {mmli}.par {offit} {dempar} {dem} lv_theta lv_phi',
+        uselogging=True,
+    )
 
-    data2geotiff("lv_theta", "{}.lv_theta.tif".format(ifgname), dempar, 2)
-    data2geotiff("lv_phi", "{}.lv_phi.tif".format(ifgname), dempar, 2)
+    data2geotiff('lv_theta', '{}.lv_theta.tif'.format(ifgname), dempar, 2)
+    data2geotiff('lv_phi', '{}.lv_phi.tif'.format(ifgname), dempar, 2)
 
-    log.info("-------------------------------------------------")
-    log.info("            End geocoding")
-    log.info("-------------------------------------------------")
+    log.info('-------------------------------------------------')
+    log.info('            End geocoding')
+    log.info('-------------------------------------------------')
 
     return coords, ref_point_info
 
@@ -349,23 +480,42 @@ def main():
         prog='unwrapping_geocoding.py',
         description=__doc__,
     )
-    parser.add_argument("reference", help='Reference scene identifier')
-    parser.add_argument("secondary", help='Secondary scene identifier')
-    parser.add_argument("-s", "--step", default='man', help='Level of interferogram for unwrapping (def=man)')
-    parser.add_argument("-r", "--rlooks", default=10, help="Number of range looks (def=10)")
-    parser.add_argument("-a", "--alooks", default=2, help="Number of azimuth looks (def=2)")
-    parser.add_argument("-t", "--tri", default=0,
-                        help="Triangulation method for mcf unwrapper: "
-                             "0) filled traingular mesh (default); 1) Delaunay triangulation")
-    parser.add_argument("--alpha", default=0.6, type=float, help="adf filter alpha value (def=0.6)")
+    parser.add_argument('reference', help='Reference scene identifier')
+    parser.add_argument('secondary', help='Secondary scene identifier')
+    parser.add_argument(
+        '-s',
+        '--step',
+        default='man',
+        help='Level of interferogram for unwrapping (def=man)',
+    )
+    parser.add_argument('-r', '--rlooks', default=10, help='Number of range looks (def=10)')
+    parser.add_argument('-a', '--alooks', default=2, help='Number of azimuth looks (def=2)')
+    parser.add_argument(
+        '-t',
+        '--tri',
+        default=0,
+        help='Triangulation method for mcf unwrapper: '
+        '0) filled traingular mesh (default); 1) Delaunay triangulation',
+    )
+    parser.add_argument('--alpha', default=0.6, type=float, help='adf filter alpha value (def=0.6)')
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.INFO,
+    )
 
-    unwrapping_geocoding(args.reference, args.secondary, step=args.step, rlooks=args.rlooks, alooks=args.alooks,
-                         trimode=args.tri, alpha=args.alpha)
+    unwrapping_geocoding(
+        args.reference,
+        args.secondary,
+        step=args.step,
+        rlooks=args.rlooks,
+        alooks=args.alooks,
+        trimode=args.tri,
+        alpha=args.alpha,
+    )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

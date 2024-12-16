@@ -13,6 +13,7 @@ gdal.UseExceptions()
 
 class GDALConfigManager:
     """Context manager for setting GDAL config options temporarily"""
+
     def __init__(self, **options):
         """
         Args:

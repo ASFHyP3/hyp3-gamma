@@ -46,9 +46,14 @@ class InSarMetadataWriter:
     def create_readme(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
 
-        return self.create_metadata_file(self.payload, 'insar/readme.md.txt.j2', reference_file,
-                                         out_ext='README.md.txt',
-                                         strip_ext=True, name_only=True)
+        return self.create_metadata_file(
+            self.payload,
+            'insar/readme.md.txt.j2',
+            reference_file,
+            out_ext='README.md.txt',
+            strip_ext=True,
+            name_only=True,
+        )
 
     def create_amp_xml(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
@@ -109,8 +114,15 @@ class InSarMetadataWriter:
         return self.create_metadata_file(self.payload, 'insar/water_mask_tif.xml.j2', reference_file)
 
     @classmethod
-    def create_metadata_file(cls, payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
-                             strip_ext: bool = False, name_only=False) -> Optional[Path]:
+    def create_metadata_file(
+        cls,
+        payload: dict,
+        template: str,
+        reference_file: Path,
+        out_ext: str = 'xml',
+        strip_ext: bool = False,
+        name_only=False,
+    ) -> Optional[Path]:
         if not reference_file.exists():
             return None
 
@@ -139,15 +151,24 @@ class InSarMetadataWriter:
 
 def decode_product(product_name: str) -> dict:
     product_parts = product_name.split('_')
-    return {
-        'pol': product_parts[3][:2]
-    }
+    return {'pol': product_parts[3][:2]}
 
 
-def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
-                     processing_date: datetime, looks: str, dem_name: str, water_mask_applied: bool,
-                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str,
-                     ref_point_coords: dict, phase_filter_parameter: float) -> dict:
+def marshal_metadata(
+    product_dir: Path,
+    reference_granule_name: str,
+    secondary_granule_name: str,
+    processing_date: datetime,
+    looks: str,
+    dem_name: str,
+    water_mask_applied: bool,
+    plugin_name: str,
+    plugin_version: str,
+    processor_name: str,
+    processor_version: str,
+    ref_point_coords: dict,
+    phase_filter_parameter: float,
+) -> dict:
     payload = locals()
     payload['granule_type'] = util.get_granule_type(reference_granule_name)['granule_type']
     payload['num_looks'] = looks

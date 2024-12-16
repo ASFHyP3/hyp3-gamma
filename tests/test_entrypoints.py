@@ -4,8 +4,7 @@ def test_hyp3_gamma(script_runner):
 
 
 def test_rtc_passthrough(script_runner):
-    ret = script_runner.run(
-        'hyp3_gamma', '++process', 'rtc', '--help')
+    ret = script_runner.run('hyp3_gamma', '++process', 'rtc', '--help')
     assert ret.success
     assert 'rtc' in ret.stdout
     assert '--radiometry' in ret.stdout
@@ -22,8 +21,7 @@ def test_hyp3_sentinel(script_runner):
 
 
 def test_insar_passthrough(script_runner):
-    ret = script_runner.run(
-        'hyp3_gamma', '++process', 'insar', '--help')
+    ret = script_runner.run('hyp3_gamma', '++process', 'insar', '--help')
     assert ret.success
     assert 'insar' in ret.stdout
     assert '--include-displacement-maps' in ret.stdout

@@ -1,4 +1,5 @@
 """Create and apply a water body mask"""
+
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -25,7 +26,7 @@ def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
         tmp_file,
         filename,
         dstSRS=epsg,
-        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus']
+        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'],
     )
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
@@ -47,7 +48,7 @@ def get_corners(filename, tmp_path: Optional[Path]):
         tmp_file,
         filename,
         dstSRS='EPSG:4326',
-        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus']
+        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'],
     )
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
@@ -96,7 +97,12 @@ def get_tiles(filename: str, tmp_path: Optional[Path]) -> None:
     return tiles
 
 
-def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', tmp_path: Optional[Path] = Path('.')):
+def create_water_mask(
+    input_image: str,
+    output_image: str,
+    gdal_format='GTiff',
+    tmp_path: Optional[Path] = Path('.'),
+):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
     The water mask is assembled from OpenStreetMaps data.
@@ -136,10 +142,12 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         subprocess.run(build_vrt_command, check=True)
         translate_command = [
             'gdal_translate',
-            '-co', 'COMPRESS=LZW',
-            '-co', 'NUM_THREADS=all_cpus',
+            '-co',
+            'COMPRESS=LZW',
+            '-co',
+            'NUM_THREADS=all_cpus',
             merged_vrt_path,
-            merged_tif_path
+            merged_tif_path,
         ]
         subprocess.run(translate_command, check=True)
 
@@ -156,7 +164,7 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         yRes=pixel_size,
         dstSRS=epsg,
         format='GTiff',
-        creationOptions=['COMPRESS=LZW', 'NUM_THREADS=all_cpus']
+        creationOptions=['COMPRESS=LZW', 'NUM_THREADS=all_cpus'],
     )
 
     flip_values_command = [
@@ -165,6 +173,6 @@ def create_water_mask(input_image: str, output_image: str, gdal_format='GTiff', 
         merged_warped_path,
         f'--outfile={output_image}',
         '--calc="numpy.abs((A.astype(numpy.int16) + 1) - 2)"',  # Change 1's to 0's and 0's to 1's.
-        f'--format={gdal_format}'
+        f'--format={gdal_format}',
     ]
     subprocess.run(flip_values_command, check=True)
