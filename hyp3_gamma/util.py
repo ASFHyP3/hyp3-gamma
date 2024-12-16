@@ -13,6 +13,7 @@ gdal.UseExceptions()
 
 class GDALConfigManager:
     """Context manager for setting GDAL config options temporarily"""
+
     def __init__(self, **options):
         """
         Args:
@@ -41,12 +42,12 @@ def get_granule(granule):
 
 
 def unzip_granule(zip_file: str, remove: bool = False) -> str:
-    log.info(f'Unzipping {zip_file}')
+    log.info(f"Unzipping {zip_file}")
     with ZipFile(zip_file) as z:
         z.extractall()
     if remove:
         os.remove(zip_file)
-    return Path(zip_file).with_suffix('.SAFE').name
+    return Path(zip_file).with_suffix(".SAFE").name
 
 
 def earlier_granule_first(g1, g2):
@@ -57,7 +58,7 @@ def earlier_granule_first(g1, g2):
 
 def set_pixel_as_point(tif_file, shift_origin=False):
     ds = gdal.Open(tif_file, gdal.GA_Update)
-    ds.SetMetadataItem('AREA_OR_POINT', 'Point')
+    ds.SetMetadataItem("AREA_OR_POINT", "Point")
     if shift_origin:
         transform = list(ds.GetGeoTransform())
         transform[0] += transform[1] / 2
