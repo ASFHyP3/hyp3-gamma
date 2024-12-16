@@ -10,10 +10,10 @@ from pyproj import CRS
 
 gdal.UseExceptions()
 
-TILE_PATH = "/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/"
+TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
-def get_extent(filename, tmp_path: Optional[Path], epsg="EPSG:4326"):
+def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
     """Get the extent of the image [min x, min y, max x, max y].
 
     Args:
@@ -21,12 +21,12 @@ def get_extent(filename, tmp_path: Optional[Path], epsg="EPSG:4326"):
         tmp_path: An optional path to a temporary directory for temp files.
         epsg: The EPSG code to open the image in.
     """
-    tmp_file = "tmp.tif" if not tmp_path else str(tmp_path / Path("tmp.tif"))
+    tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
     ds = gdal.Warp(
         tmp_file,
         filename,
         dstSRS=epsg,
-        creationOptions=["COMPRESS=LZW", "TILED=YES", "NUM_THREADS=all_cpus"],
+        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'],
     )
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
@@ -43,12 +43,12 @@ def get_corners(filename, tmp_path: Optional[Path]):
         filename: The path to the input image.
         tmp_path: An optional path to a temporary directory for temp files.
     """
-    tmp_file = "tmp.tif" if not tmp_path else str(tmp_path / Path("tmp.tif"))
+    tmp_file = 'tmp.tif' if not tmp_path else str(tmp_path / Path('tmp.tif'))
     ds = gdal.Warp(
         tmp_file,
         filename,
-        dstSRS="EPSG:4326",
-        creationOptions=["COMPRESS=LZW", "TILED=YES", "NUM_THREADS=all_cpus"],
+        dstSRS='EPSG:4326',
+        creationOptions=['COMPRESS=LZW', 'TILED=YES', 'NUM_THREADS=all_cpus'],
     )
     geotransform = ds.GetGeoTransform()
     x_min = geotransform[0]
@@ -71,14 +71,14 @@ def coord_to_tile(coord: tuple[float, float]) -> str:
     lat_rounded = np.floor(coord[1] / 5) * 5
     lon_rounded = np.floor(coord[0] / 5) * 5
     if lat_rounded >= 0:
-        lat_part = "n" + str(int(lat_rounded)).zfill(2)
+        lat_part = 'n' + str(int(lat_rounded)).zfill(2)
     else:
-        lat_part = "s" + str(int(np.abs(lat_rounded))).zfill(2)
+        lat_part = 's' + str(int(np.abs(lat_rounded))).zfill(2)
     if lon_rounded >= 0:
-        lon_part = "e" + str(int(lon_rounded)).zfill(3)
+        lon_part = 'e' + str(int(lon_rounded)).zfill(3)
     else:
-        lon_part = "w" + str(int(np.abs(lon_rounded))).zfill(3)
-    return lat_part + lon_part + ".tif"
+        lon_part = 'w' + str(int(np.abs(lon_rounded))).zfill(3)
+    return lat_part + lon_part + '.tif'
 
 
 def get_tiles(filename: str, tmp_path: Optional[Path]) -> None:
@@ -100,8 +100,8 @@ def get_tiles(filename: str, tmp_path: Optional[Path]) -> None:
 def create_water_mask(
     input_image: str,
     output_image: str,
-    gdal_format="GTiff",
-    tmp_path: Optional[Path] = Path("."),
+    gdal_format='GTiff',
+    tmp_path: Optional[Path] = Path('.'),
 ):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
@@ -118,40 +118,40 @@ def create_water_mask(
     """
 
     # Ensures that the input image is not using Ground Control Points.
-    input_image_tmp = "input.tif"
+    input_image_tmp = 'input.tif'
     ds = gdal.Warp(input_image_tmp, input_image)
     input_image = input_image_tmp
 
     pixel_size = ds.GetGeoTransform()[1]
     proj = CRS.from_wkt(ds.GetProjection())
-    epsg = f"EPSG:{proj.to_epsg()}"
+    epsg = f'EPSG:{proj.to_epsg()}'
 
     tiles = get_tiles(input_image, tmp_path=tmp_path)
 
     if len(tiles) < 1:
-        raise ValueError(f"No water mask tiles found for {tiles}.")
+        raise ValueError(f'No water mask tiles found for {tiles}.')
 
-    merged_tif_path = str(tmp_path / "merged.tif")
-    merged_vrt_path = str(tmp_path / "merged.vrt")
-    merged_warped_path = str(tmp_path / "merged_warped.tif")
-    shape_path = str(tmp_path / "tmp.shp")
+    merged_tif_path = str(tmp_path / 'merged.tif')
+    merged_vrt_path = str(tmp_path / 'merged.vrt')
+    merged_warped_path = str(tmp_path / 'merged_warped.tif')
+    shape_path = str(tmp_path / 'tmp.shp')
 
     # This is WAY faster than using gdal_merge, because of course it is.
     if len(tiles) > 1:
-        build_vrt_command = ["gdalbuildvrt", merged_vrt_path] + tiles
+        build_vrt_command = ['gdalbuildvrt', merged_vrt_path] + tiles
         subprocess.run(build_vrt_command, check=True)
         translate_command = [
-            "gdal_translate",
-            "-co",
-            "COMPRESS=LZW",
-            "-co",
-            "NUM_THREADS=all_cpus",
+            'gdal_translate',
+            '-co',
+            'COMPRESS=LZW',
+            '-co',
+            'NUM_THREADS=all_cpus',
             merged_vrt_path,
             merged_tif_path,
         ]
         subprocess.run(translate_command, check=True)
 
-    shapefile_command = ["gdaltindex", shape_path, input_image]
+    shapefile_command = ['gdaltindex', shape_path, input_image]
     subprocess.run(shapefile_command, check=True)
 
     warp_filename = merged_tif_path if len(tiles) > 1 else tiles[0]
@@ -163,16 +163,16 @@ def create_water_mask(
         xRes=pixel_size,
         yRes=pixel_size,
         dstSRS=epsg,
-        format="GTiff",
-        creationOptions=["COMPRESS=LZW", "NUM_THREADS=all_cpus"],
+        format='GTiff',
+        creationOptions=['COMPRESS=LZW', 'NUM_THREADS=all_cpus'],
     )
 
     flip_values_command = [
-        "gdal_calc.py",
-        "-A",
+        'gdal_calc.py',
+        '-A',
         merged_warped_path,
-        f"--outfile={output_image}",
+        f'--outfile={output_image}',
         '--calc="numpy.abs((A.astype(numpy.int16) + 1) - 2)"',  # Change 1's to 0's and 0's to 1's.
-        f"--format={gdal_format}",
+        f'--format={gdal_format}',
     ]
     subprocess.run(flip_values_command, check=True)

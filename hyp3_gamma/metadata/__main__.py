@@ -9,98 +9,88 @@ from hyp3_gamma.metadata import create, insar, rtc
 
 def main():
     """Generate an example set of metadata files for HyP3 products"""
-    parser = argparse.ArgumentParser(
-        description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    parser = argparse.ArgumentParser(description=main.__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     subparsers = parser.add_subparsers()
 
     # RTC Arguments
-    rtc_parser = subparsers.add_parser("rtc")
+    rtc_parser = subparsers.add_parser('rtc')
+    rtc_parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     rtc_parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
-    rtc_parser.add_argument(
-        "-o",
-        "--output-dir",
-        default=".",
+        '-o',
+        '--output-dir',
+        default='.',
         type=Path,
-        help="Generate the example products in this directory",
+        help='Generate the example products in this directory',
     )
 
     rtc_parser.add_argument(
-        "--product-name",
-        default="S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2",
-        help="RTC product name",
+        '--product-name',
+        default='S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2',
+        help='RTC product name',
     )
     rtc_parser.add_argument(
-        "--granule-name",
-        default="S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8",
-        help="Source granule used to generate the RTC product",
+        '--granule-name',
+        default='S1A_IW_SLC__1SSV_20150621T120220_20150621T120232_006471_008934_72D8',
+        help='Source granule used to generate the RTC product',
     )
     rtc_parser.add_argument(
-        "--dem-name",
-        default="GLO-30",
+        '--dem-name',
+        default='GLO-30',
         choices=rtc.SUPPORTED_DEMS,
-        help="DEM used to generate the RTC product",
+        help='DEM used to generate the RTC product',
     )
+    rtc_parser.add_argument('--processing-date', default='2020-01-01T00:00:00+00:00', type=dt_parse)
     rtc_parser.add_argument(
-        "--processing-date", default="2020-01-01T00:00:00+00:00", type=dt_parse
-    )
-    rtc_parser.add_argument(
-        "--looks",
+        '--looks',
         default=1,
         type=int,
-        help="Number of azimuth looks taken when generating the RTC product",
+        help='Number of azimuth looks taken when generating the RTC product',
     )
     rtc_parser.set_defaults(func=rtc_metadata)
 
     # INSAR Arguments
-    insar_parser = subparsers.add_parser("insar")
+    insar_parser = subparsers.add_parser('insar')
+    insar_parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     insar_parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
-    )
-    insar_parser.add_argument(
-        "-o",
-        "--output-dir",
-        default=".",
+        '-o',
+        '--output-dir',
+        default='.',
         type=Path,
-        help="Generate the example products in this directory",
+        help='Generate the example products in this directory',
     )
 
     insar_parser.add_argument(
-        "--product-name",
-        default="S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1",
-        help="INSAR product name",
+        '--product-name',
+        default='S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1',
+        help='INSAR product name',
     )
     insar_parser.add_argument(
-        "--reference-granule-name",
-        default="S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408",
-        help="Reference granule used to generate the INSAR product",
+        '--reference-granule-name',
+        default='S1B_IW_SLC__1SSH_20210430T125122_20210430T125149_026696_033052_6408',
+        help='Reference granule used to generate the INSAR product',
     )
     insar_parser.add_argument(
-        "--secondary-granule-name",
-        default="S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392",
-        help="Secondary granule used to generate the INSAR product",
+        '--secondary-granule-name',
+        default='S1A_IW_SLC__1SSH_20210424T125204_20210424T125231_037592_046F17_3392',
+        help='Secondary granule used to generate the INSAR product',
     )
+    insar_parser.add_argument('--processing-date', default='2020-01-01T00:00:00+00:00', type=dt_parse)
     insar_parser.add_argument(
-        "--processing-date", default="2020-01-01T00:00:00+00:00", type=dt_parse
-    )
-    insar_parser.add_argument(
-        "--looks",
-        default="20x4",
+        '--looks',
+        default='20x4',
         type=str,
-        help="Number of azimuth looks taken when generating the RTC product",
+        help='Number of azimuth looks taken when generating the RTC product',
     )
     insar_parser.add_argument(
-        "--water-mask-applied",
-        action="store_true",
-        help="Water mask was applied when generating the InSAR product",
+        '--water-mask-applied',
+        action='store_true',
+        help='Water mask was applied when generating the InSAR product',
     )
     parser.add_argument(
-        "--phase-filter-parameter",
+        '--phase-filter-parameter',
         default=0.6,
         type=float,
-        help="Adaptive phase filter parameter",
+        help='Adaptive phase filter parameter',
     )
     insar_parser.set_defaults(func=insar_metadata)
 
@@ -120,10 +110,10 @@ def rtc_metadata(args):
         dem_name=args.dem_name,
         processing_date=args.processing_date,
         looks=args.looks,
-        plugin_name="hyp3_gamma",
-        plugin_version="X.Y.Z",
-        processor_name="GAMMA",
-        processor_version="YYYYMMDD",
+        plugin_name='hyp3_gamma',
+        plugin_version='X.Y.Z',
+        processor_name='GAMMA',
+        processor_version='YYYYMMDD',
     )
 
 
@@ -140,15 +130,15 @@ def insar_metadata(args):
         processing_date=args.processing_date,
         looks=args.looks,
         water_mask_applied=args.water_mask_applied,
-        dem_name="GLO-30",
-        plugin_name="hyp3_gamma",
-        plugin_version="X.Y.Z",
-        processor_name="GAMMA",
-        processor_version="YYYYMMDD",
-        ref_point_coords={"lat": 64.8378, "lon": -147.7164},
+        dem_name='GLO-30',
+        plugin_name='hyp3_gamma',
+        plugin_version='X.Y.Z',
+        processor_name='GAMMA',
+        processor_version='YYYYMMDD',
+        ref_point_coords={'lat': 64.8378, 'lon': -147.7164},
         phase_filter_parameter=args.phase_filter_parameter,
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

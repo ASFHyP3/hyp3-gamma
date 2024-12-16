@@ -27,9 +27,7 @@ def test_get_reference_pixel():
         2,
         1,
     )
-    assert get_reference_pixel(
-        array, window_size=(1, 1), coherence_threshold=0.20001
-    ) == (0, 0)
+    assert get_reference_pixel(array, window_size=(1, 1), coherence_threshold=0.20001) == (0, 0)
     assert get_reference_pixel(array, window_size=(3, 3)) == (0, 0)
     assert get_reference_pixel(array, window_size=(5, 5)) == (0, 0)
 
