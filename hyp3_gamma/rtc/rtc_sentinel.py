@@ -11,7 +11,6 @@ from math import isclose
 from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import List
 
 import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
@@ -44,8 +43,8 @@ def create_decibel_tif(fi, nodata=None):
     f = gdal.Open(fi)
     in_nodata = f.GetRasterBand(1).GetNoDataValue()
     _, _, trans, proj, data = saa.read_gdal_file(f)
-    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.)
-    powerdb = 10*np.ma.log10(data)
+    data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.0)
+    powerdb = 10 * np.ma.log10(data)
     if not nodata:
         nodata = np.finfo(data.dtype).min.astype(float)
     outfile = fi.replace('.tif', '-db.tif')
@@ -54,8 +53,15 @@ def create_decibel_tif(fi, nodata=None):
     return outfile
 
 
-def get_product_name(granule_name, orbit_file=None, resolution=30.0, radiometry='gamma0', scale='power',
-                     filtered=False, matching=False):
+def get_product_name(
+    granule_name,
+    orbit_file=None,
+    resolution=30.0,
+    radiometry='gamma0',
+    scale='power',
+    filtered=False,
+    matching=False,
+):
     platform = granule_name[0:3]
     beam_mode = granule_name[4:6]
     polarization = granule_name[14:16]
@@ -103,8 +109,21 @@ def configure_log_file(log_file):
     return log_file
 
 
-def log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name):
+def log_parameters(
+    safe_dir,
+    resolution,
+    radiometry,
+    scale,
+    speckle_filter,
+    dem_matching,
+    include_dem,
+    include_inc_map,
+    include_scattering_area,
+    include_rgb,
+    orbit_file,
+    product_name,
+    dem_name,
+):
     log.info('Parameters for this run:')
     log.info(f'    SAFE directory            : {safe_dir}')
     log.info(f'    Output resolution         : {resolution}')
@@ -144,28 +163,40 @@ def run(cmd):
     execute(cmd, uselogging=True)
 
 
-def prepare_dem(safe_dir: str, dem_name: str, bbox: List[float] = None, dem: str = None, pixel_size: float = 30.0):
+def prepare_dem(
+    safe_dir: str,
+    dem_name: str,
+    bbox: list[float] = None,
+    dem: str = None,
+    pixel_size: float = 30.0,
+):
     dem_tif = 'dem.tif'
     dem_type = 'UNKNOWN'
     dem_image = 'dem.image'
     dem_par = 'dem.par'
 
     if dem:
-        run(f'dem_import {dem} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
-            f'$DIFF_HOME/scripts/egm2008-5.dem_par')
+        run(
+            f'dem_import {dem} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par'
+        )
 
     elif dem_name == 'copernicus':
         dem_type = 'GLO-30'
         if bbox:
-            wkt = f'POLYGON (({bbox[0]} {bbox[3]}, {bbox[2]} {bbox[3]}, {bbox[2]} {bbox[1]}, {bbox[0]} {bbox[1]}, ' \
-                  f'{bbox[0]} {bbox[3]}))'
+            wkt = (
+                f'POLYGON (({bbox[0]} {bbox[3]}, {bbox[2]} {bbox[3]}, {bbox[2]} {bbox[1]}, {bbox[0]} {bbox[1]}, '
+                f'{bbox[0]} {bbox[3]}))'
+            )
             geometry = ogr.CreateGeometryFromWkt(wkt)
         else:
             geometry = get_geometry_from_kml(f'{safe_dir}/preview/map-overlay.kml')
 
         prepare_dem_geotiff(dem_tif, geometry, pixel_size)
-        run(f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
-            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1')
+        run(
+            f'dem_import {dem_tif} {dem_image} {dem_par} - - $DIFF_HOME/scripts/egm2008-5.dem '
+            f'$DIFF_HOME/scripts/egm2008-5.dem_par - - - 1'
+        )
 
     else:
         raise DemError(f'DEM name "{dem_name}" is invalid; supported options are "copernicus".')
@@ -212,8 +243,10 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
             slc_par = f'{temp_dir}/swath{swath}.slc.par'
             slc_tops_par = f'{temp_dir}/swath{swath}.slc.tops.par'
 
-            run(f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} '
-                f'{slc_tops_par}')
+            run(
+                f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} '
+                f'{slc_tops_par}'
+            )
             if orbit_file:
                 run(f'S1_OPOD_vec {slc_par} {orbit_file}')
 
@@ -261,7 +294,14 @@ def create_browse_images(out_dir, out_name, pol):
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
     shapefile = f'{out_dir}/{out_name}_shape.shp'
-    raster_boundary2shape(pol_amp_tif, None, shapefile, use_closing=False, pixel_shift=True, fill_holes=True)
+    raster_boundary2shape(
+        pol_amp_tif,
+        None,
+        shapefile,
+        use_closing=False,
+        pixel_shift=True,
+        fill_holes=True,
+    )
 
 
 def append_additional_log_files(log_file, pattern):
@@ -275,11 +315,23 @@ def append_additional_log_files(log_file, pattern):
             f.write(content)
 
 
-def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str = 'gamma0', scale: str = 'power',
-                       speckle_filter: bool = False, dem_matching: bool = False, include_dem: bool = False,
-                       include_inc_map: bool = False, include_scattering_area: bool = False, include_rgb: bool = False,
-                       dem: str = None, bbox: List[float] = None, looks: int = None, skip_cross_pol: bool = False,
-                       dem_name: str = 'copernicus') -> str:
+def rtc_sentinel_gamma(
+    safe_dir: str,
+    resolution: float = 30.0,
+    radiometry: str = 'gamma0',
+    scale: str = 'power',
+    speckle_filter: bool = False,
+    dem_matching: bool = False,
+    include_dem: bool = False,
+    include_inc_map: bool = False,
+    include_scattering_area: bool = False,
+    include_rgb: bool = False,
+    dem: str = None,
+    bbox: list[float] = None,
+    looks: int = None,
+    skip_cross_pol: bool = False,
+    dem_name: str = 'copernicus',
+) -> str:
     """Creates a Radiometrically Terrain-Corrected (RTC) product from a Sentinel-1 scene using GAMMA software.
 
     Args:
@@ -307,7 +359,6 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     Returns:
         product_name: Name of the output product directory
     """
-
     safe_dir = safe_dir.rstrip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
@@ -328,8 +379,21 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
     os.mkdir(product_name)
     log_file = configure_log_file(f'{product_name}/{product_name}.log')
-    log_parameters(safe_dir, resolution, radiometry, scale, speckle_filter, dem_matching, include_dem, include_inc_map,
-                   include_scattering_area, include_rgb, orbit_file, product_name, dem_name)
+    log_parameters(
+        safe_dir,
+        resolution,
+        radiometry,
+        scale,
+        speckle_filter,
+        dem_matching,
+        include_dem,
+        include_inc_map,
+        include_scattering_area,
+        include_rgb,
+        orbit_file,
+        product_name,
+        dem_name,
+    )
 
     log.info('Preparing DEM')
     dem_image, dem_par, dem_type = prepare_dem(safe_dir, dem_name, bbox, dem, resolution)
@@ -341,17 +405,27 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
         if pol == polarizations[0]:
             log.info('Generating initial geocoding lookup table and simulating SAR image from the DEM')
-            run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
-                f'{resolution} 0 -q')
+            run(
+                f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
+                f'{resolution} 0 -q'
+            )
 
             if dem_matching:
                 log.info('Determining co-registration offsets (DEM matching)')
                 try:
-                    run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . '
-                        f'corrected {resolution} 1 -q')
-                    run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . '
-                        f'corrected {resolution} 2 -q')
-                    check_coregistration('mk_geo_radcal_2.log', 'corrected.diff_par', pixel_size=resolution)
+                    run(
+                        f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . '
+                        f'corrected {resolution} 1 -q'
+                    )
+                    run(
+                        f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . '
+                        f'corrected {resolution} 2 -q'
+                    )
+                    check_coregistration(
+                        'mk_geo_radcal_2.log',
+                        'corrected.diff_par',
+                        pixel_size=resolution,
+                    )
                 except (ExecuteError, CoregistrationError):
                     log.warning('Co-registration offsets are too large; defaulting to dead reckoning')
                     if os.path.isfile('corrected.diff_par'):
@@ -359,8 +433,10 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
 
         log.info(f'Generating terrain geocoded {pol.upper()} image and performing pixel area correction')
         radiometry_flag = int(radiometry == 'gamma0')
-        run(f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
-            f'{resolution} 3 -q -c {radiometry_flag}')
+        run(
+            f'mk_geo_radcal2 {mli_image} {mli_par} {dem_image} {dem_par} dem_seg dem_seg.par . corrected '
+            f'{resolution} 3 -q -c {radiometry_flag}'
+        )
         shutil.move('mk_geo_radcal_3.log', f'mk_geo_radcal_3_{pol}.log')
 
         power_tif = f'{pol}-power.tif'
@@ -384,13 +460,22 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
     if include_dem:
         with NamedTemporaryFile() as temp_file:
             run(f'data2geotiff dem_seg.par dem_seg 2 {temp_file.name}')
-            gdal.Translate(f'{product_name}/{product_name}_dem.tif', temp_file.name, noData="none",
-                           outputType=gdalconst.GDT_Int16)
+            gdal.Translate(
+                f'{product_name}/{product_name}_dem.tif',
+                temp_file.name,
+                noData='none',
+                outputType=gdalconst.GDT_Int16,
+            )
     if include_inc_map:
         run(f'data2geotiff dem_seg.par corrected.inc_map 2 {product_name}/{product_name}_inc_map.tif')
     if include_scattering_area:
-        create_area_geotiff('corrected_gamma0.pix', 'corrected_1.map_to_rdc', mli_par, 'dem_seg.par',
-                            f'{product_name}/{product_name}_area.tif')
+        create_area_geotiff(
+            'corrected_gamma0.pix',
+            'corrected_1.map_to_rdc',
+            mli_par,
+            'dem_seg.par',
+            f'{product_name}/{product_name}_area.tif',
+        )
     if len(polarizations) == 2:
         pol_power_tif = f'{polarizations[0]}-power.tif'
         cpol_power_tif = f'{polarizations[1]}-power.tif'
@@ -417,7 +502,14 @@ def rtc_sentinel_gamma(safe_dir: str, resolution: float = 30.0, radiometry: str 
         processor_name='GAMMA',
         processor_version=gamma_version(),
     )
-    for pattern in ['*inc_map*png*', '*inc_map*kmz', '*dem*png*', '*dem*kmz', '*area*png*', '*area*kmz']:
+    for pattern in [
+        '*inc_map*png*',
+        '*inc_map*kmz',
+        '*dem*png*',
+        '*dem*kmz',
+        '*area*png*',
+        '*area*kmz',
+    ]:
         for f in glob(f'{product_name}/{pattern}'):
             os.remove(f)
 
@@ -433,41 +525,95 @@ def main():
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument('safe_dir', help='Path to the Sentinel-1 .SAFE directory to process.')
-    parser.add_argument('--resolution', type=float, default=30.0, help='Pixel size of the output images.')
-    parser.add_argument('--radiometry', choices=('gamma0', 'sigma0'), default='gamma0',
-                        help='Radiometry of the output backscatter image(s)')
-    parser.add_argument('--scale', choices=('power', 'decibel', 'amplitude'), default='power',
-                        help='Scale of the output backscatter image(s)')
-    parser.add_argument('--speckle-filter', action='store_true', help='Apply an enhanced Lee speckle filter.')
-    parser.add_argument('--dem-matching', action='store_true', help='Attempt to co-register the image to the DEM.')
-    parser.add_argument('--include-dem', action='store_true', help='Include the DEM GeoTIFF in the output package.')
-    parser.add_argument('--include-inc-map', action='store_true',
-                        help='Include the incidence angle GeoTIFF in the output package.')
-    parser.add_argument('--include-scattering-area', action='store_true',
-                        help='Include the local scattering area GeoTIFF in the output package.')
+    parser.add_argument(
+        '--resolution',
+        type=float,
+        default=30.0,
+        help='Pixel size of the output images.',
+    )
+    parser.add_argument(
+        '--radiometry',
+        choices=('gamma0', 'sigma0'),
+        default='gamma0',
+        help='Radiometry of the output backscatter image(s)',
+    )
+    parser.add_argument(
+        '--scale',
+        choices=('power', 'decibel', 'amplitude'),
+        default='power',
+        help='Scale of the output backscatter image(s)',
+    )
+    parser.add_argument(
+        '--speckle-filter',
+        action='store_true',
+        help='Apply an enhanced Lee speckle filter.',
+    )
+    parser.add_argument(
+        '--dem-matching',
+        action='store_true',
+        help='Attempt to co-register the image to the DEM.',
+    )
+    parser.add_argument(
+        '--include-dem',
+        action='store_true',
+        help='Include the DEM GeoTIFF in the output package.',
+    )
+    parser.add_argument(
+        '--include-inc-map',
+        action='store_true',
+        help='Include the incidence angle GeoTIFF in the output package.',
+    )
+    parser.add_argument(
+        '--include-scattering-area',
+        action='store_true',
+        help='Include the local scattering area GeoTIFF in the output package.',
+    )
 
     group = parser.add_mutually_exclusive_group()
-    parser.add_argument('--include-rgb', action='store_true',
-                        help='Include an RGB decomposition GeoTIFF in the output package.')
-    group.add_argument('--skip-cross-pol', action='store_true',
-                       help='Do not include the co-polarization backscatter GeoTIFF in the output package.')
+    parser.add_argument(
+        '--include-rgb',
+        action='store_true',
+        help='Include an RGB decomposition GeoTIFF in the output package.',
+    )
+    group.add_argument(
+        '--skip-cross-pol',
+        action='store_true',
+        help='Do not include the co-polarization backscatter GeoTIFF in the output package.',
+    )
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('--dem', help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
-                                     ' A DEM will be selected automatically if not provided.')
-    group.add_argument('--dem-name', choices=['copernicus'], default='copernicus',
-                       help='DEM to use for RTC processing.')
+    group.add_argument(
+        '--dem',
+        help='Path to the DEM to use for RTC processing. Must be a GeoTIFF in a UTM projection.'
+        ' A DEM will be selected automatically if not provided.',
+    )
+    group.add_argument(
+        '--dem-name',
+        choices=['copernicus'],
+        default='copernicus',
+        help='DEM to use for RTC processing.',
+    )
 
-    parser.add_argument('--bbox', type=float, nargs=4, metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-                        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is '
-                             'provided.')
-    parser.add_argument('--looks', type=int,
-                        help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
-                             'and filter looks are selected automatically based on azimuth looks and product type.')
+    parser.add_argument(
+        '--bbox',
+        type=float,
+        nargs=4,
+        metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
+        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is ' 'provided.',
+    )
+    parser.add_argument(
+        '--looks',
+        type=int,
+        help='Number of azimuth looks to take. Will be selected automatically if not specified.  Range '
+        'and filter looks are selected automatically based on azimuth looks and product type.',
+    )
     args = parser.parse_args()
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.INFO,
+    )
 
     log.info('===================================================================')
     log.info('                Sentinel RTC Program - Starting')
@@ -476,21 +622,23 @@ def main():
     if zipfile.is_zipfile(args.safe_dir):
         args.safe_dir = unzip_granule(args.safe_dir)
 
-    rtc_sentinel_gamma(safe_dir=args.safe_dir,
-                       resolution=args.resolution,
-                       radiometry=args.radiometry,
-                       scale=args.scale,
-                       speckle_filter=args.speckle_filter,
-                       dem_matching=args.dem_matching,
-                       include_dem=args.include_dem,
-                       include_inc_map=args.include_inc_map,
-                       include_scattering_area=args.include_scattering_area,
-                       include_rgb=args.include_rgb,
-                       dem=args.dem,
-                       bbox=args.bbox,
-                       looks=args.looks,
-                       skip_cross_pol=args.skip_cross_pol,
-                       dem_name=args.dem_name)
+    rtc_sentinel_gamma(
+        safe_dir=args.safe_dir,
+        resolution=args.resolution,
+        radiometry=args.radiometry,
+        scale=args.scale,
+        speckle_filter=args.speckle_filter,
+        dem_matching=args.dem_matching,
+        include_dem=args.include_dem,
+        include_inc_map=args.include_inc_map,
+        include_scattering_area=args.include_scattering_area,
+        include_rgb=args.include_rgb,
+        dem=args.dem,
+        bbox=args.bbox,
+        looks=args.looks,
+        skip_cross_pol=args.skip_cross_pol,
+        dem_name=args.dem_name,
+    )
 
     log.info('===================================================================')
     log.info('                Sentinel RTC Program - Completed')

@@ -3,12 +3,10 @@ from copy import deepcopy
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
 
 from osgeo import gdal
 
-from hyp3_gamma.metadata import data
-from hyp3_gamma.metadata import util
+from hyp3_gamma.metadata import data, util
 
 
 class InSarMetadataWriter:
@@ -17,7 +15,7 @@ class InSarMetadataWriter:
         self.product_dir = payload['product_dir']
         self.product_name = payload['product_dir'].name
 
-    def create_metadata_file_set(self) -> List[Path]:
+    def create_metadata_file_set(self) -> list[Path]:
         files = []
         generators = [
             self.create_readme,
@@ -46,9 +44,14 @@ class InSarMetadataWriter:
     def create_readme(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
 
-        return self.create_metadata_file(self.payload, 'insar/readme.md.txt.j2', reference_file,
-                                         out_ext='README.md.txt',
-                                         strip_ext=True, name_only=True)
+        return self.create_metadata_file(
+            self.payload,
+            'insar/readme.md.txt.j2',
+            reference_file,
+            out_ext='README.md.txt',
+            strip_ext=True,
+            name_only=True,
+        )
 
     def create_amp_xml(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
@@ -66,7 +69,7 @@ class InSarMetadataWriter:
         reference_file = self.product_dir / f'{self.product_name}_los_disp.tif'
         return self.create_metadata_file(self.payload, 'insar/los_disp_tif.xml.j2', reference_file)
 
-    def create_look_vector_xmls(self) -> List[Path]:
+    def create_look_vector_xmls(self) -> list[Path]:
         reference_file_phi = self.product_dir / f'{self.product_name}_lv_phi.tif'
         reference_file_theta = self.product_dir / f'{self.product_name}_lv_theta.tif'
         output_files = [
@@ -75,7 +78,7 @@ class InSarMetadataWriter:
         ]
         return output_files
 
-    def create_browse_xmls(self) -> List[Path]:
+    def create_browse_xmls(self) -> list[Path]:
         reference_file_col = self.product_dir / f'{self.product_name}_color_phase.png'
         reference_file_unw = self.product_dir / f'{self.product_name}_unw_phase.png'
         output_files = [
@@ -109,8 +112,15 @@ class InSarMetadataWriter:
         return self.create_metadata_file(self.payload, 'insar/water_mask_tif.xml.j2', reference_file)
 
     @classmethod
-    def create_metadata_file(cls, payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
-                             strip_ext: bool = False, name_only=False) -> Optional[Path]:
+    def create_metadata_file(
+        cls,
+        payload: dict,
+        template: str,
+        reference_file: Path,
+        out_ext: str = 'xml',
+        strip_ext: bool = False,
+        name_only=False,
+    ) -> Path | None:
         if not reference_file.exists():
             return None
 
@@ -139,15 +149,24 @@ class InSarMetadataWriter:
 
 def decode_product(product_name: str) -> dict:
     product_parts = product_name.split('_')
-    return {
-        'pol': product_parts[3][:2]
-    }
+    return {'pol': product_parts[3][:2]}
 
 
-def marshal_metadata(product_dir: Path, reference_granule_name: str, secondary_granule_name: str,
-                     processing_date: datetime, looks: str, dem_name: str, water_mask_applied: bool,
-                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str,
-                     ref_point_coords: dict, phase_filter_parameter: float) -> dict:
+def marshal_metadata(
+    product_dir: Path,
+    reference_granule_name: str,
+    secondary_granule_name: str,
+    processing_date: datetime,
+    looks: str,
+    dem_name: str,
+    water_mask_applied: bool,
+    plugin_name: str,
+    plugin_version: str,
+    processor_name: str,
+    processor_version: str,
+    ref_point_coords: dict,
+    phase_filter_parameter: float,
+) -> dict:
     payload = locals()
     payload['granule_type'] = util.get_granule_type(reference_granule_name)['granule_type']
     payload['num_looks'] = looks

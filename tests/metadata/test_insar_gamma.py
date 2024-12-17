@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 import hyp3_gamma.metadata.util
 from hyp3_gamma.metadata import create_metadata_file_set_insar, insar
 
@@ -23,8 +22,9 @@ def test_create_insar_gamma_readme(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_readme()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1.README.md.txt'
+    assert (
+        output_file == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1.README.md.txt'
+    )
     assert output_file.exists()
 
 
@@ -46,8 +46,7 @@ def test_create_amp_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_amp_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_amp.tif.xml'
+    assert output_file == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_amp.tif.xml'
     assert output_file.exists()
 
 
@@ -69,8 +68,9 @@ def test_create_coherence_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_coherence_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_corr.tif.xml'
+    assert (
+        output_file == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_corr.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -92,8 +92,7 @@ def test_create_dem_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_dem_tif_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_dem.tif.xml'
+    assert output_file == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_dem.tif.xml'
     assert output_file.exists()
 
 
@@ -115,8 +114,10 @@ def test_create_los_displacement_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_los_displacement_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_los_disp.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_los_disp.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -190,8 +191,10 @@ def test_unwrapped_phase_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_unwrapped_phase_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_unw_phase.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_unw_phase.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -213,8 +216,10 @@ def test_vertical_displacement_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_vertical_displacement_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_vert_disp.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_vert_disp.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -236,8 +241,10 @@ def test_wrapped_phase_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_wrapped_phase_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_wrapped_phase.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_wrapped_phase.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -259,8 +266,10 @@ def test_inc_map_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_inc_map_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_inc_map.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_inc_map.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -282,8 +291,10 @@ def test_inc_map_ell_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_inc_map_ell_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_inc_map_ell.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_inc_map_ell.tif.xml'
+    )
     assert output_file.exists()
 
 
@@ -305,8 +316,10 @@ def test_water_mask_xml(insar_product_dir):
     )
     writer = insar.InSarMetadataWriter(payload)
     output_file = writer.create_water_mask_xml()
-    assert output_file == insar_product_dir / \
-           'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_water_mask.tif.xml'
+    assert (
+        output_file
+        == insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_water_mask.tif.xml'
+    )
     assert output_file.exists()
 
 

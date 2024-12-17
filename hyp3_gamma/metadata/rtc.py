@@ -3,12 +3,10 @@ from copy import deepcopy
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
 
 from osgeo import gdal
 
-from hyp3_gamma.metadata import data
-from hyp3_gamma.metadata import util
+from hyp3_gamma.metadata import data, util
 
 
 SUPPORTED_DEMS = ['GLO-30']
@@ -40,14 +38,21 @@ class RtcMetadataWriter:
         return files
 
     def create_readme(self) -> Path:
-        reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_' \
-                                                       f'{self.payload["polarizations"][0]}.tif'
+        reference_file = (
+            self.payload['product_dir'] / f'{self.payload["product_dir"].name}_'
+            f'{self.payload["polarizations"][0]}.tif'
+        )
 
-        return self.create_metadata_file(self.payload, 'rtc/readme.md.txt.j2', reference_file, out_ext='README.md.txt',
-                                         strip_ext=True, strip_pol=True
-                                         )
+        return self.create_metadata_file(
+            self.payload,
+            'rtc/readme.md.txt.j2',
+            reference_file,
+            out_ext='README.md.txt',
+            strip_ext=True,
+            strip_pol=True,
+        )
 
-    def create_product_xmls(self) -> List[Path]:
+    def create_product_xmls(self) -> list[Path]:
         payload = deepcopy(self.payload)
 
         output_files = []
@@ -55,9 +60,7 @@ class RtcMetadataWriter:
             payload['pol'] = pol
             reference_file = payload['product_dir'] / f'{payload["product_dir"].name}_{pol}.tif'
 
-            output_files.append(
-                self.create_metadata_file(payload, 'rtc/product.xml.j2', reference_file)
-            )
+            output_files.append(self.create_metadata_file(payload, 'rtc/product.xml.j2', reference_file))
         return output_files
 
     def create_dem_xml(self) -> Path:
@@ -67,7 +70,7 @@ class RtcMetadataWriter:
         if dem_template_id is not None:
             return self.create_metadata_file(self.payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
-    def create_browse_xmls(self) -> List[Path]:
+    def create_browse_xmls(self) -> list[Path]:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}.png'
 
         output_files = [
@@ -76,9 +79,7 @@ class RtcMetadataWriter:
 
         rgb_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_rgb.png'
         if rgb_file.exists():
-            output_files.append(
-                self.create_metadata_file(self.payload, 'browse/browse-color.xml.j2', rgb_file)
-            )
+            output_files.append(self.create_metadata_file(self.payload, 'browse/browse-color.xml.j2', rgb_file))
         return output_files
 
     def create_inc_map_xml(self) -> Path:
@@ -98,8 +99,15 @@ class RtcMetadataWriter:
         return self.create_metadata_file(self.payload, 'rtc/rgb.xml.j2', reference_file)
 
     @classmethod
-    def create_metadata_file(cls, payload: dict, template: str, reference_file: Path, out_ext: str = 'xml',
-                             strip_ext: bool = False, strip_pol: bool = False) -> Optional[Path]:
+    def create_metadata_file(
+        cls,
+        payload: dict,
+        template: str,
+        reference_file: Path,
+        out_ext: str = 'xml',
+        strip_ext: bool = False,
+        strip_pol: bool = False,
+    ) -> Path | None:
         if not reference_file.exists():
             return None
 
@@ -124,7 +132,7 @@ class RtcMetadataWriter:
         return output_file
 
 
-def get_dem_template_id(dem_name: str) -> Optional[str]:
+def get_dem_template_id(dem_name: str) -> str | None:
     if dem_name == 'GLO-30':
         return 'cop'
 
@@ -145,8 +153,17 @@ def decode_product(product_name: str) -> dict:
     }
 
 
-def marshal_metadata(product_dir: Path, granule_name: str, dem_name: str, processing_date: datetime, looks: int,
-                     plugin_name: str, plugin_version: str, processor_name: str, processor_version: str) -> dict:
+def marshal_metadata(
+    product_dir: Path,
+    granule_name: str,
+    dem_name: str,
+    processing_date: datetime,
+    looks: int,
+    plugin_name: str,
+    plugin_version: str,
+    processor_name: str,
+    processor_version: str,
+) -> dict:
     payload = locals()
 
     payload.update(decode_product(product_dir.name))

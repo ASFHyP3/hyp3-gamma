@@ -1,6 +1,5 @@
-"""
-rtc_gamma and insar_gamma processing for HyP3
-"""
+"""rtc_gamma and insar_gamma processing for HyP3"""
+
 import concurrent.futures
 import logging
 import os
@@ -23,10 +22,16 @@ from hyp3_gamma.rtc.rtc_sentinel import rtc_sentinel_gamma
 def main():
     parser = ArgumentParser(prefix_chars='+', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '++process', choices=['rtc', 'insar'], default='rtc',
-        help='Select the HyP3 entrypoint version to use'
+        '++process',
+        choices=['rtc', 'insar'],
+        default='rtc',
+        help='Select the HyP3 entrypoint version to use',
     )
-    parser.add_argument('++omp-num-threads', type=int, help='The number of OpenMP threads to use for parallel regions')
+    parser.add_argument(
+        '++omp-num-threads',
+        type=int,
+        help='The number of OpenMP threads to use for parallel regions',
+    )
     args, unknowns = parser.parse_known_args()
     (process_entry_point,) = entry_points(group='console_scripts', name=args.process)
 
@@ -34,9 +39,7 @@ def main():
         os.environ['OMP_NUM_THREADS'] = str(args.omp_num_threads)
 
     sys.argv = [args.process, *unknowns]
-    sys.exit(
-        process_entry_point.load()()
-    )
+    sys.exit(process_entry_point.load()())
 
 
 def check_earthdata_credentials(username, password):
@@ -80,8 +83,11 @@ def rtc():
 
     username, password = check_earthdata_credentials(args.username, args.password)
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.INFO,
+    )
 
     write_credentials_to_netrc_file(username, password)
 
@@ -147,8 +153,11 @@ def insar():
     if len(args.granules) != 2:
         parser.error('Must provide exactly two granules')
 
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
-                        datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.INFO)
+    logging.basicConfig(
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%m/%d/%Y %I:%M:%S %p',
+        level=logging.INFO,
+    )
 
     write_credentials_to_netrc_file(username, password)
 
@@ -169,7 +178,7 @@ def insar():
         include_wrapped_phase=args.include_wrapped_phase,
         include_inc_map=args.include_inc_map,
         apply_water_mask=args.apply_water_mask,
-        phase_filter_parameter=args.phase_filter_parameter
+        phase_filter_parameter=args.phase_filter_parameter,
     )
 
     output_zip = make_archive(base_name=product_name, format='zip', base_dir=product_name)

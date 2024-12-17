@@ -261,8 +261,11 @@ def test_decode_product():
 
 def test_create_metadata_no_such_reference_file(test_data_folder):
     writer = rtc.RtcMetadataWriter({})
-    assert writer.create_metadata_file(
-        payload={},
-        template=test_data_folder / 'rtc_dem.tif',
-        reference_file=test_data_folder / 'does_not_exist.tif',
-    ) is None
+    assert (
+        writer.create_metadata_file(
+            payload={},
+            template=test_data_folder / 'rtc_dem.tif',
+            reference_file=test_data_folder / 'does_not_exist.tif',
+        )
+        is None
+    )
