@@ -51,3 +51,29 @@ optional-dependencies = {develop = {file = ["requirements-develop.txt"]}}
 where = ["."]
 
 [tool.setuptools_scm]
+
+[tool.ruff]
+line-length = 120
+src = [".", "tests"]
+
+[tool.ruff.format]
+indent-style = "space"
+quote-style = "single"
+
+[tool.ruff.lint]
+extend-select = [
+    "I",   # isort: https://docs.astral.sh/ruff/rules/#isort-i
+
+    # TODO: uncomment the following extensions and address their warnings:
+    #"UP",  # pyupgrade: https://docs.astral.sh/ruff/rules/#pyupgrade-up
+    #"D",   # pydocstyle: https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    #"ANN", # annotations: https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    #"PTH", # use-pathlib-pth: https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+lines-after-imports = 2

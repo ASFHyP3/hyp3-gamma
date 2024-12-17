@@ -3,12 +3,10 @@ from copy import deepcopy
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
 
 from osgeo import gdal
 
-from hyp3_gamma.metadata import data
-from hyp3_gamma.metadata import util
+from hyp3_gamma.metadata import data, util
 
 
 class InSarMetadataWriter:
@@ -17,7 +15,7 @@ class InSarMetadataWriter:
         self.product_dir = payload['product_dir']
         self.product_name = payload['product_dir'].name
 
-    def create_metadata_file_set(self) -> List[Path]:
+    def create_metadata_file_set(self) -> list[Path]:
         files = []
         generators = [
             self.create_readme,
@@ -71,7 +69,7 @@ class InSarMetadataWriter:
         reference_file = self.product_dir / f'{self.product_name}_los_disp.tif'
         return self.create_metadata_file(self.payload, 'insar/los_disp_tif.xml.j2', reference_file)
 
-    def create_look_vector_xmls(self) -> List[Path]:
+    def create_look_vector_xmls(self) -> list[Path]:
         reference_file_phi = self.product_dir / f'{self.product_name}_lv_phi.tif'
         reference_file_theta = self.product_dir / f'{self.product_name}_lv_theta.tif'
         output_files = [
@@ -80,7 +78,7 @@ class InSarMetadataWriter:
         ]
         return output_files
 
-    def create_browse_xmls(self) -> List[Path]:
+    def create_browse_xmls(self) -> list[Path]:
         reference_file_col = self.product_dir / f'{self.product_name}_color_phase.png'
         reference_file_unw = self.product_dir / f'{self.product_name}_unw_phase.png'
         output_files = [
@@ -122,7 +120,7 @@ class InSarMetadataWriter:
         out_ext: str = 'xml',
         strip_ext: bool = False,
         name_only=False,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         if not reference_file.exists():
             return None
 

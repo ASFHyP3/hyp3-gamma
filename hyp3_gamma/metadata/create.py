@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 from hyp3_gamma.metadata import insar, rtc
 
@@ -15,7 +14,7 @@ def create_metadata_file_set_rtc(
     plugin_version: str,
     processor_name: str,
     processor_version: str,
-) -> List[Path]:
+) -> list[Path]:
     payload = rtc.marshal_metadata(
         product_dir=product_dir,
         granule_name=granule_name,
@@ -46,7 +45,7 @@ def create_metadata_file_set_insar(
     processor_version: str,
     ref_point_coords: dict,
     phase_filter_parameter: float,
-) -> List[Path]:
+) -> list[Path]:
     payload = insar.marshal_metadata(
         product_dir=product_dir,
         reference_granule_name=reference_granule_name,

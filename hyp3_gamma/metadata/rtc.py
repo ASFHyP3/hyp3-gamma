@@ -3,12 +3,10 @@ from copy import deepcopy
 from datetime import datetime
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
 
 from osgeo import gdal
 
-from hyp3_gamma.metadata import data
-from hyp3_gamma.metadata import util
+from hyp3_gamma.metadata import data, util
 
 
 SUPPORTED_DEMS = ['GLO-30']
@@ -54,7 +52,7 @@ class RtcMetadataWriter:
             strip_pol=True,
         )
 
-    def create_product_xmls(self) -> List[Path]:
+    def create_product_xmls(self) -> list[Path]:
         payload = deepcopy(self.payload)
 
         output_files = []
@@ -72,7 +70,7 @@ class RtcMetadataWriter:
         if dem_template_id is not None:
             return self.create_metadata_file(self.payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
 
-    def create_browse_xmls(self) -> List[Path]:
+    def create_browse_xmls(self) -> list[Path]:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}.png'
 
         output_files = [
@@ -109,7 +107,7 @@ class RtcMetadataWriter:
         out_ext: str = 'xml',
         strip_ext: bool = False,
         strip_pol: bool = False,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         if not reference_file.exists():
             return None
 
@@ -134,7 +132,7 @@ class RtcMetadataWriter:
         return output_file
 
 
-def get_dem_template_id(dem_name: str) -> Optional[str]:
+def get_dem_template_id(dem_name: str) -> str | None:
     if dem_name == 'GLO-30':
         return 'cop'
 

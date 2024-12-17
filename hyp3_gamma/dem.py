@@ -1,13 +1,14 @@
 import json
+from collections.abc import Generator
 from pathlib import Path
 from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
-from typing import Generator, List
 
 from hyp3lib import DemError
 from osgeo import gdal, ogr
 
 from hyp3_gamma.util import GDALConfigManager
+
 
 DEM_GEOJSON = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/v2/cop30-2021-with-cop90-us-west-2-mirror.geojson'
 
@@ -47,7 +48,7 @@ def intersects_dem(geometry: ogr.Geometry) -> bool:
             return True
 
 
-def get_dem_file_paths(geometry: ogr.Geometry) -> List[str]:
+def get_dem_file_paths(geometry: ogr.Geometry) -> list[str]:
     file_paths = []
     for feature in get_dem_features():
         if feature.GetGeometryRef().Intersects(geometry):
@@ -71,7 +72,7 @@ def get_centroid_crossing_antimeridian(geometry: ogr.Geometry) -> ogr.Geometry:
     return shifted_geometry.Centroid()
 
 
-def shift_for_antimeridian(dem_file_paths: List[str], directory: Path) -> List[str]:
+def shift_for_antimeridian(dem_file_paths: list[str], directory: Path) -> list[str]:
     shifted_file_paths = []
     for file_path in dem_file_paths:
         if '_W' in file_path:

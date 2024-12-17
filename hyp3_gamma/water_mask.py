@@ -2,18 +2,18 @@
 
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 from osgeo import gdal
 from pyproj import CRS
+
 
 gdal.UseExceptions()
 
 TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 
-def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
+def get_extent(filename, tmp_path: Path | None, epsg='EPSG:4326'):
     """Get the extent of the image [min x, min y, max x, max y].
 
     Args:
@@ -36,7 +36,7 @@ def get_extent(filename, tmp_path: Optional[Path], epsg='EPSG:4326'):
     return [x_min, y_min, x_max, y_max]
 
 
-def get_corners(filename, tmp_path: Optional[Path]):
+def get_corners(filename, tmp_path: Path | None):
     """Get all four corners of the given image: [upper_left, bottom_left, upper_right, bottom_right].
 
     Args:
@@ -81,7 +81,7 @@ def coord_to_tile(coord: tuple[float, float]) -> str:
     return lat_part + lon_part + '.tif'
 
 
-def get_tiles(filename: str, tmp_path: Optional[Path]) -> None:
+def get_tiles(filename: str, tmp_path: Path | None) -> None:
     """Get the AWS vsicurl path's to the tiles necessary to cover the inputted file.
 
     Args:
@@ -101,7 +101,7 @@ def create_water_mask(
     input_image: str,
     output_image: str,
     gdal_format='GTiff',
-    tmp_path: Optional[Path] = Path('.'),
+    tmp_path: Path | None = Path(),
 ):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 
@@ -116,7 +116,6 @@ def create_water_mask(
         gdal_format: GDAL format name to create output image as
         tmp_path: An optional path to a temporary directory for temp files.
     """
-
     # Ensures that the input image is not using Ground Control Points.
     input_image_tmp = 'input.tif'
     ds = gdal.Warp(input_image_tmp, input_image)

@@ -2,7 +2,6 @@ import re
 from base64 import b64encode
 from io import BytesIO
 from pathlib import Path
-from typing import Dict, Tuple
 
 from PIL import Image
 from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
@@ -34,7 +33,7 @@ def get_projection(srs_wkt) -> str:
     return srs.GetAttrValue('projcs')
 
 
-def get_granule_type(granule_name) -> Dict[str, str]:
+def get_granule_type(granule_name) -> dict[str, str]:
     granule_type = granule_name[7:10]
     if granule_type == 'SLC':
         return {'granule_type': 'SLC', 'granule_description': 'Single Look Complex'}
@@ -57,7 +56,7 @@ def strip_polarization(file_name: str) -> str:
     return re.sub(r'_(VV|VH|HH|HV)', '', file_name)
 
 
-def get_thumbnail_encoded_string(browse_file: Path, size: Tuple[int, int] = (200, 200)) -> str:
+def get_thumbnail_encoded_string(browse_file: Path, size: tuple[int, int] = (200, 200)) -> str:
     if not browse_file.exists():
         return ''
 

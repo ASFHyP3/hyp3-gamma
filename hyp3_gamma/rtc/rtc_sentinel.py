@@ -11,7 +11,6 @@ from math import isclose
 from pathlib import Path
 from secrets import token_hex
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from typing import List
 
 import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
@@ -167,7 +166,7 @@ def run(cmd):
 def prepare_dem(
     safe_dir: str,
     dem_name: str,
-    bbox: List[float] = None,
+    bbox: list[float] = None,
     dem: str = None,
     pixel_size: float = 30.0,
 ):
@@ -328,7 +327,7 @@ def rtc_sentinel_gamma(
     include_scattering_area: bool = False,
     include_rgb: bool = False,
     dem: str = None,
-    bbox: List[float] = None,
+    bbox: list[float] = None,
     looks: int = None,
     skip_cross_pol: bool = False,
     dem_name: str = 'copernicus',
@@ -360,7 +359,6 @@ def rtc_sentinel_gamma(
     Returns:
         product_name: Name of the output product directory
     """
-
     safe_dir = safe_dir.rstrip('/')
     granule = os.path.splitext(os.path.basename(safe_dir))[0]
     granule_type = get_granule_type(granule)
