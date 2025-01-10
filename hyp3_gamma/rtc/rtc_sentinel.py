@@ -166,8 +166,8 @@ def run(cmd):
 def prepare_dem(
     safe_dir: str,
     dem_name: str,
-    bbox: list[float] = None,
-    dem: str = None,
+    bbox: list[float] | None = None,
+    dem: str | None = None,
     pixel_size: float = 30.0,
 ):
     dem_tif = 'dem.tif'
@@ -326,9 +326,9 @@ def rtc_sentinel_gamma(
     include_inc_map: bool = False,
     include_scattering_area: bool = False,
     include_rgb: bool = False,
-    dem: str = None,
-    bbox: list[float] = None,
-    looks: int = None,
+    dem: str | None = None,
+    bbox: list[float] | None = None,
+    looks: int | None = None,
     skip_cross_pol: bool = False,
     dem_name: str = 'copernicus',
 ) -> str:

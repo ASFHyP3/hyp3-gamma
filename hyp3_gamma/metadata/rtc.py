@@ -37,7 +37,7 @@ class RtcMetadataWriter:
 
         return files
 
-    def create_readme(self) -> Path:
+    def create_readme(self) -> Path | None:
         reference_file = (
             self.payload['product_dir'] / f'{self.payload["product_dir"].name}_'
             f'{self.payload["polarizations"][0]}.tif'
@@ -52,7 +52,7 @@ class RtcMetadataWriter:
             strip_pol=True,
         )
 
-    def create_product_xmls(self) -> list[Path]:
+    def create_product_xmls(self) -> list[Path | None]:
         payload = deepcopy(self.payload)
 
         output_files = []
@@ -63,14 +63,15 @@ class RtcMetadataWriter:
             output_files.append(self.create_metadata_file(payload, 'rtc/product.xml.j2', reference_file))
         return output_files
 
-    def create_dem_xml(self) -> Path:
+    def create_dem_xml(self) -> Path | None:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_dem.tif'
 
         dem_template_id = get_dem_template_id(self.payload['dem_name'])
         if dem_template_id is not None:
             return self.create_metadata_file(self.payload, f'dem/dem-{dem_template_id}.xml.j2', reference_file)
+        return None
 
-    def create_browse_xmls(self) -> list[Path]:
+    def create_browse_xmls(self) -> list[Path | None]:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}.png'
 
         output_files = [
@@ -82,19 +83,19 @@ class RtcMetadataWriter:
             output_files.append(self.create_metadata_file(self.payload, 'browse/browse-color.xml.j2', rgb_file))
         return output_files
 
-    def create_inc_map_xml(self) -> Path:
+    def create_inc_map_xml(self) -> Path | None:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_inc_map.tif'
         return self.create_metadata_file(self.payload, 'rtc/inc_map.xml.j2', reference_file)
 
-    def create_ls_map_xml(self) -> Path:
+    def create_ls_map_xml(self) -> Path | None:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_ls_map.tif'
         return self.create_metadata_file(self.payload, 'rtc/ls_map.xml.j2', reference_file)
 
-    def create_area_xml(self) -> Path:
+    def create_area_xml(self) -> Path | None:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_area.tif'
         return self.create_metadata_file(self.payload, 'rtc/area.xml.j2', reference_file)
 
-    def create_rgb_xml(self) -> Path:
+    def create_rgb_xml(self) -> Path | None:
         reference_file = self.payload['product_dir'] / f'{self.payload["product_dir"].name}_rgb.tif'
         return self.create_metadata_file(self.payload, 'rtc/rgb.xml.j2', reference_file)
 
@@ -135,6 +136,7 @@ class RtcMetadataWriter:
 def get_dem_template_id(dem_name: str) -> str | None:
     if dem_name == 'GLO-30':
         return 'cop'
+    return None
 
 
 def decode_product(product_name: str) -> dict:

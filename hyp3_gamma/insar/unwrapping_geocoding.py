@@ -62,8 +62,8 @@ def coords_from_sarpix_coord(in_mli_par: str, ref_azlin: int, ref_rpix: int, hei
 
     selected_coords = [line for line in coord_log_lines if 'selected' in line]
     log.info(f'Selected sarpix coordinates: {selected_coords[0]}')
-    coord_lst = selected_coords[0].split()[:-1]
-    coord_lst = [float(s) for s in coord_lst]
+    coord_lst_str = selected_coords[0].split()[:-1]
+    coord_lst = [float(s) for s in coord_lst_str]
     return coord_lst
 
 
@@ -72,7 +72,7 @@ def get_coords(
     ref_azlin: int = 0,
     ref_rpix: int = 0,
     height: float = 0.0,
-    in_dem_par: str = None,
+    in_dem_par: str | None = None,
 ) -> dict:
     """Args:
         in_mli_par: GAMMA MLI par file
@@ -108,7 +108,7 @@ def read_bmp(file):
     return data
 
 
-def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_threshold=0.3) -> tuple[int, int]:
+def get_reference_pixel(coherence: np.ndarray, window_size=(5, 5), coherence_threshold=0.3) -> tuple[int, int]:
     """Args:
         coherence: array of coherence values
         window_size: window size over which to sum coherence values for each pixel
@@ -118,8 +118,8 @@ def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_thres
         array indices of the reference pixel
     """
 
-    def sum_valid_coherence_values(array: np.array) -> float:
-        if (array < coherence_threshold).any() or (array == 1.0).any():
+    def sum_valid_coherence_values(array: np.ndarray) -> float:
+        if (array < coherence_threshold).any() or (array == np.float64(1.0)).any():
             return 0.0
         return array.sum()
 
@@ -131,7 +131,7 @@ def get_reference_pixel(coherence: np.array, window_size=(5, 5), coherence_thres
         cval=0.0,
     )
     x, y = np.unravel_index(np.argmax(pixel_weights), pixel_weights.shape)
-    return x, y
+    return int(x), int(y)
 
 
 def geocode_back(inname, outname, width, lt, demw, demn, type_):
@@ -208,6 +208,7 @@ def combine_water_mask(cc_mask_file, water_mask_sar_file):
     water_mask_sar_data = read_bmp(water_mask_sar_file)
     in_data[water_mask_sar_data == 0] = 0
     out_im = Image.fromarray(in_data)
+    assert in_palette is not None
     out_im.putpalette(in_palette)
     out_file = os.path.join(os.path.dirname(cc_mask_file), 'combined_mask.bmp')
     out_im.save(out_file)
