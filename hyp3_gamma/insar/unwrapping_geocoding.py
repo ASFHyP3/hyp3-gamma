@@ -327,12 +327,12 @@ def unwrapping_geocoding(
     )
 
     execute(
-        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par' f' - {ifgname}.vert.disp 1',
+        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par - {ifgname}.vert.disp 1',
         uselogging=True,
     )
 
     execute(
-        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par' f' - {ifgname}.los.disp 0',
+        f'dispmap {ifgname}.adf.unw DEM/HGT_SAR_{rlooks}_{alooks} {mmli}.par - {ifgname}.los.disp 0',
         uselogging=True,
     )
 
@@ -490,8 +490,7 @@ def main():
         '-t',
         '--tri',
         default=0,
-        help='Triangulation method for mcf unwrapper: '
-        '0) filled traingular mesh (default); 1) Delaunay triangulation',
+        help='Triangulation method for mcf unwrapper: 0) filled traingular mesh (default); 1) Delaunay triangulation',
     )
     parser.add_argument('--alpha', default=0.6, type=float, help='adf filter alpha value (def=0.6)')
     args = parser.parse_args()

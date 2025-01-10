@@ -39,8 +39,7 @@ class RtcMetadataWriter:
 
     def create_readme(self) -> Path | None:
         reference_file = (
-            self.payload['product_dir'] / f'{self.payload["product_dir"].name}_'
-            f'{self.payload["polarizations"][0]}.tif'
+            self.payload['product_dir'] / f'{self.payload["product_dir"].name}_{self.payload["polarizations"][0]}.tif'
         )
 
         return self.create_metadata_file(

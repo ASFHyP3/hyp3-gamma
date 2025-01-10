@@ -244,8 +244,7 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
             slc_tops_par = f'{temp_dir}/swath{swath}.slc.tops.par'
 
             run(
-                f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} '
-                f'{slc_tops_par}'
+                f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} {slc_tops_par}'
             )
             if orbit_file:
                 run(f'S1_OPOD_vec {slc_par} {orbit_file}')
@@ -599,7 +598,7 @@ def main():
         type=float,
         nargs=4,
         metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is ' 'provided.',
+        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is provided.',
     )
     parser.add_argument(
         '--looks',
