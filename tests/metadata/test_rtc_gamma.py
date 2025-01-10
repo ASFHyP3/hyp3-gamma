@@ -48,6 +48,7 @@ def test_rtc_gamma_product(rtc_product_dir):
 
 
 def test_create_dem_xml(rtc_product_dir):
+    dem_name: str | None = None
     for dem_name in SUPPORTED_DEMS:
         payload = hyp3_gamma.metadata.rtc.marshal_metadata(
             product_dir=rtc_product_dir,
@@ -66,7 +67,7 @@ def test_create_dem_xml(rtc_product_dir):
         assert output_file.exists()
         output_file.unlink()
 
-    for dem_name in ['unknown', '', None]:  # type: ignore [assignment]
+    for dem_name in ['unknown', '', None]:
         payload['dem_name'] = dem_name
         writer = rtc.RtcMetadataWriter(payload)
         output_file = writer.create_dem_xml()
