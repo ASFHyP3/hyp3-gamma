@@ -48,7 +48,7 @@ def test_rtc_gamma_product(rtc_product_dir):
 
 
 def test_create_dem_xml(rtc_product_dir):
-    dem_name: str | None = None
+    dem_name: str | None
     for dem_name in SUPPORTED_DEMS:
         payload = hyp3_gamma.metadata.rtc.marshal_metadata(
             product_dir=rtc_product_dir,
