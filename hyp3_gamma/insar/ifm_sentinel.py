@@ -41,7 +41,9 @@ def get_bursts(mydir, name):
         if name in myfile:
             root = etree.parse(myfile)
             for coord in root.iter('azimuthAnxTime'):
-                time.append(float(coord.text))
+                text = coord.text
+                assert text is not None
+                time.append(float(text))
             for count in root.iter('burstList'):
                 total_bursts = int(count.attrib['count'])
 
@@ -166,7 +168,6 @@ def get_orbit_parameters(reference_file):
             meta = root.find('metadataSection')
             xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData
             orbit = xmldata.find('safe:orbitReference', root.nsmap)
-
             orbitnumber = orbit.find('safe:orbitNumber', root.nsmap)
             relative_orbitnumber = orbit.find('safe:relativeOrbitNumber', root.nsmap)
             cyclenumber = orbit.find('safe:cycleNumber', root.nsmap)
@@ -316,6 +317,7 @@ def make_parameter_file(
             root = etree.parse(myfile)
             for coord in root.iter('productFirstLineUtcTime'):
                 utc = coord.text
+                assert utc is not None
                 log.info(f'Found utc time {utc}')
                 t = utc.split('T')
                 log.info(f'{t}')
@@ -462,7 +464,7 @@ def insar_sentinel_gamma(
     interf_pwr_s1_lt_tops_proc(reference, secondary, hgt, rlooks=rlooks, alooks=alooks, iterations=3, step=2)
 
     g = open('offsetfit3.log')
-    offset = 1.0
+    offset = '1.0'
     for line in g:
         if 'final azimuth offset poly. coeff.:' in line:
             offset = line.split(':')[1]

@@ -3,3 +3,4 @@ pytest-cov
 pytest-console-scripts
 ruff
 setuptools_scm
+mypy

@@ -166,8 +166,8 @@ def run(cmd):
 def prepare_dem(
     safe_dir: str,
     dem_name: str,
-    bbox: list[float] = None,
-    dem: str = None,
+    bbox: list[float] | None = None,
+    dem: str | None = None,
     pixel_size: float = 30.0,
 ):
     dem_tif = 'dem.tif'
@@ -244,8 +244,7 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
             slc_tops_par = f'{temp_dir}/swath{swath}.slc.tops.par'
 
             run(
-                f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} '
-                f'{slc_tops_par}'
+                f'par_S1_SLC {tiff} {annotation_xml} {calibration_xml} {noise_xml} {slc_par} {slc_image} {slc_tops_par}'
             )
             if orbit_file:
                 run(f'S1_OPOD_vec {slc_par} {orbit_file}')
@@ -326,9 +325,9 @@ def rtc_sentinel_gamma(
     include_inc_map: bool = False,
     include_scattering_area: bool = False,
     include_rgb: bool = False,
-    dem: str = None,
-    bbox: list[float] = None,
-    looks: int = None,
+    dem: str | None = None,
+    bbox: list[float] | None = None,
+    looks: int | None = None,
     skip_cross_pol: bool = False,
     dem_name: str = 'copernicus',
 ) -> str:
@@ -599,7 +598,7 @@ def main():
         type=float,
         nargs=4,
         metavar=('LON_MIN', 'LAT_MIN', 'LON_MAX', 'LAT_MAX'),
-        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is ' 'provided.',
+        help='Subset the output images to the given lat/lon bounding box. Ignored if --dem is provided.',
     )
     parser.add_argument(
         '--looks',

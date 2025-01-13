@@ -3,10 +3,12 @@ name: Static analysis
 on: push
 
 jobs:
+  # Docs: https://github.com/ASFHyP3/actions
   call-secrets-analysis-workflow:
-    # Docs: https://github.com/ASFHyP3/actions
     uses: ASFHyP3/actions/.github/workflows/reusable-secrets-analysis.yml@v0.12.0
 
   call-ruff-workflow:
-    # Docs: https://github.com/ASFHyP3/actions
     uses: ASFHyP3/actions/.github/workflows/reusable-ruff.yml@v0.12.0
+
+  call-mypy-workflow:
+    uses: ASFHyP3/actions/.github/workflows/reusable-mypy.yml@v0.14.0

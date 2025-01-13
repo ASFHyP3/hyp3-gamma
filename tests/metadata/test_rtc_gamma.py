@@ -43,10 +43,12 @@ def test_rtc_gamma_product(rtc_product_dir):
         rtc_product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_VH.tif.xml',
     ]
     for output_file in output_file_list:
+        assert output_file is not None
         assert output_file.exists()
 
 
 def test_create_dem_xml(rtc_product_dir):
+    dem_name: str | None
     for dem_name in SUPPORTED_DEMS:
         payload = hyp3_gamma.metadata.rtc.marshal_metadata(
             product_dir=rtc_product_dir,
@@ -91,6 +93,7 @@ def test_create_browse_xmls(rtc_product_dir):
         rtc_product_dir / 'S1A_IW_20150621T120220_DVP_RTC10_G_saufem_F8E2_rgb.png.xml',
     ]
     for file in output_files:
+        assert file is not None
         assert file.exists()
 
 
