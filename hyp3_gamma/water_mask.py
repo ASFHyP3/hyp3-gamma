@@ -81,7 +81,7 @@ def coord_to_tile(coord: tuple[float, float]) -> str:
     return lat_part + lon_part + '.tif'
 
 
-def get_tiles(filename: str, tmp_path: Path | None) -> None:
+def get_tiles(filename: str, tmp_path: Path | None) -> list:
     """Get the AWS vsicurl path's to the tiles necessary to cover the inputted file.
 
     Args:
@@ -101,7 +101,7 @@ def create_water_mask(
     input_image: str,
     output_image: str,
     gdal_format='GTiff',
-    tmp_path: Path | None = Path(),
+    tmp_path: Path = Path(),
 ):
     """Create a water mask GeoTIFF with the same geometry as a given input GeoTIFF
 

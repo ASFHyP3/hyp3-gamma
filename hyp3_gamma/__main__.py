@@ -120,9 +120,9 @@ def rtc():
 
 
 def phase_filter_valid_range(x: str) -> float:
-    x = float(x)
-    if 0.0 <= x <= 1.0:
-        return x
+    n = float(x)
+    if 0.0 <= n <= 1.0:
+        return n
     raise ValueError(f'{x} not in range [0.0, 1.0]')
 
 

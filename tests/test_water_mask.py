@@ -11,9 +11,9 @@ TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
 
 def test_get_corners(tmp_path, test_data_dir):
     filepath_1 = str(test_data_dir / 'water_mask_input.tif')
-    corners_1 = np.round(np.asarray(water_mask.get_corners(filepath_1, tmp_path=str(tmp_path))), 13)
+    corners_1 = np.round(np.asarray(water_mask.get_corners(filepath_1, tmp_path=tmp_path)), 13)
     filepath_2 = str(test_data_dir / 'test_geotiff.tif')
-    corners_2 = np.round(np.asarray(water_mask.get_corners(filepath_2, tmp_path=str(tmp_path))), 13)
+    corners_2 = np.round(np.asarray(water_mask.get_corners(filepath_2, tmp_path=tmp_path)), 13)
     assert (
         corners_1.all()
         == np.round(
@@ -66,8 +66,8 @@ def test_get_tiles(tmp_path, test_data_dir):
         str(test_data_dir / 'test_geotiff.tif'),
         ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n30w120.tif'],
     )
-    assert water_mask.get_tiles(case_1[0], tmp_path=str(tmp_path)) == case_1[1]
-    assert water_mask.get_tiles(case_2[0], tmp_path=str(tmp_path)) == case_2[1]
+    assert water_mask.get_tiles(case_1[0], tmp_path=tmp_path) == case_1[1]
+    assert water_mask.get_tiles(case_2[0], tmp_path=tmp_path) == case_2[1]
 
 
 def test_create_water_mask(tmp_path, test_data_dir):
@@ -77,7 +77,4 @@ def test_create_water_mask(tmp_path, test_data_dir):
     water_mask.create_water_mask(input_image, output_image, gdal_format='ISCE', tmp_path=tmp_path)
     info_from_img = gdal.Info(output_image)
     info_from_txt = open(validation_text).read()
-    # The first 4 lines are file paths; they will be different everytime and don't need to be checked.
-    info_from_img = info_from_img.split('\n')[4:]
-    info_from_txt = info_from_txt.split('\n')[4:]
-    assert info_from_img == info_from_txt
+    assert info_from_img.split('\n')[4:] == info_from_txt.split('\n')[4:]
