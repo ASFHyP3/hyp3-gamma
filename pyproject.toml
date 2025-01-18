@@ -89,4 +89,3 @@ install_types = true
 non_interactive = true
 pretty = true
 disable_error_code = ["import-untyped"]
-explicit_package_bases = true
