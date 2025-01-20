@@ -166,7 +166,8 @@ def get_orbit_parameters(reference_file):
             root = objectify.fromstring(xml)
 
             meta = root.find('metadataSection')
-            xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData
+            assert meta is not None
+            xmldata = meta.find('*[@ID="measurementOrbitReference"]').metadataWrap.xmlData  # type: ignore[union-attr]
             orbit = xmldata.find('safe:orbitReference', root.nsmap)
             orbitnumber = orbit.find('safe:orbitNumber', root.nsmap)
             relative_orbitnumber = orbit.find('safe:relativeOrbitNumber', root.nsmap)
