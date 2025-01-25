@@ -22,8 +22,8 @@ def get_environment() -> Environment:
 
 def render_template(template: str, payload: dict) -> str:
     env = get_environment()
-    template = env.get_template(template)
-    rendered = template.render(payload)
+    template_data = env.get_template(template)
+    rendered = template_data.render(payload)
     return rendered
 
 
@@ -61,9 +61,9 @@ def get_thumbnail_encoded_string(browse_file: Path, size: tuple[int, int] = (200
         return ''
 
     image = Image.open(browse_file)
-    image = image.convert('RGB')
-    image.thumbnail(size)
+    img = image.convert('RGB')
+    img.thumbnail(size)
 
     data = BytesIO()
-    image.save(data, format='JPEG')
+    img.save(data, format='JPEG')
     return b64encode(data.getvalue()).decode()

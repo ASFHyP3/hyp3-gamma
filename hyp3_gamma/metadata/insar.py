@@ -15,7 +15,7 @@ class InSarMetadataWriter:
         self.product_dir = payload['product_dir']
         self.product_name = payload['product_dir'].name
 
-    def create_metadata_file_set(self) -> list[Path]:
+    def create_metadata_file_set(self) -> list[Path | None]:
         files = []
         generators = [
             self.create_readme,
@@ -44,7 +44,7 @@ class InSarMetadataWriter:
     def create_readme(self) -> Path:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
 
-        return self.create_metadata_file(
+        metadata_file = self.create_metadata_file(
             self.payload,
             'insar/readme.md.txt.j2',
             reference_file,
@@ -52,24 +52,26 @@ class InSarMetadataWriter:
             strip_ext=True,
             name_only=True,
         )
+        assert metadata_file is not None
+        return metadata_file
 
-    def create_amp_xml(self) -> Path:
+    def create_amp_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_amp.tif'
         return self.create_metadata_file(self.payload, 'insar/amp_tif.xml.j2', reference_file)
 
-    def create_coherence_xml(self) -> Path:
+    def create_coherence_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_corr.tif'
         return self.create_metadata_file(self.payload, 'insar/corr_tif.xml.j2', reference_file)
 
-    def create_dem_tif_xml(self) -> Path:
+    def create_dem_tif_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_dem.tif'
         return self.create_metadata_file(self.payload, 'insar/dem.xml.j2', reference_file)
 
-    def create_los_displacement_xml(self) -> Path:
+    def create_los_displacement_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_los_disp.tif'
         return self.create_metadata_file(self.payload, 'insar/los_disp_tif.xml.j2', reference_file)
 
-    def create_look_vector_xmls(self) -> list[Path]:
+    def create_look_vector_xmls(self) -> list[Path | None]:
         reference_file_phi = self.product_dir / f'{self.product_name}_lv_phi.tif'
         reference_file_theta = self.product_dir / f'{self.product_name}_lv_theta.tif'
         output_files = [
@@ -78,7 +80,7 @@ class InSarMetadataWriter:
         ]
         return output_files
 
-    def create_browse_xmls(self) -> list[Path]:
+    def create_browse_xmls(self) -> list[Path | None]:
         reference_file_col = self.product_dir / f'{self.product_name}_color_phase.png'
         reference_file_unw = self.product_dir / f'{self.product_name}_unw_phase.png'
         output_files = [
@@ -87,27 +89,27 @@ class InSarMetadataWriter:
         ]
         return output_files
 
-    def create_unwrapped_phase_xml(self) -> Path:
+    def create_unwrapped_phase_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_unw_phase.tif'
         return self.create_metadata_file(self.payload, 'insar/unw_phase_tif.xml.j2', reference_file)
 
-    def create_vertical_displacement_xml(self) -> Path:
+    def create_vertical_displacement_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_vert_disp.tif'
         return self.create_metadata_file(self.payload, 'insar/vert_disp_tif.xml.j2', reference_file)
 
-    def create_wrapped_phase_xml(self) -> Path:
+    def create_wrapped_phase_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_wrapped_phase.tif'
         return self.create_metadata_file(self.payload, 'insar/wrapped_phase_tif.xml.j2', reference_file)
 
-    def create_inc_map_xml(self) -> Path:
+    def create_inc_map_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_inc_map.tif'
         return self.create_metadata_file(self.payload, 'insar/inc_map_tif.xml.j2', reference_file)
 
-    def create_inc_map_ell_xml(self) -> Path:
+    def create_inc_map_ell_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_inc_map_ell.tif'
         return self.create_metadata_file(self.payload, 'insar/inc_map_ell_tif.xml.j2', reference_file)
 
-    def create_water_mask_xml(self) -> Path:
+    def create_water_mask_xml(self) -> Path | None:
         reference_file = self.product_dir / f'{self.product_name}_water_mask.tif'
         return self.create_metadata_file(self.payload, 'insar/water_mask_tif.xml.j2', reference_file)
 

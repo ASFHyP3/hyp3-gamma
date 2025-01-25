@@ -144,6 +144,7 @@ def test_create_look_vector_xmls(insar_product_dir):
         insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_lv_theta.tif.xml',
     ]
     for file in output_files:
+        assert file is not None
         assert file.exists()
 
 
@@ -170,6 +171,7 @@ def test_create_browse_xmls(insar_product_dir):
         insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_unw_phase.png.xml',
     ]
     for file in output_files:
+        assert file is not None
         assert file.exists()
 
 
@@ -357,4 +359,5 @@ def test_insar_gamma_all_files(insar_product_dir):
         insar_product_dir / 'S1AB_20210424T125204_20210430T125122_HHP006_INT80_G_ueF_B4A1_water_mask.tif.xml',
     ]
     for f in files:
+        assert f is not None
         assert f.exists()

@@ -46,6 +46,7 @@ def intersects_dem(geometry: ogr.Geometry) -> bool:
     for feature in get_dem_features():
         if feature.GetGeometryRef().Intersects(geometry):
             return True
+    return False
 
 
 def get_dem_file_paths(geometry: ogr.Geometry) -> list[str]:

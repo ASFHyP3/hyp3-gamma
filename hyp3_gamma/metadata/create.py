@@ -45,7 +45,7 @@ def create_metadata_file_set_insar(
     processor_version: str,
     ref_point_coords: dict,
     phase_filter_parameter: float,
-) -> list[Path]:
+) -> list[Path | None]:
     payload = insar.marshal_metadata(
         product_dir=product_dir,
         reference_granule_name=reference_granule_name,
