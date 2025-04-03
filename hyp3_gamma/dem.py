@@ -93,7 +93,7 @@ def shift_for_antimeridian(dem_file_paths: list[str], directory: Path) -> list[s
     return shifted_file_paths
 
 
-def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0):
+def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: float = 30.0, epsg: int = 4326) -> None:
     """Create a DEM mosaic GeoTIFF covering a given geometry.
 
     The DEM mosaic is assembled from the Copernicus GLO-30 Public DEM. The output GeoTIFF covers the input geometry
@@ -119,9 +119,8 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
                 dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
 
-            epsg_code = geometry.GetGeometryRef().ExportToWkt()
             prepare_dem_geotiff(dem_file_paths,
                                 geometry,
                                 pixel_size=pixel_size,
-                                epsg_code=epsg_code,
+                                epsg_code=f'EPSG:{epsg}',
                                 height_above_ellipsoid=False)
