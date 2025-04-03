@@ -5,6 +5,7 @@ from subprocess import PIPE, run
 from tempfile import TemporaryDirectory
 
 from hyp3lib import DemError
+from hyp3lib.dem import prepare_dem_geotiff
 from osgeo import gdal, ogr
 
 from hyp3_gamma.util import GDALConfigManager
@@ -118,17 +119,9 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
                 dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
 
-            dem_vrt = temp_path / 'dem.vrt'
-            gdal.BuildVRT(str(dem_vrt), dem_file_paths)
-
-            epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            gdal.Warp(
-                output_name,
-                str(dem_vrt),
-                dstSRS=f'EPSG:{epsg_code}',
-                xRes=pixel_size,
-                yRes=pixel_size,
-                targetAlignedPixels=True,
-                resampleAlg='cubic',
-                multithread=True,
-            )
+            epsg_code = geometry.GetGeometryRef().ExportToWkt()
+            prepare_dem_geotiff(dem_file_paths,
+                                geometry,
+                                pixel_size=pixel_size,
+                                epsg_code=epsg_code,
+                                height_above_ellipsoid=False)
