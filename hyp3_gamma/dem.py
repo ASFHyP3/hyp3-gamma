@@ -120,8 +120,8 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
                 dem_file_paths = shift_for_antimeridian(dem_file_paths, temp_path)
 
             epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-            prepare_dem_geotiff(dem_file_paths / 'dem.vrt',
+            prepare_dem_geotiff(output_name,
                                 geometry,
                                 pixel_size=pixel_size,
                                 epsg_code=epsg_code,
-                                height_above_ellipsoid=False)
+                                buffer_size_in_degrees=0.15)
