@@ -5,21 +5,22 @@ from hyp3lib import dem
 from osgeo import ogr
 
 
+def crosses_antimeridian(geometry: dict) -> bool:
+    if geometry['type'] != 'Polygon':
+        raise ValueError(f'Geometry type {geometry["type"]} is invalid; only Polygon is supported.')
+    longitudes = [point[0] for point in geometry['coordinates'][0]]
+    return any(lon < -160 for lon in longitudes) and any (160 < lon for lon in longitudes)
+
+
 def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
-    cmd = [
-        'ogr2ogr',
-        '-wrapdateline',
-        '-datelineoffset',
-        '20',
-        '-f',
-        'GeoJSON',
-        '-mapfieldtype',
-        'DateTime=String',
-        '/vsistdout',
-        kml_file,
-    ]
+    cmd = ['ogr2ogr', '-f', 'GeoJSON', '-mapfieldtype', 'DateTime=String', '/vsistdout', kml_file]
     geojson_str = run(cmd, stdout=PIPE, check=True).stdout
-    geometry = json.loads(geojson_str)['features'][0]['geometry']
+    geojson = json.loads(geojson_str)
+    geometry = geojson['features'][0]['geometry']
+    if crosses_antimeridian(geometry):
+        for point in geometry['coordinates'][0]:
+            if point[0] < 0:
+                point[0] += 360
     return ogr.CreateGeometryFromJson(json.dumps(geometry))
 
 
