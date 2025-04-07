@@ -1,11 +1,26 @@
-from pathlib import Path
-from tempfile import TemporaryDirectory
+import json
+from subprocess import PIPE, run
 
-from hyp3lib import DemError
 from hyp3lib import dem
 from osgeo import ogr
 
-from hyp3_gamma.util import GDALConfigManager
+
+def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
+    cmd = [
+        'ogr2ogr',
+        '-wrapdateline',
+        '-datelineoffset',
+        '20',
+        '-f',
+        'GeoJSON',
+        '-mapfieldtype',
+        'DateTime=String',
+        '/vsistdout',
+        kml_file,
+    ]
+    geojson_str = run(cmd, stdout=PIPE, check=True).stdout
+    geometry = json.loads(geojson_str)['features'][0]['geometry']
+    return ogr.CreateGeometryFromJson(json.dumps(geometry))
 
 
 def utm_from_lon_lat(lon: float, lat: float) -> int:
