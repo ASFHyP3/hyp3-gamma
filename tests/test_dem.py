@@ -10,6 +10,84 @@ from hyp3_gamma import dem
 gdal.UseExceptions()
 
 
+def test_crosses_antimeridian():
+    geojson = {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [
+                [
+                    [177.0, 50.0],
+                    [177.0, 51.0],
+                    [180.0, 51.0],
+                    [180.0, 50.0],
+                    [177.0, 50.0],
+                ]
+            ],
+            [
+                [
+                    [-180.0, 50.0],
+                    [-180.0, 51.0],
+                    [-179.0, 51.0],
+                    [-179.0, 50.0],
+                    [-180.0, 50.0],
+                ]
+            ],
+        ],
+    }
+    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
+    assert geometry.Centroid().GetX() == 89.0
+    assert geometry.Centroid().GetY() == 50.5
+
+    centroid = dem.crosses_antimeridian(geometry)
+    assert centroid.GetX() == 179.0
+    assert centroid.GetY() == 50.5
+
+
+def test_get_geometry_from_kml(test_data_dir):
+    kml = test_data_dir / 'alaska.kml'
+    expected = {
+        'type': 'Polygon',
+        'coordinates': [
+            [
+                [-154.0, 71.0],
+                [-147.0, 71.0],
+                [-146.0, 70.0],
+                [-153.0, 69.0],
+                [-154.0, 71.0],
+            ]
+        ],
+    }
+    geometry = dem.get_geometry_from_kml(kml)
+    assert json.loads(geometry.ExportToJson()) == expected
+
+    kml = test_data_dir / 'antimeridian.kml'
+    expected = {
+        'type': 'MultiPolygon',
+        'coordinates': [
+            [
+                [
+                    [176.0, 51.0],
+                    [177.0, 52.0],
+                    [180.0, 52.0],
+                    [180.0, 50.2],
+                    [176.0, 51.0],
+                ]
+            ],
+            [
+                [
+                    [-180.0, 50.2],
+                    [-180.0, 52.0],
+                    [-179.0, 52.0],
+                    [-179.0, 50.0],
+                    [-180.0, 50.2],
+                ]
+            ],
+        ],
+    }
+    geometry = dem.get_geometry_from_kml(kml)
+    assert json.loads(geometry.ExportToJson()) == expected
+
+
 def test_utm_from_lon_lat():
     assert dem.utm_from_lon_lat(0, 0) == 32631
     assert dem.utm_from_lon_lat(-179, -1) == 32701
@@ -18,7 +96,6 @@ def test_utm_from_lon_lat():
     assert dem.utm_from_lon_lat(182, 1) == 32601
     assert dem.utm_from_lon_lat(-182, 1) == 32660
     assert dem.utm_from_lon_lat(-360, -1) == 32731
-
 
 
 def test_prepare_dem_geotiff_no_coverage():
