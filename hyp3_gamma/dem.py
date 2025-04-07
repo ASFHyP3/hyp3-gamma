@@ -26,8 +26,7 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
         pixel_size: Pixel size for the output GeoTIFF in meters
 
     """
-    if geometry.GetGeometryName() == 'MULTIPOLYGON':
-        centroid = dem.get_centroid_crossing_antimeridian(geometry)
+    centroid = geometry.Centroid()
 
 
     epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
