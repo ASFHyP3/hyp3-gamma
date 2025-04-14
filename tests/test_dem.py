@@ -11,36 +11,40 @@ gdal.UseExceptions()
 
 
 def test_crosses_antimeridian():
-    geojson = {
-        'type': 'MultiPolygon',
+    geometry = {
+        'type': 'Point',
+        'coordinates': [177.0, 50.0],
+    }
+    with pytest.raises(ValueError, match='only Polygon is supported'):
+        dem.crosses_antimeridian(geometry)
+
+    geometry = {
+        'type': 'Polygon',
         'coordinates': [
             [
-                [
-                    [177.0, 50.0],
-                    [177.0, 51.0],
-                    [180.0, 51.0],
-                    [180.0, 50.0],
-                    [177.0, 50.0],
-                ]
-            ],
+                [-154.0, 71.0],
+                [-147.0, 71.0],
+                [-146.0, 70.0],
+                [-153.0, 69.0],
+                [-154.0, 71.0],
+            ]
+        ],
+    }
+    assert not dem.crosses_antimeridian(geometry)
+
+    geometry = {
+        'type': 'Polygon',
+        'coordinates': [
             [
-                [
-                    [-180.0, 50.0],
-                    [-180.0, 51.0],
-                    [-179.0, 51.0],
-                    [-179.0, 50.0],
-                    [-180.0, 50.0],
-                ]
+                [179.5, 51.4],
+                [179.5, 51.6],
+                [-179.5, 51.6],
+                [-179.5, 51.4],
+                [179.5, 51.4],
             ],
         ],
     }
-    geometry = ogr.CreateGeometryFromJson(json.dumps(geojson))
-    assert geometry.Centroid().GetX() == 89.0
-    assert geometry.Centroid().GetY() == 50.5
-
-    centroid = dem.crosses_antimeridian(geometry)
-    assert centroid.GetX() == 179.0
-    assert centroid.GetY() == 50.5
+    assert dem.crosses_antimeridian(geometry)
 
 
 def test_get_geometry_from_kml(test_data_dir):
@@ -62,25 +66,14 @@ def test_get_geometry_from_kml(test_data_dir):
 
     kml = test_data_dir / 'antimeridian.kml'
     expected = {
-        'type': 'MultiPolygon',
+        'type': 'Polygon',
         'coordinates': [
             [
-                [
-                    [176.0, 51.0],
-                    [177.0, 52.0],
-                    [180.0, 52.0],
-                    [180.0, 50.2],
-                    [176.0, 51.0],
-                ]
-            ],
-            [
-                [
-                    [-180.0, 50.2],
-                    [-180.0, 52.0],
-                    [-179.0, 52.0],
-                    [-179.0, 50.0],
-                    [-180.0, 50.2],
-                ]
+                [181.0, 50.0],
+                [176.0, 51.0],
+                [177.0, 52.0],
+                [181.0, 52.0],
+                [181.0, 50.0],
             ],
         ],
     }
