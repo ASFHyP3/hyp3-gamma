@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from subprocess import PIPE, run
 
 from hyp3lib import dem
@@ -9,7 +10,7 @@ def crosses_antimeridian(geometry: dict) -> bool:
     if geometry['type'] != 'Polygon':
         raise ValueError(f'Geometry type {geometry["type"]} is invalid; only Polygon is supported.')
     longitudes = [point[0] for point in geometry['coordinates'][0]]
-    return any(lon < -160 for lon in longitudes) and any (160 < lon for lon in longitudes)
+    return any(lon < -160 for lon in longitudes) and any(160 < lon for lon in longitudes)
 
 
 def get_geometry_from_kml(kml_file: str) -> ogr.Geometry:
@@ -44,10 +45,7 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
     """
     centroid = geometry.Centroid()
 
-
     epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
-    dem.prepare_dem_geotiff(output_name,
-                            geometry,
-                            epsg_code=epsg_code,
-                            pixel_size=pixel_size,
-                            buffer_size_in_degrees=0.15)
+    dem.prepare_dem_geotiff(
+        Path(output_name), geometry, epsg_code=epsg_code, pixel_size=pixel_size, buffer_size_in_degrees=0.15
+    )
