@@ -121,32 +121,21 @@ def test_prepare_dem_geotiff(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [171000.0, 60.0, 0.0, 1328400.0, 0.0, -60.0]
-    assert info['size'] == [1854, 3706]
+    assert info['geoTransform'] == [198480.0, 60.0, 0.0, 1218060.0, 0.0, -60.0]
+    assert info['size'] == [928, 1839]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
     dem_geotiff = tmp_path / 'dem.tif'
     geojson = {
-        'type': 'MultiPolygon',
+        'type': 'Polygon',
         'coordinates': [
             [
-                [
-                    [179.5, 51.4],
-                    [179.5, 51.6],
-                    [180.0, 51.6],
-                    [180.0, 51.4],
-                    [179.5, 51.4],
-                ]
-            ],
-            [
-                [
-                    [-180.0, 51.4],
-                    [-180.0, 51.6],
-                    [-179.5, 51.6],
-                    [-179.5, 51.4],
-                    [-180.0, 51.4],
-                ]
+                [179.5, 51.4],
+                [179.5, 51.6],
+                [180.5, 51.6],
+                [180.5, 51.4],
+                [179.5, 51.4],
             ],
         ],
     }
@@ -156,5 +145,5 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [219330.0, 30.0, 0.0, 5768640.0, 0.0, -30.0]
-    assert info['size'] == [4780, 3897]
+    assert info['geoTransform'] == [245280.0, 30.0, 0.0, 5735850.0, 0.0, -30.0]
+    assert info['size'] == [3084, 1730]
