@@ -9,6 +9,8 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [9.0.3]
 ### Changed
 - Updated `hyp3_gamma.dem.prepare_dem_geotiff` to use the update `hyp3_lib.dem.prepare_dem_geotiff` released in hyp3-lib v3.2.0
+- Output GeoTIFFs are no longer clipped to the extent of available COP30 DEM tiles. Input scenes must still intersect at
+  least one available DEM tile.
 
 ## [9.0.2]
 ### Added
