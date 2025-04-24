@@ -12,8 +12,8 @@ Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
 The product folder is named using the following convention:
 S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh_pponnn_INTzz_u_def_ssss
-x:          Sentinel-1 Mission (A or B) of reference granule
-y:          Sentinel-1 Mission (A or B) of secondary granule
+x:          Sentinel-1 Mission (A/B/C) of reference granule
+y:          Sentinel-1 Mission (A/B/C) of secondary granule
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
 bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
 gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
@@ -334,13 +334,17 @@ The detailed process, including the calls to GAMMA software, is as follows:
 
 The Sentinel-1 satellite constellation is part of the Copernicus Earth Observation program, coordinated by the European Space Agency (ESA) on behalf of the European Commission (EC). Sentinel-1 satellites carry C-band Synthetic Aperture Radar (SAR) instruments for global, around-the-clock imagery, even through cloud cover.
 
-The Sentinel-1A satellite was launched April 3, 2014, and remains active. The Sentinel-1B satellite was launched April 25, 2016, and was active until December 23, 2021. The satellites each have a 12-day repeat cycle and use the same orbit pattern, but are offset 180 degrees to allow repeat passes every 6 days while both are active. Since the mission ended for S1B, there are some significant gaps in coverage. A reduced acquisition plan will be in place until Sentinel-1C is launched (expected in 2023) to replace Sentinel-1B. Visit https://hyp3-docs.asf.alaska.edu/sentinel1/ for more information.
+The Sentinel-1 mission is designed to have two satellites in orbit, each with a 12-day repeat cycle. The satellites use the same orbit pattern, but are offset by 180 degrees, allowing for repeat passes every 6 days.
+
+The Sentinel-1A satellite was launched April 3, 2014, and remains active. The Sentinel-1B satellite was launched April 25, 2016, and was active until December 23, 2021. Sentinel-1C was launched December 5, 2024 to take the place of Sentinel-1B in the constellation.
+
+Between the end of the mission for Sentinel-1B and the start of the Sentinel-1C mission, all acquisitions were made by Sentinel-1A. The acquisition plan was adjusted to provide as much coverage as possible with a single satellite, but some areas had little to no imagery acquired between December 2021 and April 2025. Refer to https://hyp3-docs.asf.alaska.edu/sentinel1/ for more information.
 
 More information about the mission is available at:
-https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1
+https://sentiwiki.copernicus.eu/web/s1-mission
 
 Additional information about Sentinel-1 data, imagery, tools and applications is available at:
-https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1
+https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/sentinel-1
 
 *************
 For assistance, contact the Alaska Satellite Facility:
