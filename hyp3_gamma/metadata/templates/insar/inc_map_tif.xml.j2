@@ -12,20 +12,3 @@ For a detailed description of InSAR processing using GAMMA software, refer to th
 {% endblock %}
 
 ******************
-
-{# Begin idAbs READABLE - not to be included in the xml template
-This is the local incidence angle map generated for the reference granule from a pair of Sentinel-1 {{ granule_type }} granules, processed using GAMMA software. The pixel values indicate the angle between the incident radar beam and the direction perpendicular to the ground surface, expressed in radians. These values are calculated using a reference DEM and information from the reference {{ granule_type }}. It has been projected to {{ projection }} coordinates, and has a pixel spacing of {{ pixel_spacing|int }} m.
-
-Reference Scene: {{ reference_granule_name }}
-Secondary Scene: {{ secondary_granule_name }}
-Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
-
-This product was generated using the [Copernicus DEM GLO-30](https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model) to calculate the incidence angle values. The DEM is downsampled to twice the pixel spacing of the output product ({{ pixel_spacing|int }} m) in preparation for use in InSAR processing, and the incidence angle map is generated from that downsampled DEM. It is then oversampled by a factor of two to match the pixel spacing of the output InSAR product. Refer to the product README file for more information about the DEM.
-
-Refer to ASF's [InSAR Product Guide](https://hyp3-docs.asf.alaska.edu/guides/insar_product_guide/) for more information about On Demand InSAR products.
-
-The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at https://sentinels.copernicus.eu/web/sentinel/missions/sentinel-1
-
-Additional information about Sentinel-1 data, imagery, tools and applications is available at https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/
-End idAbs READABLE - not to be included in the xml template
-#}
