@@ -2,8 +2,9 @@ import logging
 import os
 
 from PIL import Image
-from hyp3_gamma.make_asf_browse import make_asf_browse
 from osgeo import gdal
+
+from hyp3_gamma.make_asf_browse import make_asf_browse
 
 
 def test_width_smaller(geotiff):
