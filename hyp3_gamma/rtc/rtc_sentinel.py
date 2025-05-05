@@ -14,7 +14,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
-from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.getParameter import getParameter
@@ -27,9 +26,10 @@ from osgeo import gdal, gdalconst, ogr
 from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
-from hyp3_gamma import gdal_file
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
+from hyp3_gamma.rtc import gdal_file
+from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
@@ -281,7 +281,7 @@ def create_browse_images(out_dir, out_name, pol):
     pol_amp_tif = f'{pol}-amp.tif'
     outfile = f'{out_dir}/{out_name}'
     with NamedTemporaryFile() as rescaled_tif:
-        byteSigmaScale(pol_amp_tif, rescaled_tif.name)
+        byte_sigma_scale(pol_amp_tif, rescaled_tif.name)
         makeAsfBrowse(rescaled_tif.name, outfile)
 
     for file_type in ['inc_map', 'dem', 'area']:
@@ -289,7 +289,7 @@ def create_browse_images(out_dir, out_name, pol):
         if os.path.exists(tif):
             outfile = f'{out_dir}/{out_name}_{file_type}'
             with NamedTemporaryFile() as rescaled_tif:
-                byteSigmaScale(tif, rescaled_tif.name)
+                byte_sigma_scale(tif, rescaled_tif.name)
                 makeAsfBrowse(rescaled_tif.name, outfile)
 
     shapefile = f'{out_dir}/{out_name}_shape.shp'

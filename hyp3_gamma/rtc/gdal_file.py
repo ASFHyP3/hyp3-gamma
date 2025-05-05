@@ -38,3 +38,17 @@ def write_float(filename, geotransform, geoproj, data, nodata=None):
     # dst_ds.SetGeoTransform(geotransform)
     dst_ds.SetGeoTransform([northing, weres, rotation, easting, rotation, nsres])
     dst_ds.SetProjection(geoproj)
+
+
+def write_byte(filename, geotransform, geoproj, data, nodata=None):
+    (x, y) = data.shape
+    image_format = 'GTiff'
+    driver = gdal.GetDriverByName(image_format)
+    dst_datatype = gdal.GDT_Byte
+    dst_ds = driver.Create(filename, y, x, 1, dst_datatype)
+    geotransform = [item for item in geotransform]
+    dst_ds.SetGeoTransform(geotransform)
+    dst_ds.GetRasterBand(1).WriteArray(data)
+    if nodata is not None:
+        dst_ds.GetRasterBand(1).SetNoDataValue(nodata)
+    dst_ds.SetProjection(geoproj)
