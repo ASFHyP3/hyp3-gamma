@@ -16,7 +16,6 @@ import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.make_cogs import cogify_dir
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
@@ -26,6 +25,7 @@ from osgeo import gdal, gdalconst, ogr
 from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
+from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc import gdal_file
@@ -261,16 +261,16 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
 
 def apply_speckle_filter(mli_image, mli_par, looks):
     log.info('Applying enhanced Lee speckle filter')
-    width = getParameter(mli_par, 'range_samples')
+    width = get_parameter(mli_par, 'range_samples')
     with NamedTemporaryFile() as temp_file:
         run(f'enh_lee {mli_image} {temp_file.name} {width} {looks} 1 7 7')
         shutil.copy(temp_file.name, mli_image)
 
 
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
-    width_in = getParameter(mli_par, 'range_samples')
-    width_out = getParameter(dem_par, 'width')
-    nlines_out = getParameter(dem_par, 'nlines')
+    width_in = get_parameter(mli_par, 'range_samples')
+    width_out = get_parameter(dem_par, 'width')
+    nlines_out = get_parameter(dem_par, 'nlines')
 
     with NamedTemporaryFile() as temp_file:
         run(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')

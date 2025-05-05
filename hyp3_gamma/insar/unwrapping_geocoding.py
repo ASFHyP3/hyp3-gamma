@@ -11,9 +11,9 @@ import numpy as np
 import scipy.ndimage
 from PIL import Image
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 from osgeo import gdal
 
+from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.water_mask import create_water_mask
 
 
@@ -243,13 +243,13 @@ def unwrapping_geocoding(
     if not os.path.isfile(offit):
         log.error(f'ERROR: Unable to find offset file {offit}')
 
-    width = getParameter(offit, 'interferogram_width')
-    lines = getParameter(offit, 'interferogram_azimuth_lines')
-    mwidth = getParameter(mmli + '.par', 'range_samples')
-    mlines = getParameter(mmli + '.par', 'azimuth_lines')
-    swidth = getParameter(smli + '.par', 'range_samples')
-    demw = getParameter(dempar, 'width')
-    demn = getParameter(dempar, 'nlines')
+    width = get_parameter(offit, 'interferogram_width')
+    lines = get_parameter(offit, 'interferogram_azimuth_lines')
+    mwidth = get_parameter(mmli + '.par', 'range_samples')
+    mlines = get_parameter(mmli + '.par', 'azimuth_lines')
+    swidth = get_parameter(smli + '.par', 'range_samples')
+    demw = get_parameter(dempar, 'width')
+    demn = get_parameter(dempar, 'nlines')
 
     ifgf = f'{ifgname}.diff0.{step}'
 

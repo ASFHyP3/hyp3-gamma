@@ -14,7 +14,6 @@ from secrets import token_hex
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
 from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from hyp3lib.system import gamma_version
@@ -22,6 +21,7 @@ from lxml import etree, objectify
 from s1_orbits import fetch_for_scene
 
 import hyp3_gamma
+from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
@@ -289,16 +289,16 @@ def make_parameter_file(
     secondary_file = glob.glob('*%s*.SAFE' % secondary_date)[0]
 
     parfile = f'{reference_date_short}.mli.par'
-    erad_nadir = getParameter(parfile, 'earth_radius_below_sensor')
+    erad_nadir = get_parameter(parfile, 'earth_radius_below_sensor')
     erad_nadir = erad_nadir.split()[0]
-    sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
+    sar_to_earth_center = get_parameter(parfile, 'sar_to_earth_center')
     sar_to_earth_center = sar_to_earth_center.split()[0]
     height = float(sar_to_earth_center) - float(erad_nadir)
-    near_slant_range = getParameter(parfile, 'near_range_slc')
+    near_slant_range = get_parameter(parfile, 'near_range_slc')
     near_slant_range = near_slant_range.split()[0]
-    center_slant_range = getParameter(parfile, 'center_range_slc')
+    center_slant_range = get_parameter(parfile, 'center_range_slc')
     center_slant_range = center_slant_range.split()[0]
-    far_slant_range = getParameter(parfile, 'far_range_slc')
+    far_slant_range = get_parameter(parfile, 'far_range_slc')
     far_slant_range = far_slant_range.split()[0]
 
     with open('baseline.log') as f:
