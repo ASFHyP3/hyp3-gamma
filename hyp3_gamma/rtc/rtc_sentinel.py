@@ -28,9 +28,9 @@ from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc import gdal_file
-from hyp3_gamma.rtc.make_cogs import cogify_dir
 from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
+from hyp3_gamma.rtc.make_cogs import cogify_dir
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 
