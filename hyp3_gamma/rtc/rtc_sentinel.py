@@ -16,7 +16,6 @@ import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
@@ -31,6 +30,7 @@ from hyp3_gamma.rtc import gdal_file
 from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
 from hyp3_gamma.rtc.make_cogs import cogify_dir
+from hyp3_gamma.rtc.raster_boundary_to_shape import raster_boundary_to_shape
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 
@@ -293,7 +293,7 @@ def create_browse_images(out_dir, out_name, pol):
                 make_asf_browse(rescaled_tif.name, outfile)
 
     shapefile = f'{out_dir}/{out_name}_shape.shp'
-    raster_boundary2shape(
+    raster_boundary_to_shape(
         pol_amp_tif,
         None,
         shapefile,
