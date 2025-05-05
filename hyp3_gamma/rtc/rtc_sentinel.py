@@ -16,7 +16,6 @@ import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
 from hyp3lib.system import gamma_version
@@ -26,6 +25,7 @@ from s1_orbits import OrbitNotFoundError, fetch_for_scene
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
 from hyp3_gamma.get_parameter import get_parameter
+from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc import gdal_file
 from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
@@ -282,7 +282,7 @@ def create_browse_images(out_dir, out_name, pol):
     outfile = f'{out_dir}/{out_name}'
     with NamedTemporaryFile() as rescaled_tif:
         byte_sigma_scale(pol_amp_tif, rescaled_tif.name)
-        makeAsfBrowse(rescaled_tif.name, outfile)
+        make_asf_browse(rescaled_tif.name, outfile)
 
     for file_type in ['inc_map', 'dem', 'area']:
         tif = f'{out_dir}/{out_name}_{file_type}.tif'
@@ -290,7 +290,7 @@ def create_browse_images(out_dir, out_name, pol):
             outfile = f'{out_dir}/{out_name}_{file_type}'
             with NamedTemporaryFile() as rescaled_tif:
                 byte_sigma_scale(tif, rescaled_tif.name)
-                makeAsfBrowse(rescaled_tif.name, outfile)
+                make_asf_browse(rescaled_tif.name, outfile)
 
     shapefile = f'{out_dir}/{out_name}_shape.shp'
     raster_boundary2shape(
@@ -480,7 +480,7 @@ def rtc_sentinel_gamma(
         cpol_power_tif = f'{polarizations[1]}-power.tif'
         rgb_tif = f'{product_name}/{product_name}_rgb.tif'
         rtc2color(pol_power_tif, cpol_power_tif, -24, rgb_tif, cleanup=True)
-        makeAsfBrowse(rgb_tif, f'{product_name}/{product_name}_rgb')
+        make_asf_browse(rgb_tif, f'{product_name}/{product_name}_rgb')
         if not include_rgb:
             os.remove(rgb_tif)
 

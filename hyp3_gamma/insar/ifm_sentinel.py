@@ -14,7 +14,6 @@ from secrets import token_hex
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
-from hyp3lib.makeAsfBrowse import makeAsfBrowse
 from hyp3lib.par_s1_slc_single import par_s1_slc_single
 from hyp3lib.system import gamma_version
 from lxml import etree, objectify
@@ -25,6 +24,7 @@ from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_insar
 
 
@@ -255,13 +255,13 @@ def move_output_files(
         outName = f'{os.path.join(prod_dir, long_output)}_lv_phi.tif'
         shutil.copy(inName, outName)
 
-    makeAsfBrowse(
+    make_asf_browse(
         f'{output}.diff0.man.adf.bmp.geo.tif',
         f'{os.path.join(prod_dir, long_output)}_color_phase',
         use_nn=True,
     )
 
-    makeAsfBrowse(
+    make_asf_browse(
         f'{output}.adf.unw.geo.bmp.tif',
         f'{os.path.join(prod_dir, long_output)}_unw_phase',
         use_nn=True,
