@@ -20,10 +20,7 @@ def raster_boundary_to_shape(inFile, threshold, outShapeFile, use_closing=True, 
 
     print('Extracting boundary geometry ...')
     (data, colFirst, rowFirst, geoTrans, proj) = geotiff_to_boundary_mask(
-        inFile,
-        epsg,
-        threshold,
-        use_closing=use_closing
+        inFile, epsg, threshold, use_closing=use_closing
     )
     (rows, cols) = data.shape
 
@@ -116,7 +113,7 @@ def data_geometry_to_shape_ext(data, fields, values, spatialRef, geoTrans, class
     originY = geoTrans[3] + 10 * pixelSize
     geoTrans = (originX, pixelSize, 0, originY, 0, -pixelSize)
     mask = np.zeros((rows + 20, cols + 20), dtype=np.float32)
-    mask[10: rows + 10, 10: cols + 10] = data
+    mask[10 : rows + 10, 10 : cols + 10] = data
     data = mask
 
     # Save in memory
