@@ -25,8 +25,8 @@ from osgeo import gdal, gdalconst, ogr
 from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
-from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
+from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc import gdal_file
 from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
