@@ -12,7 +12,6 @@ from pathlib import Path
 from secrets import token_hex
 
 from hyp3lib import GranuleError
-from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
 from lxml import etree, objectify
 from s1_orbits import fetch_for_scene
@@ -23,6 +22,7 @@ from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
 from hyp3_gamma.insar.par_s1_slc_single import par_s1_slc_single
+from hyp3_gamma.insar.slc_copy_s1_full_sw import slc_copy_s1_full_sw
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
 from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_insar
@@ -435,9 +435,9 @@ def insar_sentinel_gamma(
     shutil.move(burst_tab2, f'{secondary}/{burst_tab2}')
 
     # Mosaic the swaths together and copy SLCs over
-    log.info('Starting SLC_copy_S1_fullSW.py')
+    log.info('Starting slc_copy_s1_full_sw')
     os.chdir(reference)
-    SLC_copy_S1_fullSW(
+    slc_copy_s1_full_sw(
         wrk,
         reference,
         'SLC_TAB',
@@ -450,7 +450,7 @@ def insar_sentinel_gamma(
     )
     os.chdir('..')
     os.chdir(secondary)
-    SLC_copy_S1_fullSW(wrk, secondary, 'SLC_TAB', burst_tab2, mode=2, raml=rlooks, azml=alooks)
+    slc_copy_s1_full_sw(wrk, secondary, 'SLC_TAB', burst_tab2, mode=2, raml=rlooks, azml=alooks)
     os.chdir('..')
 
     # Interferogram creation, matching, refinement
