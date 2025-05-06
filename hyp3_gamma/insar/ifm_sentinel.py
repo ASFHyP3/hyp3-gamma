@@ -14,11 +14,11 @@ from secrets import token_hex
 from hyp3lib import GranuleError
 from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
-from hyp3lib.system import gamma_version
 from lxml import etree, objectify
 from s1_orbits import fetch_for_scene
 
 import hyp3_gamma
+from hyp3_gamma.get_gamma_version import get_gamma_version
 from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
@@ -534,7 +534,7 @@ def insar_sentinel_gamma(
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
-        processor_version=gamma_version(),
+        processor_version=get_gamma_version(),
         ref_point_coords=coords,
         phase_filter_parameter=phase_filter_parameter,
     )

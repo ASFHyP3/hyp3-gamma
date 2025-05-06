@@ -17,12 +17,12 @@ from hyp3lib import DemError, ExecuteError, GranuleError
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.rtc2color import rtc2color
-from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
 from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
+from hyp3_gamma.get_gamma_version import get_gamma_version
 from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
@@ -499,7 +499,7 @@ def rtc_sentinel_gamma(
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
-        processor_version=gamma_version(),
+        processor_version=get_gamma_version(),
     )
     for pattern in [
         '*inc_map*png*',
