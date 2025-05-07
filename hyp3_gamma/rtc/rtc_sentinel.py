@@ -14,23 +14,23 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
-from hyp3lib import saa_func_lib as saa
-from hyp3lib.byteSigmaScale import byteSigmaScale
 from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
-from hyp3lib.makeAsfBrowse import makeAsfBrowse
-from hyp3lib.make_cogs import cogify_dir
-from hyp3lib.raster_boundary2shape import raster_boundary2shape
 from hyp3lib.rtc2color import rtc2color
-from hyp3lib.system import gamma_version
 from osgeo import gdal, gdalconst, ogr
 from s1_orbits import OrbitNotFoundError, fetch_for_scene
 
 import hyp3_gamma
 from hyp3_gamma.dem import get_geometry_from_kml, prepare_dem_geotiff
+from hyp3_gamma.get_gamma_version import get_gamma_version
+from hyp3_gamma.get_parameter import get_parameter
+from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_rtc
+from hyp3_gamma.rtc import gdal_file
+from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
+from hyp3_gamma.rtc.make_cogs import cogify_dir
+from hyp3_gamma.rtc.raster_boundary_to_shape import raster_boundary_to_shape
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
 
 
@@ -42,13 +42,13 @@ ogr.UseExceptions()
 def create_decibel_tif(fi, nodata=None):
     f = gdal.Open(fi)
     in_nodata = f.GetRasterBand(1).GetNoDataValue()
-    _, _, trans, proj, data = saa.read_gdal_file(f)
+    _, _, trans, proj, data = gdal_file.read(f)
     data = np.ma.masked_less_equal(np.ma.masked_values(data, in_nodata), 0.0)
     powerdb = 10 * np.ma.log10(data)
     if not nodata:
         nodata = np.finfo(data.dtype).min.astype(float)
     outfile = fi.replace('.tif', '-db.tif')
-    saa.write_gdal_file_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
+    gdal_file.write_float(outfile, trans, proj, powerdb.filled(nodata), nodata=nodata)
     del f
     return outfile
 
@@ -261,16 +261,16 @@ def _prepare_mli_image_from_slc(safe_dir, pol, orbit_file, looks):
 
 def apply_speckle_filter(mli_image, mli_par, looks):
     log.info('Applying enhanced Lee speckle filter')
-    width = getParameter(mli_par, 'range_samples')
+    width = get_parameter(mli_par, 'range_samples')
     with NamedTemporaryFile() as temp_file:
         run(f'enh_lee {mli_image} {temp_file.name} {width} {looks} 1 7 7')
         shutil.copy(temp_file.name, mli_image)
 
 
 def create_area_geotiff(data_in, lookup_table, mli_par, dem_par, output_name):
-    width_in = getParameter(mli_par, 'range_samples')
-    width_out = getParameter(dem_par, 'width')
-    nlines_out = getParameter(dem_par, 'nlines')
+    width_in = get_parameter(mli_par, 'range_samples')
+    width_out = get_parameter(dem_par, 'width')
+    nlines_out = get_parameter(dem_par, 'nlines')
 
     with NamedTemporaryFile() as temp_file:
         run(f'geocode_back {data_in} {width_in} {lookup_table} {temp_file.name} {width_out} {nlines_out} 2')
@@ -281,19 +281,19 @@ def create_browse_images(out_dir, out_name, pol):
     pol_amp_tif = f'{pol}-amp.tif'
     outfile = f'{out_dir}/{out_name}'
     with NamedTemporaryFile() as rescaled_tif:
-        byteSigmaScale(pol_amp_tif, rescaled_tif.name)
-        makeAsfBrowse(rescaled_tif.name, outfile)
+        byte_sigma_scale(pol_amp_tif, rescaled_tif.name)
+        make_asf_browse(rescaled_tif.name, outfile)
 
     for file_type in ['inc_map', 'dem', 'area']:
         tif = f'{out_dir}/{out_name}_{file_type}.tif'
         if os.path.exists(tif):
             outfile = f'{out_dir}/{out_name}_{file_type}'
             with NamedTemporaryFile() as rescaled_tif:
-                byteSigmaScale(tif, rescaled_tif.name)
-                makeAsfBrowse(rescaled_tif.name, outfile)
+                byte_sigma_scale(tif, rescaled_tif.name)
+                make_asf_browse(rescaled_tif.name, outfile)
 
     shapefile = f'{out_dir}/{out_name}_shape.shp'
-    raster_boundary2shape(
+    raster_boundary_to_shape(
         pol_amp_tif,
         None,
         shapefile,
@@ -480,7 +480,7 @@ def rtc_sentinel_gamma(
         cpol_power_tif = f'{polarizations[1]}-power.tif'
         rgb_tif = f'{product_name}/{product_name}_rgb.tif'
         rtc2color(pol_power_tif, cpol_power_tif, -24, rgb_tif, cleanup=True)
-        makeAsfBrowse(rgb_tif, f'{product_name}/{product_name}_rgb')
+        make_asf_browse(rgb_tif, f'{product_name}/{product_name}_rgb')
         if not include_rgb:
             os.remove(rgb_tif)
 
@@ -499,7 +499,7 @@ def rtc_sentinel_gamma(
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
-        processor_version=gamma_version(),
+        processor_version=get_gamma_version(),
     )
     for pattern in [
         '*inc_map*png*',

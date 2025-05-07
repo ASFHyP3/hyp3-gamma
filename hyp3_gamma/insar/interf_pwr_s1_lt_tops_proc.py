@@ -7,7 +7,8 @@ import shutil
 import sys
 
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
+
+from hyp3_gamma.get_parameter import get_parameter
 
 
 log = logging.getLogger(__name__)
@@ -89,7 +90,7 @@ def coregister_data(
         uselogging=True,
     )
 
-    width = getParameter(offi, 'interferogram_width')
+    width = get_parameter(offi, 'interferogram_width')
     execute(
         f'rasmph_pwr {ifgname}.diff0.{ifg_diff_sfx} {reference}.mli {width} - - 3 3',
         uselogging=True,
