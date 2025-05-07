@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.5]
+### Changed
+- Move code over from `hyp3-lib` that is only used in `hyp3-gamma`
+
 ## [9.0.4]
 ### Changed
 - Updated descriptions of the Sentinel-1 mission to include Sentinel-1C in product READMEs and ArcGIS-compatible xml files.
@@ -64,7 +68,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Upgraded to `hyp3lib>=3,<4` from `>=2,<3`
 - All requirements for the conda environment are once again installed via conda in `environment.yml`, eliminating the
-  workaround for [#421](https://github.com/ASFHyP3/hyp3-gamma/issues/421) implemented in v5.7.2. 
+  workaround for [#421](https://github.com/ASFHyP3/hyp3-gamma/issues/421) implemented in v5.7.2.
 
 ## [8.0.0]
 
@@ -172,7 +176,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [6.0.0]
 
 ### Removed
-- Surface water extent map processing of RTC products, which is now entirely contained in 
+- Surface water extent map processing of RTC products, which is now entirely contained in
   [asf-tools](https://github.com/ASFHyP3/asf-tools/) and its associated docker container image. This includes removing:
   - `water_map` entrypoint to create a water map product
   - `asf_tools` environment from the hyp3-gamma docker container image
@@ -271,7 +275,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [5.4.0]
 
 ### Changed
-- RTC and InSAR products are now generated using the updated 
+- RTC and InSAR products are now generated using the updated
 [2021 release of Copernicus GLO-30 Public DEM coverage](https://spacedata.copernicus.eu/blogs/-/blogs/copernicus-dem-2021-release-now-available).
 
 ## [5.3.0]
@@ -393,7 +397,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [4.7.0](https://github.com/ASFHyP3/hyp3-gamma/compare/v4.6.3...v4.7.0)
 
 ### Added
-* Option to apply water masking to the unwrapped_phase calculation in the gamma processing 
+* Option to apply water masking to the unwrapped_phase calculation in the gamma processing
   * `apply_water_mask` parameter to `ifm_sentinel.insar_sentinel_gamma` function
   * `--apply-water-mask` parameter to `insar` entrypoint
   * `-m` parameter to `ifm_sentinel.py` script
@@ -674,7 +678,7 @@ removed.
 ## [2.1.1](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.1.0...v2.1.1)
 
 ### Changed
-* Input scenes are now downloaded directly from NGAP distribution endpoint rather than ASF's datapool 
+* Input scenes are now downloaded directly from NGAP distribution endpoint rather than ASF's datapool
 * Updates the output product README to include usage guidelines with acknowledgment and citation information
 * Removes the `ESA_citation.txt` file from the output product as it's included in the README
 * Drops the "This is an RTc product from ..." blurb from the bottom of product notification emails
@@ -727,7 +731,7 @@ removed.
 ## [2.0.2](https://github.com/ASFHyP3/hyp3-gamma/compare/v2.0.1...v2.0.2)
 
 ### Changed
-* The v2 entrypoint will now make up to three retry attempts if it fails to download the input 
+* The v2 entrypoint will now make up to three retry attempts if it fails to download the input
   granule from the ASF archive.
 * Changed the name of the product README file to `<product_name>.README.txt`,
   e.g. `S1A_IW_RT30_20170708T161200_G_gpn.README.txt`
