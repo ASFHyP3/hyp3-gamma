@@ -12,5 +12,5 @@ def create_amp(fi, nodata=None):
     (x, y, trans, proj, data) = gdal_file.read(handle)
     ampdata = np.sqrt(data)
     outfile = fi.replace('.tif', '_amp.tif')
-    gdal_file.write_fload(outfile, trans, proj, ampdata, nodata=nodata)
+    gdal_file.write_float(outfile, trans, proj, ampdata, nodata=nodata)
     return outfile
