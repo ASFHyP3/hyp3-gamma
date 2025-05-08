@@ -1,6 +1,5 @@
 """Convert Geotiff Power to Amplitude"""
 
-
 import numpy as np
 from osgeo import gdal
 
