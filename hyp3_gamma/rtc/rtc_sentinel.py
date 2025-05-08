@@ -14,7 +14,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import numpy as np
 from hyp3lib import DemError, ExecuteError, GranuleError
-from hyp3lib.createAmp import createAmp
 from hyp3lib.execute import execute
 from hyp3lib.rtc2color import rtc2color
 from osgeo import gdal, gdalconst, ogr
@@ -29,6 +28,7 @@ from hyp3_gamma.metadata import create_metadata_file_set_rtc
 from hyp3_gamma.rtc import gdal_file
 from hyp3_gamma.rtc.byte_sigma_scale import byte_sigma_scale
 from hyp3_gamma.rtc.coregistration import CoregistrationError, check_coregistration
+from hyp3_gamma.rtc.create_amp import create_amp
 from hyp3_gamma.rtc.make_cogs import cogify_dir
 from hyp3_gamma.rtc.raster_boundary_to_shape import raster_boundary_to_shape
 from hyp3_gamma.util import set_pixel_as_point, unzip_granule
@@ -441,7 +441,7 @@ def rtc_sentinel_gamma(
         power_tif = f'{pol}-power.tif'
         shutil.move('corrected_cal_map.mli.tif', power_tif)
 
-        tmp_tif = createAmp(power_tif, nodata=0)
+        tmp_tif = create_amp(power_tif, nodata=0)
         amp_tif = f'{pol}-amp.tif'
         shutil.move(tmp_tif, amp_tif)
 
