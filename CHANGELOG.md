@@ -8,7 +8,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [9.0.5]
 ### Changed
-- Move code over from `hyp3-lib` that is only used in `hyp3-gamma`
+- Move code over from `hyp3lib` that is only used in `hyp3-gamma` and bump `hyp3lib` to `v4.0.0`
 
 ## [9.0.4]
 ### Changed
