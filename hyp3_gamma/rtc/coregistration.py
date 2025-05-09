@@ -3,7 +3,7 @@
 import logging
 from math import sqrt
 
-from hyp3lib.getParameter import getParameter
+from hyp3_gamma.get_parameter import get_parameter
 
 
 log = logging.getLogger()
@@ -24,8 +24,8 @@ def get_std_dev(mk_geo_radcal2_log):
 
 def get_offset(diff_par):
     # assumes one term offset polynomial; see docs for GAMMA DIFF offset_fitm command
-    range_offset = float(getParameter(diff_par, 'range_offset_polynomial').split()[0])
-    azimuth_offset = float(getParameter(diff_par, 'azimuth_offset_polynomial').split()[0])
+    range_offset = float(get_parameter(diff_par, 'range_offset_polynomial').split()[0])
+    azimuth_offset = float(get_parameter(diff_par, 'azimuth_offset_polynomial').split()[0])
     offset = sqrt(range_offset**2 + azimuth_offset**2)
     return offset
 

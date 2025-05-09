@@ -12,19 +12,19 @@ from pathlib import Path
 from secrets import token_hex
 
 from hyp3lib import GranuleError
-from hyp3lib.SLC_copy_S1_fullSW import SLC_copy_S1_fullSW
 from hyp3lib.execute import execute
-from hyp3lib.getParameter import getParameter
-from hyp3lib.makeAsfBrowse import makeAsfBrowse
-from hyp3lib.par_s1_slc_single import par_s1_slc_single
-from hyp3lib.system import gamma_version
 from lxml import etree, objectify
 from s1_orbits import fetch_for_scene
 
 import hyp3_gamma
+from hyp3_gamma.get_gamma_version import get_gamma_version
+from hyp3_gamma.get_parameter import get_parameter
 from hyp3_gamma.insar.getDemFileGamma import get_dem_file_gamma
 from hyp3_gamma.insar.interf_pwr_s1_lt_tops_proc import interf_pwr_s1_lt_tops_proc
+from hyp3_gamma.insar.par_s1_slc_single import par_s1_slc_single
+from hyp3_gamma.insar.slc_copy_s1_full_sw import slc_copy_s1_full_sw
 from hyp3_gamma.insar.unwrapping_geocoding import unwrapping_geocoding
+from hyp3_gamma.make_asf_browse import make_asf_browse
 from hyp3_gamma.metadata import create_metadata_file_set_insar
 
 
@@ -255,13 +255,13 @@ def move_output_files(
         outName = f'{os.path.join(prod_dir, long_output)}_lv_phi.tif'
         shutil.copy(inName, outName)
 
-    makeAsfBrowse(
+    make_asf_browse(
         f'{output}.diff0.man.adf.bmp.geo.tif',
         f'{os.path.join(prod_dir, long_output)}_color_phase',
         use_nn=True,
     )
 
-    makeAsfBrowse(
+    make_asf_browse(
         f'{output}.adf.unw.geo.bmp.tif',
         f'{os.path.join(prod_dir, long_output)}_unw_phase',
         use_nn=True,
@@ -289,16 +289,16 @@ def make_parameter_file(
     secondary_file = glob.glob('*%s*.SAFE' % secondary_date)[0]
 
     parfile = f'{reference_date_short}.mli.par'
-    erad_nadir = getParameter(parfile, 'earth_radius_below_sensor')
+    erad_nadir = get_parameter(parfile, 'earth_radius_below_sensor')
     erad_nadir = erad_nadir.split()[0]
-    sar_to_earth_center = getParameter(parfile, 'sar_to_earth_center')
+    sar_to_earth_center = get_parameter(parfile, 'sar_to_earth_center')
     sar_to_earth_center = sar_to_earth_center.split()[0]
     height = float(sar_to_earth_center) - float(erad_nadir)
-    near_slant_range = getParameter(parfile, 'near_range_slc')
+    near_slant_range = get_parameter(parfile, 'near_range_slc')
     near_slant_range = near_slant_range.split()[0]
-    center_slant_range = getParameter(parfile, 'center_range_slc')
+    center_slant_range = get_parameter(parfile, 'center_range_slc')
     center_slant_range = center_slant_range.split()[0]
-    far_slant_range = getParameter(parfile, 'far_range_slc')
+    far_slant_range = get_parameter(parfile, 'far_range_slc')
     far_slant_range = far_slant_range.split()[0]
 
     with open('baseline.log') as f:
@@ -435,9 +435,9 @@ def insar_sentinel_gamma(
     shutil.move(burst_tab2, f'{secondary}/{burst_tab2}')
 
     # Mosaic the swaths together and copy SLCs over
-    log.info('Starting SLC_copy_S1_fullSW.py')
+    log.info('Starting slc_copy_s1_full_sw')
     os.chdir(reference)
-    SLC_copy_S1_fullSW(
+    slc_copy_s1_full_sw(
         wrk,
         reference,
         'SLC_TAB',
@@ -450,7 +450,7 @@ def insar_sentinel_gamma(
     )
     os.chdir('..')
     os.chdir(secondary)
-    SLC_copy_S1_fullSW(wrk, secondary, 'SLC_TAB', burst_tab2, mode=2, raml=rlooks, azml=alooks)
+    slc_copy_s1_full_sw(wrk, secondary, 'SLC_TAB', burst_tab2, mode=2, raml=rlooks, azml=alooks)
     os.chdir('..')
 
     # Interferogram creation, matching, refinement
@@ -534,7 +534,7 @@ def insar_sentinel_gamma(
         plugin_name=hyp3_gamma.__name__,
         plugin_version=hyp3_gamma.__version__,
         processor_name='GAMMA',
-        processor_version=gamma_version(),
+        processor_version=get_gamma_version(),
         ref_point_coords=coords,
         phase_filter_parameter=phase_filter_parameter,
     )
