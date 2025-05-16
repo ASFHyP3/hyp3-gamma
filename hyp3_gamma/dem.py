@@ -47,5 +47,5 @@ def prepare_dem_geotiff(output_name: str, geometry: ogr.Geometry, pixel_size: fl
 
     epsg_code = utm_from_lon_lat(centroid.GetX(), centroid.GetY())
     dem.prepare_dem_geotiff(
-        Path(output_name), geometry, epsg_code=epsg_code, pixel_size=pixel_size, buffer_size_in_degrees=0.30
+        Path(output_name), geometry, epsg_code=epsg_code, pixel_size=pixel_size, buffer_size_in_degrees=0.50
     )
