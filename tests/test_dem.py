@@ -122,7 +122,7 @@ def test_prepare_dem_geotiff(tmp_path):
 
     info = gdal.Info(str(dem_geotiff), format='json')
     assert info['geoTransform'] == [159720.0, 60.0, 0.0, 1256520.0, 0.0, -60.0]
-    assert info['size'] == [928, 1839]
+    assert info['size'] == [2216, 3120]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
