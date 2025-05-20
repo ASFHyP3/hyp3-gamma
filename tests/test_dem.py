@@ -121,8 +121,8 @@ def test_prepare_dem_geotiff(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [159720.0, 60.0, 0.0, 1256520.0, 0.0, -60.0]
-    assert info['size'] == [2216, 3120]
+    assert info['geoTransform'] == [189780.0, 60.0, 0.0, 1226700.0, 0.0, -60.0]
+    assert info['size'] == [1218, 2126]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
@@ -145,5 +145,5 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [218760.0, 30.0, 0.0, 5774070.0, 0.0, -30.0]
-    assert info['size'] == [4809, 4259]
+    assert info['geoTransform'] == [229290.0, 30.0, 0.0, 5758950.0, 0.0, -30.0]
+    assert info['size'] == [4127, 3259]
