@@ -51,7 +51,7 @@ def get_buffer_distance(lat_in_dd: float, buffer_in_km: float) -> tuple[float, f
 def get_buffer_in_degrees_for(geometry: ogr.Geometry, buffer_distance_km: float) -> float:
     _, _, min_lat, max_lat = geometry.GetEnvelope()
     geometry_lat = max(np.abs(min_lat), np.abs(max_lat))
-    lon_buffer, _ = get_buffer_distance(geometry_lat, buffer_distance_km)[0]
+    lon_buffer, _ = get_buffer_distance(geometry_lat, buffer_distance_km)
 
     return lon_buffer
 
