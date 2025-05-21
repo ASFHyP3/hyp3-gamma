@@ -8,7 +8,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [9.0.6]
 ### Changed
-- Output DEM is now buffered 25 km
+- Output DEM is now buffered by 25 km
 
 ## [9.0.5]
 ### Changed
