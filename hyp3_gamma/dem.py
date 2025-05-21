@@ -53,7 +53,7 @@ def get_buffer_in_degrees_for(geometry: ogr.Geometry, buffer_distance_km: float)
     geometry_lat = max(np.abs(min_lat), np.abs(max_lat))
     lon_buffer, _ = get_buffer_distance(geometry_lat, buffer_distance_km)
 
-    return lon_buffer
+    return round(lon_buffer, 2)
 
 
 def utm_from_lon_lat(lon: float, lat: float) -> int:

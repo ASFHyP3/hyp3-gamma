@@ -147,3 +147,17 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     info = gdal.Info(str(dem_geotiff), format='json')
     assert info['geoTransform'] == [229290.0, 30.0, 0.0, 5758950.0, 0.0, -30.0]
     assert info['size'] == [4127, 3259]
+
+
+def test_get_buffer_in_degrees(slc_geometry):
+    buffer = dem.get_buffer_in_degrees_for(slc_geometry, 25)
+    assert buffer == 1
+
+
+@pytest.fixture
+def slc_geometry(test_data_dir):
+    # S1A_IW_SLC__1SSH_20250508T084854_20250508T084921_059100_07551F_7194
+    kml = test_data_dir / 'south-pole.kml'
+    geometry = dem.get_geometry_from_kml(kml)
+
+    return geometry
