@@ -149,15 +149,11 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     assert info['size'] == [4119, 3247]
 
 
-def test_get_buffer_in_degrees(slc_geometry):
-    buffer = dem.get_buffer_in_degrees_for(slc_geometry, 25)
-    assert buffer == 1.14
+@pytest.mark.parametrize(
+    'filename,expected_buffer', [('south-pole', 1.14), ('far-north', 1.02), ('alaska', 0.69), ('antimeridian', 0.36)]
+)
+def test_get_buffer_in_degrees(test_data_dir, filename, expected_buffer):
+    south_pole_geometry = dem.get_geometry_from_kml(test_data_dir / f'{filename}.kml')
 
-
-@pytest.fixture
-def slc_geometry(test_data_dir):
-    # S1A_IW_SLC__1SSH_20250508T084854_20250508T084921_059100_07551F_7194
-    kml = test_data_dir / 'south-pole.kml'
-    geometry = dem.get_geometry_from_kml(kml)
-
-    return geometry
+    buffer = dem.get_buffer_in_degrees_for(south_pole_geometry, 25)
+    assert buffer == expected_buffer
