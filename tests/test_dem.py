@@ -153,7 +153,7 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     'filename,expected_buffer', [('south-pole', 1.14), ('far-north', 1.02), ('alaska', 0.69), ('antimeridian', 0.36)]
 )
 def test_get_buffer_in_degrees(test_data_dir, filename, expected_buffer):
-    south_pole_geometry = dem.get_geometry_from_kml(test_data_dir / f'{filename}.kml')
+    geometry = dem.get_geometry_from_kml(test_data_dir / f'{filename}.kml')
 
-    buffer = dem.get_buffer_in_degrees_for(south_pole_geometry, 25)
+    buffer = dem.get_buffer_in_degrees_for(geometry, 25)
     assert buffer == expected_buffer
