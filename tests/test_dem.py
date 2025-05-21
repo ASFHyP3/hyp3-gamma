@@ -121,8 +121,8 @@ def test_prepare_dem_geotiff(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [189780.0, 60.0, 0.0, 1226700.0, 0.0, -60.0]
-    assert info['size'] == [1218, 2126]
+    assert info['geoTransform'] == [189600.0, 60.0, 0.0, 1226820.0, 0.0, -60.0]
+    assert info['size'] == [1223, 2131]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
@@ -145,13 +145,13 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [229290.0, 30.0, 0.0, 5758950.0, 0.0, -30.0]
-    assert info['size'] == [4127, 3259]
+    assert info['geoTransform'] == [229410.0, 30.0, 0.0, 5758770.0, 0.0, -30.0]
+    assert info['size'] == [4119, 3247]
 
 
 def test_get_buffer_in_degrees(slc_geometry):
     buffer = dem.get_buffer_in_degrees_for(slc_geometry, 25)
-    assert buffer == 1
+    assert buffer == 1.14
 
 
 @pytest.fixture
