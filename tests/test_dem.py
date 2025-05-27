@@ -121,8 +121,8 @@ def test_prepare_dem_geotiff(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [198480.0, 60.0, 0.0, 1218060.0, 0.0, -60.0]
-    assert info['size'] == [928, 1839]
+    assert info['geoTransform'] == [189600.0, 60.0, 0.0, 1226820.0, 0.0, -60.0]
+    assert info['size'] == [1223, 2131]
 
 
 def test_prepare_dem_geotiff_antimeridian(tmp_path):
@@ -145,5 +145,15 @@ def test_prepare_dem_geotiff_antimeridian(tmp_path):
     assert dem_geotiff.exists()
 
     info = gdal.Info(str(dem_geotiff), format='json')
-    assert info['geoTransform'] == [245280.0, 30.0, 0.0, 5735850.0, 0.0, -30.0]
-    assert info['size'] == [3084, 1730]
+    assert info['geoTransform'] == [229410.0, 30.0, 0.0, 5758770.0, 0.0, -30.0]
+    assert info['size'] == [4119, 3247]
+
+
+@pytest.mark.parametrize(
+    'filename,expected_buffer', [('south-pole', 1.14), ('far-north', 1.02), ('alaska', 0.69), ('antimeridian', 0.36)]
+)
+def test_get_buffer_in_degrees(test_data_dir, filename, expected_buffer):
+    geometry = dem.get_geometry_from_kml(test_data_dir / f'{filename}.kml')
+
+    buffer = dem.get_buffer_in_degrees_for(geometry, 25)
+    assert buffer == expected_buffer
