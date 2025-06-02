@@ -3,4 +3,4 @@ pytest-cov
 pytest-console-scripts
 setuptools_scm
 ruff==0.11.12
-mypy==1.15.0
+mypy==1.16.0
