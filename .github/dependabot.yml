@@ -11,6 +11,10 @@ updates:
       interval: weekly
     labels:
       - bumpless
+    groups:
+      pip-deps:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: gdal[numpy]
       - dependency-name: matplotlib
@@ -25,3 +29,7 @@ updates:
       interval: weekly
     labels:
       - bumpless
+    groups:
+      github-actions-deps:
+        patterns:
+          - "*"
