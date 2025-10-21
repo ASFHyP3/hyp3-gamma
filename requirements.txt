@@ -11,7 +11,7 @@ geopandas==0.14.3
 hyp3lib==4.0.1
 jinja2==3.1.6
 lxml==6.0.2
-pillow==11.3.0
+pillow==12.0.0
 pyproj==3.7.1
 python-dateutil==2.9.0.post0
 rtree==1.4.1
