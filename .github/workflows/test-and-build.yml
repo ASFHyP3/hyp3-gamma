@@ -3,8 +3,9 @@ name: Test and build
 on:
   push:
     branches:
-      - main
       - develop
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
