@@ -33,6 +33,9 @@ jobs:
   dockerize:
     needs: call-version-info-workflow
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ needs.call-version-info-workflow.outputs.version_tag }}
+      cancel-in-progress: true
     env:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
@@ -76,14 +79,14 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Add test tag
-        if: github.ref == 'refs/heads/develop'
+        if: ${{ github.event_name != 'pull_request' && contains(inputs.version_tag, '.dev') }}
         uses: akhilerm/tag-push-action@v2.2.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
           dst: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:test
 
       - name: Add latest tag
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.event_name != 'pull_request' && ! contains(inputs.version_tag, '.dev') }}
         uses: akhilerm/tag-push-action@v2.2.0
         with:
           src: ${{ env.HYP3_REGISTRY }}/${{ github.event.repository.name }}:${{ env.SDIST_VERSION }}
