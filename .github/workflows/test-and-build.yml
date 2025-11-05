@@ -1,5 +1,9 @@
 name: Test and build
 
+concurrency:
+  group: ${{ inputs.version_tag }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
