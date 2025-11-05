@@ -1,9 +1,5 @@
 name: Test and build
 
-concurrency:
-  group: ${{ inputs.version_tag }}
-  cancel-in-progress: true
-
 on:
   push:
     branches:
@@ -37,6 +33,9 @@ jobs:
   dockerize:
     needs: call-version-info-workflow
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ needs.call-version-info-workflow.outputs.version_tag }}
+      cancel-in-progress: true
     env:
       SDIST_VERSION: ${{ needs.call-version-info-workflow.outputs.version_tag }}
     steps:
