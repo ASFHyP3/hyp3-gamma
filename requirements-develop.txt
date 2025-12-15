@@ -2,5 +2,5 @@ pytest
 pytest-cov
 pytest-console-scripts
 setuptools_scm
-ruff==0.14.7
-mypy==1.19.0
+ruff==0.14.9
+mypy==1.19.1
