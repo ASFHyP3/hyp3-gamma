@@ -453,6 +453,9 @@ def insar_sentinel_gamma(
     slc_copy_s1_full_sw(wrk, secondary, 'SLC_TAB', burst_tab2, mode=2, raml=rlooks, azml=alooks)
     os.chdir('..')
 
+    shutil.rmtree(reference)
+    shutil.rmtree(secondary)
+
     # Interferogram creation, matching, refinement
     log.info('Starting interf_pwr_s1_lt_tops_proc.py 0')
     hgt = f'DEM/HGT_SAR_{rlooks}_{alooks}'
