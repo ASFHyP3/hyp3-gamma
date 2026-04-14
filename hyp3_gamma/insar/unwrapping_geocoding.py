@@ -244,7 +244,6 @@ def unwrapping_geocoding(
         log.error(f'ERROR: Unable to find offset file {offit}')
 
     width = get_parameter(offit, 'interferogram_width')
-    lines = get_parameter(offit, 'interferogram_azimuth_lines')
     mwidth = get_parameter(mmli + '.par', 'range_samples')
     mlines = get_parameter(mmli + '.par', 'azimuth_lines')
     swidth = get_parameter(smli + '.par', 'range_samples')
@@ -298,16 +297,9 @@ def unwrapping_geocoding(
 
     height = get_height_at_pixel(f'DEM/HGT_SAR_{rlooks}_{alooks}', int(mlines), int(mwidth), ref_azlin, ref_rpix)
 
-    # unwrap very large interferograms in multiple patches to keep memory requirement under 31,600 MB
-    # https://github.com/ASFHyP3/hyp3-gamma/issues/316
-    if int(width) * int(lines) < 54000000:
-        range_patches = 1
-    else:
-        range_patches = 2
-
     mcf_log = execute(
         f'mcf {ifgf}.adf {ifgname}.adf.cc {out_file} {ifgname}.adf.unw {width} {trimode} 0 0'
-        f' - - {range_patches} 1 - {ref_rpix} {ref_azlin} 1',
+        f' - - 2 2 - {ref_rpix} {ref_azlin} 1',
         uselogging=True,
     )
 

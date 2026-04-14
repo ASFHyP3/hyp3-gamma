@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.9]
+
+### Changed
+- InSAR phase wrapping with `mcf` is now always done in 2 range patches and 2 azimuth patches
+- InSAR processing now removes the `YYYYMMDD` directories used to mosaic the input SLCs after mosaicing is complete.
+
 ## [9.0.8]
 
 This is a maintenance release that includes various dependency upgrades.
