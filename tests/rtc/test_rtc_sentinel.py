@@ -45,6 +45,18 @@ def test_get_product_name():
     name = rtc_sentinel.get_product_name('S1A_EW_RAW__0SDH_20151118T190420_20151118T190529_008663_00C507_0A5F', 'foo')
     assert match('S1A_EW_20151118T190420_DHO_RTC30_G_gpuned_[0-9A-F]{4}$', name)
 
+    payload = {
+        'granule_name': 'S1C_IW_SLC__1SDV_20250415T152128_20250415T152150_000123_000456_A1B2',
+        'orbit_file': 'S1C_OPER_AUX_POEORB_OPOD_20250505T120000_V20250414T225942_20250416T005942.EOF',
+        'resolution': 30,
+        'radiometry': 'gamma0',
+        'scale': 'power',
+        'filtered': False,
+        'matching': False,
+    }
+    name = rtc_sentinel.get_product_name(**payload)
+    assert match('S1C_IW_20250415T152128_DVP_RTC30_G_gpuned_[0-9A-F]{4}$', name)
+
 
 def test_get_polarizations():
     granule = 'S1A_S1_GRDH_1SSH_20181121T184017_20181121T184046_024690_02B6ED_6946'
@@ -60,6 +72,10 @@ def test_get_polarizations():
     assert rtc_sentinel.get_polarizations(granule, skip_cross_pol=True) == ['hh']
 
     granule = 'S1B_IW_SLC__1SDV_20200714T152128_20200714T152150_022469_02AA50_9A64'
+    assert rtc_sentinel.get_polarizations(granule, skip_cross_pol=False) == ['vv', 'vh']
+    assert rtc_sentinel.get_polarizations(granule, skip_cross_pol=True) == ['vv']
+
+    granule = 'S1C_IW_SLC__1SDV_20250415T152128_20250415T152150_000123_000456_A1B2'
     assert rtc_sentinel.get_polarizations(granule, skip_cross_pol=False) == ['vv', 'vh']
     assert rtc_sentinel.get_polarizations(granule, skip_cross_pol=True) == ['vv']
 
@@ -84,6 +100,9 @@ def test_get_granule_type():
     assert rtc_sentinel.get_granule_type(granule) == 'GRDH'
 
     granule = 'S1B_IW_SLC__1SDV_20200714T152128_20200714T152150_022469_02AA50_9A64'
+    assert rtc_sentinel.get_granule_type(granule) == 'SLC'
+
+    granule = 'S1C_IW_SLC__1SDV_20250415T152128_20250415T152150_000123_000456_A1B2'
     assert rtc_sentinel.get_granule_type(granule) == 'SLC'
 
     with pytest.raises(ValueError):
