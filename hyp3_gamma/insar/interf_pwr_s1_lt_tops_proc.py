@@ -8,8 +8,6 @@ import sys
 
 from hyp3lib.execute import execute
 
-from hyp3_gamma.get_parameter import get_parameter
-
 
 log = logging.getLogger(__name__)
 

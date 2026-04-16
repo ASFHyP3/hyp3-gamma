@@ -243,7 +243,6 @@ def unwrapping_geocoding(
     lines = get_parameter(offit, 'interferogram_azimuth_lines')
     mwidth = get_parameter(mmli + '.par', 'range_samples')
     mlines = get_parameter(mmli + '.par', 'azimuth_lines')
-    swidth = get_parameter(smli + '.par', 'range_samples')
     demw = get_parameter(dempar, 'width')
     demn = get_parameter(dempar, 'nlines')
 

@@ -6,8 +6,6 @@ from hyp3lib import OrbitDownloadError
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 
-from hyp3_gamma.get_parameter import get_parameter
-
 
 def make_cmd(swath, acquisition_date, out_dir, pol=None):
     """Assemble the par_S1_SLC gamma commands
