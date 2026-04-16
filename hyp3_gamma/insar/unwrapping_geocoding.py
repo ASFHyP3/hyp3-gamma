@@ -228,7 +228,6 @@ def unwrapping_geocoding(
     ifgname = f'{reference}_{secondary}'
     offit = f'{ifgname}.off.it'
     mmli = reference + '.mli'
-    smli = secondary + '.mli'
 
     if not os.path.isfile(dempar):
         log.error(f'ERROR: Unable to find dem par file {dempar}')
