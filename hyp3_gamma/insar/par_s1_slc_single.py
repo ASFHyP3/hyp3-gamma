@@ -92,7 +92,4 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
         for i in range(len(slc)):
             f.write(f'{slc[i]} {par[i]} {top[i]}\n')
 
-    # Make a raster version of swath 3
-    width = get_parameter(f'{acquisition_date}_003.slc.par', 'range_samples')
-    execute(f'rasSLC {acquisition_date}_003.slc {width} 1 0 50 10')
     os.chdir(wrk)

@@ -80,21 +80,12 @@ def coregister_data(
     with open(f'offsetfit{cnt}.log', 'w') as log:
         execute(f'offset_fit offs snr {offi} - - 0.2 1', uselogging=True, logfile=log)
 
-    if cnt < iterations + 1:
-        ifg_diff_sfx = f'it{cnt}'
-    else:
-        ifg_diff_sfx = 'man'
-    execute(
-        f'SLC_diff_intf {reference}.slc {secondary}.rslc {mpar} {srpar} {offi}'
-        f' {ifgname}.sim_unw {ifgname}.diff0.{ifg_diff_sfx} {rlooks} {alooks} 0 0',
-        uselogging=True,
-    )
-
-    width = get_parameter(offi, 'interferogram_width')
-    execute(
-        f'rasmph_pwr {ifgname}.diff0.{ifg_diff_sfx} {reference}.mli {width} - - 3 3',
-        uselogging=True,
-    )
+    if not cnt < iterations + 1:
+        execute(
+            f'SLC_diff_intf {reference}.slc {secondary}.rslc {mpar} {srpar} {offi}'
+            f' {ifgname}.sim_unw {ifgname}.diff0.man {rlooks} {alooks} 0 0',
+            uselogging=True,
+        )
 
     if cnt == 0:
         offit = ifgname + '.off.it'
