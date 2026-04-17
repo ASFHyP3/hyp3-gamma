@@ -9,7 +9,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [9.0.9]
 
 ### Changed
-- Slightly improved runtime of InSAR processing by removing generations of files that didn't contribute to the final InSAR product
+- Slightly improved runtime of InSAR processing by removing generation of files that didn't contribute to the final InSAR product
 
 ## [9.0.8]
 
