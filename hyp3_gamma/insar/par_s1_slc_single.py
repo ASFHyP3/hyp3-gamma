@@ -6,8 +6,6 @@ from hyp3lib import OrbitDownloadError
 from hyp3lib.execute import execute
 from hyp3lib.get_orb import downloadSentinelOrbitFile
 
-from hyp3_gamma.get_parameter import get_parameter
-
 
 def make_cmd(swath, acquisition_date, out_dir, pol=None):
     """Assemble the par_S1_SLC gamma commands
@@ -92,7 +90,4 @@ def par_s1_slc_single(safe_dir, pol='vv', orbit_file=None):
         for i in range(len(slc)):
             f.write(f'{slc[i]} {par[i]} {top[i]}\n')
 
-    # Make a raster version of swath 3
-    width = get_parameter(f'{acquisition_date}_003.slc.par', 'range_samples')
-    execute(f'rasSLC {acquisition_date}_003.slc {width} 1 0 50 10')
     os.chdir(wrk)

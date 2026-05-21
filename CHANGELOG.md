@@ -15,8 +15,7 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [9.0.9]
 
 ### Changed
-- InSAR phase wrapping with `mcf` is now always done in 2 range patches and 2 azimuth patches
-- InSAR processing now removes the `YYYYMMDD` directories used to mosaic the input SLCs after mosaicing is complete.
+- Slightly improved runtime of InSAR processing by removing generation of files that didn't contribute to the final InSAR product
 
 ## [9.0.8]
 
