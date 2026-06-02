@@ -152,10 +152,6 @@ def data2geotiff(inname, outname, dempar, type_):
     execute(f'data2geotiff {dempar} {inname} {type_} {outname} ', uselogging=True)
 
 
-def create_phase_from_complex(incpx, outfloat, width):
-    execute(f'cpx_to_real {incpx} {outfloat} {width} 4', uselogging=True)
-
-
 def get_water_mask(cc_file, width, lt, demw, demn, dempar):
     """Create water_mask geotiff file based on the cc_file (float binary file)"""
     with TemporaryDirectory() as temp_dir:
@@ -232,7 +228,6 @@ def unwrapping_geocoding(
     ifgname = f'{reference}_{secondary}'
     offit = f'{ifgname}.off.it'
     mmli = reference + '.mli'
-    smli = secondary + '.mli'
 
     if not os.path.isfile(dempar):
         log.error(f'ERROR: Unable to find dem par file {dempar}')
@@ -247,7 +242,6 @@ def unwrapping_geocoding(
     lines = get_parameter(offit, 'interferogram_azimuth_lines')
     mwidth = get_parameter(mmli + '.par', 'range_samples')
     mlines = get_parameter(mmli + '.par', 'azimuth_lines')
-    swidth = get_parameter(smli + '.par', 'range_samples')
     demw = get_parameter(dempar, 'width')
     demn = get_parameter(dempar, 'nlines')
 
@@ -347,16 +341,6 @@ def unwrapping_geocoding(
     log.info('-------------------------------------------------')
 
     geocode_back(mmli, mmli + '.geo', mwidth, lt, demw, demn, 0)
-    geocode_back(smli, smli + '.geo', swidth, lt, demw, demn, 0)
-    geocode_back(
-        f'{ifgname}.sim_unw',
-        f'{ifgname}.sim_unw.geo',
-        width,
-        lt,
-        demw,
-        demn,
-        0,
-    )
     geocode_back(
         f'{ifgname}.adf.unw',
         f'{ifgname}.adf.unw.geo',
@@ -387,15 +371,6 @@ def unwrapping_geocoding(
     )
     geocode_back(f'{ifgname}.cc', f'{ifgname}.cc.geo', width, lt, demw, demn, 0)
     geocode_back(
-        f'{ifgname}.adf.cc',
-        f'{ifgname}.adf.cc.geo',
-        width,
-        lt,
-        demw,
-        demn,
-        0,
-    )
-    geocode_back(
         f'{ifgname}.vert.disp',
         f'{ifgname}.vert.disp.geo',
         width,
@@ -414,16 +389,7 @@ def unwrapping_geocoding(
         0,
     )
 
-    create_phase_from_complex(f'{ifgf}.adf.geo', f'{ifgf}.adf.geo.phase', width)
-
     data2geotiff(mmli + '.geo', mmli + '.geo.tif', dempar, 2)
-    data2geotiff(smli + '.geo', smli + '.geo.tif', dempar, 2)
-    data2geotiff(
-        f'{ifgname}.sim_unw.geo',
-        f'{ifgname}.sim_unw.geo.tif',
-        dempar,
-        2,
-    )
     data2geotiff(
         f'{ifgname}.adf.unw.geo',
         f'{ifgname}.adf.unw.geo.tif',
@@ -436,10 +402,8 @@ def unwrapping_geocoding(
         dempar,
         0,
     )
-    data2geotiff(f'{ifgf}.adf.geo.phase', f'{ifgf}.adf.geo.tif', dempar, 2)
     data2geotiff(f'{ifgf}.adf.bmp.geo', f'{ifgf}.adf.bmp.geo.tif', dempar, 0)
     data2geotiff(f'{ifgname}.cc.geo', f'{ifgname}.cc.geo.tif', dempar, 2)
-    data2geotiff(f'{ifgname}.adf.cc.geo', f'{ifgname}.adf.cc.geo.tif', dempar, 2)
     data2geotiff('DEM/demseg', f'{ifgname}.dem.tif', dempar, 2)
     data2geotiff(
         f'{ifgname}.vert.disp.geo',
