@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [PEP 440](https://www.python.org/dev/peps/pep-0440/)
 and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.0.10]
+
+### Changed
+- `water_mask.TILE_PATH` to `/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/LAND_TILES/`, eliminating the
+  need to invert the mask pixel values. Fixes [#694](https://github.com/ASFHyP3/hyp3-gamma/issues/694).
+
 ## [9.0.9]
 
 ### Changed

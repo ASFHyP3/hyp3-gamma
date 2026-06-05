@@ -10,7 +10,7 @@ from pyproj import CRS
 
 gdal.UseExceptions()
 
-TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/'
+TILE_PATH = '/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/LAND_TILES/'
 
 
 def get_extent(filename, tmp_path: Path | None, epsg='EPSG:4326'):
@@ -132,7 +132,6 @@ def create_water_mask(
 
     merged_tif_path = str(tmp_path / 'merged.tif')
     merged_vrt_path = str(tmp_path / 'merged.vrt')
-    merged_warped_path = str(tmp_path / 'merged_warped.tif')
     shape_path = str(tmp_path / 'tmp.shp')
 
     # This is WAY faster than using gdal_merge, because of course it is.
@@ -156,22 +155,12 @@ def create_water_mask(
     warp_filename = merged_tif_path if len(tiles) > 1 else tiles[0]
     corners = get_extent(input_image, tmp_path=tmp_path, epsg=epsg)
     gdal.Warp(
-        merged_warped_path,
+        output_image,
         warp_filename,
         outputBounds=corners,
         xRes=pixel_size,
         yRes=pixel_size,
         dstSRS=epsg,
-        format='GTiff',
+        format=gdal_format,
         creationOptions=['COMPRESS=LZW', 'NUM_THREADS=all_cpus'],
     )
-
-    flip_values_command = [
-        'gdal_calc.py',
-        '-A',
-        merged_warped_path,
-        f'--outfile={output_image}',
-        '--calc="numpy.abs((A.astype(numpy.int16) + 1) - 2)"',  # Change 1's to 0's and 0's to 1's.
-        f'--format={gdal_format}',
-    ]
-    subprocess.run(flip_values_command, check=True)
