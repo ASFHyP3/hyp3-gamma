@@ -60,11 +60,11 @@ def test_coord_to_tile():
 def test_get_tiles(tmp_path, test_data_dir):
     case_1 = (
         str(test_data_dir / 'water_mask_input.tif'),
-        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n15w100.tif'],
+        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/LAND_TILES/n15w100.tif'],
     )
     case_2 = (
         str(test_data_dir / 'test_geotiff.tif'),
-        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/TILES/n30w120.tif'],
+        ['/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/LAND_TILES/n30w120.tif'],
     )
     assert water_mask.get_tiles(case_1[0], tmp_path=tmp_path) == case_1[1]
     assert water_mask.get_tiles(case_2[0], tmp_path=tmp_path) == case_2[1]
