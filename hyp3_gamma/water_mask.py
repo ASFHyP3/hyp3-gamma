@@ -132,7 +132,6 @@ def create_water_mask(
 
     merged_tif_path = str(tmp_path / 'merged.tif')
     merged_vrt_path = str(tmp_path / 'merged.vrt')
-    merged_warped_path = str(tmp_path / 'merged_warped.tif')
     shape_path = str(tmp_path / 'tmp.shp')
 
     # This is WAY faster than using gdal_merge, because of course it is.
