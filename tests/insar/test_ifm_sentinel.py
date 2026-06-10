@@ -12,6 +12,8 @@ def test_get_copol():
     assert ifm_sentinel.get_copol('S1B_IW_GRDH_1SDV_20200924T092954_20200924T093026_023515_02CABC_6C62') == 'vv'
     assert ifm_sentinel.get_copol('S1B_IW_GRDH_1SSH_20200924T112903_20200924T112932_023516_02CAC7_D003') == 'hh'
     assert ifm_sentinel.get_copol('S1B_IW_OCN__2SDH_20200924T090450_20200924T090519_023515_02CAB8_917B') == 'hh'
+    assert ifm_sentinel.get_copol('S1C_IW_SLC__1SSV_20250415T014319_20250415T014346_000123_000456_A1B2') == 'vv'
+    assert ifm_sentinel.get_copol('S1C_IW_GRDH_1SDH_20250415T092954_20250415T093026_000124_000457_B2C3') == 'hh'
     with pytest.raises(GranuleError):
         ifm_sentinel.get_copol('S1A_EW_GRDM_1SHH_20150513T080355_20150513T080455_005900_007994_35D2')
     with pytest.raises(GranuleError):
@@ -83,3 +85,16 @@ def test_get_product_name():
     }
     name = ifm_sentinel.get_product_name(**payload)
     assert match(r'S1AB_20150101T230038_20200924T005722_VVO2092_INT40_G_ueF_[0-9A-F]{4}$', name)
+
+    payload = {
+        'reference_name': 'S1C_IW_SLC__1SSV_20250415T014319_20250415T014346_000123_000456_A1B2',
+        'secondary_name': 'S1C_IW_SLC__1SSV_20250427T014322_20250427T014349_000298_000789_C3D4',
+        'orbit_files': [
+            'S1C_OPER_AUX_POEORB_OPOD_20250505T120000_V20250414T225942_20250416T005942.EOF',
+            'S1C_OPER_AUX_POEORB_OPOD_20250517T120000_V20250426T225942_20250428T005942.EOF',
+        ],
+        'pixel_spacing': 80,
+        'apply_water_mask': False,
+    }
+    name = ifm_sentinel.get_product_name(**payload)
+    assert match(r'S1CC_20250415T014319_20250427T014322_VVP012_INT80_G_ueF_[0-9A-F]{4}$', name)

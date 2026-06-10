@@ -12,8 +12,8 @@ Processing Date/Time: {{ processing_date.isoformat(timespec='seconds') }}
 
 The product folder is named using the following convention:
 S1xy-aaaaaaaaTbbbbbb_ggggggggThhhhhh_pponnn_INTzz_u_def_ssss
-x:          Sentinel-1 Mission (A/B/C) of reference granule
-y:          Sentinel-1 Mission (A/B/C) of secondary granule
+x:          Sentinel-1 Mission (A/B/C/D) of reference granule
+y:          Sentinel-1 Mission (A/B/C/D) of secondary granule
 aaaaaaaa:   Start Date of Acquisition (YYYYMMDD) of reference granule
 bbbbbb:     Start Time of Acquisition (HHMMSS) of reference granule
 gggggggg:   Start Date of Acquisition (YYYYMMDD) of secondary granule
@@ -332,11 +332,9 @@ The detailed process, including the calls to GAMMA software, is as follows:
 *************
 # The Sentinel-1 mission #
 
-The Sentinel-1 satellite constellation is part of the Copernicus Earth Observation program, coordinated by the European Space Agency (ESA) on behalf of the European Commission (EC). Sentinel-1 satellites carry C-band Synthetic Aperture Radar (SAR) instruments for global, around-the-clock imagery, even through cloud cover.
+The Sentinel-1 mission collects C-band band SAR from a pair of polar-orbiting satellites launched by the European Space Agency (ESA) as part of the Copernicus program. The first Sentinel-1 satellite was launched in April 2014, and the mission is positioned to continue acquiring data for many years to come. Refer to https://hyp3-docs.asf.alaska.edu/sentinel1/ for more information about the mission and the satellites comprising it.
 
-The Sentinel-1 mission is designed to have two satellites in orbit, each with a 12-day repeat cycle. The satellites use the same orbit pattern, but are offset by 180 degrees, allowing for repeat passes every 6 days. The Sentinel-1A satellite was launched April 3, 2014, and remains active. The Sentinel-1B satellite was launched April 25, 2016, and was active until December 23, 2021. Sentinel-1C was launched December 5, 2024 to take the place of Sentinel-1B in the constellation.
-
-Between the end of the mission for Sentinel-1B and the start of the Sentinel-1C mission, all acquisitions were made by Sentinel-1A. The acquisition plan was adjusted to provide as much coverage as possible with a single satellite, but some areas had little to no imagery acquired between December 2021 and April 2025. Refer to https://hyp3-docs.asf.alaska.edu/sentinel1/ for more information.
+Sentinel-1 satellites each have a 12-day repeat cycle. They all use the same orbit pattern, but the timing of the two satellites in the constellation are offset so that every location has the potential to be imaged with the same geometry every six days. Most landmasses are imaged on a 12-day repeat cycle, but select areas of interest are imaged with a 6-day interval.
 
 More information about the mission is available at:
 https://sentiwiki.copernicus.eu/web/s1-mission
