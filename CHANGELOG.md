@@ -10,10 +10,13 @@ and uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 - Updated 25 metadata templates to include Sentinel-1D support: naming convention from (A/B/C) to (A/B/C/D) and added S1D launch and constellation replacement info
-- Added S1C granule test cases for RTC and InSAR to verify platform support
+
+## [9.0.9]
+
+### Changed
+- Slightly improved runtime of InSAR processing by removing generation of files that didn't contribute to the final InSAR product
 - `water_mask.TILE_PATH` to `/vsicurl/https://asf-dem-west.s3.amazonaws.com/WATER_MASK/LAND_TILES/`, eliminating the
   need to invert the mask pixel values. Fixes [#694](https://github.com/ASFHyP3/hyp3-gamma/issues/694).
-- Slightly improved runtime of InSAR processing by removing generation of files that didn't contribute to the final InSAR product
 
 ## [9.0.8]
 
