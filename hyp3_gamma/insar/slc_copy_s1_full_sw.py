@@ -38,10 +38,6 @@ def slc_copy_s1_full_sw(path, slcname, tabin, burst_tab, mode=2, dem=None, dempa
     cmd = 'SLC_mosaic_S1_TOPS {TAB} {SLC}.slc {SLC}.slc.par {RL} {AL}'.format(TAB=tabin, SLC=slcname, RL=raml, AL=azml)
     execute(cmd, uselogging=True)
 
-    width = get_parameter('{}.slc.par'.format(slcname), 'range_samples')
-    cmd = 'rasSLC {}.slc {} 1 0 50 10'.format(slcname, width)
-    execute(cmd, uselogging=True)
-
     cmd = 'multi_S1_TOPS {TAB} {SLC}.mli {SLC}.mli.par {RL} {AL}'.format(TAB=tabin, SLC=slcname, RL=raml, AL=azml)
     execute(cmd, uselogging=True)
 
